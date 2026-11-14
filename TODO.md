@@ -789,6 +789,44 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
 - **Tim DC's pirate name (14 Nov):** no picture needed after all, perhaps: "I guess it should just be like ... Tim DC,
   what his pirate name was. I think he was Hunter, maybe?" To pin down with the user before his mention goes in.
 
+- **The front page's colours: rose at the top, calmer below (14 Nov):** looking at the rose and purple theme:
+  "it looks quite decent", but "it just feels like everything is in pink ... there's just too much pink and purple.
+  Like, it's great in places, like the banner looks amazing, ... the play the den call to action, and maybe the
+  outlined top thing, but then I feel like once you get below that in the hierarchy, it feels like it needs to get a
+  little bit more neutral, not massively off." Professional sites (Bun, Twitch, Stripe, Evervault) keep their accent
+  for the top level and fall back to neutral for the secondary things. And the banner's monkey: "my monkeys don't
+  have hats", so no cap. Shown to the user before it's committed.
+
+- **A theme picker on the front page (14 Nov):** "there should be like a theme picker in the top right ... to change
+  to the black gold thing if people don't like the pink, purple or blue theme, you know, the usual kind of just theme
+  pick ... dark gold, black gold, blue, that kind of thing." So a few themes to pick from at the top right, the
+  choice remembered in this browser, each kept readable (the front page's contrast test covers every theme).
+
+- **The secondary buttons drown out Play the den (14 Nov):** "it's certainly those secondary call to action things
+  ... that get drowned out. Like the call to action play the den really doesn't work with those light pink buttons
+  next to it. It loses its rarity. Even if the others are a step down, some of the contrast seems lost." So Play the
+  den the one filled rose button on the page; the others (What's new, How it's designed, Into the den) neutral, a
+  touch of the theme only on hover.
+
+- **The front page without the cookie welcome (14 Nov):** "it just works a bit better without me having the hello,
+  here's cookies thing. That maybe fits better in the den, because it creates a lot of dead space and misses the key
+  point. It's distracting from the key purpose of the homepage." So the front page goes straight from the title to
+  "What are you here for?" and its choices; "What is this place?" stays, tucked under the title. Dachimpy's hello
+  and cookie lines kept for the den.
+
+- **The front page crams too much into the top (14 Nov):** "it's the wordiness of ... that Meet the Discord one
+  that's making those really off ... I don't know if it's kind of like each of those three big things at the top of
+  what are you here for? [are] almost enough, and that's adding to that visual overwhelm. Is there's a lot being
+  crammed into a small area instead of gradually discovering it. Even if I like immediate visualness, it's
+  overwhelming." So the three choices alone at the top, with room round them; Elsewhere moved further down as a
+  compact list, a line each.
+  Still refining (14 Nov, after it went live as "a step forward"): "one of the most similar one is Twitch ...
+  [Evervault's] a lot calmer looking, but they've got less to talk about ... I do like this Stripe Docs a bit ...
+  how the menu is not as overwhelming. Obviously, all different use cases, so we've got to pick the one that really
+  fits ours, but I'd like to get some good compromise." So: Twitch the nearest model for how much there is to show,
+  with Evervault's calm and Stripe docs' quieter menu as the pull. The screenshots compared are in notes/theme/ on
+  this machine (not committed).
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.

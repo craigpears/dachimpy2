@@ -39,7 +39,13 @@ describe('the front page\'s colours: usable first (the user, 14 Nov: "not at the
   const WORDS: [string, string][] = [['text', 'bg'], ['dim', 'bg'], ['faint', 'bg'], ['title', 'bg'], ['accent-text', 'bg'],
     ['accent2-text', 'bg'], ['on-accent', 'accent'], ['ink', 'paper'], ['ink2', 'paper'], ['ink-head', 'paper'],
     ['link', 'paper'], ['link-hi', 'paper'], ['link', 'paper2'], ['coming-text', 'coming-a'], ['coming-text', 'coming-b']];
-  for (const name of [undefined, 'gold']) {
+  const THEMES = [...page.matchAll(/:root\[data-theme="(\w+)"\] \{/g)].map((m) => m[1]);
+  it('lets you pick any theme at the top right, every one there (14 Nov: "a theme picker in the top right")', () => {
+    expect(THEMES).toEqual(expect.arrayContaining(['gold', 'black', 'blue']));
+    const picks = [...page.matchAll(/data-pick="(\w+)"/g)].map((m) => m[1]);
+    expect(picks.sort()).toEqual(['rose', ...THEMES].sort());
+  });
+  for (const name of [undefined, ...THEMES]) {
     it(`keeps every word readable in the ${name ?? 'rose'} theme`, () => {
       const t = theme(name);
       for (const [fg, bg] of WORDS) {

@@ -1653,11 +1653,11 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 
 - "Byeee! Take a cookie for the road!"
 
-### On the site's front page, at the top, holding out a plate of cookies
+### On the site's front page (their hello, cookie and question off it since 14 Nov, kept for the den)
 
-- *Their hello:* "Ahoy! Welcome, welcome! Cookie? Yay, cookies!"
-- *Clicking the cookie (then the other cookies, in turn):* "Yay! There you go. Everyone who comes in gets one. House rule."
-- *Under it, all the while:* "So! What are you here for?"
+- *Their hello (not shown now):* "Ahoy! Welcome, welcome! Cookie? Yay, cookies!"
+- *Clicking the cookie (not shown now):* "Yay! There you go. Everyone who comes in gets one. House rule."
+- *Under it (not shown now):* "So! What are you here for?"
 - *Under "A room of your own": what the den is for:*
   - "Want a room of your own in the den? Ooh, yes! Let's make one!"
   - "The islands each bring something new: a mechanic, a tutorial, or a proper long adventure. And a room of your own is a lovely thing too. Got a character you love, or something to show off? Have it in 3D, in a gallery of your own."

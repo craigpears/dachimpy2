@@ -245,8 +245,8 @@ export const CHARACTER: Character = {
     { when: 'Now and then, as you wander after the tour', says: CHATTER },
     { when: 'As you leave', says: [GOODBYE] },
     {
-      when: 'On the site\'s front page, at the top, holding out a plate of cookies', says: FRONT_PAGE,
-      each: { hello: 'Their hello', cookie: 'Clicking the cookie (then the other cookies, in turn)', question: 'Under it, all the while', yourRoom: 'Under "A room of your own": what the den is for' },
+      when: 'On the site\'s front page (their hello, cookie and question off it since 14 Nov, kept for the den)', says: FRONT_PAGE,
+      each: { hello: 'Their hello (not shown now)', cookie: 'Clicking the cookie (not shown now)', question: 'Under it (not shown now)', yourRoom: 'Under "A room of your own": what the den is for' },
     },
     { when: 'At the top of the catalogue\'s pages (every colour, and more to come), a line each', says: CATALOGUE },
   ],

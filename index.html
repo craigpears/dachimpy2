@@ -15,9 +15,11 @@
   const toPrimer = () => { if (/^#\//.test(location.hash)) location.replace('carpentry.html' + location.hash); };
   toPrimer();
   addEventListener('hashchange', toPrimer);
-  // Trying a colour theme: ?theme=gold (or any [data-theme] block in the colours at the top of the styles).
-  const theme = new URLSearchParams(location.search).get('theme');
-  if (theme) document.documentElement.dataset.theme = theme;
+  // The colour theme: the one picked at the top right (kept in this browser), or ?theme=<name> to try one (any
+  // [data-theme] block in the colours at the top of the styles). Set before the page draws, so it never flashes.
+  let theme = new URLSearchParams(location.search).get('theme');
+  if (!theme) { try { theme = localStorage.getItem('den.front.theme'); } catch { /* (no storage: the default) */ } }
+  if (theme && theme !== 'rose') document.documentElement.dataset.theme = theme;
 </script>
 <meta name="description" content="Proofs of concept for learning Puzzle Pirates: tutorials played alongside a pirate in 3D or read at your own pace, a sloop race made of puzzles, and a den to look round.">
 <meta property="og:title" content="The Pirate Den">
@@ -33,7 +35,7 @@
      able to experiment with the color theme of the website ... my kind of rose purple kind of theme ... not in a
      glaring way, but at least there's like the call for actions following that theme and something neutral for
      the rest"). Neutrals for most of the page; the calls to action (the buttons, the links, the choices, the
-     sticky menu, the cookie) in Dachimpy's rose and purple, the colours of their wig, braces and kilt.
+     sticky menu) in Dachimpy's rose and purple, the colours of their wig, braces and kilt.
      To try a theme: change the values in :root, or copy the [data-theme="gold"] block below under a new name and
      open the page with ?theme=<name> (?theme=gold shows the page's old gold look). ===== */
   :root {
@@ -52,22 +54,22 @@
     --tile: rgba(255, 236, 228, 0.05);     /* a place on the launch pad */
     --tile-hi: rgba(255, 236, 228, 0.11);
     --plain-a: #4a3550; --plain-b: #2c2131; /* a choice with no picture (YPPedia, Puzzle Practice) */
-    /* The parchment: the cards, Dachimpy's speech bubble. */
+    /* The parchment: the cards. */
     --paper: #f5ebdf; --paper2: #eadbc9;
     --paper-edge: #c9ae94;
     --paper-glow: rgba(120, 80, 60, 0.16);
     --ink: #2b1f1b;                        /* words on parchment */
     --ink2: #5a4740;
     --ink-head: #5b2c26;                   /* a card's heading */
-    --bubble: #fffaf4;
     --coming-a: #ebdfcd; --coming-b: #e3d4be; --coming-edge: #ab927a; --coming-text: #665243;
-    --crumb: #b9752e;                      /* the cookie's crumbs */
-    /* The calls to action: rose and purple. */
+    /* The calls to action: rose and purple, kept to the top level (the banner, Play the den, the outlined buttons,
+       the menu) and to hover and focus; below that the page is neutral (the user, 14 Nov: "once you get below that
+       in the hierarchy, it feels like it needs to get a little bit more neutral, not massively off"). */
     --accent: #e48fae;                     /* rose: a button, the menu's place, a choice's frame on hover */
     --accent-hi: #f2aac3;                  /* ...hovered */
     --accent-text: #f1b9cc;                /* a link or a choice's title on the dark */
     --on-accent: #2d1121;                  /* words on a rose button */
-    --accent2: #9d65b9;                    /* purple: the cookie's ring, the launch pad's hover */
+    --accent2: #9d65b9;                    /* purple: the launch pad's hover */
     --accent2-text: #c9a9dc;               /* small purple labels ("made by...") */
     --link: #962f65;                       /* a link on parchment */
     --link-hi: #7a2a7e;                    /* ...hovered, toward purple */
@@ -76,24 +78,58 @@
     --sea-top: #2d2030; --sea-low: #171114;
     --land: #31232f; --land-lit: #4a3043;
     --fur: #8b5a37; --fur-light: #e6c29c; --fur-line: #3b2418; --eye: #22150f; --hook: #d6cfd6;
-    --cap: #8a4fa6;                        /* the monkey's cap, purple */
     --word-edge: #4a2242;                  /* round the wordmark's letters */
     --sail: #f1e6dc; --hull: #5a3a2c;
   }
-  /* The old look, gold on brown, kept as a second theme to show how one's tried: ?theme=gold. */
+  /* The themes to pick from at the top right (the user, 14 Nov: "a theme picker in the top right ... dark gold,
+     black gold, blue, that kind of thing"), each a block over :root's rose. Every one's words are checked readable
+     (tests/front-page.test.ts). Dark gold: the old look, gold on brown. */
   :root[data-theme="gold"] {
     --bg: #140d08; --bg-stripe: rgba(255, 220, 160, 0.025); --bar: rgba(20, 13, 8, 0.94);
     --text: #f6ead2; --dim: #cbb894; --faint: #a8967a; --title: #e0a92a; --edge: #5a412a; --frame: #3b2a1b; --well: #2a1c11;
     --tile: rgba(255, 230, 180, 0.05); --tile-hi: rgba(255, 230, 180, 0.12); --plain-a: #3b5d4a; --plain-b: #24392d;
     --paper: #f3e3c3; --paper2: #e8d2a8; --paper-edge: #c9a35c; --paper-glow: rgba(120, 80, 30, 0.18);
-    --ink: #2a1d13; --ink2: #5b4330; --ink-head: #6b2a12; --bubble: #fffaf0;
+    --ink: #2a1d13; --ink2: #5b4330; --ink-head: #6b2a12;
     --coming-a: #eadbb8; --coming-b: #e3d1aa; --coming-edge: #a88a5c; --coming-text: #66513a;
     --accent: #e0a92a; --accent-hi: #f0bd44; --accent-text: #e0a92a; --on-accent: #2a1d13;
     --accent2: #e0a92a; --accent2-text: #d4b06a; --link: #8a4b0f; --link-hi: #6b2a12;
     --sky-top: #142235; --sky-low: #3d6d93; --glow: rgba(224, 169, 42, 0.25); --sea-top: #2a5878; --sea-low: #142a3c;
-    --land: #23384c; --land-lit: #2f4a63; --cap: #2f5fa8; --word-edge: #1f3550;
+    --land: #23384c; --land-lit: #2f4a63; --word-edge: #1f3550;
   }
 
+  /* Black and gold: gold on a near-black neutral. */
+  :root[data-theme="black"] {
+    --bg: #0e0e0f; --bg-stripe: rgba(255, 240, 200, 0.02); --bar: rgba(14, 14, 15, 0.94);
+    --text: #f2efe8; --dim: #bdb7ab; --faint: #9a958c; --title: #f4ecd8; --edge: #3a3631; --frame: #2a2724; --well: #1b1a19;
+    --tile: rgba(255, 250, 235, 0.05); --tile-hi: rgba(255, 250, 235, 0.11); --plain-a: #3a3428; --plain-b: #24211b;
+    --paper: #f4efe4; --paper2: #e7dfcd; --paper-edge: #bfae86; --paper-glow: rgba(90, 70, 30, 0.16);
+    --ink: #1d1a15; --ink2: #4d473d; --ink-head: #5a4318;
+    --coming-a: #ebe4d4; --coming-b: #e2d9c4; --coming-edge: #a89b7c; --coming-text: #5c5341;
+    --accent: #d4a537; --accent-hi: #e6bb52; --accent-text: #e2b84e; --on-accent: #17130a;
+    --accent2: #b08a3e; --accent2-text: #cdb27a; --link: #7a5a12; --link-hi: #5a4210;
+    --sky-top: #121212; --sky-low: #3a3324; --glow: rgba(212, 165, 55, 0.3); --sea-top: #22201c; --sea-low: #121110;
+    --land: #2a2721; --land-lit: #3b362c; --word-edge: #3a2f16;
+  }
+  /* Blue: sea blues on a slate neutral. */
+  :root[data-theme="blue"] {
+    --bg: #0f141b; --bg-stripe: rgba(200, 225, 255, 0.025); --bar: rgba(15, 20, 27, 0.94);
+    --text: #e9eef5; --dim: #b3bfcd; --faint: #8f9bab; --title: #eef3fa; --edge: #2e3a4a; --frame: #232d3a; --well: #18202a;
+    --tile: rgba(220, 235, 255, 0.05); --tile-hi: rgba(220, 235, 255, 0.11); --plain-a: #2e4766; --plain-b: #1d2c40;
+    --paper: #eef2f7; --paper2: #dfe6ef; --paper-edge: #a8b8cc; --paper-glow: rgba(60, 90, 130, 0.16);
+    --ink: #17202b; --ink2: #44515f; --ink-head: #1f3a5c;
+    --coming-a: #e2e8f0; --coming-b: #d7dfea; --coming-edge: #93a3b8; --coming-text: #4a5869;
+    --accent: #6fa8e8; --accent-hi: #92bff0; --accent-text: #9cc6f2; --on-accent: #0c1a2b;
+    --accent2: #7f8fe0; --accent2-text: #aab6ef; --link: #1f5fa8; --link-hi: #1a4a86;
+    --sky-top: #0f1824; --sky-low: #2c4a6b; --glow: rgba(111, 168, 232, 0.3); --sea-top: #1d3048; --sea-low: #0f1826;
+    --land: #1c2a3a; --land-lit: #27394d; --word-edge: #183152;
+  }
+
+  /* The theme picker, top right above the banner: a swatch a theme, the one picked ringed. */
+  .themes { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin: -14px 0 8px; font-size: 14px; color: var(--dim); }
+  .themes button { width: 28px; height: 28px; padding: 0; border-radius: 50%; cursor: pointer; border: 2px solid var(--edge);
+    background: linear-gradient(135deg, var(--a) 0 50%, var(--b) 50% 100%); }
+  .themes button[aria-pressed="true"] { border-color: var(--text); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+  .themes button:hover { border-color: var(--dim); }
   * { box-sizing: border-box; }
   html { background: var(--bg); scroll-behavior: smooth; }
   body { margin: 0; min-height: 100vh; color: var(--text); font: 500 17px/1.5 'Alegreya Sans', system-ui, sans-serif;
@@ -103,7 +139,7 @@
   img { display: block; max-width: 100%; }
   .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
   /* The banner (the user, 14 Nov, of the old Dachimpy.com one put back here: "design it so that it fits ... do
-     something that is inspired by it but fits with the colour scheme"): the monkey in his cap hanging from the
+     something that is inspired by it but fits with the colour scheme"): the monkey hanging from the
      treasure map's dotted trail, the trail ending in an X, an island, the sea and a ship, drawn in the page's own
      colours (the banner's tokens above). The old picture is in Dachimpy's museum. On a phone it's taller and cut
      at the right, the ship sailing in nearer. */
@@ -127,8 +163,6 @@
   .bn-eye { fill: var(--eye); } .bn-glint { fill: #fff; }
   .bn-smile { fill: none; stroke: var(--eye); stroke-width: 1.8; stroke-linecap: round; }
   .bn-hook { fill: none; stroke: var(--hook); stroke-width: 2.6; stroke-linecap: round; }
-  .bn-cap { fill: var(--cap); stroke: var(--fur-line); stroke-width: 1.5; }
-  .bn-peak { fill: var(--accent); stroke: var(--fur-line); stroke-width: 1.5; }
   .bn-ring { fill: none; stroke: var(--accent); stroke-width: 2.5; opacity: .85; }
   .bn-hull { fill: var(--hull); stroke: var(--fur-line); stroke-width: 1.2; }
   .bn-mast { stroke: var(--hull); stroke-width: 2.4; }
@@ -149,10 +183,12 @@
   .links { display: flex; flex-wrap: wrap; gap: 10px; }
   .play { display: inline-block; font: 700 17px 'Alegreya Sans'; color: var(--on-accent); background: var(--accent); border-radius: 8px; padding: 9px 18px; text-decoration: none; white-space: nowrap; }
   .play:hover { color: var(--on-accent); background: var(--accent-hi); }
-  .play.ghost { color: var(--accent-text); background: transparent; border: 2px solid var(--accent); padding: 7px 16px; }
-  .play.ghost:hover { color: var(--on-accent); background: var(--accent); }
-  article .play.ghost { color: var(--link); border-color: var(--link); }
-  article .play.ghost:hover { color: var(--paper); background: var(--link); }
+  /* A secondary button: neutral, a step down, so Play the den stays the one filled button in the theme's colour
+     (the user, 14 Nov: "It loses its rarity"); the theme's colour only on hover. */
+  .play.ghost { color: var(--text); background: var(--tile); border: 1.5px solid color-mix(in srgb, var(--text) 32%, transparent); padding: 7.5px 16.5px; }
+  .play.ghost:hover { color: var(--accent-text); background: var(--tile-hi); border-color: var(--accent); }
+  article .play.ghost { color: var(--ink); background: transparent; border-color: color-mix(in srgb, var(--ink) 35%, transparent); }
+  article .play.ghost:hover { color: var(--link-hi); background: transparent; border-color: var(--link); }
   h2 { display: flex; align-items: center; gap: 14px; margin: 42px 0 14px; font: 700 24px 'Alegreya', serif; color: var(--dim); scroll-margin-top: 64px; }
   h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
   h2.ask { font-size: clamp(26px, 5vw, 34px); color: var(--title); margin-top: 30px; }
@@ -171,40 +207,27 @@
   .shots img, .pic img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; transition: transform .25s; }
   .shots a:hover img, a.pic:hover img { transform: scale(1.02); }
 
-  /* Dachimpy at the door, a plate of cookies held out (their lines from src/lines/dachimpy.ts), saying hello and
-     asking what you're here for; under it, tucked away, what this place is. Pictures straight after. */
-  .welcome { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 0 22px; align-items: center; margin: 14px 0 22px; }
-  .host { position: relative; margin: 0; }
-  .host img { width: 130px; height: auto; filter: drop-shadow(0 10px 14px var(--shadow)); }
-  /* The cookie: over the plate in the picture, a click for one (and a "Yay!"). */
-  .cookie { position: absolute; left: 0; top: 52%; width: 54px; height: 34px; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 50%; }
   /* Usable first (the user, 14 Nov: "ideally like those colors, but not at the expense of like usability"): every
      link and button shows where the keyboard is, rose on the dark, the link's own colour on parchment. */
   a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
-  .way:focus-visible, .bubble a:focus-visible { outline-color: var(--link); }
+  .way:focus-visible { outline-color: var(--link); }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
-  .cookie:hover, .cookie:focus-visible { outline: 2px dashed var(--accent); outline-offset: 2px; }
-  .crumb { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--crumb); pointer-events: none; animation: crumb .9s ease-in forwards; }
-  @keyframes crumb { to { transform: translate(var(--dx), 70px) rotate(200deg); opacity: 0; } }
-  .bubble { position: relative; margin: 0 0 16px; padding: 12px 16px; max-width: 520px; background: var(--bubble); color: var(--ink); border-radius: 14px;
-    font: 700 21px/1.3 'Alegreya', serif; box-shadow: 0 6px 18px var(--shadow); }
-  .bubble:not(.on) { display: none; }   /* (its words come from the lines file, by script) */
-  .bubble::after { content: ''; position: absolute; left: -12px; top: 50%; margin-top: -9px; border: 9px solid transparent; border-right: 14px solid var(--bubble); border-left: 0; }
-  .bubble.yay { animation: yay .35s ease-out; }
-  @keyframes yay { 40% { transform: scale(1.04); } }
-  #question { display: block; margin-top: 4px; font-size: 26px; color: var(--ink-head); }
-  .about { max-width: 520px; color: var(--dim); font-size: 15px; }
-  .about summary { cursor: pointer; color: var(--accent-text); font-weight: 700; width: max-content; }
+  /* What this place is, tucked under the title; then straight to what you're here for (the user, 14 Nov: Dachimpy's
+     cookie welcome "creates a lot of dead space and misses the key point"; it's for the den). */
+  .about { max-width: 620px; color: var(--dim); font-size: 15px; margin: 12px 0 0; }
+  .about summary { cursor: pointer; color: var(--dim); font-weight: 700; width: max-content; }
   .about summary:hover { color: var(--accent-hi); }
   .about p { margin: 6px 2px 0; }
   .about b { color: var(--text); }
 
+  .ask { margin: 34px 0 16px; font: 700 26px/1.2 'Alegreya', serif; color: var(--title); }
+  .ask::after { display: none; }
   /* What are you here for? The choices, each a little collage of its best things and a jump to its section
      below (the user, 14 Nov: "show you some of the things at a glance without you having to click"). */
-  .choices { display: grid; gap: 14px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .choices { display: grid; gap: 20px; margin-bottom: 18px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .choice { grid-column: span 2; position: relative; display: block; border-radius: 12px; overflow: hidden; border: 2px solid var(--frame); background: var(--well);
     box-shadow: 0 8px 24px var(--shadow); text-decoration: none; color: var(--text); min-height: 230px; transition: border-color .2s; }
   .choice:hover, .choice:focus-visible { border-color: var(--accent); }
@@ -216,21 +239,18 @@
   .collage.n1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
   .choice:hover .collage img { transform: scale(1.04); }
   .choice .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 14px 12px; background: linear-gradient(transparent, var(--bar) 55%); }
-  /* Elsewhere, made by others (the user, 14 Nov: "Those things are elsewhere, but I still want them"): a second
-     row of choices under its own heading, each going straight out, marked ↗, its maker named; their only place on
-     the page. The picture above, the words below, so the Discord's whole line fits. */
+  /* Elsewhere, made by others (the user, 14 Nov: "Those things are elsewhere, but I still want them"), further down
+     the page and compact, a line each (14 Nov: "a lot being crammed into a small area instead of gradually
+     discovering it"): the launch pad's tiles, each going straight out, marked ↗, its maker named. */
+  .places.out { grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
+  .place .mark { display: grid; place-items: center; width: 96px; height: 54px; border-radius: 5px; text-align: center; line-height: 1.05;
+    font: italic 700 14px 'Alegreya', serif; color: var(--text); background: linear-gradient(160deg, var(--plain-a), var(--plain-b)); }
   .ext { font-family: system-ui, sans-serif; font-weight: 700; }
-  .elsewhere-head { margin: 22px 2px 10px; font: 700 19px 'Alegreya', serif; color: var(--dim); scroll-margin-top: 64px; }
   .choice { display: flex; flex-direction: column; min-height: 0; }
   .choice .collage { position: relative; inset: auto; height: 170px; flex: none; }
-  .choices.out .collage { height: 130px; }
   .choice .cap { position: static; padding: 10px 14px 12px; background: none; }
-  .choices.out .by { font-size: 13px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--accent2-text); }
-  .collage.plain { display: grid; place-items: center; background: linear-gradient(160deg, var(--plain-a), var(--plain-b)); }
-  .collage.plain em { font: italic 700 26px 'Alegreya', serif; color: var(--text); }
-  .choices.out { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .choices.out .choice { grid-column: span 1; }
-  .choice b { display: block; font: 700 22px/1.15 'Alegreya', serif; color: var(--accent-text); }
+  .choice b { display: block; font: 700 22px/1.15 'Alegreya', serif; color: var(--title); }
+  .choice:hover b, .choice:focus-visible b { color: var(--accent-text); }
   .choice i { display: block; font-style: normal; font-size: 15px; color: var(--dim); margin-top: 3px; }
   .choice:hover b { color: var(--accent-hi); }
 
@@ -282,7 +302,7 @@
   .tests p { margin: 0 0 6px; }
   .tests ul { margin: 0; padding-left: 20px; }
   .tests li { margin: 0 0 4px; }
-  .tests a { color: var(--accent2-text); }
+  .tests a { color: var(--dim); }
   footer { margin-top: 40px; color: var(--faint); font-size: 13px; text-align: center; }
 
   @media (max-width: 760px) {
@@ -290,8 +310,6 @@
     .choice, .choice.wide { grid-column: span 1; }
     .choice .collage { height: 130px; }
     .choice:first-child { grid-column: span 2; }
-    .choices.out { grid-template-columns: 1fr 1fr; }
-    .choices.out .choice:first-child { grid-column: span 1; }
     .choice b { font-size: 19px; }
     .choice i { font-size: 14px; }
   }
@@ -300,12 +318,6 @@
     /* Taller for its width, so cut at the right (xMinYMid slice), and the ship sails in beside the X (fits down to 320px). */
     .banner { aspect-ratio: auto; height: 84px; }
     .bn-ship { transform-box: fill-box; transform-origin: center; transform: translate(-360px, 3px) scale(.85); }
-    .welcome { grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 0 16px; }
-    .talk { display: contents; }
-    .host img { width: 92px; }
-    .cookie { width: 40px; height: 26px; }
-    .bubble { font-size: 17px; margin: 0; }
-    #question { font-size: 21px; }
     .about { grid-column: 1 / -1; margin-top: 10px; }
     article.side { grid-template-columns: 1fr; }
     .cards { grid-template-columns: 1fr; }
@@ -320,13 +332,19 @@
   @media (max-width: 420px) {
     .choices { grid-template-columns: 1fr; }
     .choice, .choice.wide, .choice:first-child { grid-column: span 1; }
-    .choices.out { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 <div class="wrap" id="top">
-  <svg class="banner" viewBox="0 0 900 140" preserveAspectRatio="xMinYMid slice" role="img" aria-label="Dachimpy: a monkey in a purple cap hanging from a treasure map's dotted trail, which ends in an X, over an evening sea with a ship">
+  <div class="themes" role="group" aria-label="Colour theme">
+    <span>Theme</span>
+    <button type="button" data-pick="rose" style="--a:#151012;--b:#e48fae" aria-label="Rose and purple" title="Rose and purple"></button>
+    <button type="button" data-pick="gold" style="--a:#5a3a1e;--b:#e0a92a" aria-label="Dark gold" title="Dark gold"></button>
+    <button type="button" data-pick="black" style="--a:#0e0e0f;--b:#d4a537" aria-label="Black and gold" title="Black and gold"></button>
+    <button type="button" data-pick="blue" style="--a:#0f141b;--b:#6fa8e8" aria-label="Blue" title="Blue"></button>
+  </div>
+  <svg class="banner" viewBox="0 0 900 140" preserveAspectRatio="xMinYMid slice" role="img" aria-label="Dachimpy: a monkey hanging from a treasure map's dotted trail, which ends in an X, over an evening sea with a ship">
     <defs>
       <linearGradient id="bn-sky" x2="0" y2="1"><stop offset="0" class="bn-s1"/><stop offset="1" class="bn-s2"/></linearGradient>
       <linearGradient id="bn-sea" x2="0" y2="1"><stop offset="0" class="bn-s3"/><stop offset="1" class="bn-s4"/></linearGradient>
@@ -357,7 +375,7 @@
     <path class="bn-x-edge" d="M356 46 L 384 76 M 384 46 L 356 76"/>
     <path class="bn-x" d="M356 46 L 384 76 M 384 46 L 356 76"/>
     <text class="bn-word" x="116" y="116">Dachimpy</text>
-    <!-- The monkey, in his cap, hanging from the trail by one hand, a hook for the other. -->
+    <!-- The monkey (no hat: "my monkeys don't have hats", the user, 14 Nov), hanging from the trail by one hand, a hook for the other. -->
     <g class="bn-monkey">
       <path class="bn-limb" stroke-width="5" d="M70 114 C 92 122 102 104 93 97 C 86 92 80 100 86 104"/>
       <path class="bn-limb" stroke-width="7" d="M71 90 Q 86 58 94 25"/>
@@ -378,9 +396,6 @@
       <circle class="bn-glint" cx="51" cy="62" r="1.1"/><circle class="bn-glint" cx="63" cy="62" r="1.1"/>
       <circle class="bn-eye" cx="54" cy="72" r="1.1"/><circle class="bn-eye" cx="58" cy="72" r="1.1"/>
       <path class="bn-smile" d="M49 77 Q 56 84 63 77"/>
-      <path class="bn-cap" d="M32 57 C 32 30 80 30 80 57 Z"/>
-      <ellipse class="bn-peak" cx="29" cy="57" rx="14" ry="4.2"/>
-      <circle class="bn-peak" cx="56" cy="36" r="3.2"/>
     </g>
   </svg>
   <header>
@@ -397,48 +412,31 @@
 
   <nav class="jump" aria-label="On this page">
     <a href="#top">Top</a>
-    <a href="#elsewhere">Elsewhere</a>
     <a href="#fun">A bit of fun</a>
     <a href="#concepts">New concepts</a>
     <a href="#tutorials">Tutorials</a>
+    <a href="#elsewhere">Elsewhere</a>
     <a href="#places">Jump to a place</a>
     <a href="#room">A room of your own</a>
     <a href="changelog.html">What's new</a>
   </nav>
 
-  <section class="welcome">
-    <figure class="host">
-      <img src="changelog/dachimpy-welcome.webp" width="214" height="529" alt="Dachimpy, in a tall pink beehive wig, purple braces and a pink tartan kilt, holding out a plate of cookies">
-      <button class="cookie" type="button" aria-label="Take a cookie" title="Take a cookie"></button>
-    </figure>
-    <div class="talk">
-      <p class="bubble"><span id="said" aria-live="polite"></span><b id="question"></b></p>
-      <!-- Who it's for, tucked away (the user, 14 Nov: no "word block" first; "slightly hidden away so people can
-           click on it or expand it if they want it"). The fuller version is design.html's "Who it's for". -->
-      <details class="about">
-        <summary>What is this place?</summary>
-        <p>A playground of ideas for learning Puzzle Pirates' puzzles. It's for when you know the basics, the game's own
-          tutorials see to those, and you'd like to get better at a puzzle or two.</p>
-        <p>Each tutorial comes two ways: played in 3D with a pirate beside you, or laid out to read at your own pace.
-          They're experiments, so some will work better than others.</p>
-        <p>And the way to really get good? Play the game, and talk to <a href="#people">its people</a>. They're lovely.</p>
-      </details>
-    </div>
-  </section>
+    <!-- Who it's for, tucked away (the user, 14 Nov: no "word block" first; "slightly hidden away so people can
+         click on it or expand it if they want it"). The fuller version is design.html's "Who it's for". -->
+    <details class="about">
+      <summary>What is this place?</summary>
+      <p>A playground of ideas for learning Puzzle Pirates' puzzles. It's for when you know the basics, the game's own
+        tutorials see to those, and you'd like to get better at a puzzle or two.</p>
+      <p>Each tutorial comes two ways: played in 3D with a pirate beside you, or laid out to read at your own pace.
+        They're experiments, so some will work better than others.</p>
+      <p>And the way to really get good? Play the game, and talk to <a href="#people">its people</a>. They're lovely.</p>
+    </details>
 
+  <h2 class="ask">What are you here for?</h2>
   <nav class="choices" id="choose" aria-label="What are you here for?">
     <a class="choice" href="#fun"><span class="collage n3"><img src="changelog/wedding.jpg" alt=""><img src="changelog/gravee.jpg" alt=""><img src="changelog/vegas-island.jpg" alt=""></span><span class="cap"><b>A bit of fun and a look around</b><i>Mischievious's wedding, Gravee's gallery, penguins</i></span></a>
     <a class="choice" href="#concepts"><span class="collage n3"><img src="changelog/race-field.jpg" alt=""><img src="changelog/starlit-door.jpg" alt=""><img src="changelog/rowing.jpg" alt=""></span><span class="cap"><b>Try some interesting new concepts</b><i>The sloop race, the starlit door, rowing</i></span></a>
     <a class="choice" href="#tutorials"><span class="collage n3"><img src="changelog/helium-lesson.jpg" alt=""><img src="changelog/tzz-lesson.jpg" alt=""><img src="changelog/distilling-guide.jpg" alt=""></span><span class="cap"><b>Try out some new tutorials</b><i>Experiments for now: Distilling, Sailing, Carpentry</i></span></a>
-  </nav>
-
-  <p class="elsewhere-head" id="elsewhere">Elsewhere, made by others <span class="ext">↗</span></p>
-
-  <nav class="choices out" aria-label="Elsewhere, made by others">
-    <a class="choice" id="practice" href="https://www.globalcadesim.com/#/lobby/36" target="_blank" rel="noopener"><span class="collage n1"><img src="changelog/global-cade-sim.jpg" alt=""></span><span class="cap"><b>Play blockades online <span class="ext">↗</span></b><i class="by">The Global Cade Sim, made by AMH</i><i>Battle Navigation and blockades, online.</i></span></a>
-    <a class="choice" href="https://yppedia.puzzlepirates.com/" target="_blank" rel="noopener"><span class="collage n1 plain"><em>YPPedia</em></span><span class="cap"><b>Look up the basics <span class="ext">↗</span></b><i class="by">YPPedia, the wiki written by the game's players</i><i>Every puzzle's rules and basic mechanics, and good guides.</i></span></a>
-    <a class="choice" href="https://puzzle-practice.github.io/Puzzle_Practice/#/" target="_blank" rel="noopener"><span class="collage n1 plain"><em>Puzzle Practice</em></span><span class="cap"><b>Practise puzzles <span class="ext">↗</span></b><i class="by">Puzzle Practice, made by Jice</i><i>Practise lots of puzzles.</i></span></a>
-    <a class="choice" id="people" href="https://discord.gg/XtRHwP6XT" target="_blank" rel="noopener"><span class="collage n1"><img src="changelog/wardrobe.jpg" alt=""></span><span class="cap"><b>Meet real pirates <span class="ext">↗</span></b><i class="by">The Trophy Hunters' Discord, their own community</i><i>It's a sociable game: everything's about the people, playing puzzles together. For a friendly crowd ready to help and have fun, or to watch real pirates play and chat, this is the go-to. The top puzzlers stream on Twitch and YouTube too.</i></span></a>
   </nav>
 
   <h2 id="fun">A bit of fun and a look around</h2>
@@ -450,7 +448,7 @@
     </div>
     <h3>The den</h3>
     <p>A pirate hideout dug into a cove, played through Puzzle Pirates' own puzzles. Mend the wall with Carpentry while raiders row in, man the gun tower, build yourself a shack. Then take the old sloop out: islands to find, pirates to meet, a wedding, a checkpoint to get past, and a race.</p>
-    <p class="try"><a class="play" href="den.html">Into the den</a></p>
+    <p class="try"><a class="play ghost" href="den.html">Into the den</a></p>
   </article>
 
   <div class="cards">
@@ -542,6 +540,15 @@
     </div>
   </article>
 
+  <h2 id="elsewhere">Elsewhere, made by others</h2>
+
+  <div class="places out">
+    <a class="place" id="practice" href="https://www.globalcadesim.com/#/lobby/36" target="_blank" rel="noopener"><img src="changelog/global-cade-sim.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Play blockades online <span class="ext">↗</span></b><i>The Global Cade Sim, made by AMH</i></span></a>
+    <a class="place" href="https://yppedia.puzzlepirates.com/" target="_blank" rel="noopener"><span class="mark">YPPedia</span><span><b>Look up the basics <span class="ext">↗</span></b><i>YPPedia, the wiki written by the game's players</i></span></a>
+    <a class="place" href="https://puzzle-practice.github.io/Puzzle_Practice/#/" target="_blank" rel="noopener"><span class="mark">Puzzle Practice</span><span><b>Practise puzzles <span class="ext">↗</span></b><i>Puzzle Practice, made by Jice</i></span></a>
+    <a class="place" id="people" href="https://discord.gg/XtRHwP6XT" target="_blank" rel="noopener"><img src="changelog/wardrobe.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Meet real pirates <span class="ext">↗</span></b><i>The Trophy Hunters' Discord: a friendly crowd to play, chat and help</i></span></a>
+  </div>
+
   <h2 id="places">Jump straight to a place</h2>
 
   <p class="lead">Every place in the den has a link that drops you straight there. New things land in <a href="changelog.html">What's new</a> first.</p>
@@ -630,32 +637,10 @@
   <footer>Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</footer>
 </div>
 <script type="module">
-  // Dachimpy's hello, and a cookie on a click: their lines are src/lines/dachimpy.ts's, never written here.
-  import { FRONT_PAGE, ANOTHER_COOKIE } from './js/lines/dachimpy.js';
-  const said = document.getElementById('said'), host = document.querySelector('.host');
-  const bubble = said.parentElement;
-  const say = (line) => { said.textContent = line; bubble.classList.remove('yay'); void bubble.offsetWidth; bubble.classList.add('yay'); };
-  bubble.classList.add('on');
-  said.textContent = FRONT_PAGE.hello;
-  document.getElementById('question').textContent = FRONT_PAGE.question;
+  // Dachimpy on a room of your own: their lines are src/lines/dachimpy.ts's, never written here. (Their hello and
+  // the cookie moved off the front page, 14 Nov: "it creates a lot of dead space and misses the key point".)
+  import { FRONT_PAGE } from './js/lines/dachimpy.js';
   document.getElementById('your-room').replaceChildren(...FRONT_PAGE.yourRoom.map((line) => Object.assign(document.createElement('p'), { textContent: line })));
-  let cookies = 0;
-  document.querySelector('.cookie').addEventListener('click', (e) => {
-    say(cookies === 0 ? FRONT_PAGE.cookie : ANOTHER_COOKIE[cookies % ANOTHER_COOKIE.length]);   // (the third: "That's three")
-    cookies++;
-    // A few crumbs off the plate.
-    const b = e.currentTarget;
-    for (let i = 0; i < 6; i++) {
-      const c = document.createElement('span');
-      c.className = 'crumb';
-      c.style.left = `${b.offsetLeft + b.offsetWidth / 2}px`;
-      c.style.top = `${b.offsetTop + b.offsetHeight / 2}px`;
-      c.style.setProperty('--dx', `${(Math.random() - 0.5) * 60}px`);
-      c.style.animationDelay = `${i * 40}ms`;
-      host.append(c);
-      setTimeout(() => c.remove(), 1200);
-    }
-  });
 
   // The sticky menu marks the section you're in: the last one whose top has gone under the menu.
   const marks = [...document.querySelectorAll('.jump a[href^="#"]')]
@@ -669,6 +654,24 @@
   };
   addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(mark); } }, { passive: true });
   mark();
+</script>
+<script>
+  // The theme picker (top right): a theme picked is the page's at once, and kept in this browser for next time.
+  (() => {
+    const BG = { rose: '#151012', gold: '#140d08', black: '#0e0e0f', blue: '#0f141b' };
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const buttons = [...document.querySelectorAll('.themes [data-pick]')];
+    const show = (name) => {
+      if (name === 'rose') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = name;
+      for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.pick === name));
+      if (meta && BG[name]) meta.content = BG[name];
+    };
+    show(document.documentElement.dataset.theme || 'rose');
+    for (const b of buttons) b.addEventListener('click', () => {
+      show(b.dataset.pick);
+      try { localStorage.setItem('den.front.theme', b.dataset.pick); } catch { /* (no storage: just this visit) */ }
+    });
+  })();
 </script>
 </body>
 </html>
