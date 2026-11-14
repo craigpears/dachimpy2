@@ -1660,10 +1660,8 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 - *Under it (not shown now):* "So! What are you here for?"
 - *Under "A room of your own": what the den is for:*
   - "Want a room of your own in the den? Ooh, yes! Let's make one!"
-  - "The islands each bring something new: a mechanic, a tutorial, or a proper long adventure. And a room of your own is a lovely thing too. Got a character you love, or something to show off? Have it in 3D, in a gallery of your own."
-  - "Gravee's Bedside Manors is a whole gallery: her portraits, and yours painted, and a vampire with a scare in him. Roobear's ROOm has Robert to roob your ear and her wall of everyone's guesses at her name. I love them both!"
-  - "Find me on the Trophy Hunters' Discord, send me a link to your pirate page, and we'll put your room together. I just need a feel for your personality."
-  - "The whole den's a playground of ideas, each one tried out quickly. I like them meaningful and funny, ideally with a mechanic in them. Tell me which ones you love! Now and then one becomes something really exciting, like the sloop races. And at the very least, it's a bit of fun."
+  - "A gallery of your own in 3D, like Gravee's portraits or Roobear's ROOm."
+  - "Find me on the Trophy Hunters' Discord with a link to your pirate page, and we'll put it together!"
 
 ### At the top of the catalogue's pages (every colour, and more to come), a line each
 

@@ -188,13 +188,12 @@ export const FRONT_PAGE = {
   question: 'So! What are you here for?',
   /** Further down, under "A room of your own": what the den is for, a paragraph each (the user, 14 Nov: "you
       want your own adventure ... or room ... find me on Discord ... send me a link to your pirate page, and we
-      can put a little room for you together"). */
+      can put a little room for you together"); then cut to a third, 14 Nov: "Again, wall of text. Make it a tiny
+      fraction of the word count, like a third"). */
   yourRoom: [
-    'Want a room of your own in the den? Ooh, yes! Let\'s make one!',
-    'The islands each bring something new: a mechanic, a tutorial, or a proper long adventure. And a room of your own is a lovely thing too. Got a character you love, or something to show off? Have it in 3D, in a gallery of your own.',
-    'Gravee\'s Bedside Manors is a whole gallery: her portraits, and yours painted, and a vampire with a scare in him. Roobear\'s ROOm has Robert to roob your ear and her wall of everyone\'s guesses at her name. I love them both!',
-    'Find me on the Trophy Hunters\' Discord, send me a link to your pirate page, and we\'ll put your room together. I just need a feel for your personality.',
-    'The whole den\'s a playground of ideas, each one tried out quickly. I like them meaningful and funny, ideally with a mechanic in them. Tell me which ones you love! Now and then one becomes something really exciting, like the sloop races. And at the very least, it\'s a bit of fun.',
+    "Want a room of your own in the den? Ooh, yes! Let's make one!",
+    "A gallery of your own in 3D, like Gravee's portraits or Roobear's ROOm.",
+    "Find me on the Trophy Hunters' Discord with a link to your pirate page, and we'll put it together!",
   ],
 } as const;
 

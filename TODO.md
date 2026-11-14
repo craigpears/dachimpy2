@@ -884,6 +884,13 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   gambling ... something more visually interesting than the page that was picked." So fewer words there, and a
   Carpentry shot of a puzzle being played.
 
+- **"A room of your own" a wall of text (14 Nov):** "Again, wall of text. Make it a tiny fraction of the word count,
+  like a third." So Dachimpy's lines there cut to three short ones.
+
+- **The den's loading screen (14 Nov):** "The loading experience really needs fixing. Like, again, use some of my
+  kind of splash screen things, because that first loading screen just looks horrible." So the den loads behind
+  the front page's banner look: the monkey, the dotted trail, the X and the sloop.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
