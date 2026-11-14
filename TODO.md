@@ -611,6 +611,21 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   Then: the link is what deserves prominence, on the front page, its own "what are you here for?" choice: "if you want
   to go play the new blockade sim made by [its maker]": AMH (the user, 14 Nov). The museum's picture can wait:
   "I'm going to go at least do a better picture of it ... a bit more justice to get into the midst of things."
+- **Tutorials you can jump into anywhere: the read guides' sticky nav, and Helium asking what you want (14 Nov):**
+  "each part should be discoverable, which is obviously what the 2D thing I think does a lot better, but certainly
+  should be at the top of the 2D thing of like your basic jump to basic mechanics, and everything should have a nice
+  sticky nav at the top ... where it goes through like some basic tricks ... whatever the sections are organized as
+  ... we put a lot of effort into ... the different strategies and phases ... especially in the animated version
+  where it can show you and help you. But I don't feel like it's very discoverable at the moment ... somebody might
+  not care about showing me basics of how to do a crystal clear one. They may be struggling with the end game and
+  wanting help with that part." So:
+  - **The read guides** (Distilling's now, every later one): a sticky nav at the top, jumping to the basic
+    mechanics, the phases, the tricks, however each guide's sections are organised.
+  - **The animated lessons** (Helium's first): not a chatbot ("they kind of annoy me"), but a choice at the start,
+    in the teacher's voice: "Would you like me to start you [with] the basics? Would you like help with the early or
+    mid game? Are you trying to get your CC higher?", the end game too; then, for that part, a list of its
+    scenarios to be shown, or the individual tricks, to pick from ("a drop down of like, here are the scenario[s]
+    ... Are you wanting the individual tricks?"). Each a short lesson on a real board, as the lesson is now.
 
 ## Spotted along the way (not asked for)
 
