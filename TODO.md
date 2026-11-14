@@ -588,6 +588,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   if I ever update it." The user's screenshot (Dachimpy sailing it against a bot, flags, whirlpools, winds) as its
   exhibit after "And Then", its plaque and Dachimpy's line, and the link from the close view; also linked from the
   front page's practice choice, for blockade practice. The picture didn't reach the disk: the user to save the file.
+  Then: the link is what deserves prominence, on the front page, its own "what are you here for?" choice: "if you want
+  to go play the new blockade sim made by [its maker]" (name to come from the user). The museum's picture can wait:
+  "I'm going to go at least do a better picture of it ... a bit more justice to get into the midst of things."
 
 ## Spotted along the way (not asked for)
 
