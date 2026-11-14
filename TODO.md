@@ -530,6 +530,10 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   nice graphical link to either the animated 3D guided version or the 2D version", explained at the start: "we
   have a nice fun version. They help play alongside you and give you the situations and such ... there are static
   versions of everything for those that prefer it." (Sailing has no read version yet: Tzz's is still to do.)
+  The front page (14 Nov): "Yes, make it the front ... the carpentry primer ... you can completely move aside.
+  Maybe that can come under the tutorials because that still has some relevance until we have something that
+  supersedes it. Just that it's a bit of fun for carpentry ... it just needs to move away from being the front and
+  center." Started 14 Nov.
 
 ## Spotted along the way (not asked for)
 
