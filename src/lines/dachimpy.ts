@@ -173,6 +173,27 @@ export const CHATTER = [
 /** Seeing you out. */
 export const GOODBYE = 'Byeee! Take a cookie for the road!';
 
+/** On the site's front page (index.html), at the top, a plate of cookies held out: their hello, buzzy and
+    excited (RULES.md, "Dachimpy's voice"), before the page asks what you're here for; then, clicking the cookie,
+    the first one, and after it ANOTHER_COOKIE in turn (the user, 14 Nov: "Obviously, I need to welcome you to
+    the site. Like, would you like a cookie? That'd be hilarious."). */
+export const FRONT_PAGE = {
+  hello: 'Ahoy! Welcome, welcome! Cookie? Yay, cookies!',
+  cookie: 'Yay! There you go. Everyone who comes in gets one. House rule.',
+  /** Under the hello (and whatever cookie line's up), all the while, the big pictures straight below it. */
+  question: 'So! What are you here for?',
+  /** Further down, under "A room of your own": what the den is for, a paragraph each (the user, 14 Nov: "you
+      want your own adventure ... or room ... find me on Discord ... send me a link to your pirate page, and we
+      can put a little room for you together"). */
+  yourRoom: [
+    'Want a room of your own in the den? Ooh, yes! Let\'s make one!',
+    'The islands each bring something new: a mechanic, a tutorial, or a proper long adventure. And a room of your own is a lovely thing too. Got a character you love, or something to show off? Have it in 3D, in a gallery of your own.',
+    'Gravee\'s Bedside Manors is a whole gallery: her portraits, and yours painted, and a vampire with a scare in him. Roobear\'s ROOm has Robert to roob your ear and her wall of everyone\'s guesses at her name. I love them both!',
+    'Find me on the Trophy Hunters\' Discord, send me a link to your pirate page, and we\'ll put your room together. I just need a feel for your personality.',
+    'The whole den\'s a playground of ideas, each one tried out quickly. I like them meaningful and funny, ideally with a mechanic in them. Tell me which ones you love! Now and then one becomes something really exciting, like the sloop races. And at the very least, it\'s a bit of fun.',
+  ],
+} as const;
+
 export const CHARACTER: Character = {
   name: 'Dachimpy',
   who: 'The user\'s own pirate, of the Emerald Ocean (they/them), drawn in their rose pink wig, belt and braces and '
@@ -207,5 +228,9 @@ export const CHARACTER: Character = {
     { when: 'The thank-you on the friends\' wall, and the sign over the truly special ones', says: { thanks: THANKS, special: SPECIAL, welcomeBack: WELCOME_BACK } },
     { when: 'Now and then, as you wander after the tour', says: CHATTER },
     { when: 'As you leave', says: [GOODBYE] },
+    {
+      when: 'On the site\'s front page, at the top, holding out a plate of cookies', says: FRONT_PAGE,
+      each: { hello: 'Their hello', cookie: 'Clicking the cookie (then the other cookies, in turn)', question: 'Under it, all the while', yourRoom: 'Under "A room of your own": what the den is for' },
+    },
   ],
 };

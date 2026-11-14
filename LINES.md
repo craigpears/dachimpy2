@@ -1616,6 +1616,18 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 
 - "Byeee! Take a cookie for the road!"
 
+### On the site's front page, at the top, holding out a plate of cookies
+
+- *Their hello:* "Ahoy! Welcome, welcome! Cookie? Yay, cookies!"
+- *Clicking the cookie (then the other cookies, in turn):* "Yay! There you go. Everyone who comes in gets one. House rule."
+- *Under it, all the while:* "So! What are you here for?"
+- *Under "A room of your own": what the den is for:*
+  - "Want a room of your own in the den? Ooh, yes! Let's make one!"
+  - "The islands each bring something new: a mechanic, a tutorial, or a proper long adventure. And a room of your own is a lovely thing too. Got a character you love, or something to show off? Have it in 3D, in a gallery of your own."
+  - "Gravee's Bedside Manors is a whole gallery: her portraits, and yours painted, and a vampire with a scare in him. Roobear's ROOm has Robert to roob your ear and her wall of everyone's guesses at her name. I love them both!"
+  - "Find me on the Trophy Hunters' Discord, send me a link to your pirate page, and we'll put your room together. I just need a feel for your personality."
+  - "The whole den's a playground of ideas, each one tried out quickly. I like them meaningful and funny, ideally with a mechanic in them. Tell me which ones you love! Now and then one becomes something really exciting, like the sloop races. And at the very least, it's a bit of fun."
+
 ## The imperial guards of Port Decorum
 
 Soldiers of the Empire in its crimson and gold, standing guard over Port Decorum, the imperial port out past the checkpoint: on the jetty's end, at the fort's gate, along the quay. The one on the jetty does the talking: by the book, politely unhelpful, a little smug that the harbour's shut to pirates.

@@ -1,48 +1,464 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Carpentry Primer</title>
-  <meta name="description" content="A voyage of carpentry holes: place each piece, bet on the last one, and learn to finish Masterpieces.">
-  <meta property="og:title" content="Carpentry Primer">
-  <meta property="og:description" content="A voyage of carpentry holes: place each piece, bet on the last one, and learn to finish Masterpieces. Plus a Hole of the Day.">
-  <meta property="og:type" content="website">
-  <meta name="theme-color" content="#2e2218">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 3'%3E%3Cpath d='M0 0h2v1h1v2H1V2H0z' fill='%23c9892f'/%3E%3C/svg%3E">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Pirate Den: tutorials and proofs of concept</title>
+<!-- The front page (TODO.md, "A welcome page tying the tutorials together", 14 Nov): "what are you here for?",
+     each choice a big picture and its section below, in the changelog's look (changelog.html, design.html).
+     Hand-written, its pictures from changelog/. The Carpentry primer that was the front page is carpentry.html
+     now ("a bit of fun for carpentry", under the tutorials until something supersedes it); an old link to one of
+     its pages (/#/daily, say) is sent on there. Every tutorial comes two ways (RULES.md, "Every tutorial has a
+     read version"): its 3D lesson and its read version, both linked here. Pirate names only. -->
+<script>
+  // The primer's own pages (#/daily, #/games/pair...) live at carpentry.html now: an old link still reaches them.
+  const toPrimer = () => { if (/^#\//.test(location.hash)) location.replace('carpentry.html' + location.hash); };
+  toPrimer();
+  addEventListener('hashchange', toPrimer);
+</script>
+<meta name="description" content="Proofs of concept for learning Puzzle Pirates: tutorials played alongside a pirate in 3D or read at your own pace, a sloop race made of puzzles, and a den to look round.">
+<meta property="og:title" content="The Pirate Den">
+<meta property="og:description" content="Proofs of concept for learning Puzzle Pirates: tutorials played alongside a pirate in 3D or read at your own pace, a sloop race made of puzzles, and a den to look round.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#140d08">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 3'%3E%3Cpath d='M0 0h2v1h1v2H1V2H0z' fill='%23e0a92a'/%3E%3C/svg%3E">
+<style>
+  :root { --ink: #2a1d13; --ink2: #5b4330; --gold: #e0a92a; --cream: #f6ead2; --dim: #cbb894; --edge: #5a412a; --paper: #f3e3c3; --paper2: #e8d2a8; --rust: #6b2a12; --link: #8a4b0f; }
+  * { box-sizing: border-box; }
+  html { background: #140d08; scroll-behavior: smooth; }
+  body { margin: 0; min-height: 100vh; color: var(--cream); font: 500 17px/1.5 'Alegreya Sans', system-ui, sans-serif;
+    background: #140d08 repeating-linear-gradient(90deg, rgba(255, 220, 160, 0.025) 0 2px, transparent 2px 120px); }
+  a { color: var(--gold); }
+  img { display: block; max-width: 100%; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 20px; margin-bottom: 8px; }
+  h1 { margin: 0; font: 700 clamp(34px, 7vw, 52px)/1.05 'Alegreya', serif; color: var(--gold); }
+  .lede { margin: 6px 0 0; color: var(--dim); max-width: 600px; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; }
+  .play { display: inline-block; font: 700 17px 'Alegreya Sans'; color: var(--ink); background: var(--gold); border-radius: 8px; padding: 9px 18px; text-decoration: none; white-space: nowrap; }
+  .play:hover { background: #f0bd44; }
+  .play.ghost { color: var(--gold); background: transparent; border: 2px solid var(--gold); padding: 7px 16px; }
+  .play.ghost:hover { color: var(--ink); background: var(--gold); }
+  article .play.ghost { color: var(--link); border-color: var(--link); }
+  article .play.ghost:hover { color: var(--paper); background: var(--link); }
+  h2 { display: flex; align-items: center; gap: 14px; margin: 42px 0 14px; font: 700 24px 'Alegreya', serif; color: var(--dim); scroll-margin-top: 12px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
+  h2.ask { font-size: clamp(26px, 5vw, 34px); color: var(--gold); margin-top: 30px; }
+  article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid #c9a35c; border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 40px rgba(120, 80, 30, 0.18); padding: 14px; margin: 0 0 20px; }
+  h3 { margin: 12px 2px 4px; font: 700 25px/1.15 'Alegreya', serif; color: var(--rust); }
+  article p { margin: 0 2px 8px; color: var(--ink2); max-width: 70ch; }
+  article b { color: var(--ink); }
+  article a { color: var(--link); }
+  .try { margin: 8px 2px 2px; font-weight: 700; font-size: 15px; }
+  .try code { font: 600 14px ui-monospace, Consolas, monospace; }
+  .shots { display: grid; gap: 10px; grid-template-columns: 1fr; }
+  .shots.two { grid-template-columns: 1fr 1fr; }
+  .shots a, .pic { display: block; border-radius: 7px; overflow: hidden; border: 2px solid #3b2a1b; background: #2a1c11; line-height: 0; }
+  .shots img, .pic img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; transition: transform .25s; }
+  .shots a:hover img, a.pic:hover img { transform: scale(1.02); }
+
+  /* Dachimpy at the door, a plate of cookies held out (their lines from src/lines/dachimpy.ts), saying hello and
+     asking what you're here for; under it, tucked away, what this place is. Pictures straight after. */
+  .welcome { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 0 22px; align-items: center; margin: 14px 0 22px; }
+  .host { position: relative; margin: 0; }
+  .host img { width: 130px; height: auto; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.55)); }
+  /* The cookie: over the plate in the picture, a click for one (and a "Yay!"). */
+  .cookie { position: absolute; left: 0; top: 52%; width: 54px; height: 34px; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 50%; }
+  .cookie:hover, .cookie:focus-visible { outline: 2px dashed var(--gold); outline-offset: 2px; }
+  .crumb { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #b9752e; pointer-events: none; animation: crumb .9s ease-in forwards; }
+  @keyframes crumb { to { transform: translate(var(--dx), 70px) rotate(200deg); opacity: 0; } }
+  .bubble { position: relative; margin: 0 0 16px; padding: 12px 16px; max-width: 520px; background: #fffaf0; color: var(--ink); border-radius: 14px;
+    font: 700 21px/1.3 'Alegreya', serif; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4); }
+  .bubble:not(.on) { display: none; }   /* (its words come from the lines file, by script) */
+  .bubble::after { content: ''; position: absolute; left: -12px; top: 50%; margin-top: -9px; border: 9px solid transparent; border-right: 14px solid #fffaf0; border-left: 0; }
+  .bubble.yay { animation: yay .35s ease-out; }
+  @keyframes yay { 40% { transform: scale(1.04); } }
+  #question { display: block; margin-top: 4px; font-size: 26px; color: var(--rust); }
+  .about { max-width: 520px; color: var(--dim); font-size: 15px; }
+  .about summary { cursor: pointer; color: #d4b06a; font-weight: 700; width: max-content; }
+  .about summary:hover { color: var(--gold); }
+  .about p { margin: 6px 2px 0; }
+  .about b { color: var(--cream); }
+
+  /* What are you here for? The choices, each a little collage of its best things and a jump to its section
+     below (the user, 14 Nov: "show you some of the things at a glance without you having to click"). */
+  .choices { display: grid; gap: 14px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .choice { grid-column: span 2; position: relative; display: block; border-radius: 12px; overflow: hidden; border: 2px solid #3b2a1b; background: #2a1c11;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); text-decoration: none; color: var(--cream); min-height: 230px; }
+  .collage { position: absolute; inset: 0; display: grid; gap: 2px; grid-template-columns: 1.6fr 1fr; grid-template-rows: 1fr 1fr; background: #1a120b; }
+  .collage img { width: 100%; height: 100%; object-fit: cover; min-height: 0; transition: transform .3s; }
+  .collage img:first-child { grid-row: span 2; }
+  .collage.n2 { grid-template-columns: 1.4fr 1fr; grid-template-rows: 1fr; }
+  .collage.n2 img:first-child, .collage.n1 img { grid-row: auto; object-position: top; }
+  .collage.n1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+  .choice:hover .collage img { transform: scale(1.04); }
+  .choice .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 14px 12px; background: linear-gradient(transparent, rgba(16, 10, 5, 0.92) 55%); }
+  /* Elsewhere, made by others (the user, 14 Nov: "Those things are elsewhere, but I still want them"): a second
+     row of choices under its own heading, each going straight out, marked ↗, its maker named; their only place on
+     the page. The picture above, the words below, so the Discord's whole line fits. */
+  .ext { font-family: system-ui, sans-serif; font-weight: 700; }
+  .elsewhere-head { margin: 22px 2px 10px; font: 700 19px 'Alegreya', serif; color: var(--dim); }
+  .elsewhere-head small { font: 500 14px 'Alegreya Sans'; color: #a8967a; margin-left: 6px; }
+  .choice { display: flex; flex-direction: column; min-height: 0; }
+  .choice .collage { position: relative; inset: auto; height: 170px; flex: none; }
+  .choices.out .collage { height: 130px; }
+  .choice .cap { position: static; padding: 10px 14px 12px; background: none; }
+  .choices.out .by { font-size: 13px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: #d4b06a; }
+  .collage.plain { display: grid; place-items: center; background: linear-gradient(160deg, #3b5d4a, #24392d); }
+  .collage.plain em { font: italic 700 26px 'Alegreya', serif; color: #f3e3c3; }
+  .choice b { display: block; font: 700 22px/1.15 'Alegreya', serif; color: var(--gold); }
+  .choice i { display: block; font-style: normal; font-size: 15px; color: var(--dim); margin-top: 3px; }
+  .choice:hover b { color: #ffd166; }
+
+  /* A grid of cards: a picture, a title, a line and its link. */
+  .cards { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+  .cards article { margin: 0; display: flex; flex-direction: column; }
+  .cards h3 { font-size: 21px; margin-top: 10px; }
+  .cards p { font-size: 16px; }
+  .cards .try { margin-top: auto; }
+
+  /* A tutorial's two ways side by side: the 3D lesson and the read version. */
+  .ways { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; margin-top: 10px; }
+  .way { display: block; text-decoration: none; color: var(--ink); }
+  .way .pic { margin-bottom: 6px; }
+  .way b { display: block; font: 700 19px/1.2 'Alegreya', serif; color: var(--rust); margin: 0 2px; }
+  .way small { display: block; font: 700 12px 'Alegreya Sans'; letter-spacing: .08em; text-transform: uppercase; color: var(--link); margin: 0 2px 1px; }
+  .way i { display: block; font-style: normal; font-size: 15px; color: var(--ink2); margin: 2px 2px 0; }
+  a.way:hover b { text-decoration: underline; }
+  .way.coming .pic { display: grid; place-items: center; aspect-ratio: 16 / 9; line-height: 1.3; border-style: dashed; border-color: #a88a5c; background: repeating-linear-gradient(135deg, #eadbb8 0 10px, #e3d1aa 10px 20px); }
+  .way.coming .pic em { font: italic 700 20px 'Alegreya', serif; color: #8c7356; }
+  .way.coming b { color: #8c7356; }
+
+  /* A smaller one: the picture beside its words (the Carpentry primer). */
+  article.side { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 4px 18px; align-items: start; }
+  article.side h3 { margin-top: 2px; }
+
+  .also { margin: 14px 2px 0; color: var(--dim); font-size: 16px; }
+  .lead { margin: -4px 2px 14px; color: var(--dim); }
+  .more { margin: 12px 2px 0; text-align: right; font-weight: 700; }
+  .more a::after { content: ' →'; }  /* The launch pad: every place in the den with a link (den.html?at=...), a small picture and a line each; the
+     den's top panel links here ("Places") instead of a cheats menu. */
+  .places { display: grid; gap: 10px 22px; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+  .places section { display: flex; flex-direction: column; gap: 6px; }
+  .places h3 { margin: 8px 2px 2px; font-size: 19px; color: var(--gold); }
+  .place { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; align-items: center; padding: 5px; border-radius: 9px; text-decoration: none;
+    background: rgba(255, 230, 180, 0.05); border: 1px solid rgba(224, 169, 42, 0.18); }
+  .place:hover { background: rgba(255, 230, 180, 0.12); border-color: rgba(224, 169, 42, 0.5); }
+  .place img { width: 96px; height: 54px; object-fit: cover; border-radius: 5px; }
+  .place b { display: block; font: 700 16px/1.2 'Alegreya Sans'; color: var(--cream); }
+  .place i { display: block; font-style: normal; font-size: 14px; line-height: 1.3; color: var(--dim); }
+  /* A room of your own: Dachimpy's words (src/lines/dachimpy.ts, FRONT_PAGE.yourRoom). */
+  .said p { margin: 0 2px 8px; color: var(--ink2); }
+  .said p:first-child { font: 700 21px/1.3 'Alegreya', serif; color: var(--rust); }
+  .sig { font: italic 700 17px 'Alegreya', serif; color: var(--link) !important; }
+  .sig::before { content: '— '; }
+  .tests { margin: 50px 0 0; color: #a8967a; font-size: 15px; }
+  .tests h2 { font-size: 18px; margin: 0 0 6px; color: #a8967a; }
+  .tests p { margin: 0 0 6px; }
+  .tests ul { margin: 0; padding-left: 20px; }
+  .tests li { margin: 0 0 4px; }
+  .tests a { color: #d4b06a; }
+  footer { margin-top: 40px; color: #8c7a60; font-size: 13px; text-align: center; }
+
+  @media (max-width: 760px) {
+    .choices { grid-template-columns: 1fr 1fr; }
+    .choice, .choice.wide { grid-column: span 1; }
+    .choice .collage { height: 130px; }
+    .choice:first-child { grid-column: span 2; }
+    .choice b { font-size: 19px; }
+    .choice i { font-size: 14px; }
+  }
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    .welcome { grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 0 16px; }
+    .talk { display: contents; }
+    .host img { width: 92px; }
+    .cookie { width: 40px; height: 26px; }
+    .bubble { font-size: 17px; margin: 0; }
+    #question { font-size: 21px; }
+    .about { grid-column: 1 / -1; margin-top: 10px; }
+    article.side { grid-template-columns: 1fr; }
+    .cards { grid-template-columns: 1fr; }
+    .shots.two { grid-template-columns: 1fr; }
+    h3 { font-size: 22px; }
+    article { padding: 10px; }
+    .ways { gap: 8px; }
+    .way b { font-size: 16px; }
+    .way i { font-size: 13px; }
+    .way.coming .pic em { font-size: 16px; }
+  }
+  @media (max-width: 420px) {
+    .choices { grid-template-columns: 1fr; }
+    .choice, .choice.wide, .choice:first-child { grid-column: span 1; }
+  }
+</style>
 </head>
 <body>
-  <div class="shell">
-    <nav class="nav" aria-label="Lessons">
-      <a class="brand" href="#/"><span class="brand-mark" aria-hidden="true"></span>Carpentry<br><span>Primer</span></a>
-      <span class="nav-purse" title="Your purse: earn doubloons with Masterpieces, spend them on bets"><span class="coin" aria-hidden="true"></span><b id="purse-n">20</b> <span>doubloons</span></span>
-      <a href="#/"><i>⚓</i>The voyage</a>
-      <a href="#/daily"><i>☀</i>Hole of the Day</a>
-      <span class="nav-group">Earn doubloons</span>
-      <a href="#/games/pair"><i>◧</i>Which pair fits?</a>
-      <a href="#/games/remnant"><i>◨</i>Which gap?</a>
-      <span class="nav-group">Bet them</span>
-      <a href="#/games/table"><i>⛁</i>Harbour table</a>
-      <a href="#/games/bets"><i>⛀</i>Practice bets</a>
-      <span class="nav-group">Workshop</span>
-      <a href="#/pieces"><i>▤</i>Timber guide</a>
-      <a href="#/two-piece"><i>▥</i>Two-piece holes</a>
-      <a href="#/lab"><i>⚒</i>Hole lab</a>
-    </nav>
-    <main id="main"></main>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>The Pirate Den</h1>
+      <p class="lede">New ways to learn Puzzle Pirates' puzzles, tried out to see what works.</p>
+    </div>
+    <div class="links">
+      <a class="play ghost" href="changelog.html">What's new</a>
+      <a class="play ghost" href="design.html">How it's designed</a>
+      <a class="play" href="den.html">Play the den</a>
+    </div>
+  </header>
+
+  <section class="welcome">
+    <figure class="host">
+      <img src="changelog/dachimpy-welcome.webp" width="214" height="529" alt="Dachimpy, in a tall pink beehive wig, purple braces and a pink tartan kilt, holding out a plate of cookies">
+      <button class="cookie" type="button" aria-label="Take a cookie" title="Take a cookie"></button>
+    </figure>
+    <div class="talk">
+      <p class="bubble"><span id="said" aria-live="polite"></span><b id="question"></b></p>
+      <!-- Who it's for, tucked away (the user, 14 Nov: no "word block" first; "slightly hidden away so people can
+           click on it or expand it if they want it"). The fuller version is design.html's "Who it's for". -->
+      <details class="about">
+        <summary>What is this place?</summary>
+        <p><b>For the middle:</b> you know the basics (the game's own tutorials teach those) and want the techniques, a puzzle at a time.</p>
+        <p><b>Proofs of concept,</b> each tutorial two ways: a fun 3D one, a pirate playing alongside you, and a static one to read.</p>
+        <p><b>Real mastery</b> comes from the game and its people: <a href="#people">meet them</a>.</p>
+      </details>
+    </div>
+  </section>
+
+  <nav class="choices" id="choose" aria-label="What are you here for?">
+    <a class="choice" href="#fun"><span class="collage n3"><img src="changelog/wedding.jpg" alt=""><img src="changelog/gravee.jpg" alt=""><img src="changelog/vegas-island.jpg" alt=""></span><span class="cap"><b>A bit of fun and a look around</b><i>Mischievious's wedding, Gravee's gallery, penguins</i></span></a>
+    <a class="choice" href="#concepts"><span class="collage n3"><img src="changelog/race-field.jpg" alt=""><img src="changelog/starlit-door.jpg" alt=""><img src="changelog/rowing.jpg" alt=""></span><span class="cap"><b>Try some interesting new concepts</b><i>The sloop race, the starlit door, rowing</i></span></a>
+    <a class="choice" href="#tutorials"><span class="collage n3"><img src="changelog/helium-lesson.jpg" alt=""><img src="changelog/tzz-lesson.jpg" alt=""><img src="changelog/distilling-guide.jpg" alt=""></span><span class="cap"><b>Try out some new tutorials</b><i>Experiments for now: Distilling, Sailing, Carpentry</i></span></a>
+  </nav>
+
+  <p class="elsewhere-head" id="elsewhere">Elsewhere, made by others <span class="ext">↗</span> <small>Not part of this site. Each opens in a new tab.</small></p>
+
+  <nav class="choices out" aria-label="Elsewhere, made by others">
+    <a class="choice" id="practice" href="https://www.globalcadesim.com/#/lobby/36" target="_blank" rel="noopener"><span class="collage n1"><img src="changelog/global-cade-sim.jpg" alt=""></span><span class="cap"><b>Play blockades online <span class="ext">↗</span></b><i class="by">The Global Cade Sim, made by AMH</i><i>Battle Navigation and blockades, online.</i></span></a>
+    <a class="choice" href="https://puzzle-practice.github.io/Puzzle_Practice/#/" target="_blank" rel="noopener"><span class="collage n1 plain"><em>Puzzle Practice</em></span><span class="cap"><b>Practise puzzles <span class="ext">↗</span></b><i class="by">Puzzle Practice, made and run by the Puzzle Practice team</i><i>Practise lots of puzzles.</i></span></a>
+    <a class="choice" id="people" href="https://discord.gg/XtRHwP6XT" target="_blank" rel="noopener"><span class="collage n1"><img src="changelog/wardrobe.jpg" alt=""></span><span class="cap"><b>Meet real pirates <span class="ext">↗</span></b><i class="by">The Trophy Hunters' Discord, their own community</i><i>It's a sociable game: everything's about the people, playing puzzles together. For a friendly crowd ready to help and have fun, or to watch real pirates play and chat, this is the go-to. The top puzzlers stream on Twitch and YouTube too.</i></span></a>
+  </nav>
+
+  <p class="also"><a href="changelog.html">What's new, newest first</a> <span aria-hidden="true">·</span> <a href="#places">Jump straight to a place in the den</a> <span aria-hidden="true">·</span> <a href="#room">A room of your own</a></p>
+
+  <h2 id="fun">A bit of fun and a look around</h2>
+
+  <article>
+    <div class="shots two">
+      <a href="den.html"><img src="changelog/den-wall.jpg" width="1280" height="720" loading="lazy" alt="The den: a stone wall with holes to mend, crates of Carpentry pieces, and the raiders' ship beyond"></a>
+      <a href="den.html?at=sea"><img src="changelog/sloop.jpg" width="1280" height="720" loading="lazy" alt="The old sloop at the den's jetty, the Bilge board in the shallows beside her"></a>
+    </div>
+    <h3>The den</h3>
+    <p>A pirate hideout dug into a cove, played through Puzzle Pirates' own puzzles. Mend the wall with Carpentry while raiders row in, man the gun tower, build yourself a shack. Then take the old sloop out: islands to find, pirates to meet, a wedding, a checkpoint to get past, and a race.</p>
+    <p class="try"><a class="play" href="den.html">Into the den</a></p>
+  </article>
+
+  <div class="cards">
+    <article>
+      <a class="pic" href="den.html?at=wedding"><img src="changelog/wedding.jpg" width="1280" height="720" loading="lazy" alt="A beach wedding: guests on wooden benches, a flower arch, heart banners and a cake"></a>
+      <h3>The Wedding Isle</h3>
+      <p>Mischievious will marry anyone to anything. Choose the tone, the venue, the theme and the plot, then share your wedding as a link.</p>
+      <p class="try"><a href="den.html?at=wedding"><code>den.html?at=wedding</code></a></p>
+    </article>
+    <article>
+      <a class="pic" href="den.html?at=gravee"><img src="changelog/gravee.jpg" width="1280" height="720" loading="lazy" alt="Gravee, in a green dress and a polar bear pelt, showing you round her portraits by candlelight"></a>
+      <h3>Gravee's Bedside Manors</h3>
+      <p>A whole gallery of portraits, with Gravee showing you round by candlelight. Sit for one of your own. Mind the vampire.</p>
+      <p class="try"><a href="den.html?at=gravee"><code>den.html?at=gravee</code></a></p>
+    </article>
+    <article>
+      <a class="pic" href="den.html?at=penguins"><img src="changelog/vegas-island.jpg" width="1280" height="720" loading="lazy" alt="The sloop at Vegas Island, a little ice floe ringed by rocks past the whirlpools, penguins pottering on it"></a>
+      <h3>The penguins of Vegas Island</h3>
+      <p>Past Kikkit's whirlpools, if you can find the way, a little ice floe of penguins. One of them has a sack.</p>
+      <p class="try"><a href="den.html?at=kikkit"><code>?at=kikkit</code></a> · <a href="den.html?at=penguins"><code>?at=penguins</code></a></p>
+    </article>
+    <article>
+      <a class="pic" href="den.html?at=rumrun"><img src="changelog/rumrun-decorum.jpg" width="800" height="600" loading="lazy" alt="Off Port Decorum's jetty, its guard on the end of it, and Helium on the sloop's deck with the rum"></a>
+      <h3>Helium's rum run</h3>
+      <p>Barrels of rum on your deck and Helium aboard, whistling past the Empire. Nothing suspicious at all.</p>
+      <p class="try"><a href="den.html?at=rumrun"><code>den.html?at=rumrun</code></a></p>
+    </article>
   </div>
-  <footer class="credit">
-    <a href="https://www.puzzlepirates.com/" rel="noopener">Puzzle Pirates</a>™ © 2001–2026 Grey Havens, LLC. All rights reserved.
-    Puzzle Pirates and its carpentry puzzle were created by Three Rings Design.
-    Carpentry Primer is an unofficial fan-made practice site, not affiliated with or endorsed by Grey Havens or Three Rings.
-  </footer>
-  <script src="js/engine.js"></script>
-  <script src="js/render.js"></script>
-  <script src="js/social.js"></script>
-  <script src="js/app.js"></script>
+  <p class="more"><a href="#places">See every place in the den</a></p>
+
+  <h2 id="concepts">Try some interesting new concepts</h2>
+
+  <div class="cards">
+    <article>
+      <a class="pic" href="den.html?at=race"><img src="changelog/race-field.jpg" width="1280" height="720" loading="lazy" alt="Three sloops racing down through the start's whirlpools toward the first buoy and the gun gap"></a>
+      <h3>The sloop race</h3>
+      <p>A race made of puzzles: every shortcut a different one, every way round able to win.</p>
+      <p class="try"><a href="den.html?at=race">Race it</a> · <a href="den.html?at=race-watch">watch one</a> · <a href="race-editor.html">lay out your own course</a> · <a href="den.html?at=door">the starlit door</a></p>
+    </article>
+    <article>
+      <a class="pic" href="den.html?at=sea"><img src="changelog/rowing.jpg" width="1280" height="720" loading="lazy" alt="Rowing the sloop: two boards of mirror strokes, one for each side's oars, her bows swinging toward the side that pulls harder"></a>
+      <h3>Rowing</h3>
+      <p>Two boards of mirror strokes, one for each side's oars. The turn you build shows on her.</p>
+      <p class="try"><a href="den.html?at=sea">Go sailing</a>, then the oars</p>
+    </article>
+  </div>
+  <p class="more"><a href="#places">See more: every place in the den</a></p>
+
+  <h2 id="tutorials">Try out some new tutorials</h2>
+
+  <p class="lead">Experiments for now, by puzzle. Each comes two ways: in 3D with a pirate playing alongside you, or to read at your own pace.</p>
+
+  <article>
+    <h3>Sailing</h3>
+    <p>Tzz blows up balloon animals and plays them onto a real Sailing board, showing you how a chain is really built, a step at a time, the plan marked on the board before the pieces go in. Then it's your go.</p>
+    <div class="ways">
+      <a class="way" href="den.html?at=tzz">
+        <span class="pic"><img src="changelog/tzz-lesson.jpg" width="1280" height="720" loading="lazy" alt="Tzz blowing up a balloon beside her Sailing board, the plan marked on the board"></span>
+        <small>Animated, in 3D</small><b>Tzz's balloon animals</b><i>Play alongside her</i>
+      </a>
+      <div class="way coming">
+        <span class="pic"><em>Coming</em></span>
+        <small>To read</small><b>The read version</b><i>Not written yet</i>
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <h3>Distilling</h3>
+    <p>Helium skips the basics and goes straight to technique: whites away from the fire, the columns filled, a Crystal Clear to aim for. Ask for a hint, or watch them play your board and say why. Mind the still. It goes bang.</p>
+    <div class="ways">
+      <a class="way" href="den.html?at=helium">
+        <span class="pic"><img src="changelog/helium-lesson.jpg" width="800" height="600" loading="lazy" alt="Helium beside a Distilling board on a wooden stand, their distillery behind them"></span>
+        <small>Animated, in 3D</small><b>Helium's lesson</b><i>At their still</i>
+      </a>
+      <a class="way" href="distilling-guide.html">
+        <span class="pic"><img src="changelog/distilling-guide.jpg" width="540" height="302" loading="lazy" alt="A flat Distilling board from the read version, numbered gold arrows walking the whites away from the fire"></span>
+        <small>To read</small><b>The Distilling guide</b><i>Rules, phases, techniques</i>
+      </a>
+    </div>
+  </article>
+
+  <article class="side">
+    <a class="pic" href="carpentry.html"><img src="changelog/carpentry-primer.jpg" width="1280" height="720" loading="lazy" alt="The Carpentry primer: the voyage of holes, earning doubloons with quick puzzles, the harbour table and the Hole of the Day"></a>
+    <div>
+      <h3>Carpentry</h3>
+      <p>A bit of fun for carpentry: a voyage of holes to fill, a Hole of the Day, doubloons to bet at the harbour table.</p>
+      <p class="try"><a href="carpentry.html"><code>carpentry.html</code></a></p>
+    </div>
+  </article>
+
+  <h2 id="places">Jump straight to a place</h2>
+
+  <p class="lead">Every place in the den has a link that drops you straight there. New things land in <a href="changelog.html">What's new</a> first.</p>
+
+  <div class="places">
+    <section>
+      <h3>At the den</h3>
+      <a class="place" href="den.html?at=start"><img src="changelog/den-wall.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>The start</b><i>A broken wall, raiders rowing in</i></span></a>
+      <a class="place" href="den.html?at=walk"><img src="changelog/carpentry-frame.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>The walk</b><i>Frames for the wall-walk, by Carpentry</i></span></a>
+      <a class="place" href="den.html?at=gun-tower"><img src="changelog/gun-tower.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>The gun tower</b><i>Gunnery on its deck</i></span></a>
+      <a class="place" href="den.html?at=built"><img src="changelog/bilge-raid.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Everything built</b><i>The whole den, the beach beyond</i></span></a>
+      <a class="place" href="den.html?at=shack"><img src="changelog/shack.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Your shack</b><i>Built from Carpentry pieces</i></span></a>
+      <a class="place" href="den.html?at=map-scene"><img src="changelog/captains-map.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>The captain's map</b><i>Where the sea opens up</i></span></a>
+      <a class="place" href="den.html?at=married"><img src="changelog/wedding-gifts.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Home, married</b><i>Your spouse at the den</i></span></a>
+    </section>
+    <section>
+      <h3>Out to sea</h3>
+      <a class="place" href="den.html?at=sea"><img src="changelog/sloop.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Go sailing</b><i>The old sloop, and the sea</i></span></a>
+      <a class="place" href="den.html?at=dignity"><img src="changelog/dignity.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Dignity's checkpoint</b><i>Her cutscene at the gate</i></span></a>
+      <a class="place" href="den.html?at=umami"><img src="changelog/capybara-crane.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Umami's rescue</b><i>The lagoon, the crane, Foraging</i></span></a>
+    </section>
+    <section>
+      <h3>The islands</h3>
+      <a class="place" href="den.html?at=wedding"><img src="changelog/wedding.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>The Wedding Isle</b><i>Mischievious marries anyone</i></span></a>
+      <a class="place" href="den.html?at=kikkit"><img src="changelog/kikkit.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Kikkit's island</b><i>Her whirlpools</i></span></a>
+      <a class="place" href="den.html?at=penguins"><img src="changelog/vegas-island.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Vegas Island</b><i>The penguins past the whirlpools</i></span></a>
+      <a class="place" href="den.html?at=tzz"><img src="changelog/tzz-lesson.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Tzz's island</b><i>Balloon animals: Sailing</i></span></a>
+      <a class="place" href="den.html?at=helium"><img src="changelog/helium-lesson.jpg" width="800" height="600" loading="lazy" alt=""><span><b>Helium's still</b><i>Distilling, and the odd bang</i></span></a>
+      <a class="place" href="den.html?at=rumrun"><img src="changelog/rumrun-wedding.jpg" width="800" height="600" loading="lazy" alt=""><span><b>Helium's rum run</b><i>Nothing suspicious at all</i></span></a>
+      <a class="place" href="den.html?at=imperial"><img src="changelog/port-decorum.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Port Decorum</b><i>The Empire's island</i></span></a>
+      <a class="place" href="den.html?at=smugglers"><img src="changelog/smugglers-beach.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>The smugglers' beach</b><i>Round the back of it</i></span></a>
+    </section>
+    <section>
+      <h3>Houses</h3>
+      <a class="place" href="den.html?at=lodgings"><img src="changelog/gravee.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>The housing district</b><i>Every house's door</i></span></a>
+      <a class="place" href="den.html?at=gravee"><img src="changelog/gravee.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Gravee's Bedside Manors</b><i>Her portraits, and a vampire</i></span></a>
+      <a class="place" href="den.html?at=roobear"><img src="changelog/roobear-ear-rub.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Roobear's ROOm</b><i>Robert rubs your ear</i></span></a>
+      <a class="place" href="den.html?at=dachimpy"><img src="changelog/dachimpy-hall.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Dachimpy's museum</b><i>Hugs, cookies, the old sims</i></span></a>
+    </section>
+    <section>
+      <h3>The sloop race</h3>
+      <a class="place" href="den.html?at=race"><img src="changelog/race-start.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>The sloop race</b><i>On the starting line</i></span></a>
+      <a class="place" href="den.html?at=door"><img src="changelog/starlit-door.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>The starlit door</b><i>Duty Navigation opens it</i></span></a>
+      <a class="place" href="den.html?at=race-watch"><img src="changelog/race-watch.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Watch the race</b><i>Four bots, any camera</i></span></a>
+      <a class="place" href="race-editor.html"><img src="changelog/race-editor.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>The course editor</b><i>Lay out your own race</i></span></a>
+    </section>
+    <section>
+      <h3>By puzzle</h3>
+      <a class="place" href="den.html?at=start"><img src="changelog/carpentry-wall.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Carpentry</b><i>The den's wall</i></span></a>
+      <a class="place" href="den.html?at=gun-tower"><img src="changelog/gun-tower.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Gunnery</b><i>The gun tower</i></span></a>
+      <a class="place" href="den.html?at=tzz"><img src="changelog/tzz-lesson.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Sailing</b><i>With Tzz</i></span></a>
+      <a class="place" href="den.html?at=helium"><img src="changelog/distilling-guide.jpg" width="540" height="302" loading="lazy" alt=""><span><b>Distilling</b><i>With Helium</i></span></a>
+      <a class="place" href="den.html?at=door"><img src="changelog/navigation.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Duty Navigation</b><i>The starlit door</i></span></a>
+      <a class="place" href="den.html?at=umami"><img src="changelog/capybara-trap.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Foraging</b><i>Umami's rescue</i></span></a>
+    </section>
+  </div>
+
+  <h2 id="room">A room of your own</h2>
+
+  <article class="side">
+    <div class="shots">
+      <a href="den.html?at=gravee"><img src="changelog/gravee.jpg" width="1280" height="720" loading="lazy" alt="Gravee, in a green dress and a polar bear pelt, showing you round her portraits by candlelight"></a>
+      <a href="den.html?at=roobear"><img src="changelog/roobear-guesses.jpg" width="1280" height="720" loading="lazy" alt="Roobear's wall of portraits, each a guess at her name, Robert the kangaroo bear standing by"></a>
+    </div>
+    <div>
+      <div class="said" id="your-room"></div>
+      <p class="sig">Dachimpy</p>
+      <p class="try"><a href="#people">The Discord's link is up top</a></p>
+    </div>
+  </article>
+
+  <section class="tests" aria-labelledby="tests">
+    <h2 id="tests">Test pages (mostly for me)</h2>
+    <p>Puzzles and pieces stood up on their own while they're built. Nothing to guide you here, but if you're curious:</p>
+    <ul>
+      <li><a href="distilling-test.html">Distilling, on its own</a>: the board by itself, or <a href="distilling-test.html?bot=cc3&amp;fast=8">a bot playing it at high speed</a>.</li>
+      <li><a href="distilling-positions.html">The Distilling positions</a> the tutorials are trained on, each with the bot's move on it.</li>
+      <li><a href="navigation-test.html">Duty Navigation, on its own</a>, beside the slab of rock its constellations light, as the starlit door's do.</li>
+      <li><a href="foraging-test.html">Foraging, on its own</a>, the board the race's driftwood and Umami's rescue use.</li>
+      <li><a href="oars-test.html">Oars against the water</a>, an idea for a rowing puzzle of its own.</li>
+      <li><a href="frigate-test.html">Primates Rule</a>, Dachimpy's war frigate, beside the sloop for scale.</li>
+    </ul>
+  </section>
+
+  <footer>Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</footer>
+</div>
+<script type="module">
+  // Dachimpy's hello, and a cookie on a click: their lines are src/lines/dachimpy.ts's, never written here.
+  import { FRONT_PAGE, ANOTHER_COOKIE } from './js/lines/dachimpy.js';
+  const said = document.getElementById('said'), host = document.querySelector('.host');
+  const bubble = said.parentElement;
+  const say = (line) => { said.textContent = line; bubble.classList.remove('yay'); void bubble.offsetWidth; bubble.classList.add('yay'); };
+  bubble.classList.add('on');
+  said.textContent = FRONT_PAGE.hello;
+  document.getElementById('question').textContent = FRONT_PAGE.question;
+  document.getElementById('your-room').replaceChildren(...FRONT_PAGE.yourRoom.map((line) => Object.assign(document.createElement('p'), { textContent: line })));
+  let cookies = 0;
+  document.querySelector('.cookie').addEventListener('click', (e) => {
+    say(cookies === 0 ? FRONT_PAGE.cookie : ANOTHER_COOKIE[cookies % ANOTHER_COOKIE.length]);   // (the third: "That's three")
+    cookies++;
+    // A few crumbs off the plate.
+    const b = e.currentTarget;
+    for (let i = 0; i < 6; i++) {
+      const c = document.createElement('span');
+      c.className = 'crumb';
+      c.style.left = `${b.offsetLeft + b.offsetWidth / 2}px`;
+      c.style.top = `${b.offsetTop + b.offsetHeight / 2}px`;
+      c.style.setProperty('--dx', `${(Math.random() - 0.5) * 60}px`);
+      c.style.animationDelay = `${i * 40}ms`;
+      host.append(c);
+      setTimeout(() => c.remove(), 1200);
+    }
+  });
+</script>
 </body>
 </html>

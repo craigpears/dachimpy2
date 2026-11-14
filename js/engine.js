@@ -1,6 +1,6 @@
 /* Carpentry engine: pentomino shapes, draw weights, an exact-cover solver,
    and generators for the drill scenarios. Plain script (no modules) so the
-   site works when index.html is opened straight from disk. */
+   site works when carpentry.html is opened straight from disk. */
 (function (root) {
   'use strict';
 

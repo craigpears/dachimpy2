@@ -118,6 +118,10 @@
     body.racing .hud { padding: 4px 10px 6px; }
     body.racing .hud h1 { font-size: 16px; }
     body.racing .hud .stats, body.racing .hud .crew-line, body.racing .hud .mini:not(#race-btn):not(#pause-btn) { display: none; }
+    /* Race online only in the race, not up front (the user, 14 Nov: "race online, play with the crew. I don't
+       think anybody's really cared so far"): on the line the starter's card has it too; the crew's in Your den. */
+    #race-btn { display: none; }
+    body.racing #race-btn { display: inline-block; }
     body.racing .sailhud .off-race { display: none; }
     body.racing .sailhud .help { font-size: 13px; }
     body.raceline .sailhud { display: none !important; }
@@ -549,7 +553,7 @@
     <h1>The Pirate Den</h1>
     <div class="stats"><span>Chest <b id="s-gold">50</b></span><span>Wave <b id="s-wave">0</b></span><span>★ <b id="s-master">0</b></span><span>Boarded <b id="s-board">0</b></span><span title="Vikings who gave up at your wall">Turned away <b id="s-turned">0</b></span></div>
     <div class="crew-line" id="crew-line"></div>
-    <button class="mini" id="look-btn">Your pirate</button><button class="mini" id="den-btn" title="Your flag, the landscape, the gun tower and your shack">Your den</button><button class="mini" id="deco-btn" title="Put up flags, banners, lanterns and barrels round the den (B)">Decorate</button><button class="mini" id="pause-btn" title="Pause (P)">Pause</button><button class="mini" id="crew-btn">Play with a crew</button><button class="mini" id="race-btn" title="Race other pirates round the sloop race's course">Race online</button><button class="mini" id="cheat-btn" title="Skip to a stage, or skip the wave (`)">Cheats</button><a class="mini" id="news-btn" href="changelog.html" target="_blank" rel="noopener" title="The bigger things added to the den, newest first">What's new</a>
+    <button class="mini" id="look-btn">Your pirate</button><button class="mini" id="den-btn" title="Your flag, the landscape, the gun tower and your shack">Your den</button><button class="mini" id="deco-btn" title="Put up flags, banners, lanterns and barrels round the den (B)">Decorate</button><button class="mini" id="pause-btn" title="Pause (P)">Pause</button><button class="mini" id="race-btn" title="Race other pirates round the sloop race's course">Race online</button><button class="mini" id="cheat-btn" hidden title="Skip to a stage, or skip the wave (`)">Cheats</button><a class="mini" id="places-btn" href="./#places" title="Jump straight to any place in the den, from the front page">Places</a><a class="mini" id="news-btn" href="changelog.html" target="_blank" rel="noopener" title="The bigger things added to the den, newest first">What's new</a><a class="mini" href="./" title="The front page: the tutorials, and what to try in the den">Front page</a>
   </div>
   <div class="banner calm" id="banner"></div>
   <div class="intro" id="intro">Raiders are coming! Grab a piece from a crate and mend the wall.<br>Fill a hole exactly for a strong <b>Masterpiece</b>.</div>
@@ -598,7 +602,7 @@
       <h2 id="dress-title">Your pirate</h2>
       <div class="tabs" id="dress-tabs"></div>
       <div id="dress-rows"></div>
-      <div class="dress-foot"><button class="mini" id="dress-rand">Surprise me</button><button id="dress-done">Done</button></div>
+      <div class="dress-foot"><button class="mini" id="dress-rand">Surprise me</button><button class="mini" id="crew-btn" title="Play the den together with friends, by a crew code">Play with a crew</button><button id="dress-done">Done</button></div>
     </div>
     <div class="palette" id="palette"></div>
   </div></div>
@@ -641,7 +645,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.ZGX4DHKM.js');
+    import(local ? './js/den.js' : './js/den.EP5MABVH.js');
   </script>
 </body>
 </html>
