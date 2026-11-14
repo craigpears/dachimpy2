@@ -767,6 +767,8 @@ const CHEAT_SECTIONS = [
     ["Helium's rum run", cheatRumRun, 'rumrun'],
     ['The imperial island', cheatEmpire, 'imperial'],
     ["The smugglers' beach", cheatSmugglers, 'smugglers'],
+    // (the wolf den's hut, a place of its own on the house shell: Dignity's four-ring Duty Navigation, 14 Nov)
+    ['The wolf den (Duty Navigation)', () => toHouse('wolfden'), 'wolfden'],
   ]],
   ['The sloop race', [
     ['The sloop race', cheatRace, 'race'],

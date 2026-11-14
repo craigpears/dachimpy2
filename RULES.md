@@ -274,7 +274,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   something that I can put into the URL as well, so that I can share that animation with
   somebody." `den.html?at=` and a name opens the den straight there: the cheats' stages (`start`,
   `walk`, `gun-tower`, `built`) and their starts and scenes (`shack`, `map-scene`, `sea`,
-  `dignity`, `umami`, `wedding`, `married`, and since: `kikkit`, `penguins`, `tzz`, `imperial`, `smugglers`, `race`, `door`, `race-watch`, `lodgings`, and any house by its id: `roobear`, `gravee`, `dachimpy`). Choosing one from the cheats puts its link in the address bar, and its
+  `dignity`, `umami`, `wedding`, `married`, and since: `kikkit`, `penguins`, `tzz`, `imperial`, `smugglers`, `race`, `door`, `race-watch`, `lodgings`, and any house by its id: `roobear`, `gravee`, `dachimpy`; and `wolfden`, the wolf den's hut). Choosing one from the cheats puts its link in the address bar, and its
   button's tooltip shows it. A name that isn't one says so. A new scene or start gets a name too.
 - **The layout follows the screen's shape, not the device (11 Nov).** A tall, narrow window on a
   desktop gets the phone's layout (the wedding planner as a sheet along the bottom, say), and
