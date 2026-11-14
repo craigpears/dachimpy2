@@ -1,0 +1,15 @@
+/* The catalogue's menu, a band across the top of every catalogue page (catalogue-*.html): one place, so the pages
+   can't drift apart. Each page sets --gold, --cream and --ink. */
+.top { background: linear-gradient(180deg, #2e1f14, #22170f); border-bottom: 3px solid var(--gold); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5); }
+.catnav { max-width: 1240px; margin: 0 auto; padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; }
+.catnav .brand { font: 700 26px/1.1 'Alegreya', serif; color: var(--gold); text-decoration: none; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.tabs a, .tabs span { display: inline-block; padding: 7px 16px; border-radius: 999px; font: 700 17px/1.2 'Alegreya Sans', sans-serif; text-decoration: none; }
+.tabs a { color: var(--cream); border: 1px solid #8a6a44; }
+.tabs a:hover { border-color: var(--gold); color: var(--gold); }
+.tabs a.on { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+.tabs span { color: #8c7a60; border: 1px dashed #5a412a; font-weight: 500; }
+.tabs span small { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+.catnav .home { margin-left: auto; color: var(--cream); font-weight: 700; text-decoration: none; padding: 7px 0; }
+.catnav .home:hover { color: var(--gold); }
+@media (max-width: 520px) { .catnav .home { margin-left: 0; } }

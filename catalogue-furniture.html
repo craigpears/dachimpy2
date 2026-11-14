@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,400;1,500;1,700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/catalogue.css">
 <style>
   :root { --ink: #2a1d13; --ink2: #5b4330; --gold: #e0a92a; --cream: #f6ead2; --dim: #cbb894; --edge: #5a412a; --paper: #f3e3c3; --paper2: #e8d2a8; --rust: #6b2a12; --link: #8a4b0f; }
   * { box-sizing: border-box; }
@@ -22,11 +23,6 @@
     background: #140d08 repeating-linear-gradient(90deg, rgba(255, 220, 160, 0.025) 0 2px, transparent 2px 120px); }
   a { color: var(--gold); }
   .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 16px 48px; }
-  .shelf { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin: 0 0 14px; font-size: 15px; color: #a8967a; }
-  .shelf b { color: var(--dim); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 13px; }
-  .shelf .on { color: var(--gold); font-weight: 700; text-decoration: none; border-bottom: 2px solid var(--gold); }
-  .shelf .soon { color: #7d6c55; }
-  .shelf .home { margin-left: auto; }
   h1 { margin: 0; font: 700 clamp(30px, 6vw, 44px)/1.05 'Alegreya', serif; color: var(--gold); }
   .lede { margin: 8px 0 0; color: var(--dim); max-width: 640px; }
   .tell { margin: 14px 0 0; padding: 12px 16px; max-width: 640px; background: #fffaf0; color: var(--ink); border-radius: 14px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4); font-size: 16px; }
@@ -74,22 +70,25 @@
     .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 10px; }
     li.piece b { font-size: 16px; }
     li.piece p { font-size: 13px; }
-    .shelf .home { margin-left: 0; }
-  }
+    }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <nav class="shelf" aria-label="The catalogue's pages">
-    <b>The catalogue</b>
-    <a href="catalogue-colours.html">Colours</a>
-    <a class="on" href="catalogue-furniture.html" aria-current="page">Furniture</a>
-    <span class="soon">Hairstyles (coming)</span>
-    <span class="soon">Clothes (coming)</span>
-    <span class="soon">Familiars (coming)</span>
-    <a class="home" href="index.html">The Pirate Den</a>
+<header class="top">
+  <nav class="catnav" aria-label="The catalogue">
+    <a class="brand" href="catalogue-colours.html">The catalogue</a>
+    <ul class="tabs">
+      <li><a href="catalogue-colours.html">Colours</a></li>
+      <li><a class="on" href="catalogue-furniture.html" aria-current="page">Furniture</a></li>
+      <li><span>Hairstyles <small>soon</small></span></li>
+      <li><span>Clothes <small>soon</small></span></li>
+      <li><span>Familiars <small>soon</small></span></li>
+    </ul>
+    <a class="home" href="index.html">← The Pirate Den</a>
   </nav>
-  <h1>The catalogue: furniture</h1>
+</header>
+<div class="wrap">
+  <h1>Furniture</h1>
   <p class="lede">Every piece of furniture in the den, as the den draws it: what a house is furnished with, candles, frames for the portraits, the skeleton set on Primates Rule's deck, a beach's cargo and a museum's things. Pick one to look it over on the turntable.</p>
   <div class="tell" id="tell"></div>
   <div class="layout">

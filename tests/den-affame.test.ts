@@ -8,6 +8,7 @@ import { PLAN, ARRIVE, FURNISH, TEDDIES, PICTURES, heightOf, pictureLine, SIGN, 
 import { houseById, houseList, walkable, atWayOut, step, blocksOf } from '../src/den-houses';
 import { AT_THE_DOOR, TOUR_LINES, ON_A_PICTURE, IN_THE_CUSHIONS, CHATTER, GOODBYE } from '../src/lines/affame';
 import { IN_AFFAMES_HOUSE } from '../src/lines/you';
+import { furnitureSource } from './furniture-files';
 
 const ROOT = join(__dirname, '..');
 const read = (...p: string[]) => readFileSync(join(ROOT, ...p), 'utf8');
@@ -36,7 +37,7 @@ describe("her house in the district: a little one of her own (14 Nov, 'to show i
   });
 
   it('places only pieces the shared modules make (furniture.js, cuddly.js), each in her room', () => {
-    const shared = read('js', 'den', 'furniture.js') + read('js', 'den', 'cuddly.js');
+    const shared = furnitureSource() + read('js', 'den', 'cuddly.js');   // (the furniture a piece a file: js/den/furniture/)
     for (const p of FURNISH) {
       expect(shared, p.kind).toMatch(new RegExp(`export (function|const) ${p.kind}\\b`));
       expect(p.x > ROOM.x0 && p.x < ROOM.x1 && p.z > ROOM.z0 && p.z < ROOM.z1, `${p.kind} at ${p.x},${p.z}`).toBe(true);
