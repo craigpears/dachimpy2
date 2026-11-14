@@ -36,6 +36,11 @@ export const IN_DACHIMPYS_HOUSE = {
     cookie: 'Mm! Still warm.',
     another: 'Just one more.',
 };
+/** In Affame's house, sinking into her cushion corner among the teddies: the first time, and again. */
+export const IN_AFFAMES_HOUSE = {
+    sunk: 'Mmm. So soft.',
+    again: '...Five more minutes.',
+};
 /** Once Kikkit's told her ramble (all of it, the first time), you wonder aloud, the joke on her
     tangents (the user, 11 Nov: "now I wonder if I can find somebody that can explain how to get past
     all these ... whirlpools and winds that makes a bit more sense, or goes on fewer tangents"). It
@@ -64,7 +69,7 @@ export const CHARACTER = {
     name: 'You',
     who: 'Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, '
         + 'and only at the den\'s short, cheesy moments: picking up the captain\'s map, and riding the crane '
-        + 'up the cliff and down again, your own wedding, screaming at a vampire in Gravee\'s house, having an ear roobed in Roobear\'s, a hug and a cookie at Dachimpy\'s door, and sailing '
+        + 'up the cliff and down again, your own wedding, screaming at a vampire in Gravee\'s house, having an ear roobed in Roobear\'s, a hug and a cookie at Dachimpy\'s door, sinking into Affame\'s cushions, and sailing '
         + 'by Primates Rule, not ready yet, coming into the smugglers\' cove behind Port Decorum, and, warily, at '
         + 'Helium\'s still just after it\'s gone bang.',
     lines: [
@@ -93,6 +98,7 @@ export const CHARACTER = {
         { when: 'Coming into the smugglers\' cove behind Port Decorum, by way of the whirlpools (once a voyage)', says: [AT_SMUGGLERS_BEACH] },
         { when: 'Robert the kangaroo bear roobing your ear, in Roobear\'s ROOm', says: IN_ROOBEARS_HOUSE, each: { rubbed: 'The first time, at her door', again: 'Asking him for another' } },
         { when: 'At Dachimpy\'s door, every visit: their hug, their cookie; and asking for another from the plate', says: IN_DACHIMPYS_HOUSE, each: { hugged: 'Their hug', cookie: 'Their cookie', another: 'Another from the plate on the hall\'s table' } },
+        { when: 'Sinking into Affame\'s cushion corner, among her teddies', says: IN_AFFAMES_HOUSE, each: { sunk: 'The first time', again: 'Another time' } },
         { when: 'Helium\'s rum run: as they ask you along, before their "Delivering" (`smuggling`); turned away at Port Decorum\'s jetty (`home`)', says: ON_THE_RUM_RUN },
     ],
 };

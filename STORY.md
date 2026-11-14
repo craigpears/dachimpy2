@@ -229,6 +229,10 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    Whiterose), a page for everyone they blockaded with, whatever they're called now, and a thank-you to everyone
    who makes Puzzle Pirates what it is. The museum keeps the
    story of the sims; the house keeps the people.
+   The fourth is Affame's (14 Nov), the queen of sweetness: the Sweet Spot, a cosy little room hung with the
+   four cartoons Dachimpy made her (her knighting as Dame of Everlasting Sweetness with a candy cane, at peace
+   among cushions and teddies, the Sweetness War, the Sweetness Index off the charts), and a heap of cushions
+   and teddies in its corner to sink into, a moment's peace. A kind, peaceful part; no adventure of hers yet.
    Or find Kikkit on her little island right of the checkpoint, rambling the real way through her
    whirlpools (taken literally), and, with a Vegas, the penguins of Vegas Island beyond them. Once
    she's told it all you wonder aloud whether anyone could explain it with fewer tangents, and a hop

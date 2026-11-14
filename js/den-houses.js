@@ -3,7 +3,8 @@
    list of houses; js/den/house.js is the house shell every house is played in (its rooms, walking
    about them, the way out); each house's own scene is a module of its own (Gravee's:
    js/den/gravee-house.js, its rules src/den-gravee.ts; Roobear's: js/den/roobear-house.js, src/den-roobear.ts;
-   Dachimpy's, the museum: js/den/dachimpy-house.js, src/den-dachimpy.ts).
+   Dachimpy's, the museum: js/den/dachimpy-house.js, src/den-dachimpy.ts; Affame's: js/den/affame-house.js,
+   src/den-affame.ts).
 
    The user (11 Nov): "more like ... old Puzzle Pirates, you have like the areas of houses and you have
    the enter a house stuff and you can choose whose house to go into. And maybe she's just one of them.
@@ -28,6 +29,9 @@ export const HOUSES = [
     // and Dachimpy.com, and keeps their friends on its walls; a hug and a cookie at the door. Its rules:
     // src/den-dachimpy.ts.
     { id: 'dachimpy', owner: 'Dachimpy', name: 'Hugs and Cookies', kind: 'Manor', blurb: 'Hugs and cookies at the door. Friends first, then the old sims.' },
+    // Affame's (14 Nov), the queen of sweetness: a little cosy one, the four cartoons Dachimpy made her on its
+    // walls, a heap of cushions and teddies to sink into. Its rules: src/den-affame.ts.
+    { id: 'affame', owner: 'Affame', name: 'The Sweet Spot', kind: 'Cottage', blurb: 'Cushions, teddies, and the queen of sweetness.' },
 ];
 /** The house by its id, or null. */
 export const houseById = (id) => HOUSES.find((h) => h.id === id) ?? null;
@@ -89,6 +93,10 @@ export function blocksOf(pieces) {
             out.push({ x: p.x, z: p.z, r: 0.22 });
         else if (p.kind === 'simModel')
             out.push({ x: p.x, z: p.z, r: 0.5 });
+        else if (p.kind === 'cushions')
+            out.push({ x: p.x, z: p.z, r: 0.75 }); // (a heap of them: js/den/cuddly.js)
+        else if (p.kind === 'teddy')
+            out.push({ x: p.x, z: p.z, r: 0.3 });
         else if (p.kind === 'shelf') { // (long across its front: two circles side by side)
             const y = (p.yaw ?? 0) + Math.PI / 2, dx = Math.sin(y) * 0.38, dz = Math.cos(y) * 0.38;
             out.push({ x: p.x + dx, z: p.z + dz, r: 0.32 }, { x: p.x - dx, z: p.z - dz, r: 0.32 });
