@@ -22,6 +22,12 @@ game ... this website here is for a bit of fun and a bit of stuff on the side, b
 and the love of that, playing puzzles together, so go do it." The front page says so, and every teacher in the den
 sends you on to other pirates.
 
+**What people like so far (the user, 14 Nov).** Tutorials "that are actually in demand, like werewolves" (four-tier
+Duty Navigation in the werewolf den); the den itself "cute and a bit of fun ... a bit of a goof", which is why the
+user enjoys it; the sloop races "a thing, I think, with more potential". Racing online and crews, not so far. And
+the den's spirit: a place for pirates' own rooms and adventures, "meaningful and funny, ideally in a mechanical
+sense", most of them duds, "but ... there might be that one thing that leads to something really fun".
+
 ## The principles
 
 - **Full of things to find.** "The game should be full of those little let's go explore,
