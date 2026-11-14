@@ -579,6 +579,8 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   sub-things; the primer just "Carpentry", not "where it all started"; the external links one quick section near the
   start, never repeated; no "successor" line for the Cade Sim; Puzzle Practice not called "2D", and nobody pointed
   to practising in the den ("that is not what the point of this was").
+  The outside three stay top-level choices (14 Nov): "They're still high level concepts. I just want to make it
+  clear that they are elsewhere ... a different line with some kind of subheading to show they're elsewhere."
 - **The front page as the launch pad, and what the den is for (14 Nov):** below "what are you here for?", the
   changelog's link and a way to "jump to specific places ... then we could get rid of the cheats menu and we can
   have this as a launch pad into that." And a short, light section on the den's goals: "you want your own adventure
