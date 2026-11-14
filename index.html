@@ -30,6 +30,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 3'%3E%3Cpath d='M0 0h2v1h1v2H1V2H0z' fill='%23e48fae'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/banner.css">
 <style>
   /* ===== The colours: every colour on the page is here, and only here (the user, 14 Nov: "it would be good to be
      able to experiment with the color theme of the website ... my kind of rose purple kind of theme ... not in a
@@ -138,36 +139,6 @@
   a:hover { color: var(--accent-hi); }
   img { display: block; max-width: 100%; }
   .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
-  /* The banner (the user, 14 Nov, of the old Dachimpy.com one put back here: "design it so that it fits ... do
-     something that is inspired by it but fits with the colour scheme"): the monkey hanging from the
-     treasure map's dotted trail, the trail ending in an X, an island, the sea and a ship, drawn in the page's own
-     colours (the banner's tokens above). The old picture is in Dachimpy's museum. On a phone it's taller and cut
-     at the right, the ship sailing in nearer. */
-  .banner { display: block; width: 100%; height: auto; aspect-ratio: 900 / 140; border-radius: 10px; border: 2px solid var(--frame);
-    box-shadow: 0 8px 24px var(--shadow); margin: 0 0 16px; background: var(--sky-top); }
-  .bn-s1 { stop-color: var(--sky-top); } .bn-s2 { stop-color: var(--sky-low); }
-  .bn-s3 { stop-color: var(--sea-top); } .bn-s4 { stop-color: var(--sea-low); }
-  .bn-g1 { stop-color: var(--glow); } .bn-g2 { stop-color: var(--glow); stop-opacity: 0; }
-  .bn-stars { fill: var(--text); opacity: .55; }
-  .bn-land { fill: var(--land); } .bn-land-lit { fill: var(--land-lit); }
-  .bn-horizon { stroke: var(--accent); stroke-width: 1; opacity: .35; }
-  .bn-shimmer { stroke: var(--accent-text); stroke-width: 1.5; stroke-linecap: round; opacity: .28; }
-  .bn-trail { fill: none; stroke: var(--text); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 9 9; opacity: .92; }
-  .bn-x-edge { fill: none; stroke: var(--word-edge); stroke-width: 15; stroke-linecap: round; }
-  .bn-x { fill: none; stroke: var(--accent); stroke-width: 9; stroke-linecap: round; }
-  .bn-word { font: 700 46px 'Alegreya Sans', system-ui, sans-serif; letter-spacing: .5px; fill: var(--text);
-    stroke: var(--word-edge); stroke-width: 8px; stroke-linejoin: round; paint-order: stroke; }
-  .bn-fur { fill: var(--fur); stroke: var(--fur-line); stroke-width: 1.5; }
-  .bn-limb { fill: none; stroke: var(--fur); stroke-linecap: round; }
-  .bn-light { fill: var(--fur-light); }
-  .bn-eye { fill: var(--eye); } .bn-glint { fill: #fff; }
-  .bn-smile { fill: none; stroke: var(--eye); stroke-width: 1.8; stroke-linecap: round; }
-  .bn-hook { fill: none; stroke: var(--hook); stroke-width: 2.6; stroke-linecap: round; }
-  .bn-ring { fill: none; stroke: var(--accent); stroke-width: 2.5; opacity: .85; }
-  .bn-hull { fill: var(--hull); stroke: var(--fur-line); stroke-width: 1.2; }
-  .bn-mast { stroke: var(--hull); stroke-width: 2.4; }
-  .bn-sail { fill: var(--sail); stroke: var(--fur-line); stroke-width: 1; }
-  .bn-flag { fill: var(--accent2); }
   /* The bar, stuck to the top as you scroll (the user, 14 Nov: "I definitely need a sticky navigation menu"; then
      "get the menu into one row and trim that"): a few plain links at the left, Play the den at the right, bigger
      (14 Nov: the banner says whose den it is, so no title here). */
@@ -310,11 +281,6 @@
 
   @media (max-width: 640px) {
     body { font-size: 16px; }
-    /* Taller for its width, so cut at the right (xMinYMid slice), and the ship sails in beside the X (fits down to 320px). */
-    .banner { aspect-ratio: auto; height: 84px; }
-    /* The wordmark smaller, so the sloop still sails in after it (14 Nov: "I'd like the sloop on mobile"). */
-    .bn-word { font-size: 30px; }
-    .bn-ship { transform-box: fill-box; transform-origin: center; transform: translate(-360px, 3px) scale(.8); }
     .about { grid-column: 1 / -1; margin-top: 10px; }
     article.side { grid-template-columns: 1fr; }
     .cards { grid-template-columns: 1fr; }
@@ -338,60 +304,7 @@
     <button type="button" data-pick="black" style="--a:#0e0e0f;--b:#d4a537" aria-label="Black and gold" title="Black and gold"></button>
     <button type="button" data-pick="blue" style="--a:#0f141b;--b:#6fa8e8" aria-label="Blue" title="Blue"></button>
   </div>
-  <svg class="banner" viewBox="0 0 900 140" preserveAspectRatio="xMinYMid slice" role="img" aria-label="Dachimpy's Pirate Den: a monkey hanging from a treasure map's dotted trail, which ends in an X, over an evening sea with a ship">
-    <defs>
-      <linearGradient id="bn-sky" x2="0" y2="1"><stop offset="0" class="bn-s1"/><stop offset="1" class="bn-s2"/></linearGradient>
-      <linearGradient id="bn-sea" x2="0" y2="1"><stop offset="0" class="bn-s3"/><stop offset="1" class="bn-s4"/></linearGradient>
-      <radialGradient id="bn-glow"><stop offset="0" class="bn-g1"/><stop offset="1" class="bn-g2"/></radialGradient>
-    </defs>
-    <!-- The evening: sky, a glow low over the sea, a few stars. -->
-    <rect width="900" height="140" fill="url(#bn-sky)"/>
-    <ellipse cx="660" cy="98" rx="330" ry="62" fill="url(#bn-glow)"/>
-    <g class="bn-stars"><circle cx="452" cy="16" r="1.3"/><circle cx="530" cy="34" r="1"/><circle cx="604" cy="12" r="1.4"/><circle cx="688" cy="28" r="1"/><circle cx="760" cy="14" r="1.2"/><circle cx="846" cy="30" r="1.4"/><circle cx="878" cy="10" r="1"/><circle cx="410" cy="40" r="1"/></g>
-    <!-- The island, the old banner's cliff, its seaward face catching the glow. -->
-    <path class="bn-land" d="M226 98 C 262 80 286 50 318 30 C 336 18 352 16 368 28 C 394 48 424 76 474 92 L 506 98 Z"/>
-    <path class="bn-land-lit" d="M368 28 C 394 48 424 76 474 92 L 506 98 L 446 98 C 418 78 392 50 368 28 Z"/>
-    <!-- The sea. -->
-    <rect y="97" width="900" height="43" fill="url(#bn-sea)"/>
-    <path class="bn-horizon" d="M0 97.5H900"/>
-    <g class="bn-shimmer"><path d="M560 106h70M612 114h110M700 104h50M520 124h64M748 121h84M650 131h46M470 110h40"/></g>
-    <!-- The ship on the right, the old banner's ring round her (green then, rose now). -->
-    <g class="bn-ship">
-      <ellipse class="bn-ring" cx="802" cy="110" rx="36" ry="6.5"/>
-      <path class="bn-mast" d="M802 104V46"/>
-      <path class="bn-sail" d="M805 50 Q 830 70 824 98 L 805 98 Z"/>
-      <path class="bn-sail" d="M799 56 L 774 98 L 799 98 Z"/>
-      <path class="bn-flag" d="M802 46 l 16 3.5 -16 3.5 z"/>
-      <path class="bn-hull" d="M764 98 L 842 100 L 830 111 Q 802 116 776 111 Z"/>
-    </g>
-    <!-- The treasure map's dotted trail, from the top corner to an X. -->
-    <path class="bn-trail" d="M30 -8 Q 70 26 110 24 C 160 22 182 56 230 44 S 294 6 324 30 S 344 50 352 54"/>
-    <path class="bn-x-edge" d="M356 46 L 384 76 M 384 46 L 356 76"/>
-    <path class="bn-x" d="M356 46 L 384 76 M 384 46 L 356 76"/>
-    <text class="bn-word" x="116" y="116">Dachimpy's Pirate Den</text>
-    <!-- The monkey (no hat: "my monkeys don't have hats", the user, 14 Nov), hanging from the trail by one hand, a hook for the other. -->
-    <g class="bn-monkey">
-      <path class="bn-limb" stroke-width="5" d="M70 114 C 92 122 102 104 93 97 C 86 92 80 100 86 104"/>
-      <path class="bn-limb" stroke-width="7" d="M71 90 Q 86 58 94 25"/>
-      <circle class="bn-fur" cx="94" cy="23" r="5.5"/>
-      <path class="bn-limb" stroke-width="6" d="M54 116 Q 50 126 47 132"/>
-      <path class="bn-limb" stroke-width="6" d="M66 116 Q 70 126 74 131"/>
-      <circle class="bn-fur" cx="46" cy="133" r="4.5"/><circle class="bn-fur" cx="75" cy="132" r="4.5"/>
-      <ellipse class="bn-fur" cx="60" cy="102" rx="14.5" ry="18.5"/>
-      <ellipse class="bn-light" cx="61" cy="105" rx="8" ry="11"/>
-      <path class="bn-limb" stroke-width="6" d="M49 91 Q 39 104 36 116"/>
-      <path class="bn-hook" d="M36 117 q -3 8 3 10 q 6 1 6 -5"/>
-      <circle class="bn-fur" cx="33" cy="66" r="8"/><circle class="bn-light" cx="33" cy="66" r="4.2"/>
-      <circle class="bn-fur" cx="79" cy="66" r="8"/><circle class="bn-light" cx="79" cy="66" r="4.2"/>
-      <circle class="bn-fur" cx="56" cy="64" r="23"/>
-      <circle class="bn-light" cx="49.5" cy="62" r="8.5"/><circle class="bn-light" cx="62.5" cy="62" r="8.5"/>
-      <ellipse class="bn-light" cx="56" cy="75" rx="13" ry="9"/>
-      <circle class="bn-eye" cx="50" cy="63" r="3.3"/><circle class="bn-eye" cx="62" cy="63" r="3.3"/>
-      <circle class="bn-glint" cx="51" cy="62" r="1.1"/><circle class="bn-glint" cx="63" cy="62" r="1.1"/>
-      <circle class="bn-eye" cx="54" cy="72" r="1.1"/><circle class="bn-eye" cx="58" cy="72" r="1.1"/>
-      <path class="bn-smile" d="M49 77 Q 56 84 63 77"/>
-    </g>
-  </svg>
+  <script src="js/banner.js"></script>
   <!-- One bar, stuck to the top as you scroll (the user, 14 Nov: "Are we able to get the menu into one row and trim
        that somehow?"): the two links that matter most,
        one, and Play the den, the one filled button; then trimmed to what matters most, 14 Nov: "places, what's new, and

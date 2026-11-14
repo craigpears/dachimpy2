@@ -7,6 +7,28 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/banner.css">
+  <style>
+    /* The splash while the den loads (the user, 14 Nov: "The loading experience really needs fixing ... use some of my
+       kind of splash screen things, because that first loading screen just looks horrible"): the front page's banner
+       (css/banner.css, js/banner.js) on its dark, the trail marching and the sloop bobbing, over everything until the
+       den's first frame is drawn, then fading away. Its colours the front page's rose ones. */
+    .splash { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 16px;
+      background: radial-gradient(ellipse at 50% 60%, #2a1b26 0%, #151012 70%); transition: opacity .6s ease;
+      --sky-top: #1b1418; --sky-low: #45293b; --glow: rgba(228, 143, 174, 0.38); --sea-top: #2d2030; --sea-low: #171114;
+      --land: #31232f; --land-lit: #4a3043; --fur: #8b5a37; --fur-light: #e6c29c; --fur-line: #3b2418; --eye: #22150f;
+      --hook: #d6cfd6; --word-edge: #4a2242; --sail: #f1e6dc; --hull: #5a3a2c; --text: #f4ebe4; --accent: #e48fae;
+      --accent-text: #f1b9cc; --accent2: #9d65b9; --frame: #3a2d2b; --shadow: rgba(0, 0, 0, 0.45); }
+    .splash.gone { opacity: 0; pointer-events: none; }
+    .splash-in { width: min(900px, 100%); text-align: center; }
+    .splash .monkey-banner { margin: 0 0 18px; }
+    .splash-say { margin: 0; color: #c6b8af; font: 500 18px 'Alegreya Sans', system-ui, sans-serif; letter-spacing: .3px; }
+    .splash .bn-trail { animation: splash-march 1.1s linear infinite; }
+    .splash .bn-ship { animation: splash-bob 2.6s ease-in-out infinite; }
+    @keyframes splash-march { to { stroke-dashoffset: -18; } }
+    @keyframes splash-bob { 50% { translate: 0 -3px; rotate: 1.5deg; } }
+    @media (prefers-reduced-motion: reduce) { .splash .bn-trail, .splash .bn-ship { animation: none; } }
+  </style>
   <style>
     :root { --ink: #f6ead2; --dim: #cbb894; --gold: #e0a92a; --bad: #ff7a5c; --good: #8fe08a; --panel: rgba(28, 19, 12, 0.82); }
     html, body { margin: 0; height: 100%; overflow: hidden; background: #140d08; color: var(--ink); font: 500 16px 'Alegreya Sans', system-ui, sans-serif; }
@@ -549,6 +571,12 @@
   </style>
 </head>
 <body>
+  <div class="splash" id="splash" role="status">
+    <div class="splash-in">
+      <script src="js/banner.js"></script>
+      <p class="splash-say" id="splash-say">Loading the den...</p>
+    </div>
+  </div>
   <div class="hud">
     <h1>The Pirate Den</h1>
     <div class="stats"><span>Chest <b id="s-gold">50</b></span><span>Wave <b id="s-wave">0</b></span><span>★ <b id="s-master">0</b></span><span>Boarded <b id="s-board">0</b></span><span title="Vikings who gave up at your wall">Turned away <b id="s-turned">0</b></span></div>
@@ -645,7 +673,13 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.FCIZXAVJ.js');
+    import(local ? './js/den.js' : './js/den.FCIZXAVJ.js')
+      .then(() => requestAnimationFrame(() => requestAnimationFrame(() => {   // (the den's first frame drawn: the splash fades)
+        const s = document.getElementById('splash');
+        s.classList.add('gone');
+        setTimeout(() => s.remove(), 700);
+      })))
+      .catch((e) => { document.getElementById('splash-say').textContent = "The den didn't load. Try a reload?"; throw e; });
   </script>
 </body>
 </html>
