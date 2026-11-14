@@ -26,8 +26,8 @@
      "if you do a Double or Triple, even just in a normal lane, it's supposed to speed you along a bit"). Her
      sloop sails square to square, a move at a time, as yours does (src/race-sim.ts, `motion`).
    - The free camera's sums (`FreeCam`): moved, turned, tilted and zoomed, held over the course.
-   - The starlit door stays a secret: nobody in the field takes it (the test checks), and nothing here
-     names it. */
+   - The starlit door: only Umami takes it (since 14 Nov; nobody did till then); its Duty Navigation not
+     drawn here yet (TODO.md, the puzzles' bots). */
 
 import { LAY } from './den-sail.js';
 import { RACE, clockText } from './den-race.js';
@@ -151,7 +151,7 @@ export class Pacer {
 const WHERE: Record<CutId, string> = {
   guns: 'the gun gap', wreck: 'the old wreck', headwind: 'the headwind gap', double: 'the Double\'s gap', whirls: 'the whirlpools', rocks: 'the rocks',
   forage: 'the barrier of driftwood', locks: 'the locks', crane: 'the crane', triple: 'the Triple\'s gap', zigzag: 'the zigzag',
-  door: 'the long way',   // (never: it's a secret, and nobody watched takes it)
+  door: 'the starlit door',   // (Umami's, since 14 Nov: a secret, and nobody's, till then)
 };
 const STOPPED: Record<CutId, (x: BotInfo) => string> = {
   guns: () => 'loading shots for the gun gap (Gunnery)',
@@ -165,13 +165,13 @@ const STOPPED: Record<CutId, (x: BotInfo) => string> = {
   locks: () => 'pumping the lock (Bilge)',
   crane: () => 'building the crane (Carpentry)',
   zigzag: () => 'hopping the zigzag',
-  door: () => 'sailing the long way',
+  door: () => 'opening the starlit door (Duty Navigation)',
 };
 const CARRIED: Record<CutId, string> = {
   guns: 'through the imperial gate, across the fort\'s bay', wreck: 'off from the wreck, coins aboard', headwind: 'out of the headwind gap', double: 'hopping the gap on her Double',
   whirls: 'zooming over the whirlpools on her Vegas!', rocks: 'through the gap the rocks were blasted out of', forage: 'through the barrier\'s gap', locks: 'up the locks and down',
   crane: 'hauled over the neck by the crane', triple: 'hopping the gap on her Triple', zigzag: 'hopping the zigzag\'s headwinds',
-  door: 'sailing the long way',
+  door: 'carried through the tunnel under the spit',
 };
 
 

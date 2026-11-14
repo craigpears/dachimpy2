@@ -5,7 +5,8 @@
    things", and "it should definitely be like a now you try thing ... she sets up the balloons, you do
    the pop". */
 import { describe, expect, it } from 'vitest';
-import { ROUTINES, SHOW, BalloonShow, beats, layout, marks, perform, plan, route, setup, type Act, type Mark, type Routine, type ShowEvent } from '../src/balloons';
+import { ROUTINES, SHOW, BalloonShow, beats, layout, marks, perform, plan, setup, type Act, type Mark, type Routine, type ShowEvent } from '../src/balloons';
+import { route } from '../src/sail-pair';
 import { Sailing, PLATFORM, SPAWN } from '../src/sailing';
 import { SailPair, FALL } from '../src/sail-pair';
 import { stagesAreWhatTheySay } from './sail-stages';

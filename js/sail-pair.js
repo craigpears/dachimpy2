@@ -128,3 +128,44 @@ export class SailPair {
         return res;
     }
 }
+/** The moves that steer the game's pair from where it comes in (the top of the middle columns, turned
+    0) down to where it's to come to rest (`t`: its row, column and turn), fewest first, each one a move the
+    rules allow (Sailing's own open() and sinks(), as moves() searches); null if it can't get there. Any
+    Sailing board's: Tzz's balloon routines (src/balloons.ts), a watched racer's drops (js/den/watch-boards.js).
+    (Here since 14 Nov: it lived in the balloon lesson, where it was first needed.) */
+export function route(g, t) {
+    const start = [0, SPAWN[0], 0];
+    if (!g.open(...start))
+        return null;
+    const id = (r, c, u) => `${r},${c},${u}`;
+    const from = new Map([[id(...start), null]]);
+    const todo = [start];
+    while (todo.length) {
+        const [r, c, u] = todo.shift();
+        if (r === t.row && c === t.col && u === t.turn && !g.sinks(r, c, u)) {
+            const out = [];
+            for (let k = id(r, c, u); from.get(k); k = from.get(k)[0])
+                out.unshift(from.get(k)[1]);
+            return out;
+        }
+        // (a turn as the pair turns, Sailing.turned: keeping its lower row, pushing off what's in the way)
+        const next = [[r, c - 1, u, 'left'], [r, c + 1, u, 'right']];
+        for (const [dir, step] of [[1, 'turnR'], [-1, 'turnL']]) {
+            const to = g.turned(r, c, u, dir);
+            if (to)
+                next.push([...to, step]);
+        }
+        // (down last: of the shortest ways, the one a player takes, across and turned first, then dropped,
+        // sliding in sideways only where it has to, under a platform)
+        if (g.sinks(r, c, u))
+            next.push([r + 1, c, u, 'down']);
+        for (const [nr, nc, nu, step] of next) {
+            const k = id(nr, nc, nu);
+            if (from.has(k) || !g.open(nr, nc, nu))
+                continue;
+            from.set(k, [id(r, c, u), step]);
+            todo.push([nr, nc, nu]);
+        }
+    }
+    return null;
+}

@@ -35,6 +35,10 @@ Beaten after the third wave, he leaves his cannon, rows in, stomps up the beach 
 - *lost:*
   - "We'll be back! \*hic\*"
 
+### Racing in the race watched, Umami off in a sloop of his own, over his sloop: on the starting line
+
+- "Umami's got his own sloop?! \*hic\* Fine. I'll pump the locks meself."
+
 ## You
 
 Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, and only at the den's short, cheesy moments: picking up the captain's map, and riding the crane up the cliff and down again, your own wedding, screaming at a vampire in Gravee's house, having an ear roobed in Roobear's, a hug and a cookie at Dachimpy's door, sinking into Affame's cushions, and sailing by Primates Rule, not ready yet, coming into the smugglers' cove behind Port Decorum, and, warily, at Helium's still just after it's gone bang.
@@ -177,6 +181,16 @@ He doesn't speak (yet): his lines are what's said of him.
 ### In the sloop race, aboard Dalnoth's sloop: on the starter's card, after Dalnoth's name
 
 - "Umami aboard, to do his foraging"
+
+### Racing in the race watched, at the helm of his own sloop, said over it: on the starting line, and over the finish line first or after
+
+- *start:*
+  - "(Umami, at the helm. Nobody knows how.)"
+  - "(Umami, unbothered, at the helm.)"
+- *won:*
+  - "(Umami, first home. Still unbothered.)"
+- *lost:*
+  - "(Umami, home. Time for a nap.)"
 
 ## Mischievious
 
@@ -1399,16 +1413,6 @@ Sweet and excitable, far more excited about adding you to her collection than wo
 ### As you leave
 
 - "Come back soon! Bring your face!"
-
-### Racing in the sloop race when four race with no player in it (watched), over her sloop: on the starting line, and over the finish line first or after
-
-- *start:*
-  - "Bedside Manors has cellars. I know a pump when I see one."
-  - "Spud, hold the candle. No, the OTHER way up."
-- *won:*
-  - "First! Oh, I must have a portrait of this."
-- *lost:*
-  - "Never mind. I'll paint myself winning."
 
 ## The Count
 

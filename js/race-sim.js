@@ -477,6 +477,9 @@ export const ROUTES = [
     planned('crane', [4, 'crane']),
     planned('door', [1, 'door']),
     planned('every', [0, 'bribe'], [1, 'double'], [2, 'whirls'], [3, 'locks'], [4, 'crane']),
+    // (Umami's, in the race watched: the starlit door's Duty Navigation, the barrier's Foraging, the crane's
+    // Carpentry; the user, 14 Nov: "somebody that does the foraging and the ... carpentry and the duty nav")
+    planned('odd-jobs', [1, 'door'], [2, 'forage'], [4, 'crane']),
 ];
 export const STYLES = [
     { name: 'peaceful', fire: false },
@@ -498,7 +501,10 @@ export const style = (name) => byName(STYLES, name);
     all-rounder's, a jack of all trades: no better at any, and a little slower at each than at her own skill
     (SIM.JACK: nobody's quite as sharp at every puzzle). (12 Nov: with every stopped puzzle sized about the
     same, an all-rounder at her own skill at them all won 46% of her races, nearly twice her share.) */
-export const bestAt = (e) => (e.route.name === 'every' ? e.skill : SKILLS[Math.min(SKILLS.length - 1, SKILLS.indexOf(e.skill) + 1)]);
+/** An all-rounder's route: three shortcuts or more, each a different puzzle's place (every shortcut at once; Umami's
+    odd jobs, 14 Nov: the door, the barrier and the crane won half his races before he played as one). */
+export const allRounder = (r) => r.cuts.length >= 3;
+export const bestAt = (e) => (allRounder(e.route) ? e.skill : SKILLS[Math.min(SKILLS.length - 1, SKILLS.indexOf(e.skill) + 1)]);
 const STATE = { sail: 'sailing', stop: 'puzzling', wait: 'waiting', trip: 'carried', daze: 'dazed', done: 'finished' };
 /* ---- Where a bot is ----
    Under way, where her helm has her: on a square, or on a move between two (motion). Off it, on the square
@@ -779,7 +785,7 @@ export function sail(o, sea) {
             b.res.exposed.push(b.stop);
         }
     };
-    const firstWork = (b, c) => (b.route.name === 'every' ? SIM.JACK : 1) * puzzleWork(b, c);
+    const firstWork = (b, c) => (allRounder(b.route) ? SIM.JACK : 1) * puzzleWork(b, c);
     const puzzleWork = (b, c) => {
         switch (c.id) {
             case 'headwind': return draw(SIM.PUZZLE.row, b.best);

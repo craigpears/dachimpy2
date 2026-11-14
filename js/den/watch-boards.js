@@ -3,8 +3,8 @@
 // as I said, the puzzling". Each board is the puzzle's own rules played by its own bot, drawn by its own
 // look, the same as wherever it's played:
 // - Sailing (src/sailing.ts; the bots src/sail-bots.ts) on the den's own Sailing board (sail-board.js), down
-//   the left of the screen as at sea, each pair steered down by the moves a player makes (src/balloons.ts,
-//   route; src/sail-pair.ts). Under way (on the pilot, building a combo for a gap) it's her very board, the
+//   the left of the screen as at sea, each pair steered down by the moves a player makes (src/sail-pair.ts,
+//   route). Under way (on the pilot, building a combo for a gap) it's her very board, the
 //   race's own (W.sailor, src/race-sailor.ts), mirrored drop for drop: every clear on it is the gust that
 //   carries her sloop on, as it pops (12 Nov). Stopped to finish a Double or a combo, a board of its own; a
 //   Vegas at the whirlpools' mouth is one the staircase made (VEGAS_GAMES), its last drops played in her
@@ -19,8 +19,7 @@
 import * as THREE from 'three';
 import { LAY } from '../den-sail.js';
 import { Sailing } from '../sailing.js';
-import { SailPair } from '../sail-pair.js';
-import { route } from '../balloons.js';
+import { SailPair, route } from '../sail-pair.js';
 import { SAIL_BOTS, VEGAS_GAMES } from '../sail-bots.js';
 import { Bilge } from '../bilge.js';
 import { oddsFor } from '../den-bilge.js';

@@ -16,6 +16,19 @@ export const RACER = {
         lost: [PARTING],
     },
 };
+/** In the race watched, where Umami's racing a sloop of his own (src/den-rivals.ts, WATCHED): nobody to forage
+    for him, so up through the locks, pumping the up lock by Bilge himself; still loading his guns and firing on
+    anyone sitting still. */
+export const ALONE = {
+    how: 'Up through the locks, pumping the up lock by Bilge himself, Umami off in a sloop of his own; on the way he '
+        + 'fires on anyone sitting still, and loads more by Gunnery once he\'s fired his.',
+    route: 'locks', style: 'aggressive', skill: 'decent',
+    says: {
+        start: ['Umami\'s got his own sloop?! *hic* Fine. I\'ll pump the locks meself.'],
+        won: RACER.says.won,
+        lost: RACER.says.lost,
+    },
+};
 export const CHARACTER = {
     name: 'Dalnoth',
     who: 'Captain of the Vikings who lay siege to the den, and the one at their ship\'s cannon from its first '
@@ -35,5 +48,6 @@ export const CHARACTER = {
         { when: 'The siege beaten: on the beach, shaking his fist at your wall (the captain\'s map cutscene)', says: [PARTING] },
         { when: 'Scrawled across his map', says: [RUMOUR] },
         { when: 'Racing you in the sloop race, Umami aboard, over his sloop: on the starting line, and over the finish line first or after', says: RACER.says },
+        { when: 'Racing in the race watched, Umami off in a sloop of his own, over his sloop: on the starting line', says: ALONE.says.start },
     ],
 };

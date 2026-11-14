@@ -796,6 +796,13 @@ should be some element of randomness to it so that it's not the same on every si
 
 ## 8. Balance
 
+**The barrier's Foraging, weak (14 Nov, to decide):** with Umami's odd jobs added to the routes (the starlit door,
+the barrier and the crane, played as an all-rounder's: no better at any, a little slower at each, as every
+shortcut at once is), the forage route won 0.096 of its races in the 800-race check, under its band's floor
+(0.125, half a fair share); it was only just in before, at 0.131. Umami's own route wins 0.194, in its band. The
+forage route's held to a wider band for now (0.3 to 1.6 times its share), as the Doubles' is, rather than tuned:
+whether to make the barrier quicker to clear is the user's call.
+
 **Shortcuts in proportion (the user, 12 Nov; built the same day, below and §3):** every puzzle's shortcut should skip about the same stretch
 of course, so on the chart they look even: "each an element of puzzling surely should be the same
 distance", where today the imperial gate cuts a small corner, the locks about twice that and the crane
@@ -1218,9 +1225,10 @@ Yeah, no hidden ... not for a proof of concept. It didn't really work"). Built t
 - **The changelog and the design page:** "The starlit door" under 11 November, where it was built, with
   shots of the door open and the tunnel (`changelog/starlit-door.jpg`, `starlit-tunnel.jpg`), and a
   section on `design.html`, "The starlit door: the long way round for a navigator".
-- **The bots still don't take it,** in the watched race or as your rivals: kept off their routes for
-  balance (the simulation's door bots, §8, are another matter), no longer a secret
-  (`tests/race-watch.test.ts`).
+- **The bots didn't take it** (12 Nov), in the watched race or as your rivals: kept off their routes for
+  balance (the simulation's door bots, §8, are another matter), no longer a secret. **Since 14 Nov Umami does,
+  in the race watched** (the user: "somebody that does the foraging and the ... carpentry and the duty nav"): his
+  route, odd jobs, the door, the barrier and the crane (§10). Your rivals still don't (`tests/race-watch.test.ts`).
 - **Back to simple, Navigation only (the user, 12 Nov, decided; replaces the tunnel's Vegas stretches below):**
   "I love some of the animation and the styles on it, but I think it needs just probably to go back to being
   simple... nav only shortcut that takes you just like one step through, and maybe can be tuned to be a bit

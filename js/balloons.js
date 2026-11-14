@@ -40,7 +40,8 @@
    goes really quickly in her hand ... like, what is she doing? Fiddling around some Play-Doh"), and
    says what's happening: a squeak as each balloon's tied off, the pair tossed onto the board, the
    pair falling, landing, and the chain going off. */
-import { Sailing, SPAWN, chainName } from './sailing.js';
+import { Sailing, chainName } from './sailing.js';
+import { route } from './sail-pair.js';
 /** Sailing's colours, by name: water (blue), rope (yellow), wind (white). */
 const WATER = 0, ROPE = 1, WIND = 2;
 /** A platform from its rows of target colours, top row first ('B' water, 'Y' rope, 'W' wind). */
@@ -122,45 +123,6 @@ export function setup(routine, n) {
     const next = routine.twists[n] ?? routine.twists[routine.twists.length - 1];
     g.pair = [next.pair[0], next.pair[1]];
     return g;
-}
-/** The moves that steer the game's pair from where it comes in (the top of the middle columns, turned
-    0) down to where the twist comes to rest, fewest first, each one a move the rules allow (Sailing's
-    own open() and sinks(), as moves() searches); null if it can't get there. */
-export function route(g, t) {
-    const start = [0, SPAWN[0], 0];
-    if (!g.open(...start))
-        return null;
-    const id = (r, c, u) => `${r},${c},${u}`;
-    const from = new Map([[id(...start), null]]);
-    const todo = [start];
-    while (todo.length) {
-        const [r, c, u] = todo.shift();
-        if (r === t.row && c === t.col && u === t.turn && !g.sinks(r, c, u)) {
-            const out = [];
-            for (let k = id(r, c, u); from.get(k); k = from.get(k)[0])
-                out.unshift(from.get(k)[1]);
-            return out;
-        }
-        // (a turn as the pair turns, Sailing.turned: keeping its lower row, pushing off what's in the way)
-        const next = [[r, c - 1, u, 'left'], [r, c + 1, u, 'right']];
-        for (const [dir, step] of [[1, 'turnR'], [-1, 'turnL']]) {
-            const to = g.turned(r, c, u, dir);
-            if (to)
-                next.push([...to, step]);
-        }
-        // (down last: of the shortest ways, the one a player takes, across and turned first, then dropped,
-        // sliding in sideways only where it has to, under a platform)
-        if (g.sinks(r, c, u))
-            next.push([r + 1, c, u, 'down']);
-        for (const [nr, nc, nu, step] of next) {
-            const k = id(nr, nc, nu);
-            if (from.has(k) || !g.open(nr, nc, nu))
-                continue;
-            from.set(k, [id(r, c, u), step]);
-            todo.push([nr, nc, nu]);
-        }
-    }
-    return null;
 }
 /** A routine, played by Sailing's rules, as a player would: each twist steered down its route and
     dropped where it comes to rest. What each drop earned, the routes, and the pieces cleared before the

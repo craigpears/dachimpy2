@@ -80,7 +80,7 @@ describe('every racer races by a plan (13 Nov: "it should all be in the same thi
     const was: Record<string, CutId[]> = {
       long: ['zigzag'], 'gap-run': ['guns'], 'gap-shot': ['guns'], bribe: ['wreck', 'guns'], headwind: ['headwind'],
       doubles: ['double', 'triple'], whirls: ['whirls'], rocks: ['rocks'], forage: ['forage'], locks: ['locks'], crane: ['crane'], door: ['door'],
-      every: ['wreck', 'guns', 'double', 'whirls', 'locks', 'crane'],
+      every: ['wreck', 'guns', 'double', 'whirls', 'locks', 'crane'], 'odd-jobs': ['door', 'forage', 'crane'],
     };
     for (const r of ROUTES) { expect(r.cuts, r.name).toEqual(was[r.name]); expect(cutsOf(r.plan)).toEqual(r.cuts); }
   });

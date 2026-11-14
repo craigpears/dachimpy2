@@ -959,7 +959,42 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   things mobile first, but trying to make things as mobile friendly that we can." So design.html says so, with a
   picture, and RULES.md holds it as a rule.
 
+- **The watched race more varied, its bar compact (14 Nov):** "the bots aren't being very interesting ... everything
+  just seems to be the long way ... somebody that does the foraging and the ... carpentry and the duty nav, maybe.
+  That I think that would Umami would come in quite well, actually. I think [Gravee] is better as a side character.
+  I don't feel like she's suited to the race part." And: "I love that you can click on the different people and see
+  their different plans, see who's first, but ... that's still possible in a more compact, mobile-friendly layout
+  ... I don't need something like ticking with the seconds." And the follow camera: "quite a far-out zoom ... as
+  default. Though the wide one where you got the 4 [whirlpools] in it, that's fantastic." Done 14 Nov: Umami at the
+  helm of his own sloop (the starlit door, the barrier, the crane), Gravee out, Dalnoth up the locks (nobody to
+  forage for him); her plan kept on a phone as one compact row; no ticking clock; the camera nearer her on a phone
+  held upright, as far back as before on a wide screen. Still to do: the starlit door's Duty Navigation drawn
+  while you watch Umami at it (nothing's drawn there yet; the bar says what he's doing).
+
+- **The puzzles' bots, trained and tested like Distilling's (14 Nov):** "for each of the puzzles, we want something
+  similar to like those distilling tests with the bots." Each with a simulation of its own, numbers that say how
+  it's doing, and positions to critique (as `distilling-positions.html`) where the user gives advice, each answer
+  a test:
+  - Sailing: from the lowest level, "just trying to clear [pieces] to get a bit of an extra boost", up to building
+    Vegases (see "Teach the sailing bots to build Vegases", above).
+  - Carpentry: "doing the easy fix holes and then gradually going up to the crane ones ... how many pieces does it
+    take them on average?" The pieces are weighted in their favour, so it "will probably need to be artificially
+    just slowed as to how many choices a minute" it makes.
+  - Foraging: the same idea (and the user hasn't played Foraging in the race yet: "I need to test that").
+  - Duty Navigation: "how many drops does it take them to clear the puzzle"; it needn't be really good, "as long as
+    it has a little bit of visual interest if somebody's watching".
+  - Gunnery: needn't be good, as long as you can see the process; "good enough to fill all four. How many guns does
+    it manage to load? Does it fill all four? I hope it just doesn't get stuck." Perhaps "a freestyle bot and a
+    looping bot".
+  All of it feeding tutorials later, Gunnery's with Rapportus and Balloffire. "No reason not to have them on the
+  to-do list and start at least doing some of the basics on those. I'm sure that will evolve over time."
+
 ## Spotted along the way (not asked for)
+
+- **Distilling's timing tests trip when the machine's busy (14 Nov):** in a full test run, "cheap enough to run on
+  every move in the browser" (distill-path), a distill-ahead plan and a distill-bots game failed on time; run on
+  their own, all three pass. Their limits could allow for a loaded machine, or they could be kept out of the full
+  run's parallel batch.
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
 - **Your den's preview** shows your flag on every tab. The Shack tab could show the shack itself

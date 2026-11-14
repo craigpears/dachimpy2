@@ -48,6 +48,9 @@ export function watchStart() {
   // Following the leader from the start, the camera on her (the user, 14 Nov: "It doesn't automatically track or
   // follow anything"); a racer picked, or the free camera, ends that, and Leader goes back to it.
   watch.auto = true; watch.leadT = 0;
+  // (nearer her on a phone held upright, her sloop a good size on a narrow screen: 14 Nov, "quite a far-out zoom
+  // ... as default"; on a wide one, as far back as before, which shows the whirlpools all at once)
+  watch.fol.dist = innerHeight > innerWidth ? 16 : 26;
   watch.W.pick(-1);
   follow(watch.W.standings()[0].i, true);
   race.said.hail = true;   // (no starter's hail at the buoy: you're not racing)
@@ -142,7 +145,10 @@ function bar() {
   }
   watch.bar.style.display = '';
   const W = watch.W, b = W.bar();
-  const now = W.follow < 0 ? `<b>${b.clock}</b> · Free camera${b.doing ? ` · ${b.doing}` : ''}` : `<b>${b.clock}</b> · ${watch.auto ? 'The leader, ' : ''}<b style="color:${W.racers[W.follow].sail}">${b.who}</b> · ${b.place} · ${b.leg} · ${b.doing}`;
+  // (no clock ticking away in it: 14 Nov, "I don't need something like ticking with the seconds and whatnot"; the
+  // count before the gun, though, and each racer's time as she finishes, in the toast)
+  const count = W.state === 'count' ? `<b>${b.clock}</b> · ` : '';
+  const now = W.follow < 0 ? `${count}Free camera${b.doing ? ` · ${b.doing}` : ''}` : `${count}${watch.auto ? 'The leader, ' : ''}<b style="color:${W.racers[W.follow].sail}">${b.who}</b> · ${b.place} · ${b.leg} · ${b.doing}`;
   // (the racers always in the same order, their places on them, so a tap lands on the one you meant: 14 Nov,
   // tapping Kikkit followed Tzz, the buttons having swapped round under the finger)
   const placeOf = new Map(W.standings().map((s) => [s.i, s]));

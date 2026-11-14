@@ -17,9 +17,8 @@
 import type { Racer } from './lines/character.js';
 import { RACER as KIKKIT } from './lines/kikkit.js';
 import { RACER as TZZ } from './lines/tzz.js';
-import { RACER as DALNOTH } from './lines/dalnoth.js';
-import { RACING as UMAMI } from './lines/capybara.js';
-import { RACER as GRAVEE } from './lines/gravee.js';
+import { RACER as DALNOTH, ALONE as DALNOTH_ALONE } from './lines/dalnoth.js';
+import { RACING as UMAMI, RACER as UMAMI_RACER } from './lines/capybara.js';
 
 export interface Rival {
   /** Their name, as the race shows it. */
@@ -33,6 +32,8 @@ export interface Rival {
   flag: string;
   /** Who's aboard with them, if anyone ('umami'), and what the starter's card says of it. */
   crew: { who: 'umami'; said: string } | null;
+  /** At her helm, if not a pirate: Umami, a capybara (the race watched); `look` then is only for the bubble. */
+  helm?: 'umami';
   /** How they race and what they say (src/lines/). */
   racer: Racer;
 }
@@ -49,11 +50,17 @@ export const RIVALS: readonly Rival[] = [
 /** How many rivals race you, at most and by default. */
 export const MOST_RIVALS = RIVALS.length;
 
-/** Four racing with no player in it, to watch (src/race-watch.ts; den.html?at=race-watch): your three
-    rivals, and a fourth on a way round none of them takes. Gravee, up through the locks (her house has
-    cellars: she knows a pump), in her gown's green, a wine-dark flag; her spot on the line clear of the
-    field's whirlpools. Watched only: a race of yours is you and up to three (FIELD.MOST, four in all). */
+/** Four racing with no player in it, to watch (src/race-watch.ts; den.html?at=race-watch). Kikkit and Tzz as
+    they race you; then Umami at the helm of a sloop of his own, by the odd jobs nobody else takes (the starlit
+    door, the barrier, the crane: the user, 14 Nov, "somebody that does the foraging and the ... carpentry and the
+    duty nav ... Umami would come in quite well"), in a capybara's browns, his spot on the line clear of the
+    field's whirlpools; and so Dalnoth, nobody to forage for him, up through the locks pumping them himself. (Gravee
+    raced here till 14 Nov: "better as a side character ... I want her later to be taking portraits of things".)
+    Every puzzle's seen: Sailing's Vegas and Doubles, Bilge, Gunnery, Foraging, Carpentry, Duty Navigation. Watched
+    only: a race of yours is you and up to three (FIELD.MOST, four in all). */
 export const WATCHED: readonly Rival[] = [
-  ...RIVALS,
-  { name: 'Gravee', look: 'Gravee', spot: 10, sail: '#4f9a5c', flag: '#6e2233', crew: null, racer: GRAVEE },
+  RIVALS[0],
+  RIVALS[1],
+  { ...RIVALS[2], crew: null, racer: DALNOTH_ALONE },
+  { name: 'Umami', look: 'Dalnoth', helm: 'umami', spot: 10, sail: '#c98a4b', flag: '#3b2a1f', crew: null, racer: UMAMI_RACER },
 ];

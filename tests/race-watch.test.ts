@@ -6,11 +6,10 @@ import { describe, expect, it } from 'vitest';
 import { LAY, Sea } from '../src/den-sail';
 import { RACE } from '../src/den-race';
 import { RIVALS, WATCHED } from '../src/den-rivals';
-import { ROUTES, STYLES, startPose, type BotInfo } from '../src/race-sim';
+import { ROUTES, STYLES, route as routeOf, startPose, type BotInfo } from '../src/race-sim';
 import { Watch, FreeCam, Pacer, WATCH, boardOf, doing, paceOf, vegasDrops } from '../src/race-watch';
 import { Sailing } from '../src/sailing';
-import { SailPair } from '../src/sail-pair';
-import { route } from '../src/balloons';
+import { SailPair, route } from '../src/sail-pair';
 import { VEGAS_GAMES } from '../src/sail-bots';
 import { seeded } from '../src/mirror-row';
 
@@ -31,12 +30,16 @@ function watched(seed: number, secs = 900, boards = false) {
 }
 
 describe('a link to watch four bots race (12 Nov)', () => {
-  it('four race with no player: your three rivals, and Gravee up the locks, a way round none of them takes', () => {
-    expect(WATCHED.map((r) => r.name)).toEqual(['Kikkit', 'Tzz', 'Dalnoth', 'Gravee']);
-    expect(WATCHED.slice(0, 3)).toEqual(RIVALS);
+  it('four race with no player: Kikkit and Tzz, Umami at his own helm by the odd jobs, and Dalnoth up the locks (14 Nov: "somebody that does the foraging and the ... carpentry and the duty nav")', () => {
+    expect(WATCHED.map((r) => r.name)).toEqual(['Kikkit', 'Tzz', 'Dalnoth', 'Umami']);
+    expect(WATCHED.slice(0, 2)).toEqual(RIVALS.slice(0, 2));
     const g = WATCHED[3];
-    expect(RIVALS.map((r) => r.racer.route)).not.toContain(g.racer.route);
-    expect(['long', 'locks', 'crane']).toContain(g.racer.route);
+    expect(g.helm).toBe('umami');
+    expect(routeOf(g.racer.route).cuts).toEqual(['door', 'forage', 'crane']);
+    // (Dalnoth, nobody aboard to forage for him: the locks; so every puzzle's seen, none twice over)
+    expect(WATCHED[2].crew).toBeNull();
+    expect(WATCHED[2].racer.route).toBe('locks');
+    expect(new Set(WATCHED.map((r) => r.racer.route)).size).toBe(4);
     expect(ROUTES.map((x) => x.name)).toContain(g.racer.route);
     expect(STYLES.map((x) => x.name)).toContain(g.racer.style);
     for (const k of ['start', 'won', 'lost'] as const) expect(g.racer.says[k].length).toBeGreaterThan(0);
@@ -64,12 +67,14 @@ describe('a link to watch four bots race (12 Nov)', () => {
     expect(a.W.field.racers.map((r) => r.time)).toEqual(b.W.field.racers.map((r) => r.time));
   });
 
-  it('nobody takes the starlit door, 12 Nov: kept off the bots\' routes for balance, no longer a secret', () => {
+  it('only Umami takes the starlit door (14 Nov: "the duty nav"), the rest keeping off it as they did since 12 Nov; your rivals never', () => {
     for (const seed of [1, 2, 3, 4]) {
-      const { W, said } = watched(seed);
-      for (let i = 0; i < 4; i++) expect(W.info(i)!.done).not.toContain('door');
-      for (const s of said) for (const x of s) expect(x.toLowerCase()).not.toMatch(/through the (door|tunnel)/);
+      const { W } = watched(seed);
+      for (let i = 0; i < 3; i++) expect(W.info(i)!.done).not.toContain('door');
     }
+    for (const R of RIVALS) expect(routeOf(R.racer.route).cuts).not.toContain('door');
+    const x = { mode: 'stop', was: 'stop', cut: 'door', stage: 0, work: 5, full: 20, tries: 0, daze: 0, move: null, hop: 0, coming: false, route: 'odd-jobs', style: 'peaceful', best: 'great', skill: 'good', done: [] } as unknown as BotInfo;
+    expect(doing(x, 'door', null)).toBe('opening the starlit door (Duty Navigation)');
   });
 });
 
@@ -96,7 +101,7 @@ describe('jumping between racers, and a bar saying what each is doing (12 Nov)',
     expect([...all].some((x) => x.startsWith('home, '))).toBe(true);
     const W = new Watch(5);
     W.pick(3);
-    expect(W.bar()).toMatchObject({ who: 'Gravee', place: expect.stringMatching(/of 4$/), leg: 'on the line' });
+    expect(W.bar()).toMatchObject({ who: 'Umami', place: expect.stringMatching(/of 4$/), leg: 'on the line' });
     W.pick(-1);
     expect(W.bar().who).toBe('Free camera');
   });

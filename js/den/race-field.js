@@ -31,7 +31,15 @@ export function rivalBoat(R, shown = null) {
   for (const arm of g.userData.sails) arm.children[0].material = mat(R.sail, { side: THREE.DoubleSide, roughness: 0.95 });
   const cloth = g.userData.rig[1].children[2];
   if (cloth) cloth.material = mat(R.flag, { side: THREE.DoubleSide, roughness: 0.9 });
-  const who = person({ look: typeof R.look === 'string' ? PIRATES[R.look] : R.look, parent: g, x: -1.15, y: SLOOP_DECK, z: 0, yaw: Math.PI / 2, idle: R.look === 'Kikkit' ? 'tipsy' : 'sway', bubble: 'page', tall: 2.3, shown: () => (shown ? shown(B) : near(B)) });
+  const who = person({ look: typeof R.look === 'string' ? PIRATES[R.look] : R.look, parent: g, x: -1.15, y: SLOOP_DECK, z: 0, yaw: Math.PI / 2, idle: R.look === 'Kikkit' ? 'tipsy' : 'sway', bubble: 'page', tall: R.helm === 'umami' ? 1.4 : 2.3, shown: () => (shown ? shown(B) : near(B)) });
+  if (R.helm === 'umami') {
+    // (Umami at her helm, the race watched: a capybara where her pirate would stand; what's said of him over him)
+    who.p.g.visible = false;
+    const u = capybaraMesh();
+    u.scale.setScalar(0.8);
+    u.position.set(-1.0, SLOOP_DECK + 0.5, 0);
+    g.add(u);
+  }
   if (R.crew?.who === 'umami') {
     const u = capybaraMesh();
     u.scale.setScalar(0.62);

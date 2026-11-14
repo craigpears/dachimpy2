@@ -517,6 +517,9 @@ export const ROUTES: Route[] = [
   planned('crane', [4, 'crane']),
   planned('door', [1, 'door']),
   planned('every', [0, 'bribe'], [1, 'double'], [2, 'whirls'], [3, 'locks'], [4, 'crane']),
+  // (Umami's, in the race watched: the starlit door's Duty Navigation, the barrier's Foraging, the crane's
+  // Carpentry; the user, 14 Nov: "somebody that does the foraging and the ... carpentry and the duty nav")
+  planned('odd-jobs', [1, 'door'], [2, 'forage'], [4, 'crane']),
 ];
 /** A racing style: whether she fires on a racer sitting still as she goes by, whether she loads more by
     Gunnery once she's fired hers (instead of Sailing on the pilot), and how near behind (seconds) another
@@ -544,7 +547,10 @@ export interface Entrant { route: Route; style: Style; skill: Skill; spot?: numb
     all-rounder's, a jack of all trades: no better at any, and a little slower at each than at her own skill
     (SIM.JACK: nobody's quite as sharp at every puzzle). (12 Nov: with every stopped puzzle sized about the
     same, an all-rounder at her own skill at them all won 46% of her races, nearly twice her share.) */
-export const bestAt = (e: Entrant): Skill => (e.route.name === 'every' ? e.skill : SKILLS[Math.min(SKILLS.length - 1, SKILLS.indexOf(e.skill) + 1)]);
+/** An all-rounder's route: three shortcuts or more, each a different puzzle's place (every shortcut at once; Umami's
+    odd jobs, 14 Nov: the door, the barrier and the crane won half his races before he played as one). */
+export const allRounder = (r: Route): boolean => r.cuts.length >= 3;
+export const bestAt = (e: Entrant): Skill => (allRounder(e.route) ? e.skill : SKILLS[Math.min(SKILLS.length - 1, SKILLS.indexOf(e.skill) + 1)]);
 
 /** A race's set-up: its racers, in starting order, and what's being tried: the gap's guns' rule, any
     shortcut's saving changed (a course before it's laid), Sailing on the pilot or not. */
@@ -948,7 +954,7 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
     b.cut = c; b.stage = 0; b.work = work; b.full = work; b.tries = 0; b.mode = 'stop';
     if (!c.sheltered) { b.stop = { id: c.id, ...rankOf(b), hit: false }; b.res.exposed.push(b.stop); }
   };
-  const firstWork = (b: Bot, c: Cut): number => (b.route.name === 'every' ? SIM.JACK : 1) * puzzleWork(b, c);
+  const firstWork = (b: Bot, c: Cut): number => (allRounder(b.route) ? SIM.JACK : 1) * puzzleWork(b, c);
   const puzzleWork = (b: Bot, c: Cut): number => {
     switch (c.id) {
       case 'headwind': return draw(SIM.PUZZLE.row, b.best);

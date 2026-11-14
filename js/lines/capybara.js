@@ -7,6 +7,20 @@ export const OF_HIM = {
 /** In the sloop race (src/den-rivals.ts): aboard Dalnoth's sloop, sat up on her foredeck, doing his
     foraging for him at the barrier of driftwood. Said on the starter's card, of who's racing. */
 export const RACING = 'Umami aboard, to do his foraging';
+/** In the race watched (src/den-rivals.ts, WATCHED; the user, 14 Nov: "somebody that does the foraging and the
+    ... carpentry and the duty nav ... Umami would come in quite well, actually"): at the helm of a sloop of his
+    own, by the odd jobs nobody else bothers with, the starlit door, the barrier and the crane. Peaceful, being a
+    capybara. He doesn't speak: what's over his sloop is said of him. */
+export const RACER = {
+    how: 'At the helm of his own sloop: through the starlit door by Duty Navigation, the barrier of driftwood by '
+        + 'Foraging, and the crane by Carpentry. Never fires on anyone.',
+    route: 'odd-jobs', style: 'peaceful', skill: 'good',
+    says: {
+        start: ['(Umami, at the helm. Nobody knows how.)', '(Umami, unbothered, at the helm.)'],
+        won: ['(Umami, first home. Still unbothered.)'],
+        lost: ['(Umami, home. Time for a nap.)'],
+    },
+};
 export const CHARACTER = {
     name: 'Umami',
     who: 'A capybara, the den\'s first rescued friend (a friend\'s side quest: the friend asked for the name). '
@@ -29,5 +43,6 @@ export const CHARACTER = {
             },
         },
         { when: 'In the sloop race, aboard Dalnoth\'s sloop: on the starter\'s card, after Dalnoth\'s name', says: [RACING] },
+        { when: 'Racing in the race watched, at the helm of his own sloop, said over it: on the starting line, and over the finish line first or after', says: RACER.says },
     ],
 };

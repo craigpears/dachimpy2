@@ -2896,3 +2896,6 @@ the jetty guard lets you trade. With a doubt about trading itself: "I find the t
 not very meaningful when it's single player and ... the game design is designed to be quick and fun rather than
 deep in the sense of ... persistent." So whatever it unlocks should be quick and fun, a scene or a keepsake, not an
 economy.
+
+- **Gravee taking portraits of things (14 Nov):** out of the race ("better as a side character. I don't feel like
+  she's suited to the race part"): "I want her later to be taking portraits of things. That fits her very well."
