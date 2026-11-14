@@ -2724,6 +2724,11 @@ Puzzle Pirates, or one to make), before anything's built.
   star (the wrong colour till then), and with it wild the blue counted, so the constellation charted on the
   "Triple" step. No star had to fall into it. (Matches the guide; Multibella's the clearer telling, and the
   one to credit for the explanation.)
+- **Multibella in the tutorial, with cookies (14 Nov):** the user: "everyone loves cookies, so [Multibella] can be
+  munching on choco chip cookies while they wait for you to finish what they've helped you set up." So
+  Multibella (they) is in it too, the one who explains the wilds: they help you set up a combo (a clear beside a
+  wrong-coloured star), then stand by munching chocolate chip cookies while you finish it. A nod to Dachimpy's
+  cookies at their house. Their look from their pirate page, checked before they're drawn.
 - **Why Dignity teaches it (14 Nov):** the user: "Maybe we could put Dignity in the game as [the one] to get [it
   from], because ... she's got to catch these pesky pirates trying to figure out the ways they're going around
   their little outpost." Dignity, the checkpoint's commander, charts the stars to find the hidden ways pirates
