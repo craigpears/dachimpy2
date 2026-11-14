@@ -42,6 +42,7 @@ import { bayWorld, moleSquares, FORT_H } from './race-bay.js';
 import { netKey, netPrompt, netTick, netBefore, netInTick } from './race-net.js';
 import { NET } from '../race-net.js';
 import { planStep, planTick, planReset, planKey } from './race-plan.js';
+import { chartTick, chartKey } from './plan-chart.js';
 import { pop } from './pop-board.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
@@ -261,6 +262,7 @@ const VIEW = ['z', 'c', 'v', '-', '_', '=', '+', 'p'];
 /** A key at sea, first: whether it was the race's. */
 export function raceKey(key) {
   if (!sail.on || !race.W) return false;
+  if (chartKey(key, race.rules)) return true;   // (M: your plan on the chart, big; Esc shuts it: plan-chart.js)
   const go = key === ' ' || key === 'enter', h = sail.helm;
   if (!race.trip && !building() && doorKey(key)) return true;   // (the starlit door: door.js)
   if (boardHasKey(key, station.on)) return false;   // (with the Sailing board open, Space is its: sail-station.js)
@@ -486,6 +488,7 @@ export function raceTick(dt) {
   fieldTick(dt, R, sail.on);
   // Your plan's strip along the right-hand edge, on the line and in the race (race-plan.js).
   planTick(R, !cine);
+  chartTick(R);   // (and your plan on the parchment chart, big, while it's open: plan-chart.js)
   hud();
 }
 
