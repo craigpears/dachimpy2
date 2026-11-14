@@ -1010,10 +1010,33 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   style flag outside, just outside the gate. What has happened here?" A far buoy's number is drawn nearer so it
   always reads (12 Nov), and that ran on land too. Done 14 Nov: the buoys' numbers only while you're out at sea.
 
-- **Umami runs the wrong way once he's freed (14 Nov):** "I ... did the foraging thing, and then [he] ended up coming
-  out the wrong way. [He] ran right instead of left." As built, he breaks out on the mud at the bank's foot, bounds
-  right along it (east, toward her mooring by the bank) and leaps in to swim to her. Which way he should go, and
-  why left looked right, to pin down with the user.
+- **Umami's sloop turns the wrong way out of the barrier's gap, in the race (14 Nov):** watching the race, "[he] did
+  the foraging thing, and then ended up coming out the wrong way. [He] ran right instead of left." Found: out of
+  the barrier's gap onto leg 3 (which runs west), the simulation rejoins her to the long way where going round
+  would have had her by then, five squares east of the gap's mouth (7.6 s), so she turns right, sails east, turns
+  round and comes back. Every racer by the forage route does it; the rocks' gap the same (5.5 s back), the
+  whirlpools' not. Two fixes tried, both moving the balance, so neither kept (the user's call, with the puzzles'
+  timings below): out at the gap's mouth and on from there (the forage and rocks shortcuts a few seconds better,
+  the gap-shot route then under its floor, and the simulation's savings no longer the helm's RACE.DECENT); or the
+  same seconds spent nosing through the gap (the barrier then not worth a good player's while, against "the
+  leader always has a shortcut worth taking").
+
+- **The plan's chart draws shortcuts as doubling back (14 Nov):** "if I hover over rocks, why is it showing an L
+  shape? Like, well, there's no L shape. You just go straight up. I don't know why it's showing it as if you double
+  back. The same with driftwood. The bribe looks a bit weird as well. Like, why is it a hook shape? I know it should
+  be more like X marks the spot and then shows you where you cut through. Also, the shooting one as well. Like the
+  line goes further up than just through the imperial outpost. Same as the run. I don't think the imperial gateway
+  is that big. It's exaggerating it a bit. [Locks] is doing a bit of a weird L-shaped thing as well. And the
+  triples gap." (Likely the same rejoin as the barrier's, above: each drawn to where the simulation rejoins her.)
+
+- **Time the puzzles, the user playing them (14 Nov):** "the triple shortcut is so tiny. So is the crane one to a
+  degree ... it feels like you're underestimating how long it takes to do those puzzles. Maybe it's worth me going
+  through at some point and having that as a to-do thing of timing. Right, how long does it actually take me to
+  complete a crane or a triple, even not that, or the guns for the shooting or the foraging or something, even just
+  so you've got a bit of a comparison of how long each of these puzzles takes." The first leg looks well balanced
+  to the user ("the long way is halfway around, there's a clear benefit to running it, bribing it"), and the sweep
+  back to the left they like. A way to time each (a stopwatch on each stop's board in the den's race, written down)
+  to make, then RACE.DECENT and SIM.PUZZLE checked against the user's times.
 
 - **The Distilling guide trimmed to its best moves (14 Nov):** "I love how we've got the moves like the hook, pull a
   line of browns. But ... some of the moves are good for behind the scenes but need hiding. Like, with these arrows,
