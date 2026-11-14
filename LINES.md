@@ -1575,11 +1575,10 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 
 ### The titles on their friends' portraits
 
-- *dalnoth:* "Dalnoth, First on the Board"
 - *dignity:* "Dignity, Never Off Duty"
 - *mischievious:* "Mischievious, at a Wedding"
 - *monkeyMan:* "The Monkey Man"
-- *gravee:* "Oh, Gawd!"
+- *gravee:* "Gravee: Oh, Gawd!"
 - *balloffire:* "Balloffire, Top Gunner"
 - *felinee:* "Felinee, of Hunter"
 - *kikkit:* "Kikkit: Cursed & Cookied"
@@ -1597,7 +1596,6 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 
 ### About the friend's portrait you've stopped by (once a visit each)
 
-- *dalnoth:* "Dalnoth! He was on my very first boards. He took it well."
 - *dignity:* "Ooh, Dignity! She runs the checkpoint. Very firmly. Bella helps."
 - *mischievious:* "Mischievious! Always a wedding somewhere."
 - *monkeyMan:* "Ha, the Monkey Man! That's me, 2007. Some things never change."
@@ -1620,7 +1618,7 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 ### The pages on the friends' wall: the thank-you, and everyone they blockaded with
 
 - *thanks:* "To my friends on these walls, and everyone who isn't: everyone who makes Puzzle Pirates such an awesome place. Thank you."
-- *everyone:* "To everyone I blockaded with, whatever you're called now: Mems, Kenchio, Aurora, my old Hunter crew, and all of you whose names I've lost. You're here!"
+- *everyone:* "To everyone I blockaded with, whatever you're called now: Mems, Kenchio, Aurora, Dalnoth, my old Hunter crew, and all of you whose names I've lost. You're here!"
 
 ### Now and then, as you wander after the tour
 

@@ -189,7 +189,6 @@ const FABLE_IN_RAGS = {
     feet: 'boots', feetCol: 'light blue', hook: true, fam: 'parrot', famCol: 'aqua', famCol2: 'light blue',
 };
 export const FRIENDS = [
-    friend('dalnoth', along(-1, 9), { portrait: sat('Dalnoth', 'sea') }),
     friend('dignity', along(-1, 8), { portrait: sat('Dignity', 'den') }),
     friend('mischievious', along(-1, 7), { portrait: sat('Mischievious', 'cafe') }),
     friend('monkeyMan', along(-1, 6), { portrait: sat('Dachimpy', 'beach', { dress: MONKEY_MAN }) }),
@@ -200,13 +199,13 @@ export const FRIENDS = [
     mid('zizzy', along(-1, 1), { portrait: sat('Zizzy', 'night', { dress: ZIZZY_PINK, with: IN_PINK }) }),
     mid('daquan', FC, { portrait: sat('Daquan', 'beach', { dress: DAQUAN_GROUP, with: IN_PINK_COAT }) }),
     // (Sanne turned a little more, so her blonde hair, tied back, shows)
-    mid('sanne', along(1, 1), { portrait: sat('Sanne', 'beach', { with: IN_RED, yaw: -0.45 }) }),
-    mid('whiterose', along(1, 2), { portrait: sat('Whiterose', 'bloodmoon') }),
+    mid('whiterose', along(1, 1), { portrait: sat('Whiterose', 'bloodmoon') }),
+    mid('sanne', along(1, 2), { portrait: sat('Sanne', 'beach', { with: IN_RED, yaw: -0.45 }) }),
     friend('affame', along(1, 3), { portrait: sat('Affame', 'night') }),
-    friend('tzz', along(1, 4), { portrait: sat('Tzz', 'autumn') }),
-    friend('helium', along(1, 5), { portrait: sat('Helium', 'night') }),
-    friend('roobear', along(1, 6), { portrait: sat('Roobear', 'pinksea') }),
-    friend('welcomeBack', along(1, 7), { portrait: sat('Fable', 'night', { dress: FABLE_IN_RAGS, with: WELCOME_BACK_RAGS, yaw: -0.3 }) }),
+    friend('welcomeBack', along(1, 4), { portrait: sat('Fable', 'night', { dress: FABLE_IN_RAGS, with: WELCOME_BACK_RAGS, yaw: -0.3 }) }),
+    friend('tzz', along(1, 5), { portrait: sat('Tzz', 'autumn') }),
+    friend('helium', along(1, 6), { portrait: sat('Helium', 'night') }),
+    friend('roobear', along(1, 7), { portrait: sat('Roobear', 'pinksea') }),
     friend('everyone', along(1, 8), { page: 'everyone' }),
     friend('thanks', along(1, 9), { page: 'thanks' }),
 ];

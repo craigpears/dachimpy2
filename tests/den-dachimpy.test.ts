@@ -271,6 +271,19 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
     }
   });
 
+  it('names Dalnoth with everyone Dachimpy blockaded with, not on a portrait of his own (14 Nov)', () => {
+    expect(FRIENDS.some((f) => f.id === ('dalnoth' as string))).toBe(false);
+    expect(EVERYONE).toMatch(/Dalnoth/);
+  });
+
+  it('hangs Whiterose right beside Daquan, in the middle with Kikkit, Zizzy and Sanne (14 Nov)', () => {
+    const byX = [...FRIENDS].sort((a, b) => a.x - b.x).map((f) => f.id);
+    const d = byX.indexOf('daquan');
+    expect([byX[d - 1], byX[d + 1]]).toContain('whiterose');
+    const middle = FRIENDS.filter((f) => f.middle).map((f) => f.id).sort();
+    expect(middle).toEqual(['daquan', 'kikkit', 'sanne', 'whiterose', 'zizzy']);
+  });
+
   it('has Fable in "Welcome Back Dachimpy!", and Felinee beside Kikkit (the user, 14 Nov: "Need Fable as one of the people in the portraits in my house"; Felinee "absolutely on the edge of being special"; "Put her next to Kikkit")', () => {
     const back = FRIENDS.find((f) => f.id === 'welcomeBack')!;
     expect(back.page).toBeUndefined();
@@ -286,7 +299,7 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
   });
 
   it('recreates Dachimpy\'s own portraits with friends under their real titles (IDEAS.md, both oceans, 13 Nov)', () => {
-    expect(FRIEND_TITLES.gravee).toBe('Oh, Gawd!');
+    expect(FRIEND_TITLES.gravee).toBe('Gravee: Oh, Gawd!');   // (whose it is plain, as the others' are)
     expect(FRIEND_TITLES.kikkit).toMatch(/Cursed & Cookied/);
     expect(FRIEND_TITLES.sanne).toMatch(/Monkey Couple/);
     expect(FRIEND_TITLES.zizzy).toMatch(/Pinky and the Pink/);
@@ -299,7 +312,7 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
 
   it('labels no one special, everybody\'s special (14 Nov: "I\'m feeling a bit bad about having a few people in my house that are labelled as the special ones, because everybody\'s special"): the closest in the middle, bigger, Daquan at its centre', () => {
     const middle = FRIENDS.filter((f) => f.middle).map((f) => f.id);
-    expect(middle).toEqual(['kikkit', 'zizzy', 'daquan', 'sanne', 'whiterose']);
+    expect([...middle].sort()).toEqual(['daquan', 'kikkit', 'sanne', 'whiterose', 'zizzy']);
     const mid = (FRIENDS_ROOM.x0 + FRIENDS_ROOM.x1) / 2;
     expect(FRIENDS.find((f) => f.id === 'daquan')!.x).toBeCloseTo(mid, 5);   // ("my partner in crime through the whole thing")
     for (const f of FRIENDS) {

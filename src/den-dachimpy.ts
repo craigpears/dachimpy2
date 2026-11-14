@@ -165,8 +165,9 @@ export const exhibitLine = (id: string): string | null => (ON_AN_EXHIBIT as Reco
    already in the den, and some of Dachimpy's own portraits with friends, recreated under their real titles
    (IDEAS.md, "Dachimpy's pirate pages and portraits, both oceans", checked 13 and 14 Nov). No one's labelled
    special (the user, 14 Nov: "everybody's special"): the closest simply hang in the middle, bigger (`middle`),
-   Daquan, "my partner in crime through the whole thing", at its centre, Kikkit, Zizzy and Sanne either side in
-   portraits they shared with Dachimpy, and Whiterose, who cared about the life of the game. A portrait with
+   Daquan, "my partner in crime through the whole thing", at its centre, Whiterose right beside him, Kikkit, Zizzy
+   and Sanne with them in portraits they shared with Dachimpy. Then, nearest the middle, the friends closest after
+   them; the den's own characters further out (the user's guidance, 14 Nov). A portrait with
    Felinee, from the Hunter days, right beside Kikkit (the user, 14 Nov: "absolutely on the edge of being special";
    "Put her next to Kikkit"). Fable in "Welcome Back Dachimpy!", the two of them in white rags (the user, 14 Nov:
    "Need Fable as one of the people in the portraits in my house"). Then a
@@ -245,7 +246,6 @@ const FABLE_IN_RAGS: Dress = {
   feet: 'boots', feetCol: 'light blue', hook: true, fam: 'parrot', famCol: 'aqua', famCol2: 'light blue',
 };
 export const FRIENDS: readonly Friend[] = [
-  friend('dalnoth', along(-1, 9), { portrait: sat('Dalnoth', 'sea') }),
   friend('dignity', along(-1, 8), { portrait: sat('Dignity', 'den') }),
   friend('mischievious', along(-1, 7), { portrait: sat('Mischievious', 'cafe') }),
   friend('monkeyMan', along(-1, 6), { portrait: sat('Dachimpy', 'beach', { dress: MONKEY_MAN }) }),
@@ -256,13 +256,13 @@ export const FRIENDS: readonly Friend[] = [
   mid('zizzy', along(-1, 1), { portrait: sat('Zizzy', 'night', { dress: ZIZZY_PINK, with: IN_PINK }) }),
   mid('daquan', FC, { portrait: sat('Daquan', 'beach', { dress: DAQUAN_GROUP, with: IN_PINK_COAT }) }),
   // (Sanne turned a little more, so her blonde hair, tied back, shows)
-  mid('sanne', along(1, 1), { portrait: sat('Sanne', 'beach', { with: IN_RED, yaw: -0.45 }) }),
-  mid('whiterose', along(1, 2), { portrait: sat('Whiterose', 'bloodmoon') }),
+  mid('whiterose', along(1, 1), { portrait: sat('Whiterose', 'bloodmoon') }),
+  mid('sanne', along(1, 2), { portrait: sat('Sanne', 'beach', { with: IN_RED, yaw: -0.45 }) }),
   friend('affame', along(1, 3), { portrait: sat('Affame', 'night') }),
-  friend('tzz', along(1, 4), { portrait: sat('Tzz', 'autumn') }),
-  friend('helium', along(1, 5), { portrait: sat('Helium', 'night') }),
-  friend('roobear', along(1, 6), { portrait: sat('Roobear', 'pinksea') }),
-  friend('welcomeBack', along(1, 7), { portrait: sat('Fable', 'night', { dress: FABLE_IN_RAGS, with: WELCOME_BACK_RAGS, yaw: -0.3 }) }),
+  friend('welcomeBack', along(1, 4), { portrait: sat('Fable', 'night', { dress: FABLE_IN_RAGS, with: WELCOME_BACK_RAGS, yaw: -0.3 }) }),
+  friend('tzz', along(1, 5), { portrait: sat('Tzz', 'autumn') }),
+  friend('helium', along(1, 6), { portrait: sat('Helium', 'night') }),
+  friend('roobear', along(1, 7), { portrait: sat('Roobear', 'pinksea') }),
   friend('everyone', along(1, 8), { page: 'everyone' }),
   friend('thanks', along(1, 9), { page: 'thanks' }),
 ];

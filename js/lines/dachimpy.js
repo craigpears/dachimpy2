@@ -105,11 +105,10 @@ export const ON_AN_EXHIBIT = {
     no portrait of the two of them, by a title of Dachimpy's; Dachimpy's own portraits with friends by their real
     titles (IDEAS.md, "Dachimpy's pirate pages and portraits, both oceans"). Pirate names only. */
 export const FRIEND_TITLES = {
-    dalnoth: 'Dalnoth, First on the Board',
     dignity: 'Dignity, Never Off Duty',
     mischievious: 'Mischievious, at a Wedding',
     monkeyMan: 'The Monkey Man',
-    gravee: 'Oh, Gawd!',
+    gravee: 'Gravee: Oh, Gawd!',
     balloffire: 'Balloffire, Top Gunner',
     felinee: 'Felinee, of Hunter',
     kikkit: 'Kikkit: Cursed & Cookied',
@@ -127,7 +126,6 @@ export const FRIEND_TITLES = {
 };
 /** About each friend's portrait, by id, as you stop by it (once a visit each). */
 export const ON_A_FRIEND = {
-    dalnoth: 'Dalnoth! He was on my very first boards. He took it well.',
     dignity: 'Ooh, Dignity! She runs the checkpoint. Very firmly. Bella helps.',
     mischievious: 'Mischievious! Always a wedding somewhere.',
     monkeyMan: 'Ha, the Monkey Man! That\'s me, 2007. Some things never change.',
@@ -152,7 +150,7 @@ export const THANKS = 'To my friends on these walls, and everyone who isn\'t: ev
 /** A page for everyone else they blockaded with, whose names have changed or slipped away (the user, 14 Nov:
     "there are many names of people like that I blockaded with, but they keep changing their names, and I can't
     remember who they are. So they're here"). Pirate names only, and only names checked on yoweb. */
-export const EVERYONE = 'To everyone I blockaded with, whatever you\'re called now: Mems, Kenchio, Aurora, my old Hunter crew, and all of you whose names I\'ve lost. You\'re here!';
+export const EVERYONE = 'To everyone I blockaded with, whatever you\'re called now: Mems, Kenchio, Aurora, Dalnoth, my old Hunter crew, and all of you whose names I\'ve lost. You\'re here!';
 /** After the tour, as you wander: now and then, while they're near. */
 export const CHATTER = [
     'Ooh, another cookie? There\'s always another cookie.',
