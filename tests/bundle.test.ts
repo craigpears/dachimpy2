@@ -22,7 +22,7 @@ describe('the den in one file (10 Nov: "shouldn\'t there be some build process t
     expect(js.text).not.toMatch(/WebGLRenderer\s*=\s*class|REVISION\s*=\s*"160"/);
     // (its few line breaks are the blank lines inside characters' `who` in src/lines/: Gravee's joined the
     // main bundle on 12 Nov, racing in the race watched; and, 14 Nov, the stylesheet of Helium's opening choice,
-    // js/tutorial-choice.js, kept readable as it's written)
-    expect(js.text.split('\n').length).toBeLessThan(50);
+    // js/tutorial-choice.js, kept readable as it's written; and the race plan chart's, js/den/plan-chart.js)
+    expect(js.text.split('\n').length).toBeLessThan(70);
   }, 30000);
 });
