@@ -503,6 +503,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     v3 with its banner, logo and Primates Rule's pictures; v4 and the latest, with Shoot Dalnoth's picture and
     its Flash app). Real name, e-mail and forum handle cropped out of anything shown, as before.
   - The cookie's fine as it is (on the table).
+  - **"Did you know?", not "not brave enough" (14 Nov):** "I wasn't quite brave enough to do what [Dlonelyone]
+    did. I don't think that's a representation of me ... I wanted to do that, but it wasn't a good fit for me.
+    So this is what I did instead." Teaching out loud wasn't their fit; Dachimpy.com was their way of helping.
 
 ## Spotted along the way (not asked for)
 
