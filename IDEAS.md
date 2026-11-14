@@ -1264,7 +1264,7 @@ same thread as the museum's: helping and leading people, and growing into it.
   else. IOs: what they
   are in Puzzle Pirates, to check on YPPedia.
 - **A double act with Multibella (11 Nov).** The user: "Multibella is very sweet as well, maybe
-  they can do a duo act." **Multibella**, a real pirate (pirate name only; ocean, pirate page and
+  they can do a duo act." **Multibella**, a real pirate (her pronouns "she/it/they", her own words, 14 Nov; pirate name only; ocean, pirate page and
   portrait to check before they're drawn), in the same chat: "Foraging is mostly about using less
   moves", and to someone finding it hard, "I can probably show you some foraging sometime to learn
   from if you want?" and "You got this!" So Pandayay and Multibella together, both encouraging:
@@ -2750,8 +2750,8 @@ Puzzle Pirates, or one to make), before anything's built.
     Don't reset the board: its first constellation is worth only 71.
   - Also in it: Rumble targeting (one on one, when to defend), when to retreat, the den's Foraging with its
     wolf head and moons, and its loot. Still unknown: "fren" (not in the guide).
-- **Who explains it (14 Nov):** Multibella (a real pirate; "they", the user: neutral pronouns, "make sure you
-  use neutral pronouns") was about to explain to the user how the chain counts (one move, as the guide says,
+- **Who explains it (14 Nov):** Multibella (a real pirate; her pronouns "she/it/they", in her own words via the user, 14 Nov:
+  "Multibella tells ye, 'she/it/they'"; before that the user asked for neutral ones) was about to explain to the user how the chain counts (one move, as the guide says,
   or a streak across drops). The user: "I think [they] could win the [duty nav] explanation slot if so", so if
   their explanation is the one that lands, they may be the one credited for it (or teaching it) in the
   tutorial. To settle with the user once they've explained it.
