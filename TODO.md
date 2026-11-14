@@ -745,7 +745,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
 - **Sailing: booching at the top too easy (14 Nov):** "when I'm doing the sailing puzzle, it just feels really easy
   to booch on the top. Like, it drops a bit too quickly. It feels very unforgiving when I'm trying to maximize the
   space at the top. It's not fun to booch ... maybe ... just be a bit slower when you're one tile away from
-  booching." So the falling pair slows when it's a tile from booching.
+  booching." So the falling pair slows when it's a tile from booching. And "when I rotate things, they do still
+  seem to jump up further than the visual position would indicate. So I don't know if there's something a bit off
+  about that": turning the pair shouldn't lift it above where it's drawn falling (to check against the drawing).
 - **Helium's corner, one way in and one way out (14 Nov):** on the rum run, sailing for the back beach for the
   first time: "If you want to get to Helium's hideout, you have to do a 90-degree turn by rowing, because there's
   no way of bumping yourself there. I really like that ... I think that should be the only way of getting to
