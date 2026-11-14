@@ -145,7 +145,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   game) and offers that part's scenarios or single tricks to pick from. Not a chatbot. (The user: "somebody might not
   care about showing me basics ... They may be struggling with the end game"; "whatever structure we come up with
   ... should be a standard generic thing ... jump to this, let me show you this trick. Let me show you this phase
-  ... general concepts that we'll cover across all puzzles.")
+  ... general concepts that we'll cover across all puzzles.") How it's built: TUTORIALS.md, one description a
+  puzzle (src/tutorial.ts), the nav and the choice drawn from it.
 
 - **A demonstration shows its plan before it builds (12 Nov).** In any tutorial (Tzz's balloons, Helium's
   Distilling), the plan is on the board and said before the pieces go in, so every move is seen to serve
