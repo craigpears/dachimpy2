@@ -2848,6 +2848,7 @@ small ships because of the narrower gaps. I think that would be a cool proof of 
   you had a bigger ship with more guns ... you have to blast your way through the gate because that's the only
   way you can clear enough space for your big ship." A race or a run for frigates, the gate too narrow until
   it's blown open.
+- **Racing in either (14 Nov):** pick a war frigate or a sloop for the sloop race, each opening routes of its own: the frigate battling through, the sloop nimble (RACE.md §11).
 - **Primates Rule's own pictures (found 14 Nov):** Dachimpy.com's v3 on the user's NAS has PrimatesRule.jpg, her
   cabin and her galley (`//nas-pears/Projects/Dachimpy.com/Dachimpy.com/v3`), to check her look against.
 

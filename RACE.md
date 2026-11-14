@@ -1410,6 +1410,15 @@ check, a share link, and the den's own race for 3D.
 - Not every puzzle needs a place: "not that we necessarily need to worry about adding every single puzzle,
   we've got enough concepts here."
 
+- **Race in a war frigate or a sloop, each opening its own routes (14 Nov, an idea).** "I do love the idea of the
+  races being like you can choose either a [war frig] or a sloop, and that it unlocks different routes for you. It's
+  just, it just would be so funny. One person on the frig, one person on the sloop ... obviously the frig being the
+  I'm going to battle my way through kind of almost brute force option. Obviously, some will be mixed. The sloop will
+  have its nimble [ways] through." So you pick your ship at the start: the frigate brute-forces its way (blasting the
+  gate open, shrugging off the winds, "Bigger ships ride out the winds" in IDEAS.md), the sloop slips through the
+  narrow gaps and coves a frigate can't take; some routes open to both. Ties in with the frigate-and-sloop board
+  (IDEAS.md, "A war frigate and a sloop on one board") and blasting through the gate (§12's decision).
+
 ## 12. Open questions
 
 - **Should everyone have to fight through the imperial gate? No (the user, 14 Nov, thinking it through).** "Does it
