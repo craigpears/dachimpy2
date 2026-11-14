@@ -544,6 +544,8 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   And real people (14 Nov): "if they want a friendly community full of people ready to help them and have fun on the
   game or watch some real people and have a real interaction ... here is the link to the Trophy Hunters Discord
   page, which I think is the go-to." https://discord.gg/XtRHwP6XT
+  And Dachimpy at the door (14 Nov): "put my little pink character in ... Obviously, I need to welcome you to the
+  site. Like, would you like a cookie? That'd be hilarious."
 
 ## Spotted along the way (not asked for)
 
