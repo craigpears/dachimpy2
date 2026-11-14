@@ -679,6 +679,10 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   another, js/den/furniture.js. So a folder of small pieces, one file each: hairstyles, garments, hats, familiars,
   furniture, the colours (started 14 Nov: the palette as its own module), each piece registered by name, with a
   short guide (CONTRIBUTING.md) on adding one and a test page to see it on its own.
+  And the pictures by whose they are (14 Nov): "it feels a bit weird that museum is in the top level for the images
+  ... that's just a feature related to essentially a house ... like houses, and then [Dachimpy], and then ...
+  [museum]. But ... you should have similar for anyone else who has specific images for their house." **Done 14
+  Nov:** the museum's pictures moved to houses/dachimpy/museum/; any other house's own pictures go in houses/<host>/.
 
 ## Spotted along the way (not asked for)
 

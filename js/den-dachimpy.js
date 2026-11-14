@@ -1,6 +1,6 @@
 import { walkable } from './den-houses.js';
 import { ON_AN_EXHIBIT, ON_A_FRIEND, FRIEND_TITLES } from './lines/dachimpy.js';
-const shot = (id, file, w, h, title) => ({ id, kind: 'shot', file: `museum/${file}.jpg`, px: [w, h], title });
+const shot = (id, file, w, h, title) => ({ id, kind: 'shot', file: `houses/dachimpy/museum/${file}.jpg`, px: [w, h], title });
 const panel = (id, title) => ({ id, kind: 'panel', title });
 /** Everything on show, in the order you meet it: where it began in the hall, then the museum's, in the order
     the user told it (14 Nov): the raw HTML Bnav Guide and its first Shoot Dalnoth ("Each version requires some

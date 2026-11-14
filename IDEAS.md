@@ -1069,7 +1069,7 @@ portraits, Pandayay's trophies and Dachimpy's sims are all that piece.
 **Built (13 Nov), to be played:** Dachimpy's house, "The Museum", `den.html?at=dachimpy` (RULES.md has it):
 the hug and the cookie at the door every visit, more on the hall's plate; the banner, the title card and "Did you
 know?" (Dlonelyone) in the hall; the museum, the twelve screenshots in `notes/museum/` framed oldest first as
-`museum/*.jpg` with plaques in Dachimpy's voice, pages for the Bnav Guide and the end (Flash, Whirled, the Global
+`houses/dachimpy/museum/*.jpg` with plaques in Dachimpy's voice, pages for the Bnav Guide and the end (Flash, Whirled, the Global
 Cade Sim "works perfectly"), the little board whose sloop spins into the rocks; the friends' room, Kikkit, Zizzy
 and Sanne truly special in the middle, "Oh, Gawd!" with Gravee, "The Monkey Man", the den's pirates, a shelf of
 trinkets, the thank-you. Privacy: one screenshot cropped ("Create Your Game": its Invite Friends list showed

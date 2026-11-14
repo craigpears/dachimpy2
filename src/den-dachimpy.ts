@@ -37,7 +37,7 @@ import { ON_AN_EXHIBIT, ON_A_FRIEND, FRIEND_TITLES } from './lines/dachimpy.js';
 export interface Shot { id: keyof typeof ON_AN_EXHIBIT; kind: 'shot'; file: string; px: readonly [number, number]; title: string }
 export interface Panel { id: keyof typeof ON_AN_EXHIBIT; kind: 'panel'; title: string }
 export type Exhibit = Shot | Panel;
-const shot = (id: Shot['id'], file: string, w: number, h: number, title: string): Shot => ({ id, kind: 'shot', file: `museum/${file}.jpg`, px: [w, h], title });
+const shot = (id: Shot['id'], file: string, w: number, h: number, title: string): Shot => ({ id, kind: 'shot', file: `houses/dachimpy/museum/${file}.jpg`, px: [w, h], title });
 const panel = (id: Panel['id'], title: string): Panel => ({ id, kind: 'panel', title });
 /** Everything on show, in the order you meet it: where it began in the hall, then the museum's, in the order
     the user told it (14 Nov): the raw HTML Bnav Guide and its first Shoot Dalnoth ("Each version requires some

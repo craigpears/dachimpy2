@@ -72,17 +72,18 @@ describe('the museum: the old Blockade Simulator and Dachimpy.com, in order (the
       if (s.kind !== 'shot') continue;
       const file = join(ROOT, s.file);
       expect(existsSync(file), s.file).toBe(true);
-      expect(s.file).toMatch(/^museum\/[0-9]{2}-[a-z0-9-]+\.jpg$/);
+      expect(s.file).toMatch(/^houses\/dachimpy\/museum\/[0-9]{2}-[a-z0-9-]+\.jpg$/);
       const [w, h] = jpegSize(file);
       expect([w, h], s.file).toEqual([...s.px]);
       expect(w).toBeLessThanOrEqual(1280);
     }
   });
 
-  it('publishes museum/ with the site, and keeps notes/ unpublished', () => {
+  it('publishes its pictures with the site under houses/dachimpy/ (14 Nov: "house, like something specific, like houses, and then [Dachimpy]"), and keeps notes/ unpublished', () => {
     const ignore = readFileSync(join(ROOT, '.assetsignore'), 'utf8').split(/\r?\n/).map((l) => l.trim());
     expect(ignore).toContain('notes');
-    expect(ignore.some((l) => /^\/?museum/.test(l))).toBe(false);
+    expect(ignore.some((l) => /^\/?houses/.test(l))).toBe(false);
+    for (const e of EXHIBITS) if (e.kind === 'shot') expect(existsSync(join(ROOT, e.file)), e.file).toBe(true);
   });
 
   it('keeps them in order, as numbered, down the museum', () => {

@@ -1,6 +1,6 @@
 /* Exhibits, for any house's walls (IDEAS.md: "showing off beloved memories is a piece of its own, not
    Dachimpy's code: exhibits (a picture, a trinket, a plaque with its story) placed in any house as config"):
-   a photo (a picture published with the site, museum/*.jpg) as a texture for a frame and as an image for
+   a photo (a picture published with the site, houses/<host>/..., e.g. houses/dachimpy/museum/*.jpg) as a texture for a frame and as an image for
    the close view (picture-view.js), and a page of words painted on a canvas (a panel of a museum's story, a
    thank-you, a name), as a portrait is. Hung in frames from furniture.js, their plaques its `card`. Dachimpy's
    museum (dachimpy-house.js) is the first to use them. */
