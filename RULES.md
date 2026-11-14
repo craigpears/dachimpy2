@@ -490,12 +490,26 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     - **The friends' room.** Their friends' portraits, each painted from a look in PIRATES (pirate names
       only): the den's pirates, and some of Dachimpy's own portraits recreated under their real titles,
       Dachimpy beside the friend (a portrait's company can be a real pirate by name now): "Oh, Gawd!" with
-      Gravee, "The Monkey Man". In the middle, bigger, under a sign "Truly special": Kikkit ("Cursed &
-      Cookied"), Zizzy ("Pinky and the Pink") and Sanne ("Monkey Couple", Dachimpy in red to match her). A
+      Gravee, "The Monkey Man". **No one labelled special (the user, 14 Nov: "I'm feeling a bit bad about
+      having a few people in my house that are labelled as the special ones, because everybody's special"):**
+      no sign, no "truly special" in anything Dachimpy says; their tour line in the room is "Everyone on these
+      walls is special to me! Every single one." The closest simply hang in the middle, bigger, in ornate
+      frames between the candles (`middle`): **Daquan** at its centre ("my partner in crime through the whole
+      thing"), in "Scabard's group" (Emerald, 31 Mar 2008; drawn as him and Dachimpy, Dachimpy in a pink coat
+      and breeches; Fordenis and Scabard, in it too, and everyone's false noses aren't drawn), Kikkit ("Cursed &
+      Cookied"), Zizzy ("Pinky and the Pink"), Sanne ("Monkey Couple", Dachimpy in red to match her), and
+      **Whiterose** ("Heart of the Game": the user, 14 Nov, "the one pirate you could really trust to care about
+      the life of the game instead of taking the most powerful side, she would switch from Vanguard and play the
+      other side"; Dachimpy's line ends "Miss you, Whiterose!"). Along the wall too, Balloffire ("Top Gunner").
+      Daquan's, Balloffire's and Whiterose's looks are in PIRATES, from their yoweb portraits (14 Nov). A
       portrait with someone whose look isn't known is its title on a page, no figure ("Welcome Back
-      Dachimpy!", with Fable). A shelf of trinkets (furniture.js's `shelf`: a jar of cookies, a model sloop,
-      a ship in a bottle, a gold cup, a chest), and a page of thanks to everyone who makes Puzzle Pirates
-      what it is.
+      Dachimpy!", with Fable). A page for everyone they blockaded with, whose names have changed or slipped
+      away ("they're here"): "To everyone I blockaded with, whatever you're called now: Mems, Kenchio, my old
+      Hunter crew, and all of you whose names I've lost. You're here!" (only names checked on yoweb: no crew
+      named till it's confirmed, no Seatner till the spelling's found). A shelf of trinkets (furniture.js's
+      `shelf`: a jar of cookies, a model sloop, a ship in a bottle, a gold cup, a chest; stand-ins till the
+      user's screenshots of the real ones), and a page of thanks to everyone who makes Puzzle Pirates what it
+      is. The room is 21 metres wide for them all.
     - **The friends' portraits, as they were painted (14 Nov).** "Monkey Couple" looked awful ("oh my God,
       what is that?"), and "I'm pretty sure I've never had long hair ... Quality and fidelity, everything just
       really needs fixing." So each recreated portrait dresses everyone as the real one (yoweb, both oceans,

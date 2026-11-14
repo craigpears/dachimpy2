@@ -259,7 +259,7 @@ export const PIRATES = Object.fromEntries(Object.entries({
     hat: 'beehive', hatCol: 'rose', hatCol2: 'purple', top: 'braces', topCol: 'purple', waist: 'belt', waistCol: 'black',
     legs: 'kilt', legsCol: 'pink', legsCol2: 'purple', feet: 'shoes', feetCol: 'pink', hand: 'none', fam: 'none',
   },
-  // Sanne (Meridian), one of Dachimpy's truly special ones, from "Monkey Couple" (5 Jan 2007, the two of them in
+  // Sanne (Meridian), one of Dachimpy's closest, from "Monkey Couple" (5 Jan 2007, the two of them in
   // matching red on a beach; checked 13 Nov): fair skin, blonde hair tied back, gold hoops, a red shirt and red
   // trousers, a belt with a big gold buckle, white boots, a brown monkey on her shoulder.
   Sanne: {
@@ -267,12 +267,37 @@ export const PIRATES = Object.fromEntries(Object.entries({
     hat: 'none', top: 'belt', topCol: 'red', waist: 'buckle', waistCol: 'red',
     legs: 'pants', legsCol: 'red', feet: 'boots', feetCol: 'white', hand: 'none', fam: 'monkey', famCol: 'brown',
   },
-  // Zizzy (Meridian), one of Dachimpy's truly special ones, from "Pinky and the pink" (2012; checked 13 Nov): fair
+  // Zizzy (Meridian), one of Dachimpy's closest, from "Pinky and the pink" (2012; checked 13 Nov): fair
   // skin, long pink curls, a pink Dress top off the shoulder trimmed white, a pink Gown with a white panel.
   Zizzy: {
     body: 'f', skin: 0, hair: 'curly', hairCol: 'pink', patch: false, earring: false, smile: true,
     hat: 'none', top: 'dresstop', topCol: 'pink', topCol2: 'white', waist: 'none',
     legs: 'gown', legsCol: 'pink', legsCol2: 'white', feet: 'shoes', feetCol: 'pink', hand: 'none', fam: 'none',
+  },
+  // Daquan (Emerald, once Hunter), Dachimpy's partner in crime, as he was in 2008, the days they sailed together:
+  // his portraits "Daquan" (18 Jan 2008, The Mausoleum) and "Scabard's group" (31 Mar 2008, with Dachimpy;
+  // checked 14 Nov). Tan skin, short black hair under a black bandana, a black goatee and moustache, gold hoops;
+  // a long black coat with gold buttons over a white shirt, a black sash, black breeches, black boots.
+  Daquan: {
+    body: 'm', skin: 2, hair: 'short', hairCol: 'black', beard: 'goatee', patch: false, earring: 'both', smile: false,
+    hat: 'bandana', hatCol: 'black', top: 'swashbuckler', topCol: 'black', topCol2: 'gold', waist: 'sash', waistCol: 'black',
+    legs: 'pants', legsCol: 'black', feet: 'boots', feetCol: 'black', hand: 'none', fam: 'none',
+  },
+  // Balloffire (Emerald), the gunner (#1 Gunner, her trophies), from her pirate page's portrait (checked 14 Nov):
+  // tan skin, long blonde hair under a big navy wide-brimmed hat, an eyepatch, a navy top bare at the middle, a
+  // gold belt, navy trousers, a brown monkey on her shoulder.
+  Balloffire: {
+    body: 'f', skin: 2, hair: 'long', hairCol: 'blonde', patch: true, earring: false, smile: true,
+    hat: 'wide', hatCol: 'navy', hatCol2: 'navy', top: 'tied', topCol: 'navy', waist: 'belt', waistCol: 'gold',
+    legs: 'pants', legsCol: 'navy', feet: 'boots', feetCol: 'navy', hand: 'none', fam: 'monkey', famCol: 'brown',
+  },
+  // Whiterose (Meridian, once Viridian), from her pirate page's portrait (checked 14 Nov): fair skin, long wavy
+  // blonde hair crowned with red roses, an eyepatch; a red coat with black facings and gold buttons over a white
+  // shirt, a black sash, a short red skirt, black boots. (Her seahorse familiar isn't in the wardrobe.)
+  Whiterose: {
+    body: 'f', skin: 0, hair: 'wavy', hairCol: 'blonde', patch: true, earring: false, smile: true,
+    hat: 'roses', hatCol: 'red', hatCol2: 'green', top: 'buccaneer', topCol: 'red', topCol2: 'black', waist: 'sash', waistCol: 'black',
+    legs: 'short', legsCol: 'red', feet: 'boots', feetCol: 'black', hand: 'none', fam: 'none',
   },
 }).map(([name, look]) => [name, cleanLook(look)]));
 
@@ -1208,12 +1233,15 @@ export function dressPirate(look, opts = {}) {
   } else if (L.hat === 'roses') {
     // A crown of roses (Kikkit's, red; Roobear's wreath, dark purple with gold leaves), round the top of the
     // head, leaves in its second colour between them.
+    // (On wavy or long hair, laid in strands over the crown, it sits up and out on them, or they bury it:
+    // Whiterose's, 14 Nov.)
     const leaf = L.hatCol2 === 'gold' ? M(L.hatCol2, { metalness: 0.6, roughness: 0.35 }) : M(L.hatCol2), n = 9;
+    const up = L.hair === 'wavy' || L.hair === 'long' ? 0.045 : 0;
     for (let i = 0; i < n; i++) {
-      const a = (i / n) * Math.PI * 2, rr = hr * 0.86;
-      const rose = part(new THREE.SphereGeometry(0.05, 9, 7), hc, Math.sin(a) * rr, 1.07 + Math.cos(a) * 0.06, Math.cos(a) * rr - 0.02);
+      const a = (i / n) * Math.PI * 2, rr = hr * (0.86 + up * 1.6);
+      const rose = part(new THREE.SphereGeometry(0.05, 9, 7), hc, Math.sin(a) * rr, 1.07 + up + Math.cos(a) * 0.06, Math.cos(a) * rr - 0.02);
       rose.scale.set(1, 0.75, 1);
-      const lf = part(new THREE.SphereGeometry(0.035, 6, 4), leaf, Math.sin(a + 0.35) * rr * 1.04, 1.06 + Math.cos(a + 0.35) * 0.06, Math.cos(a + 0.35) * rr * 1.04 - 0.02);
+      const lf = part(new THREE.SphereGeometry(0.035, 6, 4), leaf, Math.sin(a + 0.35) * rr * 1.04, 1.06 + up + Math.cos(a + 0.35) * 0.06, Math.cos(a + 0.35) * rr * 1.04 - 0.02);
       lf.scale.set(1.4, 0.4, 0.7);
       hat.add(rose, lf);
     }

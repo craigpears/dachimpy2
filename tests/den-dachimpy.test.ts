@@ -4,12 +4,12 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  PLAN, ARRIVE, WALLS, EXHIBITS, hang, shotSize, SHOT_MAX, PAGE, exhibitLine, FRIENDS, FRIENDS_WALL, SPECIAL_SIGN, FURNISH,
-  COOKIES, atCookies, TOUR, stopAt, HUG, COOKIE, hugSpot, SHELF, MUSEUM_LEN, IN_RED, MONKEY_MAN, IN_RAGS,
+  PLAN, ARRIVE, WALLS, EXHIBITS, hang, shotSize, SHOT_MAX, PAGE, exhibitLine, FRIENDS, FRIENDS_WALL, FURNISH,
+  COOKIES, atCookies, TOUR, stopAt, HUG, COOKIE, hugSpot, SHELF, MUSEUM_LEN, IN_RED, MONKEY_MAN, IN_RAGS, IN_PINK_COAT,
 } from '../src/den-dachimpy';
 import { houseById, houseList, walkable, atWayOut, step, blocksOf, BACKDROPS, lookingAt, lookView, viewAt, LOOK_HOME, remark, GAZE_START, roomAt } from '../src/den-houses';
 import type { View, Gaze } from '../src/den-houses';
-import { AT_THE_DOOR, THE_COOKIE, ANOTHER_COOKIE, TOUR_LINES, PLAQUES, PANELS, ON_AN_EXHIBIT, ON_A_FRIEND, FRIEND_TITLES, THANKS, CHARACTER, GOODBYE } from '../src/lines/dachimpy';
+import { AT_THE_DOOR, THE_COOKIE, ANOTHER_COOKIE, TOUR_LINES, PLAQUES, PANELS, ON_AN_EXHIBIT, ON_A_FRIEND, FRIEND_TITLES, THANKS, EVERYONE, CHARACTER, GOODBYE } from '../src/lines/dachimpy';
 import { IN_DACHIMPYS_HOUSE } from '../src/lines/you';
 
 const ROOT = join(__dirname, '..');
@@ -242,7 +242,7 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
         const s = f.portrait.sitter.who === 'pirate' ? f.portrait.sitter : null;
         for (const name of [s!.name, ...(s!.company ?? []).map((c) => c.name ?? '')]) expect(pirates, name).toMatch(new RegExp(`\\n  ${name}: \\{`));
         expect(BACKDROPS).toContain(f.portrait.backdrop);
-      } else expect(['welcomeBack', 'thanks']).toContain(f.page);
+      } else expect(['welcomeBack', 'everyone', 'thanks']).toContain(f.page);
     }
     // (Fable's look isn't known: "Welcome Back Dachimpy!" is its title on a page, no figure)
     expect(FRIENDS.find((f) => f.id === 'welcomeBack')).toMatchObject({ page: 'welcomeBack' });
@@ -260,15 +260,36 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
     }
   });
 
-  it('gives the truly special ones the middle, bigger, under their own sign: Kikkit, Zizzy and Sanne (13 Nov: "Sanne needs to be in the truly special board as well")', () => {
-    const special = FRIENDS.filter((f) => f.special).map((f) => f.id);
-    expect(special).toEqual(['kikkit', 'zizzy', 'sanne']);
+  it('labels no one special, everybody\'s special (14 Nov: "I\'m feeling a bit bad about having a few people in my house that are labelled as the special ones, because everybody\'s special"): the closest in the middle, bigger, Daquan at its centre', () => {
+    const middle = FRIENDS.filter((f) => f.middle).map((f) => f.id);
+    expect(middle).toEqual(['kikkit', 'zizzy', 'daquan', 'sanne', 'whiterose']);
     const mid = (FRIENDS_ROOM.x0 + FRIENDS_ROOM.x1) / 2;
+    expect(FRIENDS.find((f) => f.id === 'daquan')!.x).toBeCloseTo(mid, 5);   // ("my partner in crime through the whole thing")
     for (const f of FRIENDS) {
-      if (f.special) { expect(Math.abs(f.x - mid)).toBeLessThan(1.6); continue; }
-      for (const s of FRIENDS.filter((g) => g.special)) expect(s.w * s.h).toBeGreaterThan(f.w * f.h);
+      if (f.middle) { expect(Math.abs(f.x - mid)).toBeLessThan(3); continue; }
+      for (const s of FRIENDS.filter((g) => g.middle)) expect(s.w * s.h).toBeGreaterThan(f.w * f.h);
     }
-    expect(SPECIAL_SIGN.x).toBeCloseTo(mid, 5);
+    // no sign, and no "truly special" anywhere in what Dachimpy says or hangs
+    const all = JSON.stringify({ TOUR_LINES, ON_A_FRIEND, FRIEND_TITLES, THANKS, EVERYONE });
+    expect(all).not.toMatch(/special ones|truly special/i);
+    expect(TOUR_LINES.friends.join(' ')).toMatch(/Everyone on these walls is special/);
+    expect(readFileSync(join(ROOT, 'js', 'den', 'dachimpy-house.js'), 'utf8')).not.toMatch(/FURNITURE\.sign|SPECIAL/);
+    expect(ON_A_FRIEND.daquan).toMatch(/partner in crime/);
+  });
+
+  it('gives Whiterose a frame of her own (14 Nov: "she would switch from Vanguard and play the other side ... miss you whiterose!"), Gravee and Balloffire theirs, and a page for everyone they blockaded with', () => {
+    for (const id of ['whiterose', 'gravee', 'balloffire', 'daquan'] as const) expect(FRIENDS.find((f) => f.id === id)?.portrait, id).toBeTruthy();
+    expect(ON_A_FRIEND.whiterose).toMatch(/Vanguard/);
+    expect(ON_A_FRIEND.whiterose).toMatch(/Miss you, Whiterose!/);
+    expect(FRIENDS.find((f) => f.id === 'everyone')).toMatchObject({ page: 'everyone' });
+    expect(EVERYONE).toMatch(/whatever you're called now/);
+    expect(EVERYONE).toMatch(/Mems/);
+    expect(EVERYONE).toMatch(/You're here!/);
+    // Daquan in "Scabard's group", beside Dachimpy, under its real title; Dachimpy short-haired, as ever
+    expect(FRIEND_TITLES.daquan).toMatch(/Scabard's Group/);
+    const s = FRIENDS.find((f) => f.id === 'daquan')!.portrait!.sitter;
+    expect(s.who === 'pirate' && s.company?.[0]).toMatchObject({ kind: 'pirate', name: 'Dachimpy' });
+    expect(['short', 'bald']).toContain(IN_PINK_COAT.hair);
   });
 
   it('"Monkey Couple" looked awful (14 Nov: "oh my God, what is that?"; "I\'m pretty sure I\'ve never had long hair"): Dachimpy fully clothed in red, short hair, as in the real portrait', () => {
@@ -304,11 +325,10 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
     expect(zizzy).toMatch(/legs: 'gown', legsCol: 'pink'/);
   });
 
-  it('hangs them along the back wall without overlapping, inside the room, under the sign', () => {
+  it('hangs them along the back wall without overlapping, inside the room', () => {
     const F = [...FRIENDS].sort((a, b) => a.x - b.x);
     for (let i = 1; i < F.length; i++) expect(F[i].x - F[i].w / 2 - 0.15, F[i].id).toBeGreaterThan(F[i - 1].x + F[i - 1].w / 2);
     for (const f of F) { expect(f.x - f.w / 2).toBeGreaterThan(FRIENDS_ROOM.x0 + 0.3); expect(f.x + f.w / 2).toBeLessThan(FRIENDS_ROOM.x1 - 0.3); }
-    for (const s of F.filter((f) => f.special)) expect(SPECIAL_SIGN.y - SPECIAL_SIGN.h / 2).toBeGreaterThan(s.y + s.h / 2 + 0.15);
     expect(FRIENDS_WALL).toBeCloseTo(FRIENDS_ROOM.z0 + 0.2, 5);
   });
 
