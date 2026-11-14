@@ -683,6 +683,13 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   ... that's just a feature related to essentially a house ... like houses, and then [Dachimpy], and then ...
   [museum]. But ... you should have similar for anyone else who has specific images for their house." **Done 14
   Nov:** the museum's pictures moved to houses/dachimpy/museum/; any other house's own pictures go in houses/<host>/.
+  And catalogue pages to see every piece (14 Nov): "if this is going to support her helping with things ... she's
+  going to need some kind of less technical way of viewing them ... a list of here are all the colors that are
+  configurable. Here's a list of all the furniture and kind of what they look like, a list of each of the hairstyles
+  and such, and ... a rendering of each ... something for them to work with and then be able to give critique and
+  feedback on ... It's partly documentation, but also a test page." So a catalogue page for each kind of piece,
+  each drawn from the same registry the den uses (so a new piece shows there by itself): colours (started 14 Nov,
+  catalogue-colours.html), then furniture, hairstyles, clothes and familiars, each rendered.
 
 ## Spotted along the way (not asked for)
 
