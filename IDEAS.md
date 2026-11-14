@@ -2872,3 +2872,15 @@ decorating competition, above). In it: a copy of Dachimpy, with the cat named Fa
 Fable all over them; and something of the St Jude's yearly fundraiser she helps run with Jazz. Her look's in the den
 now (indigo and hot pink, a crown of roses, a pink octopus), and she's in "Welcome Back Dachimpy!" on the friends'
 wall.
+
+## Trading at Port Decorum, unlocked by getting Dignity on side (14 Nov, vague, for the list)
+
+After being turned away at Port Decorum's jetty on Helium's rum run: "maybe ... a good quest for later ... you
+unlock trading ... I don't know if Dignity could be involved in that. Like, you know, that somehow you get her on
+side and it gives you also the legitimacy so that the guy at the fort doesn't immediately flag you as a pirate.
+Don't really know how that works. That's just kind of a vague idea for the list at the moment." Not necessarily
+Dignity: "for somebody or some kind of line like that." A quest that wins you standing with the Empire, after which
+the jetty guard lets you trade. With a doubt about trading itself: "I find the trading very awkward because ... it's
+not very meaningful when it's single player and ... the game design is designed to be quick and fun rather than
+deep in the sense of ... persistent." So whatever it unlocks should be quick and fun, a scene or a keepsake, not an
+economy.
