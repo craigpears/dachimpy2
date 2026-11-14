@@ -106,9 +106,9 @@ describe('the bots are their target chains, 13 Nov (the thirtieth note: "I want 
   });
   it('never dismisses: when a chain breaks it goes back to building toward the next ("then it will start working on the next one")', () => {
     let chained = false, rebuilt = false;
-    // (Seed 5000: on 5002, since the pair rescue (13 Nov), its chains of 3, 4 and 1 each break with whites still banked,
-    // so it chains them again and never needs to rebuild in 8 minutes.)
-    const r = playSession(new Distilling(seeded(5000)), levelNamed('cc2'), 8, undefined, (a) => {
+    // (Seed 5002: on 5000, since the late game's channels (14 Nov), its chains break with whites still banked, so it
+    // chains them again and never needs to rebuild in 8 minutes; it was 5000 since the pair rescue did the same on 5002.)
+    const r = playSession(new Distilling(seeded(5002)), levelNamed('cc2'), 8, undefined, (a) => {
       expect(a.kind).not.toBe('dismiss');
       expect(a.target).toBe(2);
       expect(a.whitesNeeded).toBeGreaterThanOrEqual(0);
@@ -701,5 +701,20 @@ describe('the CC^1 opening (the user, 13 Nov, watching CC^1: "it should be like 
         if (after) expect(after[a.column].filter((p) => p === WHITE).length, `seed ${seed}`).toBeGreaterThanOrEqual(g.cols[a.column].filter((p) => p === WHITE).length);
       });
     }
+  });
+});
+
+describe('the first chain started further left (the user, 14 Nov: "a person would not be wanting to put themselves under so much pressure")', () => {
+  it('with P.FIRST_AT on, the CC^1 bot\'s first column is at least that many in from the fire; off (the default), wherever the first mostly-white column from the right is', () => {
+    const was = P.FIRST_AT;
+    const firstColumn = (seed: number) => { const g = new Distilling(seeded(seed)), bot = new DistillBot(levelNamed('cc1')); return bot.plan(g).column ?? -1; };
+    try {
+      // Off: it burned more whites (DISTILLING.md, "The late game: whites go right", 14 Nov).
+      expect(P.FIRST_AT).toBe(0);
+      // (seed 5004 deals a mostly-white column second from the fire)
+      expect(firstColumn(5004)).toBe(COLS - 2);
+      P.FIRST_AT = 4;
+      for (const seed of [5000, 5004, 5007]) expect(firstColumn(seed), `seed ${seed}`).toBeLessThanOrEqual(COLS - 4);
+    } finally { P.FIRST_AT = was; }
   });
 });

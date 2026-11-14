@@ -59,6 +59,8 @@ import type { Phase } from './distill-phase.js';
 import { TACTICS, hoistDrags, hoistOrder, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, sorts, tailDrags, tipDrags, toolBrowns } from './distill-read.js';
 import type { BoardState, Reading, Tactic } from './distill-read.js';
 import { joinPairs } from './distill-teach.js';
+import { channelReason, channelRuns } from './distill-channel.js';
+import type { ChannelPlan } from './distill-channel.js';
 import { ownGoal, purposeful, stepsFor } from './distill-goals.js';
 import type { Aims, DragStep } from './distill-goals.js';
 import type { Ctx, Drag, Move, RoutineName } from './distill-routines.js';
@@ -240,7 +242,21 @@ export const P = {
   QUICK_FIRST: 1,
   /** Sorting the ladder or the tail: a brown brought down to the V's tip first (P29, P30; 0 off). */
   TIP: 1,
+  /** The chain: a white brought along a channel into the junk's place in the column being filled, the channel built
+      first if need be (src/distill-channel.ts, the late game, the user, 14 Nov; 0 off). */
+  CHANNEL: 1,
+  /** The first chain's column at least this many columns in from the fire, the furnace's counted as the first (`DistillBot`;
+      the user, 14 Nov: "a person would not be wanting to put themselves under so much pressure"; 0 off, wherever the
+      first mostly-white column from the right is). */
+  FIRST_AT: 0,
 };
+
+/** The late game's channel's name for a player. */
+export const CHANNEL_LABEL = 'Through a channel';
+/** A channel plan (src/distill-channel.ts) as a move: the channel routine's, named for itself. */
+export function channelMove(cols: Board, p: ChannelPlan): Move {
+  return { routine: 'channel', label: CHANNEL_LABEL, drags: p.drags.map((d) => ({ x: d.x, y: d.y, ways: [...d.ways] })), reason: channelReason(cols, p) };
+}
 
 /** What the planner says to do now: its stage, and a routine's drags, a burn, a wait or a dismiss, with
     the routine's name for a player and the reason in a line. */
@@ -658,6 +674,10 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style, reading?: Reading)
     if (!style.routines.includes(name)) continue;
     for (const found of ROUTINES[name].find(cols, ctx)) consider(found);
   }
+  // The late game's channels (src/distill-channel.ts; the user, 14 Nov: "they create a kind of channel for the white to go
+  // through"): a white brought along a channel into the place of the junk in the column being filled, the channel built
+  // first where there's none.
+  if (!one && P.CHANNEL && style.path) for (const p of channelRuns(cols, ctx, style)) consider(channelMove(cols, p));
   // Quick sorting with time in hand (the board read, P3: "I'll just be going down, browns up"): its blacks down and
   // browns up into the places of the whites by the fire.
   if (read?.tactic === 'quickSort' && read.targets.length && style.path) {
@@ -1163,7 +1183,10 @@ export class DistillBot {
     // out as Stage I gets them out. (Burning the columns as they stood instead, a buffer begun in the chain, burned CC^1's
     // whites: 0.9 a session, not 0.5, the seventeenth run; and 1.1 with the chain made to save them.)
     if (this.stage === 'junk' && decisionTime(g.cols, bankFor(target)) && (this.chained || doneFromRight(g.cols) + this.junkGone >= P.BUFFER)) {
-      this.stage = 'chain'; this.burns = burnsLeft(g.cols); this.chained = true;
+      // (The first chain's column started a little further left, P.FIRST_AT columns in from the fire at the least: the
+      // user, 14 Nov, "a person would not be wanting to put themselves under so much pressure, so they would have
+      // started it a bit further to the left"; the columns right of it burn first, their whites got out into it.)
+      this.stage = 'chain'; this.burns = Math.max(burnsLeft(g.cols), this.chained ? 0 : P.FIRST_AT - 1); this.chained = true;
     }
     // After a chain broke, the whites still banked on the right are sent up, a new chain, not turned into junk
     // columns to burn (the thirteenth run, traced 13 Nov: back in Stage I with the bank still on the right, every

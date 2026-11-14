@@ -538,6 +538,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   going right through a black channel or a brown one then a black one into the target (DISTILLING.md, "The late
   game: whites go right"); and the first target started further left, "a person would not be wanting to put
   themselves under so much pressure".
+  - **Done 14 Nov (branch, not merged):** P43 kept and judged, the channel built and on (better for CC^3, CC^5 and CC^8,
+    CC^1 even, CC^2 3.4 to 3.7 chains on 40 fresh boards, a few more whites burned there to watch); the first target further left built as
+    `P.FIRST_AT`, off: it burned more whites in CC^1, CC^2 and CC^8. The user to decide.
 - **A welcome page tying the tutorials together: "what are you here for?" (14 Nov):** "some kind of a page that
   starts tying together like the tutorial side of this ... when you come in, you should be ... given the option of
   ... what are you here for?" The choices: "just having a bit of fun and a look around" (the den); "I want to try
@@ -650,6 +653,23 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   And Whiterose (she), from Viridian (now Meridian), a place of her own: "she was so incredible. The one pirate you could really
   trust to care about the life of the game instead of taking the most powerful side, she would switch from Vanguard
   and play the other side, will always remember that ❤️ miss you whiterose!"
+- **Rowing: a lopsided Bingo's worth should turn her, even by accident (14 Nov):** after hearing a Bingo on one side
+  gives a quarter turn and a Vegas a half: "not even Vegas, but just a bit of an accidental ... I want it to be
+  possible to almost do accidentally if you leave it ... the original idea was if you did like a bingo on one side,
+  yeah, it would do a quarter turn. Like that doesn't seem to obviously happen, but it should also be possible with
+  the same score, like the equivalent of a bingo, but with ... if you don't balance out the other side." So a Bingo
+  on one side plainly turns her a quarter in play, and so does the same pull built up from smaller clears on one
+  side left unbalanced; check why it doesn't show in play (the keel's straightening, the threshold, or the turn
+  not reading on screen).
+- **The crane in Umami's quest: the ship covers the puzzle (14 Nov):** "I'm doing the crane part of the Umami
+  Capybara quest, and the ship now does seem to be overlapping with the puzzle, so that it's obscuring it a bit."
+  The board should sit clear of her.
+- **Every dye in the wardrobe, and a list of them (14 Nov):** Fable is asking about her periwinkle colour (the den
+  has no periwinkle). "Are you able to check that we've definitely got full coverage of all the colours? Look at
+  Fable on Meridian ... Is that a purple? ... people are going to be sad if they can't completely recreate their
+  pirate. So there needs to be a list somewhere." So every Puzzle Pirates clothing colour (YPPedia's Clothing
+  palette, the limited editions too) in the wardrobe, each sampled from a real portrait where the wiki's swatch is
+  off, Fable's checked on Meridian; and a public list of them all.
 
 ## Spotted along the way (not asked for)
 

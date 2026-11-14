@@ -64,6 +64,7 @@ const TRICK_WORDS = {
     kept: { title: 'A brown kept bottom-left', line: 'Don\'t clear the left greedily: a brown bottom-left and a black top-left are tools for later.' },
     fluid: { title: 'One fluid motion, once the right side\'s sorted', line: 'A black from the far left down under the whites and up the browns till it joins the blacks: one drag.' },
     pair: { title: 'The pair rescue', line: 'A brown stuck at the top of a column going up: two pieces working together free it.' },
+    channelIn: { title: 'Through a channel', line: 'The late game, whites going right: a white run down a channel of browns and up one of blacks into the place of the junk in the column going up, the channel built first if need be.' },
 };
 /** Each technique in a line, in the page's words (Helium's own on each are their HELP, src/lines/helium.ts). */
 const TECHNIQUE_LINES = {

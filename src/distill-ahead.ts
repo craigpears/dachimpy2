@@ -19,7 +19,7 @@ import { WHITE } from './distilling.js';
 import type { Board } from './distilling.js';
 import { chainContext, choose, contextFor, focusOf, timeFor } from './distill-bots.js';
 import type { Advice, Level } from './distill-bots.js';
-import { playDrags } from './distill-routines.js';
+import { isJunk, playDrags } from './distill-routines.js';
 import type { Drag } from './distill-routines.js';
 import type { DragStep, Goal } from './distill-goals.js';
 
@@ -66,6 +66,13 @@ export function ahead(s: Stand, level: Level, most = AHEAD.MOVES): Ahead {
         aim = `free column ${at.x + 1}'s white in row ${at.y + 1}`;
         done = (b) => held === WHITE && b[at.x][at.y] !== WHITE;
         on = (m) => (m.steps ?? []).some((st) => !!st.goal?.at && st.goal.at.x === at.x && st.goal.at.y === at.y);
+      } else if (g?.kind === 'channel' && g.at && cols[g.at.x].filter(isJunk).length > 1) {
+        // The late game's channels (src/distill-channel.ts): the column cleared of junk, a white along a channel in for
+        // each piece of it, the plan seen through (the user, 14 Nov: "So that's what I would expect it to plan out here").
+        const x = g.at.x;
+        aim = `clear column ${x + 1} of junk: a white along a channel in for each piece`;
+        done = (b) => !b[x].some(isJunk);
+        on = (m) => (m.steps ?? []).some((st) => st.goal?.kind === 'channel');
       } else if (g?.kind === 'setUp') {
         aim = 'save the white by the fire';
         done = (_, m) => (m.steps ?? []).some((st) => st.goal && ['save', 'fill', 'free', 'untrap'].includes(st.goal.kind));

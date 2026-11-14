@@ -106,7 +106,7 @@ const NOT_FOUND: Readonly<Record<string, string>> = {
 const moved = (p: { id: string; like?: string }) => !!THEMED[p.id] && !!p.like && THEMED[p.id].theme !== THEMED[p.like]?.theme;
 describe('the batch to judge', () => {
   it('numbered on from the judged positions, in its two parts, every one a real moment on a deal not judged before', () => {
-    const judged = POSITIONS.filter((p) => !p.batch);
+    const judged = POSITIONS.filter((p) => !p.batch && !p.shot);   // (a board from the user's screenshot, kept as judged, numbered on after the batch)
     expect(BATCH.length).toBeGreaterThanOrEqual(12);
     expect(Math.min(...BATCH.map((p) => Number(p.id.slice(1))))).toBeGreaterThan(Math.max(...judged.map((p) => Number(p.id.slice(1)))));
     for (const part of Object.keys(BATCHES)) expect(BATCH.some((p) => p.batch === part), part).toBe(true);

@@ -123,7 +123,7 @@ const MOMENT = {
 
 /** A position as written in the file, a few readable lines. */
 function format(p) {
-  const head = ['id', 'moment', 'level', 'seed', 'ms', 'stage', 'burns', 'chain', 'timeLeft', 'batch', 'like', 'shut'].filter((k) => p[k] !== undefined).map((k) => `${k}: ${JSON.stringify(p[k])}`).join(', ');
+  const head = ['id', 'moment', 'level', 'seed', 'ms', 'stage', 'burns', 'chain', 'timeLeft', 'batch', 'like', 'shut', 'shot'].filter((k) => p[k] !== undefined).map((k) => `${k}: ${JSON.stringify(p[k])}`).join(', ');
   return `  {\n    ${head},\n    what: ${JSON.stringify(p.what)},\n    cols: ${JSON.stringify(p.cols)},\n    bot: ${JSON.stringify(p.bot)},${p.plan ? `\n    plan: ${JSON.stringify(p.plan)},` : ''}\n  },`;
 }
 function write(list) {

@@ -14,8 +14,10 @@
      fills the gaps), the right-hand pair sorted (`ladder`), the V's tail sorted (`tail`), stranded junk freed
      (`cracks`), the way opened to a trapped white or the pieces round it set moving (`open`, the tactic's opening);
    - a white out of the columns to burn (`save`, the white dragged out; `fill`, junk dragged into its place);
-   - in the chain, junk out of the column being filled or the two after it (`build`), a white brought toward it, junk
-     taken back left out of its way;
+   - in the chain, a white along a channel into the column being filled, in for a piece of junk there (`channel`: down
+     through browns, up through blacks, the late game, the user, 14 Nov; src/distill-channel.ts), and the drag of junk
+     past junk just before it that built the channel (`buildChannel`); junk out of the column being filled or the two
+     after it (`build`), a white brought toward it, junk taken back left out of its way;
    - a stuck piece freed (`untrap`: a white with no way out, or junk among the whites with none, src/distill-path.ts's
      `stuck`);
    - in Stage I, junk carried right to the colour, let go against junk or in the columns being built (`pull`), never
@@ -41,10 +43,11 @@ import { disorder, ladderBad, stranded, tailOrder } from './distill-patterns.js'
 import { stuck } from './distill-path.js';
 
 /** What a drag is for. */
-export type GoalKind = 'save' | 'fill' | 'free' | 'open' | 'build' | 'untrap' | 'pull' | 'bank' | 'hoist' | 'ladder' | 'tail' | 'cracks' | 'store' | 'makeWay' | 'setUp';
+export type GoalKind = 'save' | 'fill' | 'free' | 'open' | 'build' | 'channel' | 'buildChannel' | 'untrap' | 'pull' | 'bank' | 'hoist' | 'ladder' | 'tail' | 'cracks' | 'store' | 'makeWay' | 'setUp';
 /** Each goal's kind in a word or two, for the pages. */
 export const GOALS: Readonly<Record<GoalKind, string>> = {
-  save: 'Save a white', fill: 'Fill a gap', free: 'Free a white', open: 'Open the way', build: 'Build the Crystal Clear', untrap: 'Free a stuck piece',
+  save: 'Save a white', fill: 'Fill a gap', free: 'Free a white', open: 'Open the way', build: 'Build the Crystal Clear',
+  channel: 'Through a channel', buildChannel: 'Build a channel', untrap: 'Free a stuck piece',
   pull: 'Junk to the colour', bank: 'A white to the others', hoist: 'Hoist', ladder: 'Sort the junk', tail: 'Sort the tail', cracks: 'Fix a crack', store: 'Store the junk',
   makeWay: 'Make way', setUp: 'Set up the save',
 };
@@ -74,6 +77,20 @@ function endOf(cols: Board, d: Drag): [number, number] {
   let at: [number, number] = [d.x, d.y];
   for (const w of d.ways) { const n = neighbourOn(cols, at[0], at[1], w); if (!n) break; at = n; }
   return at;
+}
+/** What a white's drag passes through, in words: "through the blacks", "down through the browns, then up through the
+    blacks". */
+function throughWords(b: Board, d: Drag): string {
+  const runs: string[] = [];
+  let at: [number, number] = [d.x, d.y];
+  for (const w of d.ways) {
+    const n = neighbourOn(b, at[0], at[1], w);
+    if (!n) break;
+    const k = b[n[0]][n[1]] === BLACK ? 'up through the blacks' : 'down through the browns';
+    if (runs[runs.length - 1] !== k) runs.push(k);
+    at = n;
+  }
+  return runs.length > 1 ? runs.join(', then ') : runs[0]?.replace(/^(up|down) /, '') ?? '';
 }
 const whitesIn = (b: Board, x: number) => b[x].filter((p) => p === WHITE).length;
 const junkIn = (b: Board, x: number) => b[x].filter(isJunk).length;
@@ -144,6 +161,12 @@ export function ownGoal(b: Board, d: Drag, a: Board, aims: Aims): Goal | null {
     return p === WHITE && burns(d.x) ? { kind: 'save', says: `get ${whiteAt(b, d.x, d.y)} ${where}` }
       : { kind: 'fill', says: `fill column ${fell + 1}'s gap: its white ${out ? 'out left before it burns' : 'further from the fire'}` };
   }
+  // The late game's channel (src/distill-channel.ts; the user, 14 Nov): a white along a channel into the column being
+  // filled, in for a piece of junk there, the junk back along the path.
+  if (!one && p === WHITE && ctx.fill >= 0 && end[0] === ctx.fill && d.x < ctx.fill && isJunk(b[end[0]][end[1]]) && a[end[0]][end[1]] === WHITE) {
+    const q = PIECE[b[end[0]][end[1]]];
+    return { kind: 'channel', says: `${whiteAt(b, d.x, d.y)} along a channel ${throughWords(b, d)} into column ${ctx.fill + 1}, in for the ${q} in row ${end[1] + 1}, the ${q} back along the path`, at: { x: end[0], y: end[1] } };
+  }
   // The chain: the columns going up next cleared of junk, whites brought toward them, junk out of their way.
   if (!one && ctx.fill >= 0) {
     for (const x of [ctx.fill, ctx.fill - 1, ctx.fill - 2]) {
@@ -200,6 +223,16 @@ export function stepsFor(cols: Board, drags: readonly Drag[], aims: Aims): DragS
     out.push({ tricks, name: trickName(tricks), goal: a ? ownGoal(b, d, a, aims) : null });
     if (!a) break;
     b = a;
+  }
+  // A drag of junk past junk (the ladder) just before a white goes along a channel: it built the channel (the user, 14
+  // Nov: "drag a brown down-left through the blacks ... a nice channel of brown pieces").
+  for (let i = 0, bb = cols; i < out.length - 1; i++) {
+    const d = drags[i], next = out[i + 1].goal;
+    if (next?.kind === 'channel' && (!out[i].goal || out[i].goal!.kind === 'makeWay') && out[i].tricks.length && out[i].tricks.every((t) => t === 'ladder')) {
+      const brown = bb[d.x][d.y] === BROWN;
+      out[i].goal = { kind: 'buildChannel', says: `build the channel: the ${brown ? 'brown sunk down through the blacks' : 'black lifted up through the browns'}, for the white to come through` };
+    }
+    bb = playDrags(bb, [d]) ?? bb;
   }
   for (let i = out.length - 1; i >= 0; i--) {
     if (out[i].goal) continue;
