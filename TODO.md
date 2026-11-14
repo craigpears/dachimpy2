@@ -923,25 +923,29 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   automatically track or follow anything. Different orientations seem to hide too much or too little of different
   things. Like ... that top bar can take up like a third of the screen, and I can't really see or tell what's going
   on." So on a phone: the top bar small (or tucked away), the camera movable by touch, the race watched following
-  someone by default, and each orientation showing the sea and what matters.
+  someone by default, and each orientation showing the sea and what matters. For watching the race, done 14 Nov
+  (RACE.md §10, "Watching on a phone"); the rest of the den on a phone still to go through.
 
 - **Watching a racer shows her racing, not an idle board (14 Nov):** "even if I click on observe Kick It, why have
   I got a bunch of buttons and then there's a puzzle where nothing's happening? Like, the default, I would have
   thought, is you see ... them puzzling on deck and in the sails, so you can kind of observe ... you have that
   kind of nice observing version. That kind of solves this. How much can we fit on the screen at one time?" So
   following a racer shows her sloop, her puzzling on deck and on her sails, with her board small or out of the
-  way, as much on the screen at once as fits.
+  way, as much on the screen at once as fits. Done 14 Nov: small in the corner, a tap for big, no touch pad; and no
+  board at all through the start's field, where she steers (it had sat idle there for most of a minute).
 
 - **Sailing has an impact you can see (14 Nov, again; see "A rival's Sailing shows on her sails", 12 Nov):**
   "there's still no impact of sailing ... when you see, for example, Kikkit complete a single or a double as she's
   going along, you should visibly see the jump, the ship sparkle even a tiny bit and start moving faster. There's
-  no impact visible at the moment." Each clear: a visible surge, a sparkle on her sails, more speed.
+  no impact visible at the moment." Each clear: a visible surge, a sparkle on her sails, more speed. Done 14 Nov,
+  every racer's sloop, raced or watched: her bow lifting with spray, her sails glinting (a plain clear a little).
 
 - **A watched racer's Sailing runs on its own, not in step with her moves (14 Nov):** "watching Kick-It ... her
   sailing puzzle, it seems almost in sync with the turns. It's like a piece drops fluidly, she puts it in place,
   and then it's like there's a pause waiting for the next turn ... this should be running relatively separately.
   Or is it having performance issues waiting on the rest of the things to all update?" Her pieces should keep
-  coming at her own pace, not wait on the race's steps (to find out which it is).
+  coming at her own pace, not wait on the race's steps (to find out which it is). Found 14 Nov: not lag; each piece
+  was steered down in a rush, then waited for the race's next drop. Now steered down steadily through the time.
 
 - **Teach the sailing bots to build Vegases (14 Nov):** "her sailing is just extremely [poor]. She's building a
   giant combo of nothing. Though I do love that she got bopped by somebody, and you can see the little ... things

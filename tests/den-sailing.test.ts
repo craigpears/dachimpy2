@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { Helm, LAY, SAIL, Sea, type Pose, type SailEvent } from '../src/den-sail';
 import { WEATHER, Wind } from '../src/den-wind';
-import { BILLOW, SPARKLE, Sparkle, billow, carry, carrySay, gustPath, sparkleFor } from '../src/den-sailing';
+import { BILLOW, SPARKLE, SURGE, Sparkle, billow, carry, carrySay, gustPath, sparkleFor, surgeFor } from '../src/den-sailing';
 import { runFor } from '../src/sailing';
 
 /** Open sea: no rocks, no lanes, no wind to put her in irons (every move SAIL.MOVE). */
@@ -203,13 +203,20 @@ describe('what\'s said (carrySay)', () => {
 });
 
 describe('doing well shows (Sparkle; the user, 11 Nov: "a sparkly indicator, and sparkly full sails")', () => {
-  it('bigger chains, more show: nothing for a plain clear, a little glitter for a Double, everything for a Vegas', () => {
-    expect([0, 1, 2, 3, 6, 9].map(sparkleFor)).toEqual([0, 0, 0.25, 0.45, 1, 1]);
+  it('bigger chains, more show: a glint for a plain clear (14 Nov: "the ship sparkle even a tiny bit"), a little glitter for a Double, everything for a Vegas', () => {
+    expect([0, 1, 2, 3, 6, 9].map(sparkleFor)).toEqual([0, 0.12, 0.25, 0.45, 1, 1]);
     for (let s = 1; s < 6; s++) expect(sparkleFor(s + 1)).toBeGreaterThan(sparkleFor(s));
     const a = new Sparkle(), b = new Sparkle();
     a.chain(2); b.chain(6, 7);
     expect(a.full()).toBe(false);
     expect(b.full()).toBe(true);
+  });
+  it('every gust shows as it takes her, a single clear too, bigger with a bigger chain (14 Nov: "you should visibly see the jump")', () => {
+    expect(surgeFor(1)).toBeGreaterThan(0.3);
+    for (let s = 1; s < 6; s++) expect(surgeFor(s + 1)).toBeGreaterThan(surgeFor(s));
+    expect(surgeFor(6)).toBe(1);
+    expect(surgeFor(3, 0)).toBe(0);   // (held up: no gust, no surge)
+    expect(SURGE.EASE).toBeGreaterThan(0.3);
   });
   it('lasts while the gust carries her and a while after, then fades away', () => {
     const s = new Sparkle();

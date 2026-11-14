@@ -51,7 +51,7 @@ const RC = LAY.RACE;
 /** Each racer's desk: her boards, kept as she left them; the one on show; its beat. */
 const desks = new Map();
 /** The Sailing board on screen (one: the followed racer's game is laid on it). */
-const panel = { B: null, of: -1, layout: null, linger: 0, lowT: 0, low: 0, top: 0 };
+const panel = { B: null, of: -1, layout: null, linger: 0, lowT: 0, low: 0, top: 0, big: false };
 
 const deskOf = (i, seed) => {
   if (!desks.has(i)) desks.set(i, { i, seed: seed * 31 + i * 7 + 1, now: null, key: '', pacer: new Pacer(2), sail: null, guns: null, forage: null, bilge: null, carp: null, vegas: null });
@@ -64,7 +64,13 @@ function sailDesk(D) {
   return D.sail;
 }
 function sailShow(D, game = D.sail.game) {
-  panel.B ||= sailBoardMake(null);
+  if (!panel.B) {
+    panel.B = sailBoardMake(null);
+    // (watched, small in the corner; a tap makes it big, another small again)
+    panel.B.cv.title = 'Tap to make her board bigger or smaller';
+    panel.B.cv.style.cursor = 'zoom-in';
+    panel.B.cv.addEventListener('click', () => { panel.big = !panel.big; panel.B.cv.style.cursor = panel.big ? 'zoom-out' : 'zoom-in'; });
+  }
   if (panel.of !== D.i || panel.game !== game) { sailBoardLay(panel.B, game); sailBoardSnap(panel.B); panel.of = D.i; panel.game = game; }
 }
 /* Her very board, under way (W.sailor: src/race-sailor.ts): the race's own, laid here from the same deal and
@@ -97,7 +103,10 @@ function liveTick(L, S, dt) {
     L.pair.reset();
     L.route = route(L.game, { pair: L.game.pair, col: S.aim.col, turn: S.aim.turn, row: S.aim.row }) ?? [];
     L.done = 0; L.stepT = 0;
-    L.every = Math.max(0.03, Math.min(0.08, ((S.every - S.t) * 0.8) / Math.max(1, L.route.length)));
+    // (steered down steadily through the time before it lands, as a pirate does, not in a rush and then a wait:
+    // the user, 14 Nov, "a piece drops fluidly, she puts it in place, and then ... there's a pause waiting for the
+    // next turn")
+    L.every = Math.max(0.06, Math.min(0.45, ((S.every - S.t) * 0.85) / Math.max(1, L.route.length + 1)));
   }
   if (!L.route) return;
   L.stepT += dt;
@@ -110,23 +119,26 @@ function liveTick(L, S, dt) {
   }
 }
 /** A drop to make: steered down its route a move at a time (sailStep), then landed. */
-function sailAim(Sd, drop) {
+function sailAim(Sd, drop, every = 0.6) {
   if (!drop) return;
   Sd.pair.reset();
   Sd.route = route(Sd.game, { pair: Sd.game.pair, col: drop.col, turn: drop.turn, row: drop.row }) ?? [];
   Sd.drop = drop; Sd.done = 0; Sd.stepT = 0;
+  // (steadily, through most of the beat before the next, as under way: liveTick)
+  Sd.every = Math.max(0.06, Math.min(0.45, (every * 0.8) / (Sd.route.length + 1)));
 }
 function sailStep(Sd, dt) {
   if (!Sd.route) return;
   Sd.stepT += dt;
-  while (Sd.stepT > 0.08 && Sd.done < Sd.route.length) {
+  const every = Sd.every ?? 0.08;
+  while (Sd.stepT > every && Sd.done < Sd.route.length) {
     const st = Sd.route[Sd.done++], P = Sd.pair;
-    Sd.stepT -= 0.08;
+    Sd.stepT -= every;
     if (st === 'left') P.slide(-1); else if (st === 'right') P.slide(1);
     else if (st === 'turnR') P.turnBy(1); else if (st === 'turnL') P.turnBy(-1);
     else P.row++;
   }
-  if (Sd.done >= Sd.route.length && Sd.stepT > 0.12) {
+  if (Sd.done >= Sd.route.length && Sd.stepT > Math.min(0.12, every)) {
     const res = Sd.pair.slam();
     Sd.route = null;
     if (panel.game === Sd.game) { sailBoardDrop(panel.B, res, Sd.game); sailBoardSnap(panel.B); }
@@ -147,8 +159,8 @@ function vegasLay(D, now) {
 function sailDue(D, now) {
   const Sd = D.sail;
   if (sailBusy(Sd)) return;
-  if (now.why === 'vegas' && D.vegas) { if (D.vegas.queue.length > 1) sailAim(Sd, D.vegas.queue.shift()); return; }
-  sailAim(Sd, SAIL_BOTS.shallow(Sd.game));
+  if (now.why === 'vegas' && D.vegas) { if (D.vegas.queue.length > 1) sailAim(Sd, D.vegas.queue.shift(), D.pacer.every); return; }
+  sailAim(Sd, SAIL_BOTS.shallow(Sd.game), D.pacer.every);
 }
 
 /* ---------- Gunnery, on her deck ---------- */
@@ -278,7 +290,7 @@ export function watchBoardsTick(dt, W, follow, boats) {
   if (panel.B) panel.B.el.style.display = showPanel ? '' : 'none';
   if (showPanel) {
     if ((panel.lowT -= dt) <= 0) { panel.lowT = 0.5; panel.low = $('dock')?.getBoundingClientRect().top || innerHeight; panel.top = document.getElementById('watchbar')?.getBoundingClientRect().bottom ?? 0; }
-    panel.layout = sailBoardLayout(panel.B, panel.low, panel.top, false);
+    panel.layout = sailBoardLayout(panel.B, panel.low, panel.top, false, 0, { big: panel.big });
     if (L) liveTick(L, S, dt); else sailStep(Sd, dt);
     sailBoardTick(panel.B, dt, Sd.route ? Sd.pair : null);
   } else {

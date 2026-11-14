@@ -137,6 +137,17 @@
     #watchbar .wb-plan .wb-label { background: none; border: none; color: var(--gold); padding: 0; }
     #watchbar .wb-plan em { flex-basis: 100%; color: #ffd27a; font-style: normal; }
     @media (max-width: 620px) { #watchbar { font-size: 13px; } #watchbar .wb-keys { display: none; } }
+    #watchbar .wb-who small { color: var(--dim); font-size: 11px; }
+    /* On a phone: a slim bar (the user, 14 Nov: "that top bar can take up like a third of the screen"): the line of
+       what's happening, then one row of buttons big enough to tap, sliding sideways if they don't all fit; her plan
+       is in the line already (her leg), so its row goes. */
+    @media (pointer: coarse), (max-width: 620px), (max-height: 500px) {
+      #watchbar { top: 6px; padding: 4px 8px; width: calc(100vw - 12px); max-width: none; box-sizing: border-box; }
+      #watchbar .wb-now { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
+      #watchbar .wb-plan, #watchbar .wb-keys { display: none; }
+      #watchbar .wb-who { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; margin: 4px 0 0; }
+      #watchbar .wb-who button { flex: none; min-height: 44px; padding: 0 12px; font-size: 14px; }
+    }
     /* The sloop race, racing or in its lobby: the den's panels slimmed to what applies (the user, 12 Nov: "a big
        dump of text ... needs to be a lot lighter. Lot lighter. What does H head home mean in this context?").
        body.racing: the den's top panel only its name, Race online and Pause; the sailing bar's keys without
@@ -696,7 +707,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.TVAGPL36.js')
+    import(local ? './js/den.js' : './js/den.W6R2E6WA.js')
       .then(() => requestAnimationFrame(() => requestAnimationFrame(() => {   // (the den's first frame drawn: the splash fades)
         const s = document.getElementById('splash');
         s.classList.add('gone');

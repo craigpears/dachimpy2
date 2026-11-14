@@ -101,6 +101,9 @@ export function boardOf(x: BotInfo | null): BoardNow | null {
     const m = x.move;
     if (m?.kind === 'load') return at('gunnery', 'load', m.left, SIM.PUZZLE.load);
     if (m?.kind === 'hop') return at('sailing', m.id === 'triple' ? 'triple' : 'double', m.left, SIM.PUZZLE[m.id === 'triple' ? 'triple' : 'double']);
+    // (steering through the start's field, not Sailing: no board, rather than one where nothing's happening; the
+    // user, 14 Nov, "why have I got ... a puzzle where nothing's happening?")
+    if (x.field) return null;
     return at('sailing', 'pilot', Infinity, Infinity);
   }
   return null;
@@ -190,6 +193,7 @@ export function doing(x: BotInfo | null, next: CutId | null, home: number | null
   if (x.hop > 0) return 'lining up a Double over the trade wind';
   if (x.move?.kind === 'hop') return `building a ${x.move.id === 'triple' ? 'Triple' : 'Double'} on the move (Sailing)`;
   if (x.move?.kind === 'load') return 'loading a shot by Gunnery, under way';
+  if (x.field) return 'steering through the start\'s whirlpools and slow winds';
   if (x.route === 'long' || !next || next === 'zigzag') return 'sailing the long way (Sailing on the pilot)';
   return `sailing for ${WHERE[next]} (Sailing on the pilot)`;
 }

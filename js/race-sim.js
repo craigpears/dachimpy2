@@ -1393,6 +1393,7 @@ export function sail(o, sea) {
                 mode: b.mode, was: b.was, cut: b.cut?.id ?? null, stage: b.stage, work: Math.max(0, b.work), full: b.full, tries: b.tries, daze: Math.max(0, b.daze),
                 move: b.move ? { ...b.move } : null, hop: Math.max(0, b.hop), coming: (b.mode === 'stop' || b.mode === 'wait') && !!b.walk,
                 route: b.route.name, style: b.style.name, best: b.best, skill: b.skill, done: [...b.done], plan: [...b.choices], changes: b.changes.map((x) => ({ ...x })),
+                field: b.mode === 'sail' && !b.move && !(b.hop > 0) && (() => { const p = b.helm.gustFrom(); return stretchAt(p.c, p.r) < 0; })(),
             };
         },
     };

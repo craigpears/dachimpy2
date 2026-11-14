@@ -19,7 +19,7 @@ import { STARTER } from '../lines/race.js';
 import { RACE } from '../den-race.js';
 import { camera, renderer, pirate, toast, V3 } from './world.js';
 import { sail, seaX, seaZ } from './sea.js';
-import { rivalBoat, boatAt, boatSay, broadsideFx } from './race-field.js';
+import { rivalBoat, boatAt, boatSay, broadsideFx, boatGusts } from './race-field.js';
 import { race } from './race.js';
 import { watchBoardsTick, watchBoardsIdle, watchBoardsFired, watchBoardView, watchBoardsReset } from './watch-boards.js';
 
@@ -27,7 +27,7 @@ const RC = LAY.RACE;
 /** The watched race: on or not, its Watch, the sloops, the free camera, the camera following a racer (its
     own way round, tilt and distance, turned and zoomed as the free one is), and how far it's gone over to
     framing her board (0 to 1). */
-export const watch = { on: false, W: null, boats: [], cam: null, fol: { yaw: 0.5, tilt: 0.55, dist: 26 }, view: 0, shot: null, held: new Set(), bar: null, ptr: new Map(), pinch: 0 };
+export const watch = { on: false, W: null, boats: [], cam: null, fol: { yaw: 0.5, tilt: 0.55, dist: 26 }, view: 0, shot: null, held: new Set(), bar: null, ptr: new Map(), pinch: 0, auto: true, leadT: 0 };
 
 const course = () => ({ x0: seaX(0), x1: seaX(SAIL.COLS - 1), z0: seaZ(RC.R0), z1: seaZ(RC.FINISH[1] + 1) });
 const near = (B) => B.g.visible && camera.position.distanceTo(B.g.position) < 45;
@@ -45,12 +45,16 @@ export function watchStart() {
   watch.cam ||= new FreeCam(course());
   watch.cam.goTo(seaX(13), seaZ(RC.LINE.r + 4));
   Object.assign(watch.cam.shot, { yaw: 0, tilt: WATCH.CAM.TILT, dist: WATCH.CAM.DIST });
+  // Following the leader from the start, the camera on her (the user, 14 Nov: "It doesn't automatically track or
+  // follow anything"); a racer picked, or the free camera, ends that, and Leader goes back to it.
+  watch.auto = true; watch.leadT = 0;
   watch.W.pick(-1);
+  follow(watch.W.standings()[0].i, true);
   race.said.hail = true;   // (no starter's hail at the buoy: you're not racing)
   WATCHED.forEach((R, k) => boatSay(watch.boats[k], R.racer.says.start));
   document.body.classList.add('watching');
   bar();
-  toast('Watching the race · 1 to 4 follow a racer · 0 the free camera');
+  toast(matchMedia('(pointer: coarse)').matches ? 'Watching the leader · tap a racer to follow her · drag to look around' : 'Watching the leader · 1 to 4 follow a racer · L the leader · 0 the free camera');
 }
 /** Watching's over (another cheat, or a fresh voyage). */
 export function watchStop() {
@@ -65,9 +69,11 @@ export function watchStop() {
 }
 
 // ---------- the keys and the mouse ----------
-/** Whom to follow: racer `i`, or the free camera (-1), from where the camera's looking now. */
-function follow(i) {
+/** Whom to follow: racer `i`, or the free camera (-1), from where the camera's looking now; `auto`, the
+    leader's being followed (otherwise it stops). */
+function follow(i, auto = false) {
   const W = watch.W, was = W.follow;
+  watch.auto = auto;
   W.pick(i);
   if (W.follow < 0 && was >= 0) { const B = watch.boats[was]; watch.cam.goTo(B.g.position.x, B.g.position.z); Object.assign(watch.cam.shot, { yaw: watch.fol.yaw, tilt: Math.max(WATCH.CAM.TILT_MIN, watch.fol.tilt), dist: Math.max(30, watch.fol.dist) }); }
   if (W.follow >= 0 && was < 0) watch.fol.yaw = watch.cam.shot.yaw;
@@ -77,6 +83,7 @@ export function watchKey(key, e) {
   if (!watch.on) return false;
   const W = watch.W;
   if (['1', '2', '3', '4'].includes(key)) { follow(Number(key) - 1); return true; }
+  if (key === 'l') { follow(W.standings()[0].i, true); return true; }
   if (key === 'tab') { if (W.follow < 0) follow(W.standings()[0].i); else follow((W.follow + (e?.shiftKey ? W.racers.length - 1 : 1)) % W.racers.length); return true; }
   if (key === '0' || key === 'escape' || key === 'f') { follow(-1); return true; }
   if (key === 'n') { watchStart(); toast('Another race'); return true; }
@@ -104,6 +111,11 @@ addEventListener('pointermove', (e) => {
     const [a, b] = [...watch.ptr.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
     if (watch.pinch) zoom(watch.pinch / Math.max(1, d));
     watch.pinch = d;
+  } else if (e.pointerType === 'touch' && watch.W?.follow < 0) {
+    // (a finger on the free camera drags the sea along with it, so you can look round the race: 14 Nov, "I can't
+    // move the camera around on the mobile to see the race")
+    const k = watch.cam.shot.dist / Math.max(200, innerHeight) * 1.6;
+    watch.cam.move(dy * k, -dx * k);
   } else turn(-dx * 0.006, dy * 0.004);
   e.stopImmediatePropagation();
 }, true);
@@ -118,14 +130,26 @@ function bar() {
   if (!watch.bar) {
     const el = watch.bar = document.createElement('div');
     el.id = 'watchbar';
-    el.innerHTML = '<div class="wb-now"></div><div class="wb-plan"></div><div class="wb-who"></div><div class="wb-keys">1–4 follow a racer · Tab next · 0 free camera · W A S D move · Q E or drag turn · wheel zoom · N another race · X stop watching</div>';
-    el.querySelector('.wb-who').addEventListener('click', (e) => { const b = e.target.closest('[data-i]'); if (b) follow(Number(b.dataset.i)); });
+    el.innerHTML = '<div class="wb-now"></div><div class="wb-plan"></div><div class="wb-who"></div><div class="wb-keys">1–4 follow a racer · L the leader · Tab next · 0 free camera · W A S D move · Q E or drag turn · wheel zoom · N another race · X stop watching</div>';
+    el.querySelector('.wb-who').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-i]');
+      if (!b) return;
+      if (b.dataset.i === 'lead') follow(watch.W.standings()[0].i, true);
+      else if (b.dataset.i === 'free') follow(-1);
+      else follow(Number(b.dataset.i));
+    });
     document.body.appendChild(el);
   }
   watch.bar.style.display = '';
   const W = watch.W, b = W.bar();
-  const now = W.follow < 0 ? `<b>${b.clock}</b> · Free camera${b.doing ? ` · ${b.doing}` : ''}` : `<b>${b.clock}</b> · Watching <b style="color:${W.racers[W.follow].sail}">${b.who}</b> · ${b.place} · ${b.leg} · ${b.doing}`;
-  const who = W.standings().map((s) => `<button data-i="${s.i}" class="${s.i === W.follow ? 'on' : ''}"><i style="background:${W.racers[s.i].sail}"></i>${s.i + 1} ${s.name}${s.time !== null ? ` ${['1st', '2nd', '3rd', '4th'][s.place - 1]}` : ''}</button>`).join('');
+  const now = W.follow < 0 ? `<b>${b.clock}</b> · Free camera${b.doing ? ` · ${b.doing}` : ''}` : `<b>${b.clock}</b> · ${watch.auto ? 'The leader, ' : ''}<b style="color:${W.racers[W.follow].sail}">${b.who}</b> · ${b.place} · ${b.leg} · ${b.doing}`;
+  // (the racers always in the same order, their places on them, so a tap lands on the one you meant: 14 Nov,
+  // tapping Kikkit followed Tzz, the buttons having swapped round under the finger)
+  const placeOf = new Map(W.standings().map((s) => [s.i, s]));
+  const who = `<button data-i="lead" class="${watch.auto ? 'on' : ''}">Leader</button>` + W.racers.map((R, i) => {
+    const s = placeOf.get(i);
+    return `<button data-i="${i}" class="${i === W.follow && !watch.auto ? 'on' : ''}"><i style="background:${R.sail}"></i>${R.name}${s ? ` <small>${['1st', '2nd', '3rd', '4th'][s.place - 1]}</small>` : ''}</button>`;
+  }).join('') + `<button data-i="free" class="${W.follow < 0 ? 'on' : ''}">Free</button>`;
   // Her plan (src/race-plan.ts): the legs still to come and her choice on each, the one she's on lit; and anyone's
   // change of plan as it happens (13 Nov: "if you're watching the race, you should ... be able to see what
   // people's plans are"). Following nobody, just the changes.
@@ -133,12 +157,11 @@ function bar() {
   const legs = W.follow >= 0 && W.state !== 'count' ? plans[W.follow].legs : [];
   const plan = (legs.length ? `<span class="wb-label">Plan</span> ${legs.map((l) => `<span class="${l.now ? 'now' : ''}" title="${l.puzzle}">${l.leg} ${l.name.replace(/^The /, '')}</span>`).join(' ')}` : '')
     + changed.map((c) => `<em>${c}</em>`).join('');
-  const sig = now + plan + who;
-  if (watch.bar.dataset.sig === sig) return;
-  watch.bar.dataset.sig = sig;
-  watch.bar.querySelector('.wb-plan').innerHTML = plan;
-  watch.bar.querySelector('.wb-now').innerHTML = now;
-  watch.bar.querySelector('.wb-who').innerHTML = who;
+  // (each part redrawn only when it changes: the clock ticking mustn't remake the buttons under your finger)
+  for (const [sel, html] of [['.wb-now', now], ['.wb-plan', plan], ['.wb-who', who]]) {
+    const el = watch.bar.querySelector(sel);
+    if (el.dataset.sig !== html) { el.dataset.sig = html; el.innerHTML = html; }
+  }
 }
 
 // ---------- each tick ----------
@@ -173,7 +196,14 @@ export function watchTick(dt) {
     B.g.visible = true;
     B.who.tick(dt);
     boatAt(B, i, poseOf(W, i), (W.run?.lift(i) ?? 0) * 6, W.field.racers[i].state === 'dazed', dt);
+    boatGusts(B, W.run?.carries(i) ?? [], dt);
   });
+  // Following the leader: on to whoever's led a couple of seconds (not flicking between two neck and neck).
+  if (watch.auto && W.state !== 'count') {
+    const lead = W.standings()[0].i;
+    watch.leadT = lead === W.follow ? 0 : watch.leadT + dt;
+    if (watch.leadT > 2.5) { follow(lead, true); watch.leadT = 0; }
+  }
   // The camera's keys: moved (free), turned.
   const h = watch.held, k = (a, b) => (h.has(a) || h.has(b) ? 1 : 0);
   const fwd = k('w', 'arrowup') - k('s', 'arrowdown'), side = k('d', 'arrowright') - k('a', 'arrowleft'), rot = k('q', 'q') - k('e', 'e');

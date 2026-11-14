@@ -113,6 +113,11 @@ describe('jumping between racers, and a bar saying what each is doing (12 Nov)',
     expect(doing(x({ mode: 'trip', cut: 'rocks' }), null, null)).toMatch(/rocks were blasted/);
     expect(doing(x({ route: 'locks' }), 'locks', null)).toBe('sailing for the locks (Sailing on the pilot)');
     expect(doing(x({ move: { kind: 'load', left: 3 } }), null, null)).toBe('loading a shot by Gunnery, under way');
+    // (through the start's field she steers, her board idle: said so, and no board shown, 14 Nov: "a puzzle where
+    // nothing's happening")
+    expect(doing(x({ field: true }), null, null)).toBe('steering through the start\'s whirlpools and slow winds');
+    expect(boardOf(x({ field: true }))).toBeNull();
+    expect(boardOf(x({}))?.why).toBe('pilot');
     expect(doing(null, null, 2)).toBe('home, 2nd');
   });
 });

@@ -34,24 +34,28 @@ function star() {
 }
 
 /** A frame of it on her (`g`, the sloop), for `sp` (a Sparkle): her sails filled and lit by its
-    level, and sparkles off them at a rate that grows with it. */
+    level, and sparkles off them at a rate that grows with it; then every sparkle moved on (sparkleFx). */
 export function sparkleTick(g, sp, dt) {
-  fx.t += dt;
-  const level = sp?.level ?? 0, { cloths, mat } = sloopSails(g);
+  sparkleOn(g, sp, dt);
+  sparkleFx(dt);
+}
+/** The show on one sloop (`g`) for `sp`: any racer's, yours or a rival's (race-field.js, boatGusts). */
+export function sparkleOn(g, sp, dt) {
+  const level = sp?.level ?? 0, { cloths } = sloopSails(g), own = g?.userData ?? fx;
   const up = g?.visible && cloths.length && cloths[0].parent.visible;
   // Her sails billow out, fuller with a bigger chain (their shape's the wind's to draw, with this on
   // top: wind.js, by src/den-sailing.ts's billow), and glow gold.
   if (g) g.userData.swell = level;
-  if (mat?.emissive) mat.emissive.copy(fx.glow).multiplyScalar(0.45 * level);
+  for (const m of new Set(cloths.map((c) => c.material))) if (m?.emissive) m.emissive.copy(fx.glow).multiplyScalar(0.45 * level);   // (a rival's sails each their own cloth)
   // Sparkles off the cloth, streaming aft: off its face toward the camera, where they're seen (from
   // behind her, the far side of her sails, toward her bow, hid them), and round its edges.
   if (up && level > 0.01) {
-    fx.owed += dt * 90 * level ** 1.3;
+    own.owed = (own.owed || 0) + dt * 90 * level ** 1.3;
     g.updateMatrixWorld(true);
     fx.bow.set(1, 0, 0).transformDirection(g.matrixWorld);
-    for (; fx.owed >= 1; fx.owed--) {
+    for (; own.owed >= 1; own.owed--) {
       const s = star();
-      if (!s) { fx.owed = 0; break; }
+      if (!s) { own.owed = 0; break; }
       const c = cloths[Math.floor(Math.random() * cloths.length)], P = c.geometry.parameters;
       const seen = c.worldToLocal(fx.v.copy(camera.position)).z >= 0 ? 1 : -1;   // (the camera's side of it)
       const x = (Math.random() - 0.5) * P.width, y = (Math.random() - 0.5) * P.height;
@@ -64,6 +68,13 @@ export function sparkleTick(g, sp, dt) {
       fx.stars.push(s);
     }
   }
+}
+/** Every sparkle and streak moved on, once a frame however many sloops are sparkling. */
+export function sparkleFx(dt) {
+  if (fx.moved) return;
+  fx.moved = true;
+  queueMicrotask(() => { fx.moved = false; });   // (once this frame's done)
+  fx.t += dt;
   fx.stars = fx.stars.filter((s) => {
     const u = s.userData;
     if ((u.t += dt) >= u.life) { scene.remove(s); fx.free.push(s); return false; }

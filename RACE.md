@@ -1263,6 +1263,26 @@ Yeah, no hidden ... not for a proof of concept. It didn't really work"). Built t
 
 ## 10. Watching (built), the course editor (built) and replays (idea)
 
+**Watching on a phone, and seeing the Sailing (14 Nov):** "I want people to get into it quick ... I can't move the
+camera around on the mobile to see the race. It doesn't automatically track or follow anything ... that top bar can
+take up like a third of the screen"; "why have I got a bunch of buttons and then there's a puzzle where nothing's
+happening?"; "there's still no impact of sailing". So:
+- Watching starts on the leader, the camera with her, moving on to whoever's led a couple of seconds; a racer
+  tapped (or 1 to 4), or Free, ends that; Leader (L) goes back to it. A finger on the free camera drags the sea
+  along; the mouse still turns it.
+- The racers' buttons always in the same order, their places on them, and redrawn only when something changes
+  (tapping Kikkit had followed Tzz: the buttons swapped round under the finger as places changed).
+- Her board watched: small in the bottom-left corner, no touch pad (nothing of yours to steer), a tap making it
+  big; her sloop and her puzzling on deck and in the sails get the screen. On a phone (or any short screen) the
+  bar is slim: the line of what's happening, one row of buttons big enough to tap.
+- Through the start's field she steers, not Sails (§7): her board was shown idle there for most of a minute, "a
+  puzzle where nothing's happening". Now no board there, and the bar says she's steering through it.
+- Her pieces steered down steadily through the time before the next lands, not a rush and then a wait ("a piece
+  drops fluidly, she puts it in place, and then ... a pause waiting for the next turn").
+- Every racer's gusts show on her sloop as they take her, in the race you sail as well as the watched one: her
+  bow lifting with a burst of spray, her sails glinting (a plain clear too, a little), more with a bigger chain, a
+  Vegas's whoosh (src/den-sailing.ts, SURGE and SPARKLE; race-field.js, boatGusts).
+
 "Replays, and ... that would go down to the detail of the actual puzzling, because that's kind of what
 you're watching." A replay shows the sea and every sloop on it, with each racer's board beside them, move by
 move. It's cheap to keep, because the puzzles are dealt from a seed: a run is its seeds and its moves with

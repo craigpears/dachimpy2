@@ -16,6 +16,8 @@ import { sail, seaX, seaZ, liftAt, sloopMesh, SLOOP_DECK } from './sea.js';
 import { deckHoleShape } from './sea-puzzles.js';
 import { capybaraMesh } from './foraging.js';
 import { person } from './props-people.js';
+import { Sparkle, SURGE, surgeFor } from '../den-sailing.js';
+import { sparkleOn, sparkleFx, sparkleWhoosh } from './sail-sparkle.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL;
 /** Each rival's sloop (by her number in the field, 1 up), as drawn; how near you have to be to hear her. */
@@ -131,6 +133,7 @@ export function fieldTick(dt, Rc, on) {
     B.who.tick(dt);
     if (!show) { B.at = null; return; }
     boatAt(B, k, spotOf(Rc, i), (Rc.run?.lift(i) ?? 0) * 6, Rc.field.racers[i].state === 'dazed', dt);
+    boatGusts(B, Rc.run?.carries(i) ?? [], dt);
   });
 }
 
@@ -152,6 +155,36 @@ export function boatAt(B, k, p, lift, dazed, dt) {
   if (dazed) {
     B.stars.rotation.y += dt * 4;
     if ((B.smokeT -= dt) < 0) { B.smokeT = 0.25; burst(B.g.localToWorld(V3(0.2, SLOOP_DECK + 0.6, 0)), '#6f6a66', 3, 0.7); }
+  }
+}
+
+/** Her Sailing's gusts on her sloop, as they take her (any racer's: the race's rivals here, the watched race's
+    in race-watch.js; `carries`, the run's record of them, src/race-sim.ts): her bow lifting with a burst of
+    spray, her sails glinting gold and sparkling, more with a bigger chain, a Vegas's whoosh (the user, 14 Nov:
+    "when you see ... Kikkit complete a single or a double ... you should visibly see the jump, the ship sparkle
+    even a tiny bit and start moving faster"). After boatAt, each tick. */
+export function boatGusts(B, carries, dt) {
+  B.sparkle ||= new Sparkle();
+  if (carries.length < (B.gusts ?? 0)) { B.gusts = 0; B.sparkle = new Sparkle(); B.surge = 0; }   // (a fresh race)
+  for (; (B.gusts ?? 0) < carries.length; B.gusts = (B.gusts ?? 0) + 1) {
+    const c = carries[B.gusts ?? 0];
+    if (!B.g.visible) continue;
+    B.sparkle.chain(c.steps, c.went, SAIL.PUSH);
+    const s = surgeFor(c.steps, c.went);
+    if (s > 0) {
+      B.surge = Math.max(B.surge ?? 0, s);
+      burst(B.g.localToWorld(V3(1.7, 0.25, 0)), '#e6f3f6', Math.round(SURGE.SPRAY * s), 2.5 + 2 * s);
+    }
+    if (B.sparkle.full()) sparkleWhoosh(B.g);
+  }
+  B.sparkle.tick(dt);
+  sparkleOn(B.g, B.sparkle, dt);
+  sparkleFx(dt);
+  B.surge = Math.max(0, (B.surge ?? 0) - dt / SURGE.EASE);
+  if (B.surge > 0) {
+    const e = Math.sin(Math.min(1, B.surge) * Math.PI / 2);   // (eased: quick up, slow down)
+    B.g.rotation.z += e * SURGE.PITCH;
+    B.g.position.y += e * 0.12;
   }
 }
 

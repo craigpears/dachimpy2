@@ -757,6 +757,9 @@ export interface BotInfo {
   /** Her plan as it stands, and her changes to it in the race (src/race-plan.ts): what someone watching sees. */
   plan: Plan;
   changes: PlanChange[];
+  /** Under way but steering through the start's field of slow winds and whirlpools, not Sailing (her board idle
+      till she's through): what someone watching sees instead of a board where nothing's happening (14 Nov). */
+  field?: boolean;
 }
 
 /** How far round the long way a racer at `p` is (seconds of it), going by the stretch she's on, or the
@@ -1378,6 +1381,7 @@ export function sail(o: SimOptions, sea?: Sea): SimRun {
         mode: b.mode, was: b.was, cut: b.cut?.id ?? null, stage: b.stage, work: Math.max(0, b.work), full: b.full, tries: b.tries, daze: Math.max(0, b.daze),
         move: b.move ? { ...b.move } : null, hop: Math.max(0, b.hop), coming: (b.mode === 'stop' || b.mode === 'wait') && !!b.walk,
         route: b.route.name, style: b.style.name, best: b.best, skill: b.skill, done: [...b.done], plan: [...b.choices], changes: b.changes.map((x) => ({ ...x })),
+        field: b.mode === 'sail' && !b.move && !(b.hop > 0) && (() => { const p = b.helm.gustFrom(); return stretchAt(p.c, p.r) < 0; })(),
       };
     },
   };

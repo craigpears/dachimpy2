@@ -141,9 +141,10 @@ export function carrySay(steps, c) {
    one, a booch knocks most of it out, and it drains slowly with time, so it shows how you've been
    sailing lately. js/den/sail-station.js draws it, on her (js/den/sea.js's sails) and the board. */
 export const SPARKLE = {
-    /** The show a chain puts on, by its steps: none for a plain clear, a little glitter for a Double,
-        everything for a Vegas. */
-    BY_STEPS: [0, 0, 0.25, 0.45, 0.62, 0.8, 1],
+    /** The show a chain puts on, by its steps: a glint for a plain clear (the user, 14 Nov: "when you see ... Kikkit
+        complete a single or a double ... you should visibly see the jump, the ship sparkle even a tiny bit"), a
+        little glitter for a Double, everything for a Vegas. */
+    BY_STEPS: [0, 0.12, 0.25, 0.45, 0.62, 0.8, 1],
     /** Seconds it stays at its height after the gust's spent, then the seconds it takes to fade away. */
     HOLD: 3,
     FADE: 5,
@@ -156,6 +157,20 @@ export const SPARKLE = {
     BOOCH_KEEPS: 0.3,
 };
 const bySteps = (t, steps) => t[Math.max(0, Math.min(t.length - 1, Math.floor(steps)))];
+/** A gust's surge on her, seen as it takes her (14 Nov: "you should visibly see the jump ... and start moving
+    faster. There's no impact visible at the moment"): her bow lifting and a burst of spray, bigger with a bigger
+    chain, easing off over `EASE` seconds. Any racer's sloop, yours or a rival's (race-field.js, boatGusts). */
+export const SURGE = {
+    /** How big, by the chain's steps (0 to 1): a plain clear already a clear lift. */
+    BY_STEPS: [0, 0.4, 0.55, 0.7, 0.8, 0.9, 1],
+    /** Seconds it takes to ease off. */
+    EASE: 0.9,
+    /** Her bow's lift at its biggest (radians), and the spray's puffs. */
+    PITCH: 0.09,
+    SPRAY: 14,
+};
+/** The surge a gust of a chain of `steps` puts on her (0 to 1), none when it carries her nowhere. */
+export const surgeFor = (steps, went = 1) => (went > 0 ? bySteps(SURGE.BY_STEPS, steps) : 0);
 /** The show a chain of `steps` puts on (0 to 1). */
 export const sparkleFor = (steps) => bySteps(SPARKLE.BY_STEPS, steps);
 /** The sparkle: the show on her now, and the meter of how well you're sailing. */

@@ -305,19 +305,23 @@ export function sailBoardMake(onPad) {
    to its right; on a tall one (a phone) along the bottom, above the prompt, the sea above it. The
    touch pad goes beside it, on a tall screen always, on a wide one only for a touch screen. `low`:
    the screen's height left above the prompt; `top`: below the den's panel at the top. Says where
-   the sea shows: `free`, a rectangle in pixels. */
-export function sailBoardLayout(B, low, top, touch = matchMedia('(pointer: coarse)').matches, right = 0) {
+   the sea shows: `free`, a rectangle in pixels. `watching`: someone else's board, watched (race-watch.js):
+   no touch pad (nothing of yours to steer), and unless it's `big` (tapped), small in the bottom-left corner,
+   so her sloop and her puzzling on deck and in the sails get the screen (the user, 14 Nov: "why have I got a
+   bunch of buttons and then there's a puzzle where nothing's happening?"). */
+export function sailBoardLayout(B, low, top, touch = matchMedia('(pointer: coarse)').matches, right = 0, watching = null) {
   // (`right`: pixels along the screen's right-hand edge kept clear, a panel's: the race plan's strip)
   const w = innerWidth - right, h = innerHeight, gap = 10;
   top = Math.max(gap, top + gap);
-  const wide = w > h * 1.05, pad = touch || !wide;
+  const wide = w > h * 1.05, pad = !watching && (touch || !wide);
+  const f = watching && !watching.big ? (wide ? 0.6 : 0.55) : 1;
   let k, x, y;
   if (wide) {
-    k = Math.min(1.25, (h - top - gap) / BH, (w * 0.34 - (pad ? PAD_W + gap : 0)) / BW);
-    x = gap; y = top + (h - top - gap - BH * k) / 2;
+    k = Math.min(1.25, (h - top - gap) / BH, (w * 0.34 - (pad ? PAD_W + gap : 0)) / BW) * f;
+    x = gap; y = watching && !watching.big ? h - gap - BH * k : top + (h - top - gap - BH * k) / 2;
   } else {
-    k = Math.min(1.1, (low - top - 2 * gap) * 0.76 / BH, (w - PAD_W - 3 * gap) / BW);
-    x = (w - BW * k - PAD_W - gap) / 2; y = low - gap - BH * k;
+    k = Math.min(1.1, (low - top - 2 * gap) * 0.76 / BH, (w - (pad ? PAD_W + gap : 0) - 2 * gap) / BW) * f;
+    x = watching ? gap : (w - BW * k - PAD_W - gap) / 2; y = low - gap - BH * k;
   }
   const bw = BW * k, bh = BH * k;
   const sig = `${w}x${h}|${k.toFixed(3)}`;
