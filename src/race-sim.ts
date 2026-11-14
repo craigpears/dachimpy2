@@ -292,8 +292,13 @@ const SHIFT = (() => {
 const shifted = (id: CutId): number => (id in SHIFT ? SHIFT[id as keyof typeof SHIFT] : 0);
 const SAVES: Record<CutId, number> = Object.fromEntries(Object.entries({ ...RACE.DECENT, door: DOOR.SAVES, zigzag: 0, wreck: 0 }).map(([id, s]) => [id, s + shifted(id as CutId)])) as Record<CutId, number>;
 
+/* A gap's shortcuts (the rocks', the barrier's) rejoin the long way at the gap's mouth, `OUT`, and sail on from
+   there: what they save is where that mouth is (14 Nov, watching Umami: "ended up coming out the wrong way ... ran
+   right instead of left"; rejoined where the long way would have had her by then, a few squares back along leg 3,
+   she came out, turned right, sailed back and turned round again; the user: "yeah, you should come out"). */
+const AT_MOUTH: CutId[] = ['zigzag', 'rocks', 'forage'];
 const cut = (id: CutId, s: number, c: number, to: number, cOut: number, trip: number, at: Pose, spot: Spot | null = null): Cut => {
-  const tIn = tauAt(s, c), saves = id === 'zigzag' ? tauAt(to, cOut) - tIn - trip : SAVES[id];
+  const tIn = tauAt(s, c), saves = AT_MOUTH.includes(id) ? tauAt(to, cOut) - tIn - trip : SAVES[id];
   return { id, tIn, tOut: tIn + trip + saves, trip, saves, at, sheltered: sheltered(at.c, at.r), spot };
 };
 const G = RC.GUNS.way, WR = RC.BRIBE.NOTCH, B = RC.HEADWIND, M = RC.WHIRLS.MOUTH, K = RC.ROCKS, L = RC.LOCKS, E = RC.CRANE, D = RC.DOOR, F = RC.FORAGE, D2 = RC.DOUBLE.WAY, T3 = RC.TRIPLE, Z = RC.ZIGZAG;
@@ -313,8 +318,8 @@ export const CUTS: Record<CutId, Cut> = {
   whirls: cut('whirls', 2, M.c, 3, M.c, runFor(RUN.VEGAS) * SAIL.PUSH, { ...M }),
   // (from leg 3's second row by the rocks, firing her port guns down on them as she comes; once they're down,
   // down through the gap onto leg 4)
-  rocks: cut('rocks', 2, K.WALL[0][0], 3, K.WALL[0][0], SIM.ROCK_TRIP, { c: K.WALL[0][0], r: S[2].r + 1, d: 1 }),
-  forage: cut('forage', 2, F.NOTCH[0], 3, F.NOTCH[0], 6.2, { c: F.NOTCH[0], r: F.NOTCH[1], d: 0 }, 'forage'),
+  rocks: cut('rocks', 2, K.WALL[0][0], 3, K.OUT[0], SIM.ROCK_TRIP, { c: K.WALL[0][0], r: S[2].r + 1, d: 1 }),
+  forage: cut('forage', 2, F.NOTCH[0], 3, F.OUT[0], 6.2, { c: F.NOTCH[0], r: F.NOTCH[1], d: 0 }, 'forage'),
   locks: cut('locks', 3, L[0].at[0], 4, L[0].at[0], 4.3, { c: L[0].at[0], r: L[0].at[1], d: 0 }, 'lock-up'),
   crane: cut('crane', 4, E.LEDGE[0], 5, E.TO.c, TRIP + 1, { c: E.LEDGE[0], r: E.LEDGE[1], d: 0 }, 'crane'),
   triple: cut('triple', 4, T3[0][0], 5, T3[0][0], 1.7, { c: T3[0][0], r: T3[0][1] - 1, d: 0 }),

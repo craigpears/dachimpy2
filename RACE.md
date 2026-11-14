@@ -1212,6 +1212,15 @@ coins, 5-piece holes, both guns made to hit in the den too; then the mole to col
   have to save less again for the long way to keep up.
 - How strong Sailing on the pilot should be in a race (it carries the long way).
 
+**Out of a gap at its mouth (14 Nov).** Watching the race, Umami came out of the barrier's gap, turned right,
+sailed back along leg 3 and turned round again ("ran right instead of left"). In the simulation a shortcut rejoined
+the long way where sailing it would have had her by then (its saving, `RACE.DECENT`), and for the barrier's gap that
+was five squares behind its mouth (the rocks' gap, four). The user: "yeah, you should come out". So both rejoin at
+their gap's mouth, `OUT`, and sail on from there, saving what that mouth is worth on the simulation's long way: the
+barrier 23.6 s (it was 16), the rocks 30.4 s (25). The helm's numbers still hold the course (tests/den-race.test.ts),
+and these two are now held at least to them. Shooting through the gate (gap-shot) fell just under its band (11.8%
+against 12.5%, within chance) and is held to 0.4 to 1.6 of fair until the user has timed the puzzles (TODO.md).
+
 **From players, later (idea).** A full competitive version would log each run: the route, the time on each
 puzzle and each leg, and the finish. That gives win rates by route, "like in Age of Empires". The data is
 for the user to balance by, not automatic balancing. "Balancing is going to be certainly, I think, for

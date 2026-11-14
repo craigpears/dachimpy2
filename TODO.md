@@ -1019,7 +1019,8 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   timings below): out at the gap's mouth and on from there (the forage and rocks shortcuts a few seconds better,
   the gap-shot route then under its floor, and the simulation's savings no longer the helm's RACE.DECENT); or the
   same seconds spent nosing through the gap (the barrier then not worth a good player's while, against "the
-  leader always has a shortcut worth taking").
+  leader always has a shortcut worth taking"). The user, 14 Nov: "yeah, you should come out": out at the gap's
+  mouth and on from there, rebalanced round it.
 
 - **The plan's chart draws shortcuts as doubling back (14 Nov):** "if I hover over rocks, why is it showing an L
   shape? Like, well, there's no L shape. You just go straight up. I don't know why it's showing it as if you double
@@ -1089,6 +1090,12 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   anywhere in the race's waters (by the buoy, sailed off, on the course) back to it; the chart's stylesheet, lost
   in a merge, put back (that was the tiny chart at the side) and its choices' words bigger; picking a choice on the
   line flies the camera to it for a few seconds, then the chart's back; What's new's entry shows both.
+
+- **The wolf den tutorial, a first version (14 Nov):** "You were supposed to be doing the wolf den tutorial thing,
+  build the building, the at least do a first version of it. I think I gave you enough as something to get started
+  with." From IDEAS.md's "Dignity's tutorial: four-tier Duty Navigation in the werewolf den": the place and its
+  hut with the star table, Dignity teaching, Multibella munching cookies, the den's wild slots and moon in
+  Navigation's rules, a first lesson and its read version.
 
 ## Spotted along the way (not asked for)
 
