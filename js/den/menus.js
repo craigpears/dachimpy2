@@ -25,7 +25,7 @@ import { heliumCheat } from './helium-isle.js';
 import { rumCheat } from './rumrun.js';
 import { empireCheat } from './imperial-isle.js';
 import { smugglersCheat } from './smugglers.js';
-import { raceCheat, race } from './race.js';
+import { raceCheat, raceLineCheat, race } from './race.js';
 import { doorCheat } from './door.js';
 import { watchStart, watchStop } from './race-watch.js';
 import { raceOnline, online as racingOnline } from './race-net.js';
@@ -643,17 +643,23 @@ function cheatSmugglers() {
 }
 /* The sloop race (js/den/race.js), out past Primates Rule: at sea, by its starting buoy, the checkpoint
    told she's beyond it, as for Port Decorum. */
-function cheatRace() {
-  if (cine) return;
+/* At sea by the race's buoy (the starlit door's and the watched race's starting point). */
+function toRaceBuoy() {
   if (!sail.on) cheatSail();
   raceCheat();
   cp.check.side = 'far';
+}
+/* The sloop race (?at=race): straight on to its starting line, the plan beside you (14 Nov). */
+function cheatRace() {
+  if (cine) return;
+  toRaceBuoy();
+  raceLineCheat();
 }
 /* The starlit door (js/den/door.js), on the race course off leg 2: by the race's buoy first, as for the
    race, then stopped under the door's crag, Space to look closer at the rock. */
 function cheatDoor() {
   if (cine) return;
-  cheatRace();
+  toRaceBuoy();
   doorCheat();
 }
 /* The sloop race watched (js/den/race-watch.js): four racers and no player in it, a free camera and a
@@ -661,7 +667,7 @@ function cheatDoor() {
    the race. */
 function cheatRaceWatch() {
   if (cine) return;
-  cheatRace();
+  toRaceBuoy();
   watchStart();
 }
 /* Mischievious's wedding (js/den/wedding.js): the siege put to rest and their ship gone, and off to

@@ -5,6 +5,9 @@
    choicePlaces), with where she stops for each and its line against the long way's, drawn by the same sheet as the
    changelog's chart (tools/race-map.mjs). */
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { Helm } from '../src/den-sail';
+import { Race, inRaceWaters } from '../src/den-race';
 import { choicePlaces, lineSquares, sheet, sheetSvg, wordsAt, POINT, type Pt } from '../src/race-chart';
 import { LEGS, STOPS } from '../src/race-plan';
 import { choiceLines } from '../src/race-sim';
@@ -83,5 +86,39 @@ describe('the chart\'s sheet, one drawing for the changelog\'s chart and the den
     expect(a).toContain('url(#pc-paper)');
     expect(a).not.toContain('url(#rc-');
     expect(a.startsWith('<svg') && a.endsWith('</g></svg>')).toBe(true);
+  });
+});
+
+/* 14 Nov, the race from its link: "When I drop into [the race], surely that should be the first thing that appears
+   ... if I try moving at all, there's no way to get back into the race"; and the chart: "why is on the full screen the
+   plan so tiny and on the right-hand side?" (its styles lost in a merge), and "I wanted almost for like the 3D view
+   to kind of jump to the thing as you click it so you can see what it is before you plan". */
+describe('the race from its link, and its plan big and looked at (14 Nov)', () => {
+  const read = (f: string) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+  it('lays out the big chart in den.html: the course big beside its panel, each choice a box to point at', () => {
+    const den = read('den.html');
+    for (const rule of ['#planchart {', '#planchart[hidden]', '#planchart .pc-stage {', '#planchart .pc-side {', '#planchart .pc-hit {', 'body.bigchart #raceplan']) expect(den, rule).toContain(rule);
+  });
+  it('drops you straight on to the starting line from ?at=race, the door and the watched race still from the buoy', () => {
+    const menus = read('js/den/menus.js');
+    expect(menus).toMatch(/function cheatRace\(\) \{[\s\S]*?raceLineCheat\(\);/);
+    expect(menus).toMatch(/function cheatDoor\(\) \{[\s\S]*?toRaceBuoy\(\);/);
+  });
+  it('takes Space anywhere in the race\'s waters, no race on, in to the line: by the buoy, sailed off from it, or on the course', () => {
+    const race = new Race(), at = (c: number, r: number) => new Helm(new Sea(9), { c, r, d: 0 });
+    expect(race.takes(' ', at(RC.BUOY[0], RC.BUOY[1]), false)).toBe(true);
+    expect(race.takes(' ', at(RC.BUOY[0] + 6, RC.R0 - 3), false)).toBe(true);   // (sailed off along the reef)
+    expect(inRaceWaters(RC.BUOY[0], RC.R0 + 5)).toBe(true);   // (on the course)
+    expect(inRaceWaters(RC.BUOY[0], RC.R0 - 12)).toBe(false);   // (back towards the den: not the race's)
+    race.take();
+    expect(race.takes(' ', at(RC.BUOY[0], RC.BUOY[1]), false)).toBe(false);   // (on the line already: Space is the count)
+  });
+  it('flies the camera to a choice picked on the line, the chart back after, never in the race', () => {
+    const peek = read('js/den/plan-peek.js'), chart = read('js/den/plan-chart.js'), strip = read('js/den/race-plan.js');
+    expect(chart).toMatch(/peekAt\(leg, id, true\)/);
+    expect(strip).toMatch(/peekAt\(leg, id, false\)/);
+    expect(chart).toMatch(/peekTick\(live\(R\) && R\.state === 'line'\)/);
+    expect(peek).toMatch(/if \(!peek\.ok\) return false;/);
+    expect(read('js/den/race.js')).toMatch(/raceCam = \(\) => peekCam\(\) \|\| forageCam\(\)/);
   });
 });

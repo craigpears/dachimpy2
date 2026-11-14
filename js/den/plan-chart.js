@@ -14,6 +14,7 @@ import { fieldFor } from '../start-field.js';
 import { optionOf, LEGS } from '../race-plan.js';
 import { plan, planPick } from './race-plan.js';
 import { sail } from './sea.js';
+import { peek, peekAt, peekEnd, peekTick } from './plan-peek.js';
 
 const big = { el: null, seed: null, sheet: null, places: [], hot: null, sig: '', fitted: false };
 const P = () => plan.pilot;
@@ -22,6 +23,8 @@ const live = (R) => sail.on && ['line', 'count', 'on'].includes(R?.state);
 /** M or Esc, at sea in a race (race.js, first among its keys): the chart open or shut. */
 export function chartKey(key, R) {
   if (!live(R)) return false;
+  // (looking at a choice in 3D: M or Esc back to the chart now, plan-peek.js)
+  if (peek.p && (key === 'm' || key === 'escape')) { peekEnd(); plan.big = true; return true; }
   if (key === 'm') { plan.big = !plan.big; return true; }
   if (key === 'escape' && plan.big) { plan.big = false; return true; }
   return false;
@@ -46,7 +49,14 @@ function press(e) {
   e.stopPropagation(); e.preventDefault();
   if (e.button !== 0) return;
   const b = e.target.closest('[data-pick]');
-  if (b) { planPick(Number(b.dataset.leg), b.dataset.pick); hot({ leg: Number(b.dataset.leg), id: b.dataset.pick }); return; }
+  if (b) {
+    const leg = Number(b.dataset.leg), id = b.dataset.pick;
+    planPick(leg, id);
+    hot({ leg, id });
+    // (on the line, a look at it in 3D first, the chart back after: plan-peek.js)
+    if (peekAt(leg, id, true)) plan.big = false;
+    return;
+  }
   if (e.target.closest('.pc-close') || e.target.classList.contains('pc-bg')) plan.big = false;
 }
 
@@ -64,7 +74,7 @@ function build(seed) {
     S.at(A.finish.c, A.finish.r, [['FINISH', TITLE, 700]], { size: 0.75, anchor: A.finish.anchor }),
   ];
   const opts = big.places.map((p) => `<g class="pc-opt" data-leg="${p.leg}" data-pick="${p.id}"><rect class="pc-hit" rx="8"/>`
-    + S.at(p.words.c, p.words.r, [[p.lines[0], TITLE, 700], [p.lines[1], INK, 500, 'italic']], { size: 0.6, lh: 1.08, anchor: p.words.anchor })
+    + S.at(p.words.c, p.words.r, [[p.lines[0], TITLE, 700], [p.lines[1], INK, 500, 'italic']], { size: 0.78, lh: 1.08, anchor: p.words.anchor })
     + '</g>').join('');
   big.el.innerHTML = '<div class="pc-bg"></div><div class="pc-box">'
     + `<div class="pc-stage" style="aspect-ratio: ${S.w} / ${S.h}">${sheetSvg(S, words, ' class="pc-sheet" aria-hidden="true"')}`
@@ -124,6 +134,7 @@ function drawRoute() {
 
 /** Each frame (race.js): open while plan.big is, on the line and in the race. */
 export function chartTick(R) {
+  if (peekTick(live(R) && R.state === 'line')) plan.big = true;   // (a look at a choice over: plan-peek.js)
   const on = !!plan.big && live(R);
   if (!on && plan.big && !live(R)) plan.big = false;
   if (!big.el) { if (!on) return; make(); }

@@ -532,6 +532,14 @@ the rubble settle back after half a minute.
     On a phone the chart fills the width with the panel below it. `js/den/plan-chart.js`, through race.js's
     `chartTick` and `chartKey`. **Left open:** whether it should open by itself on the line the first time (the
     TODO had it "shown big on the starting line"; today it's a key or a click away, over the starter's card).
+  - **A choice looked at in 3D before you plan it (the user, 14 Nov: "I wanted almost for like the 3D view to kind
+    of jump to the thing as you click it so you can see what it is before you plan"):** on the line, picking a choice
+    (on the chart or the strip) flies the camera to where its puzzle is, from above enough that a spit's walls don't
+    hide it, for a few seconds, then the chart's back (M or Esc sooner). Never in the race: the camera stays with
+    her. `js/den/plan-peek.js`. And the race from its link: `?at=race` puts you on the line with your plan, and
+    Space anywhere in the race's waters, no race on, takes you back to it (14 Nov: "if I try moving at all, there's
+    no way to get back into the race"; src/den-race.ts, `inRaceWaters`). The chart's words a size bigger (14 Nov: "a
+    bit vague on the map ... tiny text above the locks").
 
 ## 6. Racing each other: position and risk
 

@@ -18,7 +18,7 @@ import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
 import { whirlpool } from '../den-whirl.js';
 import { CRANE, travel } from '../den-crane.js';
-import { RACE, Race, GunGap, Drift, atStart, onCourse, clockText, cleanBest, neckCrane, nextBuoy, stretchAt, readyLocks, boardHasKey } from '../den-race.js';
+import { RACE, Race, GunGap, Drift, atStart, clockText, cleanBest, neckCrane, nextBuoy, stretchAt, readyLocks, boardHasKey } from '../den-race.js';
 import { station } from './sail-station.js';
 import { simDrive } from '../race-sim.js';
 import { FIELD, sheltered } from '../den-racers.js';
@@ -43,6 +43,7 @@ import { netKey, netPrompt, netTick, netBefore, netInTick } from './race-net.js'
 import { NET } from '../race-net.js';
 import { planStep, planTick, planReset, planKey } from './race-plan.js';
 import { chartTick, chartKey } from './plan-chart.js';
+import { peekCam } from './plan-peek.js';
 import { pop } from './pop-board.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
@@ -277,10 +278,9 @@ export function raceKey(key) {
   }
   if (go && craneSpace(h)) return true;
   if (planKey(key, race.rules)) return true;   // (T: the pilot on or off: race-plan.js)
-  if (race.rules.takes(key, h, station.on)) { intoLine(); toast('Pick yer spot on the line, and Space when ye\'re ready'); return true; }
-  // (home: the course runs one way, so Space takes her back out to the starting buoy for another go; 12 Nov,
-  // the left-hand trade wind that used to carry her back there is only a few gentle loops now)
-  if (go && homeAgain(h)) { raceCheat(); toast('Back out to the starting buoy'); return true; }
+  // (Space anywhere in the race's waters, no race on, straight to the line: by the buoy, sailed off from it, or home
+  // after a race for another go; 14 Nov, "if I try moving at all, there's no way to get back into the race")
+  if (!finishing() && !race.trip && race.rules.takes(key, h, station.on)) { intoLine(); toast('Pick yer spot on the line, and Space when ye\'re ready'); return true; }
   return false;
 }
 /** Space alongside the neck: the crane built a part, or (built) her trip over it. */
@@ -297,8 +297,8 @@ const spaceHere = () => {
   if (race.trip || building()) return false;
   return doorKey(' ') || forageKey(' ') || bribeKey(' ') || craneSpace(h);
 };
-/** Over the line and lying still on the course: Space takes her back to the buoy. */
-const homeAgain = (h) => race.rules.state === 'done' && race.doneT <= 0 && onCourse(h.pose.c, h.pose.r) && h.slot < 0 && !h.held() && !race.trip;
+/** Just over the line: the moment of finishing, before Space takes her back to the line for another go. */
+const finishing = () => race.rules.state === 'done' && race.doneT > 0;
 /** In to the starting line from the buoy, everything on the course made ready for a new race (Space at the
     buoy; racing online, the room's lobby or its count: race-net.js). */
 function intoLine(seed) {
@@ -324,9 +324,10 @@ export function racePrompt() {
     if (K().built()) return 'Under the crane · Space: haul her over the neck';
     return K().frame || K().up ? `Alongside the neck · Space: back to building the crane (its ${CRANE.PARTS[K().up].name})` : 'Alongside the neck · Space: build a crane to haul her over (Carpentry)';
   }
-  if (homeAgain(h)) return 'Home! · Space: back out to the starting buoy';
-  if (atStart(h.pose.c, h.pose.r) && h.slot < 0 && R.state !== 'count' && R.state !== 'on') {
-    return `The race buoy · Space: in to the starting line${R.best ? ` · your best ${clockText(R.best)}` : ''}`;
+  if (!finishing() && !race.trip && R.takes(' ', h, false)) {
+    const best = R.best ? ` · your best ${clockText(R.best)}` : '';
+    if (R.state === 'done') return `Home! · Space: back to the starting line for another go${best}`;
+    return `${atStart(h.pose.c, h.pose.r) ? 'The race buoy' : 'The sloop race'} · Space: in to the starting line${best}`;
   }
   return '';
 }
@@ -516,7 +517,8 @@ export function raceReset() {
 }
 
 /** The camera, the mouse: on the barrier's Foraging board (den.js, sailing.js). */
-export const raceCam = forageCam;
+// (and a look at a race choice in 3D, picked on the line: plan-peek.js)
+export const raceCam = () => peekCam() || forageCam();
 // (under a cave in the starlit door's tunnel, no pins: door.js)
 export const raceHover = (x, y) => doorInside() || forageHover(x, y), raceClick = (x, y) => doorInside() || forageClick(x, y);
 
@@ -524,4 +526,11 @@ export const raceHover = (x, y) => doorInside() || forageHover(x, y), raceClick 
 export function raceCheat() {
   sail.helm.moor({ c: RC.BUOY[0] - 1, r: RC.BUOY[1], d: 0 });
   sail.riding = false;
+}
+/** The race's link (`?at=race`, menus.js): straight on to the starting line, your plan beside it, not the buoy
+    first (the user, 14 Nov: "When I drop into [the race], surely that should be the first thing that appears"). */
+export function raceLineCheat() {
+  raceCheat();
+  intoLine();
+  toast("Pick yer spot on the line, and Space when ye're ready");
 }

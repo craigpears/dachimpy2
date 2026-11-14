@@ -26,6 +26,7 @@ import { door } from './door.js';
 import { forage } from './race-forage.js';
 import { bribe } from './race-bribe.js';
 import { netPlan } from './race-net.js';
+import { peekAt } from './plan-peek.js';
 
 /* Your last plan, kept in this browser (the user, 13 Nov: "persist the last plan you chose so that you don't need to
    do it every time"): each race starts from it. Only what you choose is kept, never a shortcut the pilot put by. */
@@ -143,7 +144,12 @@ function press(e) {
   e.stopPropagation(); e.preventDefault();
   if (e.button !== 0) return;
   const b = e.target.closest('[data-pick]');
-  if (b) return pick(Number(b.dataset.leg), b.dataset.pick);
+  if (b) {
+    const leg = Number(b.dataset.leg), id = b.dataset.pick;
+    pick(leg, id);
+    peekAt(leg, id, false);   // (on the line, a look at it in 3D: plan-peek.js, 14 Nov)
+    return;
+  }
   if (e.target.closest('.rp-pilot')) return pilotToggle();
   // (the course on the parchment chart, big, the choices on it where they are: plan-chart.js)
   if (e.target.closest('.rp-big,.rp-chart')) { plan.big = !plan.big; return; }

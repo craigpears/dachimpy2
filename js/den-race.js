@@ -134,6 +134,10 @@ export const boardHasKey = (key, board) => board && (key === ' ' || key === 'ent
 export const atStart = (c, r) => c >= RC.START.c0 && c <= RC.START.c1 && r >= RC.START.r0 && r <= RC.START.r1;
 /** Anywhere on the course: behind its line of rocks. */
 export const onCourse = (c, r) => r > RC.R0;
+/** The race's waters: the course, and the open sea off its line of rocks, a few rows out and the line's width
+    (the buoy's in them). Space anywhere in them, no race on, takes her in to the starting line (the user, 14 Nov:
+    "if I try moving at all, there's no way to get back into the race. It's really annoying"). */
+export const inRaceWaters = (c, r) => onCourse(c, r) || (r >= RC.R0 - 4 && c >= RC.LINE.c0 - 1 && c <= RC.LINE.c1 + 1);
 const headwind = new Set(RC.HEADWIND.map(([c, r]) => key(c, r)));
 /** In the headwind gap [B]. */
 export const inHeadwind = (c, r) => headwind.has(key(c, r));
@@ -205,13 +209,14 @@ export class Race {
     taken(c) { return this.racing().some((r) => r.spot === c); }
     /** The furthest stretch she's reached in order (0 the first leg): every one counts, a shortcut's or not. */
     get leg() { return this.field.racers[0].leg; }
-    /** Whether Space (`key`, as js/den gets it) by the buoy takes her in to the starting line: by it, lying
-        still, no race on, and the Sailing board not open (`board`): with it open, Space is the board's,
+    /** Whether Space (`key`, as js/den gets it) takes her in to the starting line: anywhere in the race's waters
+        (by the buoy, sailed off from it, or on the course after a race: inRaceWaters, 14 Nov), lying still, no race on
+        and not on the line already, and the Sailing board not open (`board`): with it open, Space is the board's,
         dropping its pair faster (12 Nov: Space at the buoy with the board open took her to the line). */
     takes(key, h, board) {
         if (boardHasKey(key, board) || (key !== ' ' && key !== 'enter'))
             return false;
-        return atStart(h.pose.c, h.pose.r) && h.slot < 0 && !h.held() && this.state !== 'count' && this.state !== 'on';
+        return inRaceWaters(h.pose.c, h.pose.r) && h.slot < 0 && !h.held() && (this.state === 'off' || this.state === 'done');
     }
     /** The start's field this race (its seed's). */
     field0() { return fieldFor(this.seed); }
