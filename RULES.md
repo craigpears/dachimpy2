@@ -117,6 +117,14 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   (4.5:1 at least, tested on the front page for every theme), every link and button showing where the keyboard is,
   motion calmed for anyone who asks their browser for less, and links and buttons that look like links and buttons.
 
+- **As phone-friendly as we can make it (14 Nov):** "Make the kind of mobile first stuff like a key feature ...
+  maybe in the design page. Just that, you know, it's hard to make things mobile first, but trying to make things
+  as mobile friendly that we can." A key principle, on design.html: every page and every part of the den works on
+  a phone as well as a computer, checked on both (a phone's width, both ways round): one thing at a time on a
+  narrow screen, buttons and links at least 44px to tap, short words, nothing scrolling sideways, and in the den the
+  sea and the puzzle getting the screen, not the menus (a bar along the top kept slim; buttons that do nothing in
+  that moment hidden; the camera movable by touch).
+
 ## Pirate Den (3D prototype, `den.html`)
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.

@@ -950,6 +950,11 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   as Distilling's were (techniques, positions to critique, tests), so a good sailor like Kikkit builds real chains
   and Vegases.
 
+- **Phone-friendly as a key principle, on the design page (14 Nov):** "Make the kind of mobile first stuff like a
+  key feature that's in somewhere in the chain ... maybe in the design page. Just that, you know, it's hard to make
+  things mobile first, but trying to make things as mobile friendly that we can." So design.html says so, with a
+  picture, and RULES.md holds it as a rule.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
