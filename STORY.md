@@ -299,6 +299,6 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
 | Break loose crates | Planks that mend the wall for good |
 | Walk into the plot | Your shack, built the same way, any time |
 | Come up off Helium's island, past the checkpoint | Their Distilling lesson, then their still to play at, their help on H |
-| Fill a couple of casks at Helium's still | Their rum run: Helium and the barrels aboard, to Mischievious, Kikkit and Port Decorum, then home |
+| Fill a couple of casks at Helium's still | Their rum run: Helium and the barrels aboard, to Mischievious, Kikkit and Port Decorum, then home; the first run, three barrels of their rum for the den, there for good |
 | Build the crane at the hidden cove's ledge | Her way up the cliff to the clifftop lagoon, and its wreck's treasure (by Treasure Haul) |
 | Get past Dalnoth (to come) | His treasure, and his white monkey on your shoulder |

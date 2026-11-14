@@ -1272,6 +1272,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
   - *after:* "Someone'll be along for them. Someone always is."
 - *The barrels all gone:* "That's the lot. Drop me home, would you? The still won't blow itself up."
 - *Back off their island, hopping off:* "Ta. More casks, another run. Bring the sloop."
+- *Then, the first run: rolling three barrels aboard for your den, yours to keep:* "Oh, and three for your den. The good stuff. Don't tell the Empire."
 
 ## Gravee
 

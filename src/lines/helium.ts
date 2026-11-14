@@ -358,6 +358,7 @@ export const RUM_RUN = {
   },
   last: 'That\'s the lot. Drop me home, would you? The still won\'t blow itself up.',
   home: 'Ta. More casks, another run. Bring the sloop.',
+  keepsake: 'Oh, and three for your den. The good stuff. Don\'t tell the Empire.',
 } as const;
 
 /** While you're within earshot of their island, before or after: round and round. */
@@ -476,6 +477,7 @@ export const CHARACTER: Character = {
         notYet: 'At Port Decorum before Mischievious and Kikkit have theirs', wedding: 'Off the Wedding Isle, Mischievious on the jetty',
         kikkit: 'Off Kikkit\'s island', quay: 'At Port Decorum\'s jetty, its guard asking what\'s in the barrels, then turning the rum away: Helium\'s hint at the back way (and `again`, back there after)',
         cove: 'Landing it quietly at the smugglers\' beach behind Port Decorum', last: 'The barrels all gone', home: 'Back off their island, hopping off',
+        keepsake: 'Then, the first run: rolling three barrels aboard for your den, yours to keep',
       },
     },
   ],

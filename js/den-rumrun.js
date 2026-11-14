@@ -23,7 +23,10 @@
    - Past the Empire: sailing in sight of the checkpoint or Port Decorum with barrels aboard, Helium whistles and
      plays it innocent, Dignity remarks from her gate, Port Decorum's guards turn to watch. No new puzzle and no
      search: the checkpoint's guns are the danger, as they already are.
-   - What it earns: the barrels counted as delivered and Helium's thanks, back at their island. No economy.
+   - What it earns: the barrels counted as delivered and Helium's thanks, back at their island. No economy. And,
+     the first run, something to keep (RULES.md "Every adventure ends with something to keep"; src/keepsakes.ts):
+     taking them home, Helium rolls RUM_RUN.KEEP barrels aboard for your den (`homeBeats(true)`), and from then
+     on they stand at the back of the den (RUM_CAST.den).
    Not yet (IDEAS.md): the barrels shifting or going over in a rough sea, a sharper search at the checkpoint,
    the smuggling ring and its penguin. */
 import { LAY } from './den-sail.js';
@@ -47,6 +50,8 @@ export const RUM_RUN = {
     CASKS: 2,
     /** Barrels on her deck as you set off. */
     LOAD: 6,
+    /** Barrels Helium gives you for the den, the first run, taking them home: yours to keep. */
+    KEEP: 3,
     /** Sailing in sight of the Empire with barrels aboard: how near the checkpoint's gate (rows either side of its
         line, columns either side of its gate) and Port Decorum (squares from its land, any way), and how long out of
         sight (seconds) before Helium whistles again. */
@@ -247,8 +252,8 @@ export const turnAwayBeats = () => [
 export const againBeats = () => [b('guard', GUARD_SAYS.again), b('helium', HELIUM_SAYS.quay.again)];
 /** At Port Decorum before the other two have theirs. */
 export const notYetBeats = () => [b('helium', HELIUM_SAYS.notYet)];
-/** Home: they hop off. */
-export const homeBeats = () => [b('helium', HELIUM_SAYS.home)];
+/** Home: they hop off. `gift`, the first run: they roll RUM_RUN.KEEP barrels aboard for your den as they go. */
+export const homeBeats = (gift = false) => [b('helium', HELIUM_SAYS.home), ...(gift ? [b('helium', HELIUM_SAYS.keepsake, RUM_RUN.KEEP)] : [])];
 /** Sailing by the Empire with barrels aboard: the tune, then the `n`th innocent line in turn; at the checkpoint,
     Dignity's remark from her gate, in turn. */
 export function whistleBeats(where, n) {
@@ -307,6 +312,13 @@ export const RUM_CAST = {
         { x: 0.8, y: 0, z: 0.57 }, { x: 0.8, y: 0, z: 0.19 }, { x: 0.8, y: 0, z: -0.19 }, { x: 0.8, y: 0, z: -0.57 },
     ],
     h: 0.5,
+    /** Helium's barrels at the den, kept (src/keepsakes.ts): metres from the den's treasure chest (x across the
+        den, z back from the wall), a little pile behind it, by the den's back rock: two standing, one on its side in
+        front. Kept left of the chest, clear of the walk's frame on the den's right. Barrels `denH` tall. */
+    den: [
+        { x: -0.35, z: 3.5, lie: false }, { x: 0.45, z: 3.65, lie: false }, { x: 0.05, z: 2.8, lie: true },
+    ],
+    denH: 0.8,
     /** Helium aboard: where they stand on her deck (as your spouse does: src/den-spouse.ts's ABOARD), to port. */
     aboard: { x: -0.25, z: -0.5 },
     /** Mischievious on her jetty while there's rum coming (her look PIRATES's), and where her barrels go. */
