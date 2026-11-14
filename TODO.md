@@ -1003,6 +1003,12 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   room, in his captain's hat and jacket.
   And (14 Nov), on playing as him: "That's hilarious. I think that needs a tiny thing in What's New is him playable
   as a character": a smaller update on What's new, a thumbnail of him walking the den in his hat. Done 14 Nov.
+  And (14 Nov): "why does the capybara look like they've only got one eye?" His head sat a little to one side of
+  his body, so one eye was buried in it. Done 14 Nov: his head square on, both eyes showing.
+
+- **A race buoy's number by the den's gate (14 Nov):** "I'm at the den opening the door and I see a number 5 buoy
+  style flag outside, just outside the gate. What has happened here?" A far buoy's number is drawn nearer so it
+  always reads (12 Nov), and that ran on land too. Done 14 Nov: the buoys' numbers only while you're out at sea.
 
 - **The Distilling guide trimmed to its best moves (14 Nov):** "I love how we've got the moves like the hook, pull a
   line of browns. But ... some of the moves are good for behind the scenes but need hiding. Like, with these arrows,

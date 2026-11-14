@@ -1638,7 +1638,7 @@ function dressCapybara(L) {
   }
   // His hat, as a pirate wears it, over his ears (its front his snout's way).
   const hatOn = new THREE.Group();
-  hatOn.position.set(-0.03, 0.04, -0.05);
+  hatOn.position.set(-0.03, 0.04, 0);
   hatOn.rotation.y = Math.PI / 2;
   const hat = hatOf(L, 0.26, { skin: capyFur, black, white, gold });
   hat.position.y = -0.9;
@@ -1646,10 +1646,10 @@ function dressCapybara(L) {
   head.add(hatOn);
   // An eyepatch over one eye, its strap round his head; and earrings.
   if (L.patch) {
-    const pt = part(new THREE.CylinderGeometry(0.075, 0.075, 0.02, 14).rotateX(Math.PI / 2), black, 0.15, 0.1, -0.25 - 0.012);
-    head.add(pt, part(new THREE.TorusGeometry(0.27, 0.012, 5, 28).rotateY(Math.PI / 2).scale(1, 1, 0.9), black, 0.12, 0.02, -0.05));
+    const pt = part(new THREE.CylinderGeometry(0.075, 0.075, 0.02, 14).rotateX(Math.PI / 2), black, 0.15, 0.1, -0.2 - 0.065);
+    head.add(pt, part(new THREE.TorusGeometry(0.27, 0.012, 5, 28).rotateY(Math.PI / 2).scale(1, 1, 0.9), black, 0.12, 0.02, 0));
   }
-  if (L.earring) for (const s of L.earring === 'both' ? [-1, 1] : [-1]) head.add(part(new THREE.TorusGeometry(0.035, 0.01, 6, 14), gold, -0.12, 0.19, s * 0.16 - 0.05 + s * 0.02));
+  if (L.earring) for (const s of L.earring === 'both' ? [-1, 1] : [-1]) head.add(part(new THREE.TorusGeometry(0.035, 0.01, 6, 14), gold, -0.12, 0.19, s * 0.18));
   // His legs, each on a hip of its own straight under the rig (so a swing about x is forward and back).
   g.updateMatrixWorld(true);
   const hips = c.userData.legs.map((leg) => {

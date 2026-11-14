@@ -15,7 +15,7 @@ export function capybaraMesh() {
   const body = new THREE.Mesh(new THREE.SphereGeometry(0.5, 20, 14).scale(1.25, 0.85, 0.8), capyFur);
   body.position.set(-0.12, -0.1, 0);
   const head = new THREE.Group();
-  head.position.set(0.52, 0.12, 0.05);
+  head.position.set(0.52, 0.12, 0);   // (square on his body, so both eyes show: 14 Nov, "why does the capybara look like they've only got one eye?")
   const skull = new THREE.Mesh(new THREE.SphereGeometry(0.3, 18, 12).scale(1.25, 0.95, 0.85), capyFur);
   const snout = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.3, 0.36), capyFur);
   snout.position.set(0.26, -0.08, 0);
@@ -24,11 +24,11 @@ export function capybaraMesh() {
   head.add(skull, snout, nose);
   for (const s of [-1, 1]) {
     const ear = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 8).scale(1, 1.2, 0.5), capyDark);
-    ear.position.set(-0.12, 0.26, s * 0.16 - 0.05);
+    ear.position.set(-0.12, 0.26, s * 0.16);
     const eye = new THREE.Mesh(new THREE.SphereGeometry(0.055, 10, 8), capyEye);
-    eye.position.set(0.14, 0.1, s * 0.2 - 0.05);
+    eye.position.set(0.14, 0.1, s * 0.2);
     const glint = new THREE.Mesh(new THREE.SphereGeometry(0.014, 6, 4), capyGlint);   // (a bright eye)
-    glint.position.set(0.18, 0.125, s * 0.2 - 0.05 + s * 0.022);
+    glint.position.set(0.18, 0.125, s * 0.2 + s * 0.022);
     head.add(ear, eye, glint);
   }
   c.add(body, head);

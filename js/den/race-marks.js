@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { LAY, SAIL } from '../den-sail.js';
 import { scene, camera, mat, mesh, canvasTex, V3, burst } from './world.js';
-import { seaX, seaZ } from './sea.js';
+import { sail, seaX, seaZ } from './sea.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL;
 export const marks = { buoys: [], banner: null, card: null, cardT: 0, lit: -1 };
@@ -136,7 +136,10 @@ export function marksTick(dt, next) {
     b.g.position.y = Math.sin(t * 1.3 + i) * 0.08;
     b.g.rotation.z = Math.sin(t * 0.9 + i) * 0.04;
     b.g.updateMatrixWorld();
-    signTick(b, on, t);
+    // (its number only while she's out, racing or watched: drawn nearer than a far buoy, it hung in the air at the
+    // den, seen through the gate, 14 Nov: "I see a number 5 buoy style flag outside, just outside the gate")
+    b.sign.visible = sail.on;
+    if (sail.on) signTick(b, on, t);
   });
   marks.lit = next;
   const B = marks.banner;
