@@ -1023,6 +1023,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   more whites (DISTILLING.md, seventeenth run). The user to decide.
 - **Distilling: a plan seen through (14 Nov).** The white a bot's move only opened the way to is its next move's to
   free, unless something burning sooner needs the move (P1: freed by move 3).
+- **Distilling: the late game's channels (14 Nov, P43).** Late on, whites go right: a black (or brown) stuck in the
+  column going up next is replaced by a white dragged along a channel from the left, down through browns and up through
+  blacks in one drag, the channel built first where there's none (a brown sunk through blacks, a black lifted through
+  browns). Never a white taken from a column that's mostly white. And the first chain's column started further left than
+  "two or three in from the fire" ("a person would not be wanting to put themselves under so much pressure"): built
+  (`P.FIRST_AT`), off till the user decides, since it burned more whites in the bots' run.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one

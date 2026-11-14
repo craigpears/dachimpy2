@@ -52,6 +52,7 @@ import { PATH, freed, pairRescue, pathMoves, stuck } from './distill-path.js';
 import { phaseOf, weightIn } from './distill-phase.js';
 import { TACTICS, hoistDrags, hoistOrder, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, sorts, tailDrags, tipDrags, toolBrowns } from './distill-read.js';
 import { joinPairs } from './distill-teach.js';
+import { channelReason, channelRuns } from './distill-channel.js';
 import { ownGoal, purposeful, stepsFor } from './distill-goals.js';
 /** The path search when a white in the furnace's column has no other way out: longer drags, a wider look
     for a piece to move out of the way first. Run only then. */
@@ -194,7 +195,20 @@ export const P = {
     QUICK_FIRST: 1,
     /** Sorting the ladder or the tail: a brown brought down to the V's tip first (P29, P30; 0 off). */
     TIP: 1,
+    /** The chain: a white brought along a channel into the junk's place in the column being filled, the channel built
+        first if need be (src/distill-channel.ts, the late game, the user, 14 Nov; 0 off). */
+    CHANNEL: 1,
+    /** The first chain's column at least this many columns in from the fire, the furnace's counted as the first (`DistillBot`;
+        the user, 14 Nov: "a person would not be wanting to put themselves under so much pressure"; 0 off, wherever the
+        first mostly-white column from the right is). */
+    FIRST_AT: 0,
 };
+/** The late game's channel's name for a player. */
+export const CHANNEL_LABEL = 'Through a channel';
+/** A channel plan (src/distill-channel.ts) as a move: the channel routine's, named for itself. */
+export function channelMove(cols, p) {
+    return { routine: 'channel', label: CHANNEL_LABEL, drags: p.drags.map((d) => ({ x: d.x, y: d.y, ways: [...d.ways] })), reason: channelReason(cols, p) };
+}
 /** Junk in the furnace's column (spice is fine in a Crystal Clear). */
 const junkAt = (col) => col.filter((p) => p !== WHITE && p !== SPICE).length;
 /** The ms a move takes at a pace. */
@@ -617,6 +631,12 @@ export function weigh(sit, ctx, style, reading) {
         for (const found of ROUTINES[name].find(cols, ctx))
             consider(found);
     }
+    // The late game's channels (src/distill-channel.ts; the user, 14 Nov: "they create a kind of channel for the white to go
+    // through"): a white brought along a channel into the place of the junk in the column being filled, the channel built
+    // first where there's none.
+    if (!one && P.CHANNEL && style.path)
+        for (const p of channelRuns(cols, ctx, style))
+            consider(channelMove(cols, p));
     // Quick sorting with time in hand (the board read, P3: "I'll just be going down, browns up"): its blacks down and
     // browns up into the places of the whites by the fire.
     if (read?.tactic === 'quickSort' && read.targets.length && style.path) {
@@ -1204,8 +1224,11 @@ export class DistillBot {
         // out as Stage I gets them out. (Burning the columns as they stood instead, a buffer begun in the chain, burned CC^1's
         // whites: 0.9 a session, not 0.5, the seventeenth run; and 1.1 with the chain made to save them.)
         if (this.stage === 'junk' && decisionTime(g.cols, bankFor(target)) && (this.chained || doneFromRight(g.cols) + this.junkGone >= P.BUFFER)) {
+            // (The first chain's column started a little further left, P.FIRST_AT columns in from the fire at the least: the
+            // user, 14 Nov, "a person would not be wanting to put themselves under so much pressure, so they would have
+            // started it a bit further to the left"; the columns right of it burn first, their whites got out into it.)
             this.stage = 'chain';
-            this.burns = burnsLeft(g.cols);
+            this.burns = Math.max(burnsLeft(g.cols), this.chained ? 0 : P.FIRST_AT - 1);
             this.chained = true;
         }
         // After a chain broke, the whites still banked on the right are sent up, a new chain, not turned into junk

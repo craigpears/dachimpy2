@@ -124,8 +124,8 @@ export const POSITIONS = [
         id: "P11", moment: "junkUp", level: "cc3", seed: 1, ms: 135200, stage: "chain", burns: 0, chain: 2, timeLeft: 2500,
         what: "The chain at CC^2; column 10 goes up next with 1 brown in it, 2.5 s before it goes.",
         cols: ["wwKbKbbKb", "KKbKbKbK", "bbwbKbKbK", "bK*KbwKK", "bKKwK*KKb", "wKwKbKKK", "wwwKKbKKb", "wwwbbKbw", "bwwwwK*ww", "wwwwwbww"],
-        bot: { "phase": "chain", "kind": "move", "technique": "path", "label": "Bring a piece round", "reason": "the brown at column 10, row 6 is stuck: bring the white at column 8, row 8 round, looping, to take its place, and it's out left", "drags": [{ "x": 7, "y": 7, "ways": [1, 1, 0, 0, 0, 3] }], "column": 9, "state": "healthy", "tactic": "chain", "read": "the chain: whites right", "steps": [{ "name": "the weave", "goal": "clear column 10's junk for the Crystal Clear", "kind": "build" }] },
-        plan: { "aim": "clear column 10's junk for the Crystal Clear", "reached": 1, "through": true, "ends": "it waits", "moves": [{ "cols": ["wwKbKbbKb", "KKbKbKbK", "bbwbKbKbK", "bK*KbwKK", "bKKwK*KKb", "wKwKbKKK", "wwwKKbKKb", "wwwbbKbw", "bwwwwK*ww", "wwwwwbww"], "label": "Bring a piece round", "drags": [{ "x": 7, "y": 7, "ways": [1, 1, 0, 0, 0, 3] }], "steps": [{ "name": "the weave", "goal": "clear column 10's junk for the Crystal Clear" }] }] },
+        bot: { "phase": "chain", "kind": "move", "technique": "path", "label": "Bring a piece round", "reason": "the brown at column 10, row 6 is stuck: bring the white at column 8, row 8 round, looping, to take its place, and it's out left", "drags": [{ "x": 7, "y": 7, "ways": [1, 1, 0, 0, 0, 3] }], "column": 9, "state": "healthy", "tactic": "chain", "read": "the chain: whites right", "steps": [{ "name": "the weave", "goal": "column 8's bottom white along a channel up through the blacks, then down through the browns into column 10, in for the brown in row 6, the brown back along the path", "kind": "channel" }] },
+        plan: { "aim": "column 8's bottom white along a channel up through the blacks, then down through the browns into column 10, in for the brown in row 6, the brown back along the path", "reached": 1, "through": true, "ends": "it waits", "moves": [{ "cols": ["wwKbKbbKb", "KKbKbKbK", "bbwbKbKbK", "bK*KbwKK", "bKKwK*KKb", "wKwKbKKK", "wwwKKbKKb", "wwwbbKbw", "bwwwwK*ww", "wwwwwbww"], "label": "Bring a piece round", "drags": [{ "x": 7, "y": 7, "ways": [1, 1, 0, 0, 0, 3] }], "steps": [{ "name": "the weave", "goal": "column 8's bottom white along a channel up through the blacks, then down through the browns into column 10, in for the brown in row 6, the brown back along the path" }] }] },
     },
     {
         id: "P12", moment: "junkUp", level: "cc8", seed: 2, ms: 303450, stage: "chain", burns: 0, chain: 1, timeLeft: 2550,
@@ -344,6 +344,13 @@ export const POSITIONS = [
         bot: { "phase": "fire", "kind": "move", "technique": "sweep", "label": "The sweep", "reason": "go, go, go: whites left, junk right: the brown at column 4, row 2 up-right across the whites, then down through the blacks to the browns", "drags": [{ "x": 3, "y": 1, "ways": [3, 3, 0] }], "state": "healthy", "tactic": "quickSort", "read": "nothing at risk: quick, simple moves, blacks down and browns up", "steps": [{ "name": "the ladder, then the lift", "goal": "fill column 7's gap: its white further from the fire", "kind": "fill" }] },
         plan: { "aim": "fill column 7's gap: its white further from the fire", "reached": 1, "through": true, "ends": "5 moves", "moves": [{ "cols": ["KbwKbKKKK", "bKwbbbwK", "wbwwbbbwK", "wbwKKKbK", "wwKKKKbw*", "KKKwKKKw", "KwwwKbKbb", "KbwwbbbK", "bbbKbbbKK", "bbbKbKKb"], "label": "The sweep", "drags": [{ "x": 3, "y": 1, "ways": [3, 3, 0] }], "steps": [{ "name": "the ladder, then the lift", "goal": "fill column 7's gap: its white further from the fire" }] }, { "cols": ["KbwKbKKKK", "bKwbbbwK", "wbwwbbbwK", "wKwKKKbK", "wwKKKKbw*", "KKwwKKKw", "KwbwKbKbb", "KbwwbbbK", "bbbKbbbKK", "bbbKbKKb"], "label": "The diamond", "drags": [{ "x": 1, "y": 1, "ways": [3, 3] }], "steps": [{ "name": "the drop", "goal": "carry the black over to the colour in column 4" }] }, { "cols": ["KbwKbKKKK", "bwwbbbwK", "wbwwbbbwK", "wKKKKKbK", "wwKKKKbw*", "KKwwKKKw", "KwbwKbKbb", "KbwwbbbK", "bbbKbbbKK", "bbbKbKKb"], "label": "The sweep", "drags": [{ "x": 4, "y": 2, "ways": [3, 3, 3] }], "steps": [{ "name": "the drop", "goal": "fill column 8's gap: its white out left before it burns" }] }, { "cols": ["KbwKbKKKK", "bwwbbbwK", "wbwwbbbwK", "wKKKKKbK", "wwwKKKbw*", "KKwwKKKw", "KwbwKbKbb", "KbwKbbbK", "bbbKbbbKK", "bbbKbKKb"], "label": "Save the whites", "drags": [{ "x": 3, "y": 1, "ways": [3, 3, 0] }, { "x": 7, "y": 2, "ways": [1] }], "steps": [{ "name": "the drop, then the ladder", "goal": "free column 8's white in row 3, stuck" }, { "name": "the climb", "goal": "get column 8's white in row 3 further from the fire" }] }, { "cols": ["KbwKbKKKK", "bwwbbbwK", "wbwwbbbwK", "wwKKKKbK", "wwwKKKbw*", "KKbwKKKw", "KwwwKbKbb", "KbKKbbbK", "bbbKbbbKK", "bbbKbKKb"], "label": "The diamond", "drags": [{ "x": 2, "y": 1, "ways": [0, 0] }], "steps": [{ "name": "the lift", "goal": "free column 5's top white, stuck" }] }] },
     },
+    {
+        id: "P43", moment: "chain", level: "cc1", seed: 0, ms: 0, stage: "chain", burns: 1, chain: 0, timeLeft: 9000, shot: "notes/distilling/48-two-blacks-in-the-target.webp",
+        what: "Your screenshot, 14 Nov: the CC^1 bot filling column 9, second from the fire, its whites broken by two blacks (rows 4 and 6); column 10 all junk, the flask still empty (the furnace's time a guess).",
+        cols: ["KwKKKK*Kw", "bbKbKbww", "*bwwKwbwb", "bbwKbbKb", "K*wKbbKbb", "wwKbKbbK", "KKKKKbbwK", "wbKKKbww", "wwwKwKwww", "KKKKbKKK"],
+        bot: { "phase": "chain", "kind": "move", "technique": "channel", "label": "Through a channel", "reason": "the white at column 3, row 6 along the channel, through blacks, then browns, then blacks, into column 9, row 4, in for the black there, the black back along the path", "drags": [{ "x": 2, "y": 5, "ways": [1, 0, 3, 3, 0, 0, 0, 0] }], "column": 8, "state": "healthy", "tactic": "chain", "read": "the chain: whites right", "steps": [{ "name": "the weave", "goal": "column 3's white in row 6 along a channel up through the blacks, then down through the browns, then up through the blacks into column 9, in for the black in row 4, the black back along the path", "kind": "channel" }] },
+        plan: { "aim": "clear column 9 of junk: a white along a channel in for each piece", "reached": 2, "through": true, "ends": "5 moves", "moves": [{ "cols": ["KwKKKK*Kw", "bbKbKbww", "*bwwKwbwb", "bbwKbbKb", "K*wKbbKbb", "wwKbKbbK", "KKKKKbbwK", "wbKKKbww", "wwwKwKwww", "KKKKbKKK"], "label": "Through a channel", "drags": [{ "x": 2, "y": 5, "ways": [1, 0, 3, 3, 0, 0, 0, 0] }], "steps": [{ "name": "the weave", "goal": "column 3's white in row 6 along a channel up through the blacks, then down through the browns, then up through the blacks into column 9, in for the black in row 4, the black back along the path" }] }, { "cols": ["KwKKKK*Kw", "bbKbKbww", "*bwwbKbwb", "bbwKbbKb", "K*wKbKKbb", "wwKbKbbK", "KKKKKbbwK", "wbKKKbww", "wwwwwKwww", "KKKKbKKK"], "label": "Through a channel", "drags": [{ "x": 4, "y": 4, "ways": [3] }, { "x": 2, "y": 3, "ways": [2, 3, 3, 0, 3, 3, 3, 0] }], "steps": [{ "name": "the ladder", "goal": "build the channel: the brown sunk down through the blacks, for the white to come through" }, { "name": "the weave", "goal": "column 3's white in row 4 along a channel down through the browns, then up through the blacks, then down through the browns, then up through the blacks into column 9, in for the black in row 6, the black back along the path" }] }, { "cols": ["KwKKKK*Kw", "bbKbKbww", "*bwbbKbwb", "bbwKKbKb", "K*wKbKKbb", "wwKbbbbK", "KKKKKbbwK", "wbKKKKww", "wwwwwwwww", "KKKKbKKK"], "label": "Channels", "drags": [{ "x": 5, "y": 1, "ways": [0, 3] }], "steps": [{ "name": "the weave", "goal": "column 6's white in row 2 along a channel up through the blacks, then down through the browns into column 8, in for the brown in row 2, the brown back along the path" }] }, { "cols": ["KwKKKK*Kw", "bbKbKbww", "*bwbbKbwb", "bbwKKbKb", "K*wKbKKbb", "wKKbbbbK", "KbKKKbbwK", "wwKKKKww", "wwwwwwwww", "KKKKbKKK"], "label": "Channels", "drags": [{ "x": 5, "y": 0, "ways": [0] }], "steps": [{ "name": "the climb", "goal": "clear column 7's junk, to go up after column 8" }] }, { "cols": ["KwKKKK*Kw", "bbKbKbww", "*bwbbKbwb", "bbwKKbKb", "K*wKbKKbb", "KKKbbbbK", "wbKKKbbwK", "wwKKKKww", "wwwwwwwww", "KKKKbKKK"], "label": "The diamond", "drags": [{ "x": 3, "y": 7, "ways": [1, 1, 2] }], "steps": [{ "name": "the lift, then the ladder", "goal": "take the brown back left, out of the chain's way" }] }] },
+    },
 ];
 // ---- end of POSITIONS ----
 /** The user's verdicts, by position. Add to these, never to POSITIONS. */
@@ -472,6 +479,11 @@ export const VERDICTS = {
             note: "As P29: a brown brought down goes to the V's bottom-left tip, swapped in for the black at the bottom of column 7.",
             expect: { holds: 'brown', ends: [6, 7], noBurn: true },
         }],
+    P43: [{
+            date: '14 Nov',
+            note: "The last move it just did, it started to make that little triangle of whites in the bottom left: it can't figure out the technique to clear those two blacks. The late game runs in reverse, whites going right: a channel made for a white (the blacks in the middle joined up for the bottom one; the brown at the top of column 8 dragged down-left through the blacks for the top one), and a white from the left dragged along it, down through the browns and up through the blacks, in for each black. This is a test situation we need to keep.",
+            expect: { goals: ['channel', 'buildChannel'], planClean: 8, noBurn: true },
+        }],
 };
 /** Positions the user chose not to give a verdict on, and why: kept, and not asked about again. */
 export const SKIPPED = {
@@ -494,6 +506,7 @@ export const THEMES = {
     damage: { name: 'Damage control', about: 'a board gone really wrong: the columns by the fire filled however you can, then the stranded junk out left' },
     cracked: { name: 'A cracked board: keep the tools', about: 'junk stranded among the whites: fix it, and keep the browns in the middle to fix it with' },
     patterns: { name: 'The patterns: the ladder and the V', about: 'the right-hand pair sorted into the zigzag\'s ladder before one burns; the V\'s tail sorted so the next sweep runs through' },
+    channels: { name: 'The late game: whites go right, through channels', about: 'with things burning the whites go right into the column going up: a channel made for a white, down through browns and up through blacks, and the white dragged along it in for each piece of junk there' },
     late: { name: 'Past saving: the lead-up wanted', about: 'boards already lost when picked; the boards before them are the ones to judge (the next batch)' },
     skipped: { name: 'Skipped: lost boards', about: 'boards you\'d never reach if you\'re any good; their lesson is earlier' },
 };
@@ -530,6 +543,8 @@ export const THEMED = {
     P28: { theme: 'damage', reads: { state: 'damageControl' } },
     P29: { theme: 'patterns', reads: { tactic: 'sortLadder' } },
     P30: { theme: 'patterns', reads: { tactic: 'sortTail' } },
+    // (The user's own screenshot, 14 Nov: the late game's channels.)
+    P43: { theme: 'channels' },
     P13: { theme: 'late' },
     P14: { theme: 'late' },
     P16: { theme: 'late' },
@@ -657,6 +672,26 @@ export function check(p, m, e) {
         }
         if (!b || e.planFrees.every(([x, y]) => b[x][y] === WHITE))
             out.push(`its plan frees none of the whites at ${e.planFrees.map(place).join(' or ')}`);
+    }
+    if (e.planClean !== undefined) {
+        // (Its plan, the next few moves played forward, each a white along a channel, till the column has no junk.)
+        const x = e.planClean, level = levelNamed(p.level);
+        const a = ahead({ cols, stage: p.stage, burns: p.burns, chain: p.chain, timeLeft: p.timeLeft }, level);
+        let b = cols, done = !cols[x].some(isJunk), all = true;
+        for (const mv of a.moves) {
+            if (done)
+                break;
+            if (!(mv.advice.steps ?? []).some((st) => st.goal?.kind === 'channel'))
+                all = false;
+            b = b && playDrags(b, mv.advice.drags);
+            if (!b)
+                break;
+            done = !b[x].some(isJunk);
+        }
+        if (!done)
+            out.push(`its plan leaves junk in column ${x + 1}`);
+        else if (!all)
+            out.push(`its plan clears column ${x + 1}, but not every move till then brings a white along a channel`);
     }
     if (e.goals) {
         const k = m.steps?.[0]?.kind;

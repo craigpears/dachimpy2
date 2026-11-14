@@ -2123,7 +2123,7 @@ minutes of play each, about 8 minutes to run), no two from the same session with
   burnt, just to have a bit of burnt buffer. You build some fully [junk] columns, and then build behind it, but this
   did not seem to have a plan. It just seems to have picked a random column, not worrying about what whites are going
   to be burnt to the right." And its target column lit, "it doesn't seem to actually try and get the whites there ...
-  and then it's just moved that out": a white taken back out of the target. So the opening: the goal's column two or
+  and then it's just moved that out": a white taken back out of the target. So the opening (corrected 14 Nov: started further left, "The late game" below): the goal's column two or
   three in from the fire, the columns to its right let burn as junk (a buffer), every white to the right of it brought
   left before its column goes; and never a white moved out of the target column.
 
@@ -2155,6 +2155,76 @@ minutes of play each, about 8 minutes to run), no two from the same session with
   down a brown channel and then up a black one carries it the whole way in one drag. Its last swap, rising past
   the target's black, is the black-over-white pair that swaps, and the black goes back along the path to where
   the white came from. The brown dragged down-left first sinks through blacks, which also swaps.
+- **Kept as a test (P43):** the board read from `48-*` piece by piece (columns 1 to 10, top to bottom: `KwKKKK*Kw`,
+  `bbKbKbww`, `*bwwKwbwb`, `bbwKbbKb`, `K*wKbbKbb`, `wwKbKbbK`, `KKKKKbbwK`, `wbKKKbww`, `wwwKwKwww`, `KKKKbKKK`; the
+  same board in `49-*` and `50-*`), the CC^1 bot in the chain, no chain sent up yet, column 10 to burn, about 9 s on the furnace
+  (a guess). A position of its own on the positions page (`shot`, read from your screenshot, not a bot's deal), under a
+  new theme, "The late game: whites go right, through channels"; its verdict (tests/distill-positions.test.ts, "P43, 14
+  Nov: ..."): the first drag's goal a channel (or building one), and its plan clearing column 9 of junk, every move till
+  then a white along a channel. Before the change below it failed: the bot ferried a white into column 8 instead (the
+  existing Channels routine only ever goes right, and nothing aimed at column 9's blacks).
+- **Built (14 Nov): the channel, a named trick** (src/distill-channel.ts; goals 'channel' and 'buildChannel' in
+  src/distill-goals.ts; the planner's P.CHANNEL; tests/distill-channel.test.ts). In the chain, for each piece of junk in
+  the column being filled: the cheapest drag, in a person's time, of a white from any column left of it that moves only
+  down onto browns and up onto blacks and never into that column but for its last swap (`whiteRun`, Dijkstra over place
+  and way); where there's none, or building one is quicker, a channel built first by one drag of junk past junk only (a
+  brown sunk through blacks, a black lifted through browns, up to 5 swaps, from the six columns left of it: `builders`),
+  then the run (`channelRuns`). Each is offered to the chain's planner as a move ("Through a channel"), weighed like the
+  rest; its drags named "build the channel: the brown sunk down through the blacks ..." and "column 3's white in row 4
+  along a channel down through the browns, then up through the blacks into column 9, in for the black in row 6". The
+  plan of next moves (src/distill-ahead.ts) takes "clear column N of junk" as its aim when the column has more than one,
+  reached when it's all white, every move a channel. On P43 the bot now plays: (1) column 3's white in row 6 up through
+  the blacks, down through the browns and up through the blacks into row 4, one drag of 8 swaps (a channel already
+  there); (2) the brown at column 5, row 5 dropped a place through a black (the channel built), then column 3's white in
+  row 4 down-left, through the browns and up through the blacks into row 6, the user's own white from `50-*`; column 9
+  is all white after move 2. Your own drawn routes check out too (the test plays `50-*`'s red then green). The guide
+  has it as a trick in the chain ("The late game: a channel made for a white"), drawn live on P43's board.
+- **Two limits, from the run below:** the white never comes from a column that's mostly white (the next Crystal Clears
+  in the making: robbing one leaves it the junk too; CC^3 burned 1.1 whites a session, not 0.5, till this, seed 5004
+  alone 8); and the channel is offered only for the column going up next (just left of the fire, or of the junk
+  burning) while it's mostly white, a few pieces of junk left to replace, as on P43 (`CHANNEL.NEXT_ONLY`; offered
+  further back as well, CC^2's chains fell 3.9 to 3.6).
+- **The first target further left: built, off** (`P.FIRST_AT`, src/distill-bots.ts, `DistillBot.plan`; tested with it on
+  in tests/distill-bots.test.ts). This corrects the 13 Nov opening note ("two or three in from the fire"). Found: CC^1
+  (and CC^3 often) starts its first chain at once, on the deal, where `burnsLeft` says: the first column from the
+  right that's at least half white. On the 20 boards that's column 9 or 8 (second or third from the fire) in 6 of 20,
+  and column 1 to 4 in most of the rest. With `FIRST_AT` n the first chain's column is at least n in from the fire,
+  the columns right of it burning first, their whites got out into it. Measured (CHANNEL off, against the same
+  boards): at 3, CC^1 whites burned 0.5 to 0.8 a session (sessions with none 14 to 11), CC^2 0.5 to 0.8 (13 to 11),
+  CC^3 better (target 17 to 18, none burned 14 to 16, 0.5 to 0.3); at 4, CC^1 1.1 (10/20), CC^2 0.9 (10/20), CC^5's
+  target 9 to 7, CC^8 0.3 to 0.8, chains about even. Traced on the CC^1 seeds it changes (5004, 5007, 5011, 5014): the
+  opening itself goes well (the extra column burns clean, seed 5011 got a CC^4 first), the whites burn later, as the
+  first chain breaks and the columns let go burn with a white or two in them, as the earlier buffer tries did (P.BUFFER,
+  13 and 14 Nov). So off, for the user to decide, like the buffer.
+
+The eighteenth run, 20 boards a level (seeds 5000 on), main against the channel (as kept: next column only, no white
+from a mostly-white column):
+
+| Bot | Longest chain: mean (best) | Target reached | Sessions with no white burned | Whites burned (first 3 min) | Points a minute |
+|---|---|---|---|---|---|
+| CC^1, main | 3.6 (6) | 20/20 | 14/20 | 0.5 (0.3) | 13.1 |
+| **CC^1, channel** | 3.5 (6) | 20/20 | **15/20** | 0.5 (0.3) | **13.8** |
+| CC^2, main | 3.9 (6) | 20/20 | 13/20 | 0.5 (0.3) | 13.6 |
+| **CC^2, channel** | **3.5 (6)** | 20/20 | 13/20 | 0.6 (0.3) | 13.1 |
+| CC^3, main | 3.6 (6) | 17/20 | 14/20 | 0.5 (0.3) | 13.0 |
+| **CC^3, channel** | 3.6 (6) | **18/20** | 14/20 | 0.5 (0.3) | **13.4** |
+| CC^5, main | 4.3 (6) | 9/20 | 16/20 | 0.3 (0.0) | 16.2 |
+| **CC^5, channel** | **4.5 (7)** | **10/20** | 16/20 | 0.3 (0.0) | **16.6** |
+| CC^8, main | 4.2 (7) | 0/20 | 15/20 | 0.3 (0.0) | 14.4 |
+| **CC^8, channel** | **4.7 (8)** | **1/20** | **16/20** | **0.2** (0.0) | **16.1** |
+
+(The first version, offered for any column being filled and whites from anywhere: CC^5 4.7 and CC^8 4.7 chains, CC^8
+18/20 with no white burned, but CC^3 1.1 whites a session and CC^2 3.8; with no white from a mostly-white column, CC^3
+back to 0.5, CC^2 3.6.) Plainly: CC^3, CC^5 and CC^8 better, CC^1 about even, CC^2's chains shorter (3.9 to 3.5) with
+nothing else worse. Traced seed by seed (CC^2, the 20 boards, channel off and on): four sessions' longest chain shorter
+(5008 4 to 2, 5014 5 to 2, 5009, 5012), two longer (5000, 5003), the rest the same, no one mechanism: in 5014 the first
+chain broke on the same junk either way and the boards went their own ways after it. Then 40 fresh boards (seeds 5020
+on, the user's go-ahead), CC^2 off against on: chains **3.4 to 3.7** (best 6 to 7), target 38 to 39/40, points a minute
+12.5 to 13.0, columns up not Crystal Clear 5.0 to 4.3; but sessions with no white burned 23 to 19/40, whites burned 0.7
+to 1.0 a session. So the chains' drop was noise and the channel stays on at every level; over all 60 boards CC^2 burns a
+little more (0.63 to 0.87 a session, about one standard error and a half), one to watch. Still open: in the chain the bots wait most of the
+time (over 1,100 waits a session for CC^1, "junk in the column going up"), mostly a black stuck on the bottom (or a brown
+on the top) of the column going up that no white can reach and nothing frees: the channel can't reach those either.
 
 ### The batch judged: trapped by what it takes, the hoist, and the lead-up (13 Nov, seventeenth run)
 Every verdict on P13 to P30 is now a test (src/distill-positions.ts, VERDICTS; tests/distill-positions.test.ts), the

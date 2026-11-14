@@ -15,6 +15,9 @@ const CELL = 40;
 const html = (tag, attrs = {}, text) => { const e = document.createElement(tag); Object.assign(e, attrs); if (text !== undefined) e.textContent = text; return e; };
 const secs = (ms) => `${(ms / 1000).toFixed(1)} s`;
 const levelLabel = (name) => name.replace(/^cc/, 'CC^');
+/** Where a position's from: the bot's seeded deal and how far in, or (a board read from the user's own screenshot) the
+    screenshot. */
+const fromWhere = (p) => (p.shot ? `your screenshot ${p.shot.replace(/^.*\//, '')}` : `seed ${p.seed}, ${secs(p.ms)} in`);
 const parse = (cols) => cols.map((s) => [...s].map((ch) => 'wbK*x'.indexOf(ch)));
 const KIND = { wait: 'Waits', burn: 'Burns the column now', dismiss: 'Cashes in' };
 
@@ -96,7 +99,7 @@ function position(p) {
     dl.appendChild(dd);
   }
   if (bot.column !== undefined) row('Filling', `column ${bot.column + 1} (shaded), to go up Crystal Clear`);
-  row('Where', `the ${levelLabel(p.level)} bot, seed ${p.seed}, ${secs(p.ms)} in; ${secs(p.timeLeft)} on the furnace${p.chain ? `; the chain at CC^${p.chain}` : ''}`);
+  row('Where', `the ${levelLabel(p.level)} bot, ${fromWhere(p)}; ${secs(p.timeLeft)} on the furnace${p.chain ? `; the chain at CC^${p.chain}` : ''}`);
   a.appendChild(dl);
   if (p.plan) a.appendChild(planBox(p));
   const verdicts = VERDICTS[p.id] ?? [];
@@ -157,7 +160,7 @@ function toJudge(p) {
     }
     row(bot.steps.length > 1 ? 'Drags' : 'Drag', ol);
   }
-  row('Where', `${levelLabel(p.level)} bot, seed ${p.seed}, ${secs(p.ms)} in; ${secs(p.timeLeft)} on the furnace${p.chain ? `; the chain at CC^${p.chain}` : ''}${bot.column !== undefined ? `; filling column ${bot.column + 1} (shaded)` : ''}`);
+  row('Where', `${levelLabel(p.level)} bot, ${fromWhere(p)}; ${secs(p.timeLeft)} on the furnace${p.chain ? `; the chain at CC^${p.chain}` : ''}${bot.column !== undefined ? `; filling column ${bot.column + 1} (shaded)` : ''}`);
   a.appendChild(dl);
   if (p.plan) a.appendChild(planBox(p));
   const q = html('p', { className: 'question' });

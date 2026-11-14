@@ -32,15 +32,16 @@ import { FIRE_COLS, PHASES, PHASE_ORDER } from './distill-phase.js';
 import { LEVELS, PATH_LABEL, PER_COLUMN, SWEEP_LABEL, bankFor, chainZones, clearComingUp, contextFor, dangerZones, edgeWhites, levelNamed, plainDrag } from './distill-bots.js';
 import { blockPhase, keptTools } from './distill-score.js';
 import { bringRound, pairRescue, stuck } from './distill-path.js';
+import { channelRuns } from './distill-channel.js';
 import { STEP_ONE_CTX, afterOpening, aimFor, beforeBang, lessonPlan, opening, lessonGame } from './den-helium.js';
 import { DRAG_TRICKS, LADDER, dragTricks, makeWay, teachLevel } from './distill-teach.js';
 import { BEST, HELP, HELP_ELSE, NERVES, ONWARD, OPENING, PHASE, SPOT, STEP_ONE, TEACH, TELL } from './lines/helium.js';
 import { POSITIONS } from './distill-guide-boards.js';
 import { POSITIONS as POSITIONS_SEEN, boardOf, botAt } from './distill-positions.js';
 import { STATES, TACTICS, readBoard } from './distill-read.js';
-/** The user's tricks (DISTILLING.md §3, the twentieth to twenty-ninth notes, the thirty-first's fluid motion, and the
-    pair rescue in the chain, 13 Nov). */
-export const TRICKS = ['white', 'danger', 'edge', 'flick', 'blocks', 'kept', 'burnEarly', 'fluid', 'pair'];
+/** The user's tricks (DISTILLING.md §3, the twentieth to twenty-ninth notes, the thirty-first's fluid motion, the
+    pair rescue in the chain, 13 Nov, and the late game's channels, 14 Nov). */
+export const TRICKS = ['white', 'danger', 'edge', 'flick', 'blocks', 'kept', 'burnEarly', 'fluid', 'pair', 'channelIn'];
 const tech = (name, longer = false) => (longer ? { kind: 'technique', name, longer } : { kind: 'technique', name });
 const trick = (name) => ({ kind: 'trick', name });
 /** The page in the course of a game (the user, 13 Nov: "a few of the simple things are a bit out of order ...
@@ -53,7 +54,7 @@ export const PLAN = {
     fire: [trick('white'), trick('danger'), trick('edge'), tech('rescue'), tech('sweep')],
     fill: [tech('junkColumn'), tech('diamond'), trick('flick'), trick('burnEarly'), tech('turnOver')],
     block: [trick('blocks'), trick('kept'), tech('store'), tech('leapfrog'), trick('fluid')],
-    chain: [tech('channel'), trick('pair'), tech('crawl', true), tech('hook', true), tech('figureEight', true), tech('linePull', true), tech('path')],
+    chain: [tech('channel'), trick('pair'), trick('channelIn'), tech('crawl', true), tech('hook', true), tech('figureEight', true), tech('linePull', true), tech('path')],
 };
 // ---------------------------------------------------------------- where the boards come from
 /** A board a bot reached, as the page says it: the deal and how far in. */
@@ -305,6 +306,27 @@ export function pairOn(cols) {
     const alone = bringRound(cols, { x: zone, y, side: -1 }, levelNamed(LEVELS[0].name));
     return { zone, stuck: [zone, y], drags, frees: !!after && !alone && after[zone].every((p) => p === WHITE || p === SPICE) };
 }
+// ---------------------------------------------------------------- the late game's channels
+/** The board the late game's channels are drawn on: the user's own (P43, 14 Nov), the column second from the fire being
+    filled with two blacks in it. */
+export const CHANNEL_POSITION = 'P43';
+/** The late game's channels on a board, live (src/distill-channel.ts): column `fill` cleared a piece of junk at a time,
+    each the cheapest plan the bots find on the board the last one left (a white along a channel, the channel built first
+    where need be); its drags in order, the junk it replaces, and whether the column's left all white. */
+export function channelOn(cols, fill) {
+    const ctx = { stage: 'chain', burnFrom: fill + 1, fill, reach: LEVELS[0].reach }, pace = levelNamed(LEVELS[0].name);
+    const drags = [], into = [];
+    let b = cols;
+    for (let i = 0; i < 4 && b[fill].some((p) => p === BROWN || p === BLACK); i++) {
+        const plan = channelRuns(b, ctx, pace)[0], after = plan && playDrags(b, plan.drags);
+        if (!plan || !after)
+            break;
+        drags.push(...plan.drags);
+        into.push(plan.into);
+        b = after;
+    }
+    return { drags, into, clears: drags.length > 0 && b[fill].every((p) => p === WHITE || p === SPICE) };
+}
 /** The corner tools (keptTools): a brown in the bottom-left corner, a black in the top-left. */
 function toolsAt(cols) {
     const out = [];
@@ -337,6 +359,16 @@ export function trickExamples() {
                 trick, says: null, level: firstLevel('turnOver')?.label ?? null,
                 picture: { cols, drags: d ? [d] : [], rings: [], shade: range(from, COLS), from: 'A real game at Helium\'s still, the right side sorted' },
                 shows: !!d && isFluid(cols, d),
+            });
+            continue;
+        }
+        if (trick === 'channelIn') {
+            // The user's own board (P43), the channels found on it live.
+            const p = POSITIONS_SEEN.find((q) => q.id === CHANNEL_POSITION), cols = boardOf(p), fill = botAt(p).column ?? COLS - 2, c = channelOn(cols, fill);
+            out.push({
+                trick, says: null, level: every,
+                picture: { cols, drags: c.drags, rings: c.into, shade: [fill], from: 'A real game: the column going up second from the fire, two blacks stuck in it' },
+                shows: c.clears && c.into.length >= 2,
             });
             continue;
         }

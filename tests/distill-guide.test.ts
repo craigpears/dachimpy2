@@ -71,7 +71,7 @@ describe('the read version: a section for everything the code has (13 Nov, "ever
     }
   });
   it('has a section for each of the user\'s tricks', () => {
-    expect(TRICKS).toHaveLength(9);
+    expect(TRICKS).toHaveLength(10);
     for (const t of TRICKS) {
       const s = section('data-trick', t);
       expect(s, `no section for the trick ${t}`).not.toBeNull();
@@ -279,6 +279,20 @@ describe('the pair rescue in the chain (13 Nov: "this is absolute danger mode ..
   it('sits in the chain, straight after the channels, with words of its own', () => {
     expect(PLAN.chain[1]).toEqual({ kind: 'trick', name: 'pair' });
     expect(words(section('data-trick', 'pair')!).join(' ').length).toBeGreaterThan(60);
+  });
+});
+
+describe('the late game\'s channels (14 Nov: "they create a kind of channel for the white to go through")', () => {
+  it('is drawn on the user\'s own board, both blacks in the column going up replaced by whites along channels the bots find', () => {
+    const t = trickExamples().find((x) => x.trick === 'channelIn')!;
+    expect(t.shows).toBe(true);
+    expect([...t.picture.rings].sort((a, b) => a[1] - b[1])).toEqual([[8, 3], [8, 5]]);
+    expect(t.picture.shade).toEqual([8]);
+    expect(playDrags(t.picture.cols, t.picture.drags)![8].every((x) => x === WHITE)).toBe(true);
+  });
+  it('sits in the chain, after the pair rescue, with words of its own', () => {
+    expect(PLAN.chain[2]).toEqual({ kind: 'trick', name: 'channelIn' });
+    expect(words(section('data-trick', 'channelIn')!).join(' ').length).toBeGreaterThan(60);
   });
 });
 
