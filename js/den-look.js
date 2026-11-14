@@ -1612,7 +1612,8 @@ function dressCapybara(L) {
   // In his model's own frame (x forward, y up): his body an ellipsoid round (-0.12, -0.1), 0.625 long, 0.425 high,
   // 0.4 wide; his head round (0.52, 0.12, 0.05).
   const BX = -0.12, BY = -0.1, RX = 0.625, RY = 0.425, RZ = 0.4;
-  const ringAt = (x, r, thick, m, sy = 1, sz = 1) => { const t = part(new THREE.TorusGeometry(r, thick, 6, 28).rotateY(Math.PI / 2).scale(1, sy, sz), m, x, BY); c.add(t); return t; };
+  // (a ring round him at x along his length; `arc` < 2π: from one side over his back to the other)
+  const ringAt = (x, r, thick, m, sy = 1, sz = 1, arc = Math.PI * 2) => { const t = part(new THREE.TorusGeometry(r, thick, 6, 28, arc).rotateY(Math.PI / 2).scale(1, sy, sz), m, x, BY); c.add(t); return t; };
   // A shirt or jacket over his front half, open behind (his rump bare).
   if (L.top !== 'none') {
     const striped = L.top === 'striped' || L.top === 'vest', jacket = ['swashbuckler', 'buccaneer', 'captain'].includes(L.top);
@@ -1621,7 +1622,7 @@ function dressCapybara(L) {
     const coat = part(new THREE.SphereGeometry(0.5, 22, 14, from, Math.PI * 2 - 2 * from).scale(RX / 0.5 * 1.04, RY / 0.5 * 1.04, RZ / 0.5 * 1.05), cloth, BX, BY);
     c.add(coat);
     // Its collar round his neck, in its second colour (a jacket's, or the vest's), and gold buttons down his chest.
-    if (jacket || L.top === 'vest') ringAt(0.36, 0.27, 0.045, M(L.topCol2), 1.05, 0.95);
+    if (jacket || L.top === 'vest') ringAt(0.34, 0.285, 0.03, M(L.topCol2), 1.05, 0.95, Math.PI);   // (over his shoulders)
     if (jacket) for (const y of [-0.12, -0.24, -0.36]) {
       const k = (y - BY) / RY, x = BX + RX * Math.sqrt(Math.max(0, 1 - k * k)) * 1.04 + 0.015;
       c.add(part(new THREE.SphereGeometry(0.035, 8, 6), gold, x, y, 0));

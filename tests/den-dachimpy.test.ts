@@ -260,7 +260,7 @@ describe('Dachimpy\'s voice: buzzy and excited first, the wry line after (the us
 
 describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The tribute moves home")', () => {
   it('paints only pirates whose looks are in PIRATES (with Dachimpy beside them), pirate names only; anyone else a titled page', () => {
-    const pirates = LOOK_JS.match(/export const PIRATES = [\s\S]*?\n\}\)/)![0];
+    const pirates = LOOK_JS.match(/export const PIRATES = [\s\S]*?\n\}\)/)![0] + LOOK_JS.match(/export const CAPYBARAS = \{[^\n]*/)![0].replace('{ Umami:', '\n  Umami: {');
     for (const f of FRIENDS) {
       expect(f.title).toBe(FRIEND_TITLES[f.id]);
       expect(ON_A_FRIEND[f.id].length, f.id).toBeLessThan(110);
@@ -272,6 +272,16 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
         expect(BACKDROPS).toContain(f.portrait.backdrop);
       } else expect(['everyone', 'thanks']).toContain(f.page);
     }
+  });
+
+  it('hangs Umami among the friends, painted as the capybara (14 Nov: "Umami needs to be in the portraits too as a friend")', () => {
+    const u = FRIENDS.find((f) => f.id === 'umami')!;
+    expect(u.portrait?.sitter).toMatchObject({ who: 'pirate', name: 'Umami' });
+    expect(u.x).toBeGreaterThan(FRIENDS_ROOM.x0);
+    expect(u.x).toBeLessThan(FRIENDS_ROOM.x1);
+    expect(u.middle).toBeFalsy();
+    expect(LOOK_JS).toMatch(/export const CAPYBARAS = \{ Umami: cleanLook\(\{ body: 'capy'/);
+    expect(readFileSync(join(ROOT, 'js', 'den', 'portraits.js'), 'utf8')).toMatch(/CAPYBARAS\[name\]/);
   });
 
   it('names Dalnoth with everyone Dachimpy blockaded with, not on a portrait of his own (14 Nov)', () => {

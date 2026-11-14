@@ -210,8 +210,11 @@ export const FRIENDS = [
     friend('affame', along(1, 1), { portrait: sat('Affame', 'night') }),
     friend('welcomeBack', along(1, 2), { portrait: sat('Fable', 'night', { dress: FABLE_IN_RAGS, with: WELCOME_BACK_RAGS, yaw: -0.3 }) }),
     friend('whiterose', along(1, 3), { portrait: sat('Whiterose', 'bloodmoon') }),
-    friend('everyone', along(1, 4), { page: 'everyone' }),
-    friend('thanks', along(1, 5), { page: 'thanks' }),
+    // (Umami, a friend too, painted as the capybara he is, dressed for it: 14 Nov, "Umami needs to be in the portraits
+    // too as a friend". His look: js/den-look.js's CAPYBARAS.)
+    friend('umami', along(1, 4), { portrait: sat('Umami', 'sea', { yaw: 0.55 }) }),
+    friend('everyone', along(1, 5), { page: 'everyone' }),
+    friend('thanks', along(1, 6), { page: 'thanks' }),
 ];
 /** The friends' wall (its face's z). */
 export const FRIENDS_WALL = FROOM.z0 + WALL_T;

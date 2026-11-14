@@ -998,6 +998,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   jacket over his front, a belt or sash, an eyepatch, earrings and a familiar on his back. Umami himself, in a
   captain's hat and jacket and a red sash: den.html?as=umami. Still to see: how he looks seated, rowing and at
   the helm (the den poses him as it does a pirate, his front legs as arms).
+  And (14 Nov): "Umami needs to be in the portraits too as a friend": his portrait in Dachimpy's house (Hugs and
+  Cookies), hung with the friends', painted as the capybara. Done 14 Nov: "Umami, Captain Capybara" in the friends'
+  room, in his captain's hat and jacket.
 
 - **The Distilling guide trimmed to its best moves (14 Nov):** "I love how we've got the moves like the hook, pull a
   line of browns. But ... some of the moves are good for behind the scenes but need hiding. Like, with these arrows,

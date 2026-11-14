@@ -1619,6 +1619,7 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 - *whiterose:* "Whiterose, Heart of the Game"
 - *affame:* "Affame, Queen of Sweetness"
 - *welcomeBack:* "Welcome Back Dachimpy!"
+- *umami:* "Umami, Captain Capybara"
 - *everyone:* "Everyone I Blockaded With"
 - *thanks:* "Thank You"
 
@@ -1637,6 +1638,7 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 - *whiterose:* "Whiterose! For the life of the game, she'd switch from Vanguard to the other side. Miss you, Whiterose!"
 - *affame:* "Affame! The queen of sweetness. Such a sweety, honestly."
 - *welcomeBack:* "Fable! Welcome back, eggs and all, last June. It was so good to be home."
+- *umami:* "Umami! Dressed up for his portrait, and not a word about it. Unbothered, as ever."
 - *everyone:* "Yay, all of you! Names change, I forget, but every one of you is here."
 - *thanks:* "That one's for everyone! It's the people that made it."
 

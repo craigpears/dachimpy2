@@ -14,7 +14,7 @@
    - paintYou(look) for yours: read off into a canvas, to finish stroke by stroke on her easel and to save
      as a snapshot. Gives { canvas, texture }. */
 import * as THREE from 'three';
-import { PIRATES, cleanLook } from '../den-look.js';
+import { PIRATES, CAPYBARAS, cleanLook } from '../den-look.js';
 import { renderer, makePirate } from './world.js';
 import { yeti, vampire, fright, beast, rooBear, pose } from './creatures.js';
 import { coffin } from './furniture.js';
@@ -112,7 +112,8 @@ function backdropPlane(kind, far) {
 }
 
 // ---------- who's in it ----------
-const lookOf = (name, dress = {}) => cleanLook({ ...(PIRATES[name] || {}), ...dress });
+// (a real pirate's look, or Umami's, the capybara: CAPYBARAS)
+const lookOf = (name, dress = {}) => cleanLook({ ...(PIRATES[name] || CAPYBARAS[name] || {}), ...dress });
 /** A sitter as Puzzle Pirates' portraits stood them: a quarter turn, the hand with something in it up. */
 function sitFor(p, yaw = 0.3) {
   p.g.rotation.y = yaw;
@@ -160,6 +161,7 @@ function compose(portrait, you) {
     }
     // (`close`: knees up, the sitters big in the frame, as Puzzle Pirates' own were)
     if (s.company?.length) { const cx = s.company.reduce((a, c) => a + c.x, 0) / (s.company.length + 1) * (portrait.close ? 1 : 0.8); portrait.close ? aim(cx, 1.38, 4.5, cx, 1.3, 0) : aim(cx, 1.15, 5.4, cx, 1.0, 0); }
+    else if (portrait.close && look.body === 'capy') aim(0.3, 1.25, 4.6, 0, 0.78, 0);   // (a capybara: lower, and nearer, he's smaller)
     else if (portrait.close) aim(0.2, 1.4, 3.8, 0, 1.33, 0);
     else if (portrait.watch) {
       // Head and shoulders, close enough to see the eyes move.
