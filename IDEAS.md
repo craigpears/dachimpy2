@@ -2706,6 +2706,11 @@ Puzzle Pirates, or one to make), before anything's built.
     Don't reset the board: its first constellation is worth only 71.
   - Also in it: Rumble targeting (one on one, when to defend), when to retreat, the den's Foraging with its
     wolf head and moons, and its loot. Still unknown: "fren" (not in the guide).
+- **Who explains it (14 Nov):** Montebello (a real pirate; "they", the user: neutral pronouns, "make sure you
+  use neutral pronouns") was about to explain to the user how the chain counts (one move, as the guide says,
+  or a streak across drops). The user: "I think [they] could win the [duty nav] explanation slot if so", so if
+  their explanation is the one that lands, they may be the one credited for it (or teaching it) in the
+  tutorial. To settle with the user once they've explained it.
 
 ## Distilling with a higher skill cap: fun variations (13 Nov)
 
