@@ -140,6 +140,8 @@ function rugTex() {
   });
 }
 const RUG = { L: 1.5, W: 1.02 };
+/** The most the carpet ripples while it's lashed on the sloop (metres): the lashings sit just over that. */
+const LASHED_RIPPLE = 0.04;
 /** The carpet: a cloth that can ripple, tassels at each end. */
 function makeRug() {
   const geo = new THREE.PlaneGeometry(RUG.L, RUG.W, 24, 6).rotateX(-Math.PI / 2);
@@ -257,8 +259,11 @@ function build() {
   carpet.crates = crates;
   const ropes = new THREE.Group(), rope = mat('#c9b48a');
   for (const dx of [-0.42, 0.42]) {
-    const k = mesh(new THREE.CylinderGeometry(0.018, 0.018, RUG.W + 0.1, 5), rope, false); k.rotation.x = Math.PI / 2; k.position.set(CARPET.RUG_X + dx, top + 0.03, 0); ropes.add(k);
-    for (const z of [-1, 1]) { const d = mesh(new THREE.CylinderGeometry(0.018, 0.018, top - SLOOP_DECK, 5), rope, false); d.position.set(CARPET.RUG_X + dx, SLOOP_DECK + (top - SLOOP_DECK) / 2, z * (RUG.W / 2 + 0.05)); ropes.add(d); }
+    // (over the cloth, clear of it as it ripples, LASHED_RIPPLE: level with it, it showed through and flickered; the
+    // user, 14 Nov: "it kind of appears and disappears ... the rope or the strap")
+    const over = top + 0.04 + LASHED_RIPPLE + 0.03;
+    const k = mesh(new THREE.CylinderGeometry(0.022, 0.022, RUG.W + 0.1, 6), rope, false); k.rotation.x = Math.PI / 2; k.position.set(CARPET.RUG_X + dx, over, 0); ropes.add(k);
+    for (const z of [-1, 1]) { const d = mesh(new THREE.CylinderGeometry(0.022, 0.022, over - SLOOP_DECK, 6), rope, false); d.position.set(CARPET.RUG_X + dx, SLOOP_DECK + (over - SLOOP_DECK) / 2, z * (RUG.W / 2 + 0.05)); ropes.add(d); }
   }
   s.add(ropes);
   carpet.ropes = ropes;
@@ -556,7 +561,7 @@ export function carpetTick(dt) {
     rug.rotation.x += (-F.s * 0.07 - rug.rotation.x) * Math.min(1, dt * 6);
     rug.rotation.z = Math.max(-0.4, Math.min(0.4, F.w * 0.05));
     ripple(rug, 0.07, t, 1.4);
-  } else if (!F) ripple(carpet.rug, 0.015 + v * 0.005, t, 0.4 + v / 8);
+  } else if (!F) ripple(carpet.rug, Math.min(LASHED_RIPPLE, 0.01 + v * 0.0025), t, 0.4 + v / 8);
   // Afloat, she drifts on it, bobbing.
   if (carpet.landed && J.at === 'afloat') { const rug = carpet.rug; rug.position.x += dt * 0.3; rug.position.y = 0.03 + Math.sin(t * 2) * 0.04; rug.rotation.z = Math.sin(t * 1.6) * 0.04; }
   // The gusts turning; one she's flown through flaring and fading.
