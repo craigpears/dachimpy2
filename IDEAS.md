@@ -1043,9 +1043,30 @@ picture, a trinket, a plaque with its story) placed in any house as config, the 
 from one to the next and telling each one's story, every exhibit in the 2D viewer too. Gravee's
 portraits, Pandayay's trophies and Dachimpy's sims are all that piece.
 
-Still to collect: the user's pictures not saved to disk need putting in `notes/museum/` by hand
-(the v1 page, the first shoot-Dalnoth board and the Dachimpy.com pages), and pictures of Imaduck's
-Global Cade Sim.
+**Built (13 Nov), to be played:** Dachimpy's house, "The Museum", `den.html?at=dachimpy` (RULES.md has it):
+the hug and the cookie at the door every visit, more on the hall's plate; the banner, the title card and "Did you
+know?" (Dlonelyone) in the hall; the museum, the twelve screenshots in `notes/museum/` framed oldest first as
+`museum/*.jpg` with plaques in Dachimpy's voice, pages for the Bnav Guide and the end (Flash, Whirled, the Global
+Cade Sim "works perfectly"), the little board whose sloop spins into the rocks; the friends' room, Kikkit, Zizzy
+and Sanne truly special in the middle, "Oh, Gawd!" with Gravee, "The Monkey Man", the den's pirates, a shelf of
+trinkets, the thank-you. Privacy: one screenshot cropped ("Create Your Game": its Invite Friends list showed
+another player's Whirled handle and picture); the rest show only the pirate name Dachimpy.
+Still open:
+- To collect: the v1 Bnav Guide page, the first shoot-Dalnoth board and the Dachimpy.com pages (no screenshots
+  yet: the Bnav Guide's a page of words for now), and pictures of the Global Cade Sim (its maker's pirate name,
+  "I think it's imaduck", to check before it's named: the museum says "someone else's" for now).
+- Dlonelyone: named on the "Did you know?" page from the user's spelling; her pirate page, portrait and ocean
+  still to check, and she's not drawn.
+- The trinkets are stand-ins (a jar of cookies, a model sloop, a ship in a bottle, a gold cup, a chest): the
+  real ones are on Dachimpy's pirate pages, to put on the shelf. Mini and the cuddly monkeys: what they look like,
+  from the user's photos, still to come.
+- Fable (in "Welcome Back Dachimpy!") and the other friends in Dachimpy's portraits (Daquan, Milleh, Scabard and
+  the rest): their looks to check before they're drawn; Fable's frame is its title on a page meanwhile.
+  "Swan Molestation" waits for a swan; "Cursed & Cookied" is drawn as Kikkit beside Dachimpy, its scene not
+  recreated.
+- The cookie kept (in your hold, or on a shelf at home): not yet; a cookie each visit for now.
+- Dachimpy.com's later versions (the grey parchment-menu site, the blue site, the Distilling Simulator, the
+  2010 updates log) as exhibits, once there are pictures of them.
 
 ## Helium, and Distilling (11 Nov, from Mischievious)
 

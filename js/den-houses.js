@@ -2,7 +2,8 @@
    tested in tests/den-houses.test.ts. js/den/lodgings.js draws the district's door in the den and its
    list of houses; js/den/house.js is the house shell every house is played in (its rooms, walking
    about them, the way out); each house's own scene is a module of its own (Gravee's:
-   js/den/gravee-house.js, its rules src/den-gravee.ts; Roobear's: js/den/roobear-house.js, src/den-roobear.ts).
+   js/den/gravee-house.js, its rules src/den-gravee.ts; Roobear's: js/den/roobear-house.js, src/den-roobear.ts;
+   Dachimpy's, the museum: js/den/dachimpy-house.js, src/den-dachimpy.ts).
 
    The user (11 Nov): "more like ... old Puzzle Pirates, you have like the areas of houses and you have
    the enter a house stuff and you can choose whose house to go into. And maybe she's just one of them.
@@ -23,6 +24,10 @@ export const HOUSES = [
     // Roobear's (13 Nov): a little house of her own, as every pirate has (RULES.md), small as suits her. A house,
     // but she calls it her ROOm (her own joke: "a ROOm you mean? xD"). Its rules: src/den-roobear.ts.
     { id: 'roobear', owner: 'Roobear', name: 'The ROOm', kind: 'Cottage', blurb: 'A house. She calls it her ROOm.' },
+    // Dachimpy's (13 Nov), the user's own pirate: their house doubles as a museum of the old Blockade Simulator
+    // and Dachimpy.com, and keeps their friends on its walls; a hug and a cookie at the door. Its rules:
+    // src/den-dachimpy.ts.
+    { id: 'dachimpy', owner: 'Dachimpy', name: 'The Museum', kind: 'Manor', blurb: 'Hugs and cookies at the door. The old sims, oldest first.' },
 ];
 /** The house by its id, or null. */
 export const houseById = (id) => HOUSES.find((h) => h.id === id) ?? null;
@@ -82,6 +87,12 @@ export function blocksOf(pieces) {
             out.push({ x: p.x, z: p.z, r: 0.35 });
         else if (p.kind === 'candelabra')
             out.push({ x: p.x, z: p.z, r: 0.22 });
+        else if (p.kind === 'simModel')
+            out.push({ x: p.x, z: p.z, r: 0.5 });
+        else if (p.kind === 'shelf') { // (long across its front: two circles side by side)
+            const y = (p.yaw ?? 0) + Math.PI / 2, dx = Math.sin(y) * 0.38, dz = Math.cos(y) * 0.38;
+            out.push({ x: p.x + dx, z: p.z + dz, r: 0.32 }, { x: p.x - dx, z: p.z - dz, r: 0.32 });
+        }
         // (rugs and runners you walk over)
     }
     return out;

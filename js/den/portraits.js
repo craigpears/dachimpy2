@@ -153,7 +153,7 @@ function compose(portrait, you) {
     objs.push(p.g);
     // Whoever's beside them (Robert, a joey, a bear, a pirate), and the camera back to fit them in.
     for (const c of s.company || []) {
-      const f = c.kind === 'pirate' ? makePirate({ look: cleanLook(c.look || {}) }) : beast(c.kind);
+      const f = c.kind === 'pirate' ? makePirate({ look: c.name ? lookOf(c.name, c.look) : cleanLook(c.look || {}) }) : beast(c.kind);
       f.g.position.set(c.x, 0, c.z); f.g.rotation.y = c.yaw ?? 0;
       if (c.pose) pose(f, c.pose);
       objs.push(f.g);

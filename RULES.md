@@ -232,7 +232,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   something that I can put into the URL as well, so that I can share that animation with
   somebody." `den.html?at=` and a name opens the den straight there: the cheats' stages (`start`,
   `walk`, `gun-tower`, `built`) and their starts and scenes (`shack`, `map-scene`, `sea`,
-  `dignity`, `umami`, `wedding`, `married`, and since: `kikkit`, `penguins`, `tzz`, `imperial`, `smugglers`, `race`, `door`, `race-watch`, `lodgings`, and any house by its id: `roobear`, `gravee`). Choosing one from the cheats puts its link in the address bar, and its
+  `dignity`, `umami`, `wedding`, `married`, and since: `kikkit`, `penguins`, `tzz`, `imperial`, `smugglers`, `race`, `door`, `race-watch`, `lodgings`, and any house by its id: `roobear`, `gravee`, `dachimpy`). Choosing one from the cheats puts its link in the address bar, and its
   button's tooltip shows it. A name that isn't one says so. A new scene or start gets a name too.
 - **The layout follows the screen's shape, not the device (11 Nov).** A tall, narrow window on a
   desktop gets the phone's layout (the wedding planner as a sheet along the bottom, say), and
@@ -449,6 +449,49 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       flare pants; a hook; a blue-and-white china bowl of blueberries (`blueberries`); a pale periwinkle
       crow (`crow`, in atlantean). Her skin (fair) and her feet (black boots) aren't in the description:
       guesses, to check against her portrait. The beret is a new hat for anyone too.
+  - **Dachimpy's house, the museum (13 Nov).** The user: "my museum house idea ... Definitely seems
+    [ready]" (IDEAS.md, "A museum, in Dachimpy's house"). The district's third house, a Manor named "The
+    Museum" (`src/den-dachimpy.ts`, played by `js/den/dachimpy-house.js` on the shared shell), three rooms in
+    a row:
+    - **The hall: a hug and a cookie at the door, every visit.** Dachimpy says hello, comes to your side and
+      hugs you (the talking pirates' `hug` idle, your eyes shut), then holds out a plate of cookies (`offer`,
+      holding furniture.js's `cookiePlate`), and you take one; their line and yours one after the other,
+      never over each other; the camera in close on you both. More from the plate on the hall's table (walk
+      up and Space). On its walls: the Dachimpy.com banner, high; the guide videos' title card; and a page,
+      "Did you know?", telling how it began (watching Dlonelyone teach a new pirate, and Dachimpy.com as the
+      quieter way of helping).
+    - **The museum: the old Blockade Simulator, oldest first.** The user's screenshots (`notes/museum/`,
+      not published) as `museum/*.jpg` (published, no wider than 1280; one cropped: "Create Your Game"
+      without its Invite Friends list, which showed another player's handle). Each framed with a card under
+      it, its plaque in Dachimpy's voice (`PLAQUES` in `src/lines/dachimpy.ts`: what IDEAS.md says of each
+      version, else what the screenshot plainly shows); pages of story where there's no picture ("Version
+      one", the Bnav Guide, and "And then": Flash gone, Whirled gone, the Global Cade Sim working perfectly).
+      Stop by one and Dachimpy says a line about it (the shell's remark); Tab for every exhibit close up,
+      the screenshot as it is with its plaque under it (picture-view.js's `note`; an image keeps its own
+      shape). Fond of the bugs: a little model of the old board stands by "Blockade!", its sloop sailing
+      round a square at a time and now and then spinning and hopping into the rocks (furniture.js's
+      `simModel`). Exhibits are a shared piece (`js/den/exhibits.js`: a photo as a texture and an image, a
+      page of words painted), for any house.
+    - **The friends' room.** Their friends' portraits, each painted from a look in PIRATES (pirate names
+      only): the den's pirates, and some of Dachimpy's own portraits recreated under their real titles,
+      Dachimpy beside the friend (a portrait's company can be a real pirate by name now): "Oh, Gawd!" with
+      Gravee, "The Monkey Man". In the middle, bigger, under a sign "Truly special": Kikkit ("Cursed &
+      Cookied"), Zizzy ("Pinky and the Pink") and Sanne ("Monkey Couple", Dachimpy in red to match her). A
+      portrait with someone whose look isn't known is its title on a page, no figure ("Welcome Back
+      Dachimpy!", with Fable). A shelf of trinkets (furniture.js's `shelf`: a jar of cookies, a model sloop,
+      a ship in a bottle, a gold cup, a chest), and a page of thanks to everyone who makes Puzzle Pirates
+      what it is.
+    Their link: `den.html?at=dachimpy`.
+    - **Dachimpy's look, from their in-game picture (13 Nov).** The first go, from words alone, "absolutely
+      does not look like me"; then: "me at the back with my pink and purple wig, kilt, belt and braces, and
+      shoes." So a tall pale pink beehive wig with a purple band (`beehive`, a hat with a second colour,
+      either body), tan skin, a brown beard and moustache, purple braces over a bare chest (`braces`, a
+      man's top), a dark belt, a pink kilt in a purple tartan, bare legs (`bareLegs`, a toggle in the
+      wardrobe: no stockings under a kilt or knickers), pink shoes. In PIRATES, they/them.
+    - **Sanne and Zizzy, from their Meridian portraits (13 Nov).** Sanne (she) as in "Monkey Couple": fair,
+      blonde hair tied back, gold hoops, red shirt and trousers, a big gold buckle, white boots, a brown
+      monkey. Zizzy as in "Pinky and the pink": fair, long pink curls (`pink`, a hair colour now), a pink
+      off-shoulder gown trimmed white. Both in PIRATES.
   - **Watching eyes are a piece (11 Nov).** "The vampire portrait that's following you definitely
     needs to be a normal thing." Any portrait can have eyes that follow you (`watch`): the Count's,
     and Dignity's "Off Duty (Never)", one eye under her patch.

@@ -4,7 +4,7 @@ Every character's lines, and who they are, made from `src/lines/` by `npm run bu
 (`tools/lines-doc.mjs`): change a line there, not here, and the game changes with it.
 This file's history in git shows every line as it's changed.
 
-[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Gravee](#gravee) · [The Count](#the-count) · [Roobear](#roobear) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
+[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Gravee](#gravee) · [The Count](#the-count) · [Roobear](#roobear) · [Dachimpy](#dachimpy) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
 
 ## Dalnoth
 
@@ -37,7 +37,7 @@ Beaten after the third wave, he leaves his cannon, rows in, stomps up the beach 
 
 ## You
 
-Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, and only at the den's short, cheesy moments: picking up the captain's map, and riding the crane up the cliff and down again, your own wedding, screaming at a vampire in Gravee's house, having an ear roobed in Roobear's, and sailing by Primates Rule, not ready yet, coming into the smugglers' cove behind Port Decorum, and, warily, at Helium's still just after it's gone bang.
+Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, and only at the den's short, cheesy moments: picking up the captain's map, and riding the crane up the cliff and down again, your own wedding, screaming at a vampire in Gravee's house, having an ear roobed in Roobear's, a hug and a cookie at Dachimpy's door, and sailing by Primates Rule, not ready yet, coming into the smugglers' cove behind Port Decorum, and, warily, at Helium's still just after it's gone bang.
 
 ### Picking up the captain's map, at the end of Dalnoth's cutscene
 
@@ -82,6 +82,12 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 
 - *The first time, at her door:* "Oh! ...Oh, that's actually lovely."
 - *Asking him for another:* "...Yes. Still lovely."
+
+### At Dachimpy's door, every visit: their hug, their cookie; and asking for another from the plate
+
+- *Their hug:* "Aww."
+- *Their cookie:* "Mm! Still warm."
+- *Another from the plate on the hall's table:* "Just one more."
 
 ### Helium's rum run: as they ask you along, before their "Delivering"
 
@@ -1443,6 +1449,148 @@ Warm and quietly funny. Asked what her name stands for, she answered that she co
 ### As you leave
 
 - "Bye! Mind your ears!"
+
+## Dachimpy
+
+The user's own pirate, of the Emerald Ocean (they/them), drawn in their rose pink wig, belt and braces and kilt. They made the Blockade Simulator and Dachimpy.com, guides and sims for helping people learn the puzzles, a quieter way of doing what they saw Dlonelyone do one day: teaching a new pirate to sail.
+
+Warm, proud of everything they built, bugs and all, and well known for hugs and cookies: everyone who comes into their house gets both. Their house in the den's housing district doubles as a museum of the old sims, oldest first, and keeps their friends on its walls.
+
+> "It very much fits me, kind of just ... showing you around all the history of the things that I've built. They are my pride and joy." (the user, 11 Nov)
+>
+> "I'm very well known for giving just like hugs and cookies ... anyone that comes into my house, which I guess you can double up as a museum, I need to give them cookies." (the user, 11 Nov)
+>
+> "the bugs are what made it, kept it interesting. They gave it the character." (the user, 11 Nov)
+>
+> "my museum house idea ... Definitely seems [ready]" (the user, 13 Nov)
+
+### At the door when you come in, a hug first
+
+- *Your first visit:* "Welcome, welcome! Come here, you. Hug first."
+- *Coming back:* "You came back! Hug first. Then cookies."
+
+### After the hug, a cookie
+
+- *Your first visit:* "And a cookie. Everyone who comes in gets a cookie. House rule."
+- *Coming back, one in turn:*
+  - "Cookie! Fresh ones."
+  - "Your cookie. Still warm."
+  - "One cookie, as promised."
+- *Then, on to the museum:* "Now come and see. The old sims, oldest first. My pride and joy."
+
+### Another cookie from the plate on the hall's table, one in turn
+
+- "Have another. I insist."
+- "There's always another cookie."
+- "That's three. I'm not counting. I am counting."
+- "Take two. One for the road."
+
+### Showing you round, as you come to each stop
+
+- *In the hall, under the banner:*
+  - "So this is my house. And the museum. Both, really."
+  - "Everything I ever made for Puzzle Pirates, through there. Oldest first."
+- *Into the museum:*
+  - "Here we are. Stop by any of them and I'll tell you about it."
+  - "Bugs and all. Especially the bugs."
+- *Into the friends' room:*
+  - "And this room's the people. My friends, from all those years."
+  - "The middle of the wall is for the truly special ones."
+
+### The plaques under the exhibits, oldest first
+
+- *banner:* "The banner from the top of Dachimpy.com: the chimp in his blue pirate hat, a dashed trail to the X, the cliffs, and the sloop on its green ring."
+- *titleCard:* "The title card from my guide videos: the logo over the sea, faint jigsaw pieces across it, and a little ship sailing in at the corner."
+- *first:* "The first prototype board. One whirlpool, one little ship, three moves: left, forward, right. Then Execute Move. It moved! I was thrilled."
+- *beforeWhirled:* "The version before Whirled. I bet nobody even recognises it. Flags, rocks, whirlpools and winds, your ship counting its lefts, forwards and rights, chat beside it, on SmartFoxServer."
+- *jobbers:* "It tried to be realistic: Starting Jobbers and Jobbers per Turn for each team, so you had to fill your ship with jobbers. Too complicated. I simplified it to just the ship navigating part."
+- *wireframe:* "The plan for the game set-up, in grey boxes: an Admiral and Navs for each team, chat, and the user list."
+- *lobby:* "The Blockade Sim's lobby: choose your ship, your jobbers Weak, Normal or Elite, and tick Ready. Blockade practice without gathering hundreds of jobbers."
+- *teams:* "The teams: Spectators, Team One and Team Two. That's me on Team One, on Normal, ready."
+- *create:* "Create Your Game: max players, rated or not, the map, the turn time, and friendly fire. Ticked, of course."
+- *inPlay:* "The finished thing, live on Whirled from 13 April 2010: isometric, the Blockade! move panel, the clock. And now and then your ship would spin and hop into the rocks. That gave it character."
+- *rotations:* "A sloop for every heading, drawn by hand by someone I paid a tiny bit, back in the day. Poor guy. I love them."
+- *rings:* "The same sloops, turning round on their rings."
+
+### The museum's panels of story, where there's no picture
+
+- *began:*
+  - *title:* "Did you know?"
+  - *text:* "It all started when I watched Dlonelyone showing a new pirate how to sail a sloop for the first time. I wished I could do that too. I wasn't quite brave enough, not out loud. So I made Dachimpy.com instead: a quieter way of doing the same thing. Helping people learn."
+- *guide:*
+  - *title:* "Version one"
+  - *text:* "An insanely basic HTML page: the Bnav Guide. Plain links. Ship movement; winds and rocks; whirlpools; shooting and grappling; collisions. Then practice boards, and "Dalnoth traverses the board", I to III. Its last line planned a Survival Game: waves of bot ships, each harder than the last."
+- *gone:*
+  - *title:* "And then"
+  - *text:* "Flash got deprecated and Whirled was taken down, and the sim went with them. These days there's the Global Cade Sim, someone else's, still running. It works perfectly. No ship ever spins into the rocks. Where's the fun in that?"
+
+### About the exhibit you've stopped by or turned to look at (once a visit each), and under it close up
+
+- *began:* "That's where it all started. Watching her."
+- *banner:* "My banner. The chimp's me, more or less."
+- *titleCard:* "The videos opened on this. Imagine the music."
+- *guide:* "Version one. Insanely basic. I was so proud of it."
+- *first:* "Look at that little ship. Execute Move!"
+- *beforeWhirled:* "You don't recognise it, do you? Nobody does."
+- *jobbers:* "Jobbers per turn. What was I thinking?"
+- *wireframe:* "All grey boxes. The dream was in there somewhere."
+- *lobby:* "Choose your ship! The jobbers came along for free."
+- *teams:* "Team One. Just me. Ready, though."
+- *create:* "Friendly fire on. Obviously."
+- *inPlay:* "Sometimes she'd spin into the rocks. Character, that is."
+- *rotations:* "Every one of those by hand. Poor guy. I love them."
+- *rings:* "Round and round. Still makes me smile."
+- *gone:* "The new one works perfectly. Shame, really."
+
+### The titles on their friends' portraits
+
+- *dalnoth:* "Dalnoth, First on the Board"
+- *dignity:* "Dignity, Never Off Duty"
+- *mischievious:* "Mischievious, at a Wedding"
+- *monkeyMan:* "The Monkey Man"
+- *gravee:* "Oh, Gawd!"
+- *kikkit:* "Kikkit: Cursed & Cookied"
+- *zizzy:* "Zizzy: Pinky and the Pink"
+- *sanne:* "Sanne: Monkey Couple"
+- *tzz:* "Tzz, and D'rizzle"
+- *helium:* "Helium, Eyebrows Pending"
+- *roobear:* "Roobear, Ears Roobed"
+- *welcomeBack:* "Welcome Back Dachimpy!"
+- *thanks:* "Thank You"
+
+### About the friend's portrait you've stopped by (once a visit each)
+
+- *dalnoth:* "Dalnoth. He was on my very first boards. He took it well."
+- *dignity:* "Dignity. She runs the checkpoint. Very firmly. Bella helps."
+- *mischievious:* "Mischievious. Always a wedding somewhere."
+- *monkeyMan:* "The Monkey Man. That's me, 2007. Some things never change."
+- *gravee:* "Oh, Gawd! Gravee and me, aboard her Familiar Plaice. That face says it all."
+- *kikkit:* "Kikkit. Truly special. Every Valentine's, a portrait, and always cookies."
+- *zizzy:* "Zizzy. Truly special. Pinky and the pink: both of us in pink, of course."
+- *sanne:* "Sanne. Truly special. Monkey Couple, 2007: matching red, a monkey each."
+- *tzz:* "Tzz. She gave me my best teaming tip: don't stall. Ever."
+- *helium:* "Helium. Ask about the eyebrows. Actually, don't."
+- *roobear:* "Roobear. Robert roobed my ears too."
+- *welcomeBack:* "Fable welcomed me back, last June. It was good to be home."
+- *thanks:* "That one's for everyone. It's the people that made it."
+
+### The thank-you on the friends' wall, and the sign over the truly special ones
+
+- *thanks:* "To my friends on these walls, and everyone who isn't: everyone who makes Puzzle Pirates such an awesome place. Thank you."
+- *special:* "Truly special"
+- *welcomeBack:* "With Fable, June 2025."
+
+### Now and then, as you wander after the tour
+
+- "Another cookie? There's always another cookie."
+- "The ship spinning into the rocks? That was a feature."
+- "Tab, if you want a proper look at them."
+- "Mind the crumbs. Actually, I don't mind."
+- "I've got hugs in reserve, if you need one."
+
+### As you leave
+
+- "Bye! Take a cookie for the road!"
 
 ## The imperial guards of Port Decorum
 

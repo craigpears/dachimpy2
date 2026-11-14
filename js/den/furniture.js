@@ -9,11 +9,14 @@
    The pieces: rug, runner, armchair, chair, table, candelabra, sconce, bed, coffin, easel, frame, sign, door,
    and outdoors a still; and the skeleton set and its company (Primates Rule's deck): skeleton,
    skeletonChair, skeletalCannon, gibbet, armour, grandPiano, anchorChair, jar, toolChest; and cargo and a
-   beach's things (the smugglers' beach): crate, barrel, tarpPile, lantern, rowboat. */
+   beach's things (the smugglers' beach): crate, barrel, tarpPile, lantern, rowboat; and a museum's (Dachimpy's
+   house): a card of words (a plaque), a shelf of trinkets, the old sim's board in miniature (simModel), and a
+   plate of cookies (cookiePlate, on a table or in a hand). */
 import * as THREE from 'three';
 import { mat, mesh, woodTex, canvasTex } from './world.js';
 import { CANVAS } from '../den-houses.js';
 import { bake } from './bake.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const at = (m, x, y, z) => { m.position.set(x, y, z); return m; };
 const box = (w, h, d, m, x = 0, y = 0, z = 0) => at(mesh(new THREE.BoxGeometry(w, h, d), m), x, y, z);
@@ -60,11 +63,12 @@ export function armchair({ col = '#4a6b3a' } = {}) {
   return { g };
 }
 /** A round side table on one leg, a teacup on it; or `cards` dealt on it and `bottles` stood on it
-    (Primates Rule's deck); `black`, in ebony. */
-export function table({ cup = true, cards = false, bottles = 0, black = false } = {}) {
+    (Primates Rule's deck); `black`, in ebony; `cookies`, a plate of them (Dachimpy's hall: cookiePlate). */
+export function table({ cup = true, cards = false, bottles = 0, black = false, cookies = false } = {}) {
   const g = new THREE.Group(), top = black ? ebony : mid, foot = black ? ebony : dark;
   g.add(cyl(0.42, 0.42, 0.05, top, 0, 0.72, 0, 20), cyl(0.05, 0.07, 0.7, foot, 0, 0.36, 0, 8), cyl(0.26, 0.3, 0.04, foot, 0, 0.02, 0, 16));
   if (cup) g.add(cyl(0.05, 0.04, 0.07, mat('#f4f1ea'), 0.1, 0.78, 0.05, 10), cyl(0.08, 0.08, 0.01, mat('#f4f1ea'), 0.1, 0.75, 0.05, 12));
+  if (cookies) { const p = cookiePlate({ n: 7 }); p.position.set(cup ? -0.12 : 0, 0.745, cup ? -0.05 : 0); g.add(p); }
   if (cards) {
     // A hand dealt round, and the pack.
     [[-0.2, 0.05, 0.3], [0.05, -0.22, -0.4], [0.22, 0.12, 1.1], [-0.05, 0.24, 2.0], [0.15, -0.05, 2.6]].forEach(([x, z, a], i) => { const c = box(0.08, 0.004, 0.11, i === 3 ? cardRed : cardM, x, 0.748, z); c.rotation.y = a; g.add(c); });
@@ -529,6 +533,170 @@ export function rowboat({ col = '#6e4a2c' } = {}) {
   return { g };
 }
 
+// ---------- a museum's things, and a host's (Dachimpy's house: dachimpy-house.js) ----------
+const doughM = mat('#c98a45', { roughness: 0.85 }), chipM = mat('#3a2216', { roughness: 0.7 }), plateM = mat('#f4f1ea', { roughness: 0.35 });
+/* A plate of cookies (Dachimpy's, at their door: "I'm very well known for giving just like hugs and cookies"),
+   its middle at its origin, `n` cookies on it, chips and all; one mesh of chips, to stay cheap. On a table
+   (`table({ cookies })`), or held out in a hand (props-people.js's 'offer'). */
+export function cookiePlate({ n = 5 } = {}) {
+  const g = new THREE.Group(), chips = [];
+  g.add(cyl(0.15, 0.12, 0.018, plateM, 0, 0.009, 0, 20));
+  for (let i = 0; i < n; i++) {
+    const a = i * 2.4, r = i ? 0.075 : 0, x = Math.sin(a) * r, z = Math.cos(a) * r, y = 0.024 + (i ? 0 : 0.012);
+    const c = cyl(0.048, 0.048, 0.013, doughM, x, y, z, 14); c.rotation.set(Math.sin(a) * 0.08, 0, Math.cos(a) * 0.08); g.add(c);
+    for (let k = 0; k < 4; k++) { const ca = a + k * 1.7, cr = 0.012 + (k % 2) * 0.018, s = new THREE.SphereGeometry(0.008, 5, 4); s.translate(x + Math.sin(ca) * cr, y + 0.007, z + Math.cos(ca) * cr); chips.push(s); }
+  }
+  g.add(mesh(mergeGeometries(chips), chipM));
+  return g;
+}
+/** Words on a little card for a wall: a museum's plaque under a picture (`title` in bold, then `text`),
+    `w` by `h` metres, its back to the wall at its origin, its middle at height `y`; in front of a frame's
+    layers, as a plaque is. */
+export function card({ title = '', text = '', w = 0.9, h = 0.42, y = 1.1 } = {}) {
+  const g = new THREE.Group(), W = 640, H = Math.round(W * h / w);
+  const face = canvasTex(W, H, (c) => {
+    c.fillStyle = '#efe2bd'; c.fillRect(0, 0, W, H);
+    c.strokeStyle = '#7a5216'; c.lineWidth = 4; c.strokeRect(5, 5, W - 10, H - 10);
+    c.fillStyle = '#3a2210'; c.textAlign = 'left'; c.textBaseline = 'top';
+    // (the biggest the words go that fits: the title, then the text under it)
+    for (let px = 30; px > 10; px -= 1) {
+      c.font = `italic ${px}px Alegreya, Georgia, serif`;
+      const lines = wrapLines(c, text, W - 44), lh = px * 1.2, th = title ? px * 1.35 : 0;
+      if (th + lines.length * lh > H - 30) continue;
+      let at = (H - th - lines.length * lh) / 2;
+      if (title) { c.font = `700 ${Math.round(px * 1.1)}px Alegreya, Georgia, serif`; c.fillText(title, 22, at); at += th; }
+      c.font = `italic ${px}px Alegreya, Georgia, serif`;
+      lines.forEach((l, i) => c.fillText(l, 22, at + i * lh));
+      break;
+    }
+  });
+  const board = mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: face, roughness: 0.7, ...AHEAD }), false);
+  board.position.set(0, y, LAYER.plaque);
+  g.add(board);
+  return { g };
+}
+/** `text` in lines no wider than `max` pixels, in the canvas's font as it's set. */
+export function wrapLines(c, text, max) {
+  const out = [];
+  let line = '';
+  for (const word of String(text).split(/\s+/).filter(Boolean)) {
+    const next = line ? `${line} ${word}` : word;
+    if (line && c.measureText(next).width > max) { out.push(line); line = word; } else line = next;
+  }
+  if (line) out.push(line);
+  return out;
+}
+/* A shelf of trinkets, freestanding, its back to a wall: three shelves, and on them a jar of cookies and a
+   stack of books, a model sloop on a stand and a ship in a bottle, a little gold cup and a treasure chest.
+   Baked: a few meshes. */
+export function shelf() {
+  const g = new THREE.Group(), W = 1.2, D = 0.36, Hh = 1.75;
+  g.add(box(W, Hh, 0.03, dark, 0, Hh / 2, -D / 2 + 0.015), box(0.05, Hh, D, dark, -W / 2 + 0.025, Hh / 2, 0), box(0.05, Hh, D, dark, W / 2 - 0.025, Hh / 2, 0));
+  for (const y of [0.04, 0.5, 1.0, 1.5, Hh - 0.02]) g.add(box(W, 0.04, D, mid, 0, y, 0));
+  // a jar of cookies, and books
+  g.add(cyl(0.11, 0.11, 0.24, glass, -0.3, 0.64, 0, 14), cyl(0.115, 0.115, 0.03, cork, -0.3, 0.775, 0, 14));
+  for (let i = 0; i < 5; i++) g.add(cyl(0.07, 0.07, 0.012, doughM, -0.3 + Math.sin(i) * 0.02, 0.535 + i * 0.03, Math.cos(i) * 0.02, 12));
+  ['#7a2a3a', '#2a4a6a', '#3a5a2a', '#8a6a2a'].forEach((col, i) => g.add(box(0.05, 0.3 - (i % 2) * 0.04, 0.24, mat(col, { roughness: 0.8 }), 0.18 + i * 0.06, 0.67 - (i % 2) * 0.02, 0)));
+  // a model sloop on her stand, and a ship in a bottle
+  const sloop = new THREE.Group();
+  sloop.add(box(0.3, 0.06, 0.08, mat('#7a4a28', { map: woodTex }), 0, 0.05, 0), cyl(0.008, 0.008, 0.3, dark, 0.02, 0.22, 0, 6));
+  const sail = mesh(new THREE.ShapeGeometry(new THREE.Shape([new THREE.Vector2(0, 0), new THREE.Vector2(0, 0.24), new THREE.Vector2(0.16, 0.02)])), new THREE.MeshStandardMaterial({ color: '#f4efe2', side: THREE.DoubleSide, roughness: 0.9 }));
+  sail.position.set(0.03, 0.09, 0); sloop.add(sail);
+  sloop.add(box(0.04, 0.03, 0.04, dark, -0.08, 0.0, 0), box(0.04, 0.03, 0.04, dark, 0.08, 0.0, 0));
+  sloop.position.set(-0.25, 1.035, 0); g.add(sloop);
+  const bottle = cyl(0.06, 0.06, 0.3, glass, 0.25, 1.08, 0.02, 12); bottle.rotation.z = Math.PI / 2; g.add(bottle);
+  const neck = cyl(0.025, 0.035, 0.08, glass, 0.44, 1.08, 0.02, 10); neck.rotation.z = Math.PI / 2;
+  const cap = cyl(0.024, 0.024, 0.03, cork, 0.49, 1.08, 0.02, 8); cap.rotation.z = Math.PI / 2; g.add(neck, cap);
+  g.add(box(0.14, 0.025, 0.035, mat('#7a4a28'), 0.25, 1.06, 0.02), box(0.006, 0.07, 0.006, dark, 0.25, 1.1, 0.02));
+  // a little gold cup, and a treasure chest
+  g.add(cyl(0.05, 0.06, 0.03, gilt, -0.25, 1.535, 0, 12), cyl(0.012, 0.012, 0.08, gilt, -0.25, 1.59, 0, 8), cyl(0.07, 0.035, 0.1, gilt, -0.25, 1.68, 0, 14));
+  for (const s of [-1, 1]) { const h = mesh(new THREE.TorusGeometry(0.03, 0.007, 5, 10, Math.PI), gilt); h.position.set(-0.25 + s * 0.075, 1.68, 0); h.rotation.z = -s * Math.PI / 2; g.add(h); }
+  g.add(box(0.26, 0.14, 0.17, mat('#6a3a1c', { map: woodTex }), 0.25, 1.59, 0), box(0.27, 0.025, 0.18, brass, 0.25, 1.6, 0), box(0.04, 0.05, 0.01, brass, 0.25, 1.6, 0.09));
+  const lid = mesh(new THREE.CylinderGeometry(0.085, 0.085, 0.26, 12, 1, false, 0, Math.PI), mat('#6a3a1c', { map: woodTex })); lid.rotation.z = Math.PI / 2; lid.position.set(0.25, 1.66, 0); g.add(lid);
+  bake(g);
+  return { g };
+}
+/* A little model of the old Blockade Simulator's board on a stand, for a museum (Dachimpy's: the user, 11 Nov,
+   "there was always a fun gamble that ... your ship might randomly spin and jump into the rocks on mine ...
+   the bugs are what made it"): a board of blue squares ringed with rocks, a whirlpool in a corner, and a
+   little sloop sailing round it a square at a time, who now and then spins round and hops into the rocks,
+   sits there a moment, and starts again. The stand and board are baked; the sloop moves (`tick`). */
+export function simModel() {
+  const g = new THREE.Group(), N = 6, S = 0.95, q = S / N, top = 0.92;
+  const stand = new THREE.Group();
+  stand.add(cyl(0.16, 0.22, top - 0.06, dark, 0, (top - 0.06) / 2, 0, 12), box(S + 0.08, 0.06, S + 0.08, mid, 0, top - 0.03, 0));
+  const face = canvasTex(384, 384, (c, W) => {
+    const k = W / N;
+    c.fillStyle = '#1f8fe0'; c.fillRect(0, 0, W, W);
+    c.strokeStyle = '#0b2a44'; c.lineWidth = 2;
+    for (let i = 0; i <= N; i++) { c.beginPath(); c.moveTo(i * k, 0); c.lineTo(i * k, W); c.stroke(); c.beginPath(); c.moveTo(0, i * k); c.lineTo(W, i * k); c.stroke(); }
+    // a whirlpool, in the second square in
+    c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 4;
+    for (let a = 0; a < 3; a++) { c.beginPath(); for (let t = 0; t < 1; t += 0.05) { const r = 4 + t * k * 0.42, th = a * 2.1 + t * 5; c.lineTo(k * 1.5 + Math.cos(th) * r, k * 1.5 + Math.sin(th) * r); } c.stroke(); }
+  });
+  const board = mesh(new THREE.PlaneGeometry(S, S), new THREE.MeshStandardMaterial({ map: face, roughness: 0.6 }), false);
+  board.rotation.x = -Math.PI / 2; board.position.y = top + 0.002;
+  stand.add(board);
+  const cellAt = (i, j) => [(i - (N - 1) / 2) * q, (j - (N - 1) / 2) * q];
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+    if (i > 0 && i < N - 1 && j > 0 && j < N - 1) continue;
+    const [x, z] = cellAt(i, j), rock = mesh(new THREE.DodecahedronGeometry(q * 0.36, 0), greyStone);
+    rock.position.set(x, top + q * 0.22, z); rock.rotation.set(i, j, i + j); rock.scale.y = 0.75;
+    stand.add(rock);
+  }
+  bake(stand);
+  g.add(stand);
+  // Her: a hull, a mast and a sail, small.
+  const her = new THREE.Group(), hull = mat('#7a4a28', { map: woodTex });
+  her.add(box(q * 0.32, q * 0.14, q * 0.8, hull, 0, q * 0.07, 0), box(q * 0.012 + 0.004, q * 0.7, q * 0.012 + 0.004, dark, 0, q * 0.45, 0));
+  const sail = mesh(new THREE.ShapeGeometry(new THREE.Shape([new THREE.Vector2(0, 0), new THREE.Vector2(0, q * 0.6), new THREE.Vector2(q * 0.42, 0)])), new THREE.MeshStandardMaterial({ color: '#f4efe2', side: THREE.DoubleSide, roughness: 0.9 }));
+  sail.rotation.y = Math.PI / 2; sail.position.set(0, q * 0.16, q * 0.05);
+  her.add(sail);
+  her.userData.live = true;
+  g.add(her);
+  // Round the inside of the rocks, a square at a time; now and then, off into them.
+  const loop = [];
+  for (let i = 1; i <= N - 2; i++) loop.push([i, 1]);
+  for (let j = 2; j <= N - 2; j++) loop.push([N - 2, j]);
+  for (let i = N - 3; i >= 1; i--) loop.push([i, N - 2]);
+  for (let j = N - 3; j >= 2; j--) loop.push([1, j]);
+  const st = { k: 0, t: 0, phase: 'sail', steps: 0, from: null, to: null, spin: 0 };
+  const put = (x, z, y = 0, yaw = 0, tip = 0) => { her.position.set(x, top + y, z); her.rotation.set(0, yaw, tip); };
+  const headOf = (a, b) => Math.atan2(b[0] - a[0], b[1] - a[1]);
+  const [x0, z0] = cellAt(...loop[0]);
+  put(x0, z0, 0, headOf(loop[0], loop[1]));
+  let yaw = her.rotation.y;
+  return {
+    g,
+    tick(dt) {
+      st.t += dt;
+      if (st.phase === 'sail') {
+        const a = loop[st.k], b = loop[(st.k + 1) % loop.length], u = Math.min(1, st.t / 0.7);
+        const [ax, az] = cellAt(...a), [bx, bz] = cellAt(...b), want = headOf(a, b);
+        yaw += Math.atan2(Math.sin(want - yaw), Math.cos(want - yaw)) * Math.min(1, dt * 8);
+        put(ax + (bx - ax) * u, az + (bz - az) * u, 0, yaw);
+        if (u >= 1) {
+          st.k = (st.k + 1) % loop.length; st.t = 0; st.steps++;
+          // (a bug: now and then, off she goes, into the rocks outside her square)
+          if (st.steps > 5 && Math.random() < 0.18) {
+            const [i, j] = loop[st.k], out = [i === 1 ? 0 : i === N - 2 ? N - 1 : i, j === 1 ? 0 : j === N - 2 ? N - 1 : j];
+            if (out[0] === i && out[1] === j) out[1] = 0;
+            Object.assign(st, { phase: 'bug', from: cellAt(i, j), to: cellAt(...out), spin: yaw, steps: 0 });
+          }
+        }
+      } else if (st.phase === 'bug') {
+        const u = Math.min(1, st.t / 1.1), [ax, az] = st.from, [bx, bz] = st.to;
+        put(ax + (bx - ax) * u, az + (bz - az) * u, q * 0.25 + 4 * q * 0.9 * u * (1 - u), st.spin + u * Math.PI * 4, u * 0.45);
+        if (u >= 1) { st.phase = 'sit'; st.t = 0; }
+      } else if (st.phase === 'sit' && st.t > 1.6) {
+        st.phase = 'sail'; st.t = 0; st.k = 0;
+        yaw = headOf(loop[0], loop[1]);
+        put(x0, z0, 0, yaw);
+      }
+    },
+  };
+}
+
 /** Every piece by its kind (the name a house's rules use: src/den-gravee.ts's FURNISH; a ship's deck:
-    src/den-frigate.ts; the smugglers' beach: src/den-smugglers.ts). */
-export const FURNITURE = { rug, runner, chair, armchair, table, bed, candelabra, sconce, coffin, easel, frame, sign, door, still, skeleton, skeletonChair, skeletalCannon, gibbet, armour, grandPiano, anchorChair, jar, toolChest, crate, barrel, tarpPile, lantern, rowboat };
+    src/den-frigate.ts; the smugglers' beach: src/den-smugglers.ts; Dachimpy's museum: src/den-dachimpy.ts). */
+export const FURNITURE = { rug, runner, chair, armchair, table, bed, candelabra, sconce, coffin, easel, frame, sign, door, still, skeleton, skeletonChair, skeletalCannon, gibbet, armour, grandPiano, anchorChair, jar, toolChest, crate, barrel, tarpPile, lantern, rowboat, card, shelf, simModel };
