@@ -879,6 +879,8 @@ parked: too close to the wedding for a proof of concept. One for if people love 
   theme, everyone decorates a house for it (the housing district's houses, Gravee's the first, and
   the furniture as modular pieces: RULES.md), then a tour of the entries to vote on. Parked with
   the fashion show, for the same reason; the houses make it nearer to hand.
+  **Fable for it (14 Nov):** "I definitely have Fable down in the ideas list for a decorating competition
+  feature." Fable (who welcomed Dachimpy back, June 2025; pronouns and look to check) as its host or judge.
 
 ## Your own little island to decorate (11 Nov)
 
