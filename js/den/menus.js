@@ -31,6 +31,7 @@ import { watchStart, watchStop } from './race-watch.js';
 import { raceOnline, online as racingOnline } from './race-net.js';
 import { cp } from './checkpoint.js';
 import { board, sailReset } from './sailing.js';
+import { rowToggle } from './wind.js';
 import { online, guest, myId, send } from './crew.js';
 import { wed, weddingEnter, weddingLeave, plannedSpouse } from './wedding.js';
 import { spouse, spouseCheat } from './spouse.js';
@@ -546,6 +547,12 @@ function cheatSail() {
   sailReset();
   board();
 }
+/* Out to sea with her oars already out (?at=rowing), so the front page's Rowing goes straight to it (the user,
+   14 Nov: "I clicked it, show me something already"). */
+function cheatRowing() {
+  if (!sail.on) cheatSail();
+  if (!sail.helm.oars) rowToggle();
+}
 /* Dignity's cutscene at the imperial checkpoint, again (js/den/dignity.js): out to sea first if you're
    not, and the sloop put where the trade wind drops her, facing its gate. */
 function cheatDignity() {
@@ -734,6 +741,7 @@ const CHEAT_SECTIONS = [
   ]],
   ['Out to sea', [
     ['Go sailing', cheatSail, 'sea'],
+    ['Rowing her', cheatRowing, 'rowing'],
     ["Dignity's scene", cheatDignity, 'dignity'],
     ["Umami's rescue", cheatUmami, 'umami'],
   ]],

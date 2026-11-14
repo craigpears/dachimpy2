@@ -171,7 +171,14 @@
   article b { color: var(--ink); }
   article a { color: var(--link); }
   article a:hover { color: var(--link-hi); }
-  .try { margin: 8px 2px 2px; font-weight: 700; font-size: 15px; }
+  /* A card's links: buttons big enough to tap (14 Nov: "those links are tiny, especially on mobile"), its main one
+     filled. */
+  .try { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 2px; font-weight: 700; font-size: 16px; }
+  .try a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 999px; text-decoration: none;
+    border: 2px solid var(--link); color: var(--link); background: transparent; }
+  .try a:hover, .try a:focus-visible { color: var(--link-hi); border-color: var(--link-hi); }
+  .try a.go { background: var(--link); color: var(--paper); }
+  .try a.go:hover, .try a.go:focus-visible { background: var(--link-hi); color: var(--paper); }
   .try code { font: 600 14px ui-monospace, Consolas, monospace; }
   .shots { display: grid; gap: 10px; grid-template-columns: 1fr; }
   .shots.two { grid-template-columns: 1fr 1fr; }
@@ -200,22 +207,29 @@
      whole, 16:9 as they were taken, each with a caption ("subtitle text pictures", 14 Nov: no more collages "cropped
      and distorted a bit weirdly"), a jump to its section below. */
   .choices { display: grid; gap: 22px; margin-bottom: 18px; }
-  .choice { display: block; padding: 16px 18px 18px; border-radius: 12px; border: 2px solid var(--frame); background: var(--well);
-    box-shadow: 0 8px 24px var(--shadow); text-decoration: none; color: var(--text); transition: border-color .2s; }
-  .choice:hover, .choice:focus-visible { border-color: var(--accent); }
-  .choice b { display: block; margin: 0 2px 12px; font: 700 26px/1.15 'Alegreya', serif; color: var(--title); }
-  .choice:hover b, .choice:focus-visible b { color: var(--accent-text); }
-  /* Three pictures side by side, all the same size (14 Nov: a big one beside two small ones "is very jarring"). */
+  .choice { padding: 16px 18px 18px; border-radius: 12px; border: 2px solid var(--frame); background: var(--well);
+    box-shadow: 0 8px 24px var(--shadow); color: var(--text); }
+  /* Its title a jump to its section below; each picture straight to its thing (14 Nov: "I clicked it, show me
+     something already"). */
+  .choice-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 2px 12px; text-decoration: none; }
+  .choice-head b { font: 700 26px/1.15 'Alegreya', serif; color: var(--title); }
+  .choice-head .see { flex: none; font-weight: 700; font-size: 15px; color: var(--dim); }
+  .choice-head:hover b, .choice-head:hover .see, .choice-head:focus-visible .see { color: var(--accent-text); }
+  /* Three pictures side by side, all the same size (14 Nov: a big one beside two small ones "is very jarring"); two
+     for the new concepts, the race and rowing (14 Nov). */
   .pics { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .pics.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pics a { display: block; text-decoration: none; border-radius: 8px; }
   .pics figure { margin: 0; }
-  .pics img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 7px; border: 1px solid var(--frame); transition: transform .3s; }
-  .choice:hover .pics img { transform: scale(1.02); }
-  .pics figcaption { margin: 6px 2px 0; font-size: 15px; color: var(--dim); }
+  .pics img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 7px; border: 2px solid var(--frame); transition: transform .3s, border-color .2s; }
+  .pics a:hover img, .pics a:focus-visible img { transform: scale(1.02); border-color: var(--accent); }
+  .pics figcaption { margin: 6px 2px 0; font-size: 16px; font-weight: 700; color: var(--dim); }
+  .pics a:hover figcaption, .pics a:focus-visible figcaption { color: var(--accent-text); }
   @media (max-width: 640px) {
     .choice { padding: 12px 12px 14px; }
-    .choice b { font-size: 21px; margin-bottom: 10px; }
+    .choice-head b { font-size: 21px; }
     /* On a phone, one under another (14 Nov: "for phone, just make it single column"). */
-    .pics { grid-template-columns: 1fr; gap: 12px; }
+    .pics, .pics.two { grid-template-columns: 1fr; gap: 12px; }
     .pics figcaption { font-size: 15px; line-height: 1.3; }
   }
   /* Elsewhere, made by others (the user, 14 Nov: "Those things are elsewhere, but I still want them"), further down
@@ -331,9 +345,9 @@
     </details>
 
   <nav class="choices" id="choose" aria-label="What are you here for?">
-    <a class="choice" href="#concepts"><b>Try some interesting new concepts</b><span class="pics"><figure><img src="changelog/race-field.jpg" width="1280" height="720" alt=""><figcaption>The sloop race</figcaption></figure><figure><img src="changelog/starlit-door.jpg" width="1280" height="720" alt=""><figcaption>The starlit door</figcaption></figure><figure><img src="changelog/rowing.jpg" width="1280" height="720" alt=""><figcaption>Rowing</figcaption></figure></span></a>
-    <a class="choice" href="#tutorials"><b>Try out some new tutorials</b><span class="pics"><figure><img src="changelog/helium-lesson.jpg" width="1280" height="720" alt=""><figcaption>Distilling, with Helium</figcaption></figure><figure><img src="changelog/tzz-lesson.jpg" width="1280" height="720" alt=""><figcaption>Sailing, with Tzz</figcaption></figure><figure><img src="changelog/distilling-guide.jpg" width="1280" height="720" alt=""><figcaption>Distilling, to read</figcaption></figure></span></a>
-    <a class="choice" href="#fun"><b>A bit of fun and a look around</b><span class="pics"><figure><img src="changelog/kikkit-approach.jpg" width="960" height="540" alt=""><figcaption>Kikkit's island</figcaption></figure><figure><img src="changelog/gravee.jpg" width="1280" height="720" alt=""><figcaption>Gravee's gallery</figcaption></figure><figure><img src="changelog/umami-rescue.jpg" width="1280" height="720" alt=""><figcaption>Rescuing Umami the capybara</figcaption></figure></span></a>
+    <div class="choice"><a class="choice-head" href="#concepts"><b>Try some interesting new concepts</b><span class="see">See more ↓</span></a><div class="pics two"><a href="den.html?at=race"><figure><img src="changelog/race-field.jpg" width="1280" height="720" alt=""><figcaption>The sloop race</figcaption></figure></a><a href="den.html?at=rowing"><figure><img src="changelog/rowing.jpg" width="1280" height="720" alt=""><figcaption>Rowing</figcaption></figure></a></div></div>
+    <div class="choice"><a class="choice-head" href="#tutorials"><b>Try out some new tutorials</b><span class="see">See more ↓</span></a><div class="pics"><a href="den.html?at=helium"><figure><img src="changelog/helium-lesson.jpg" width="1280" height="720" alt=""><figcaption>Distilling, with Helium</figcaption></figure></a><a href="den.html?at=tzz"><figure><img src="changelog/tzz-lesson.jpg" width="1280" height="720" alt=""><figcaption>Sailing, with Tzz</figcaption></figure></a><a href="distilling-guide.html"><figure><img src="changelog/distilling-guide.jpg" width="1280" height="720" alt=""><figcaption>Distilling, to read</figcaption></figure></a></div></div>
+    <div class="choice"><a class="choice-head" href="#fun"><b>A bit of fun and a look around</b><span class="see">See more ↓</span></a><div class="pics"><a href="den.html?at=kikkit"><figure><img src="changelog/kikkit-approach.jpg" width="960" height="540" alt=""><figcaption>Kikkit's island</figcaption></figure></a><a href="den.html?at=gravee"><figure><img src="changelog/gravee.jpg" width="1280" height="720" alt=""><figcaption>Gravee's gallery</figcaption></figure></a><a href="den.html?at=umami"><figure><img src="changelog/umami-rescue.jpg" width="1280" height="720" alt=""><figcaption>Rescuing Umami the capybara</figcaption></figure></a></div></div>
   </nav>
 
   <h2 id="concepts">Try some interesting new concepts</h2>
@@ -343,13 +357,13 @@
       <a class="pic" href="den.html?at=race"><img src="changelog/race-field.jpg" width="1280" height="720" loading="lazy" alt="Three sloops racing down through the start's whirlpools toward the first buoy and the gun gap"></a>
       <h3>The sloop race</h3>
       <p>A race made of puzzles: every shortcut a different one, every way round able to win.</p>
-      <p class="try"><a href="den.html?at=race">Race it</a> · <a href="den.html?at=race-watch">watch one</a> · <a href="race-editor.html">lay out your own course</a> · <a href="den.html?at=door">the starlit door</a></p>
+      <p class="try"><a class="go" href="den.html?at=race">Race it</a> <a href="den.html?at=race-watch">Watch a race</a> <a href="race-editor.html">Make a course</a></p>
     </article>
     <article>
-      <a class="pic" href="den.html?at=sea"><img src="changelog/rowing.jpg" width="1280" height="720" loading="lazy" alt="Rowing the sloop: two boards of mirror strokes, one for each side's oars, her bows swinging toward the side that pulls harder"></a>
+      <a class="pic" href="den.html?at=rowing"><img src="changelog/rowing.jpg" width="1280" height="720" loading="lazy" alt="Rowing the sloop: two boards of mirror strokes, one for each side's oars, her bows swinging toward the side that pulls harder"></a>
       <h3>Rowing</h3>
       <p>Two boards of mirror strokes, one for each side's oars. The turn you build shows on her.</p>
-      <p class="try"><a href="den.html?at=sea">Go sailing</a>, then the oars</p>
+      <p class="try"><a class="go" href="den.html?at=rowing">Row her</a></p>
     </article>
   </div>
   <p class="more"><a href="#places">See more: every place in the den</a></p>
@@ -391,7 +405,7 @@
     <div>
       <h3>Carpentry</h3>
       <p>Which pair fills the hole? Quick puzzles, and doubloons to bet at the harbour table.</p>
-      <p class="try"><a href="carpentry.html">Try it</a></p>
+      <p class="try"><a class="go" href="carpentry.html">Try it</a></p>
     </div>
   </article>
 
@@ -412,25 +426,25 @@
       <a class="pic" href="den.html?at=wedding"><img src="changelog/wedding.jpg" width="1280" height="720" loading="lazy" alt="A beach wedding: guests on wooden benches, a flower arch, heart banners and a cake"></a>
       <h3>The Wedding Isle</h3>
       <p>Mischievious will marry anyone to anything. Choose the tone, the venue, the theme and the plot, then share your wedding as a link.</p>
-      <p class="try"><a href="den.html?at=wedding"><code>den.html?at=wedding</code></a></p>
+      <p class="try"><a class="go" href="den.html?at=wedding">Go to the wedding</a></p>
     </article>
     <article>
       <a class="pic" href="den.html?at=gravee"><img src="changelog/gravee.jpg" width="1280" height="720" loading="lazy" alt="Gravee, in a green dress and a polar bear pelt, showing you round her portraits by candlelight"></a>
       <h3>Gravee's Bedside Manors</h3>
       <p>A whole gallery of portraits, with Gravee showing you round by candlelight. Sit for one of your own. Mind the vampire.</p>
-      <p class="try"><a href="den.html?at=gravee"><code>den.html?at=gravee</code></a></p>
+      <p class="try"><a class="go" href="den.html?at=gravee">Visit Gravee</a></p>
     </article>
     <article>
       <a class="pic" href="den.html?at=penguins"><img src="changelog/vegas-island.jpg" width="1280" height="720" loading="lazy" alt="The sloop at Vegas Island, a little ice floe ringed by rocks past the whirlpools, penguins pottering on it"></a>
       <h3>The penguins of Vegas Island</h3>
       <p>Past Kikkit's whirlpools, if you can find the way, a little ice floe of penguins. One of them has a sack.</p>
-      <p class="try"><a href="den.html?at=kikkit"><code>?at=kikkit</code></a> · <a href="den.html?at=penguins"><code>?at=penguins</code></a></p>
+      <p class="try"><a class="go" href="den.html?at=penguins">See the penguins</a> <a href="den.html?at=kikkit">Find the way yourself</a></p>
     </article>
     <article>
       <a class="pic" href="den.html?at=rumrun"><img src="changelog/rumrun-decorum.jpg" width="800" height="600" loading="lazy" alt="Off Port Decorum's jetty, its guard on the end of it, and Helium on the sloop's deck with the rum"></a>
       <h3>Helium's rum run</h3>
       <p>Barrels of rum on your deck and Helium aboard, whistling past the Empire. Nothing suspicious at all.</p>
-      <p class="try"><a href="den.html?at=rumrun"><code>den.html?at=rumrun</code></a></p>
+      <p class="try"><a class="go" href="den.html?at=rumrun">Run the rum</a></p>
     </article>
   </div>
   <p class="more"><a href="#places">See every place in the den</a></p>
@@ -462,6 +476,7 @@
     <section>
       <h3>Out to sea</h3>
       <a class="place" href="den.html?at=sea"><img src="changelog/sloop.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Go sailing</b><i>The old sloop, and the sea</i></span></a>
+      <a class="place" href="den.html?at=rowing"><img src="changelog/rowing.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Rowing her</b><i>Her oars out, a board each side</i></span></a>
       <a class="place" href="den.html?at=dignity"><img src="changelog/dignity.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Dignity's checkpoint</b><i>Her cutscene at the gate</i></span></a>
       <a class="place" href="den.html?at=umami"><img src="changelog/capybara-crane.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Umami's rescue</b><i>The lagoon, the crane, Foraging</i></span></a>
     </section>
