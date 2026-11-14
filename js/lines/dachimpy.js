@@ -70,7 +70,7 @@ export const PANELS = {
     },
     gone: {
         title: 'And then',
-        text: 'Aww. Flash got deprecated and Whirled was taken down, and the sim went with them. These days there\'s the Global Cade Sim, someone else\'s, still running. It works perfectly. No ship ever spins into the rocks. Where\'s the fun in that?',
+        text: 'Aww. Flash got deprecated and Whirled was taken down, and the sim went with them. But now there\'s AMH\'s Global Cade Sim, and it\'s fantastic! Online, beautifully done, everything a blockade sim should be. I\'m jealous of the energy that\'s gone into it. It works perfectly. No ship ever spins into the rocks. Where\'s the fun in that?',
     },
 };
 /** About the exhibit you're looking at (the house shell's: src/den-houses.ts's lookingAt), by its id, once a
@@ -99,7 +99,7 @@ export const ON_AN_EXHIBIT = {
     siteV5: 'Comments at last! People told me things.',
     siteLatest: 'The last one! Proper code, finally.',
     dalnothApp: 'Dalnoth again! It\'s tradition now.',
-    gone: 'Oh, the new one! It works perfectly. Shame, really.',
+    gone: 'AMH\'s Global Cade Sim! Fantastic. It works perfectly, too. Shame, really.',
 };
 /** Their friends' portraits' titles, by id (src/den-dachimpy.ts's FRIENDS): the den's pirates, and friends with
     no portrait of the two of them, by a title of Dachimpy's; Dachimpy's own portraits with friends by their real
@@ -152,7 +152,7 @@ export const THANKS = 'To my friends on these walls, and everyone who isn\'t: ev
 /** A page for everyone else they blockaded with, whose names have changed or slipped away (the user, 14 Nov:
     "there are many names of people like that I blockaded with, but they keep changing their names, and I can't
     remember who they are. So they're here"). Pirate names only, and only names checked on yoweb. */
-export const EVERYONE = 'To everyone I blockaded with, whatever you\'re called now: Mems, Kenchio, my old Hunter crew, and all of you whose names I\'ve lost. You\'re here!';
+export const EVERYONE = 'To everyone I blockaded with, whatever you\'re called now: Mems, Kenchio, Aurora, my old Hunter crew, and all of you whose names I\'ve lost. You\'re here!';
 /** After the tour, as you wander: now and then, while they're near. */
 export const CHATTER = [
     'Ooh, another cookie? There\'s always another cookie.',

@@ -1045,6 +1045,8 @@ Meridian ... Also check all my portraits for connections to other friends on bot
   2010 to 2012, then Meridian; Sage, Cobalt, Obsidian). YPPedia does list Dachimpy as a senior officer of Kikkit's
   **Cookies Reign Supreme** on Hunter (2009, flag Swinging Pink Bananas, Dachimpy's flag there), and a Viridian
   Dachimpy in Silver Dragons (Dragon Lords). So the page says "my old Hunter crew", unnamed, till the user knows.
+  **Aurora** (the user, 14 Nov): "Aurora was a pirate on Hunter", a person, not the crew; named on the page beside
+  Mems and Kenchio.
 - **Sanne's look** (Meridian portraits): fair skin, blonde hair tied back, a monkey on her shoulder; matching red
   (shirt, trousers, a gold buckle, white boots) in "Monkey Couple"; a gold crown and sceptre, green and black, in
   "I love you babae". **Zizzy's:** fair skin, long pink hair, a pink off-shoulder gown.

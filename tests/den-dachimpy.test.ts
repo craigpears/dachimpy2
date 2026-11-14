@@ -185,6 +185,11 @@ describe('the museum: the old Blockade Simulator and Dachimpy.com, in order (the
   it('is fond of the bugs (11 Nov: "the bugs are what made it"), and deadpan about the one that works', () => {
     expect(PLAQUES.inPlay).toMatch(/rocks/);
     expect(PANELS.gone.text).toMatch(/works perfectly/);
+    // (and warm about it, AMH credited, no dig: the user, 14 Nov: "I like my joke, but I don't want it to sound like
+    // I'm having a dig at it ... add some compliments as well of just how fantastic it is")
+    expect(PANELS.gone.text).toMatch(/AMH's Global Cade Sim/);
+    expect(PANELS.gone.text).toMatch(/fantastic/);
+    expect(ON_AN_EXHIBIT.gone).toMatch(/AMH's Global Cade Sim! Fantastic/);
     expect(PLAQUES.jobbers).toMatch(/too complicated/i);
     expect(PLAQUES.inPlay).toMatch(/13 April 2010/);
     expect(FURNISH.find((p) => p.kind === 'simModel')?.x).toBe(H.inPlay.x);
