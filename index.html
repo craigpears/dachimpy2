@@ -84,16 +84,32 @@
   .about p { margin: 6px 2px 0; }
   .about b { color: var(--cream); }
 
-  /* What are you here for? The choices as big pictures, each a jump to its section below. */
-  .choices { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .choice { position: relative; display: block; border-radius: 12px; overflow: hidden; border: 2px solid #3b2a1b; background: #2a1c11;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); text-decoration: none; color: var(--cream); min-height: 210px; }
-  /* A picture shown whole, not cropped to 16:9 (the Global Cade Sim's, its controls along the bottom). */
-  .pic.whole img { aspect-ratio: auto; }
-  .choice.top img { object-position: top; }
-  .choice img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
-  .choice:hover img { transform: scale(1.04); }
-  .choice span { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 14px 12px; background: linear-gradient(transparent, rgba(16, 10, 5, 0.92) 55%); }
+  /* What are you here for? The choices, each a little collage of its best things and a jump to its section
+     below (the user, 14 Nov: "show you some of the things at a glance without you having to click"). */
+  .choices { display: grid; gap: 14px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .choice { grid-column: span 2; position: relative; display: block; border-radius: 12px; overflow: hidden; border: 2px solid #3b2a1b; background: #2a1c11;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); text-decoration: none; color: var(--cream); min-height: 230px; }
+  .collage { position: absolute; inset: 0; display: grid; gap: 2px; grid-template-columns: 1.6fr 1fr; grid-template-rows: 1fr 1fr; background: #1a120b; }
+  .collage img { width: 100%; height: 100%; object-fit: cover; min-height: 0; transition: transform .3s; }
+  .collage img:first-child { grid-row: span 2; }
+  .collage.n2 { grid-template-columns: 1.4fr 1fr; grid-template-rows: 1fr; }
+  .collage.n2 img:first-child, .collage.n1 img { grid-row: auto; object-position: top; }
+  .collage.n1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+  .choice:hover .collage img { transform: scale(1.04); }
+  .choice .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 14px 12px; background: linear-gradient(transparent, rgba(16, 10, 5, 0.92) 55%); }
+  /* Elsewhere, made by others (the user, 14 Nov: "Those things are elsewhere, but I still want them"): a second
+     row of choices under its own heading, each going straight out, marked ↗, its maker named; their only place on
+     the page. The picture above, the words below, so the Discord's whole line fits. */
+  .ext { font-family: system-ui, sans-serif; font-weight: 700; }
+  .elsewhere-head { margin: 22px 2px 10px; font: 700 19px 'Alegreya', serif; color: var(--dim); }
+  .elsewhere-head small { font: 500 14px 'Alegreya Sans'; color: #a8967a; margin-left: 6px; }
+  .choice { display: flex; flex-direction: column; min-height: 0; }
+  .choice .collage { position: relative; inset: auto; height: 170px; flex: none; }
+  .choices.out .collage { height: 130px; }
+  .choice .cap { position: static; padding: 10px 14px 12px; background: none; }
+  .choices.out .by { font-size: 13px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: #d4b06a; }
+  .collage.plain { display: grid; place-items: center; background: linear-gradient(160deg, #3b5d4a, #24392d); }
+  .collage.plain em { font: italic 700 26px 'Alegreya', serif; color: #f3e3c3; }
   .choice b { display: block; font: 700 22px/1.15 'Alegreya', serif; color: var(--gold); }
   .choice i { display: block; font-style: normal; font-size: 15px; color: var(--dim); margin-top: 3px; }
   .choice:hover b { color: #ffd166; }
@@ -150,7 +166,9 @@
 
   @media (max-width: 760px) {
     .choices { grid-template-columns: 1fr 1fr; }
-    .choice { min-height: 170px; }
+    .choice, .choice.wide { grid-column: span 1; }
+    .choice .collage { height: 130px; }
+    .choice:first-child { grid-column: span 2; }
     .choice b { font-size: 19px; }
     .choice i { font-size: 14px; }
   }
@@ -175,7 +193,7 @@
   }
   @media (max-width: 420px) {
     .choices { grid-template-columns: 1fr; }
-    .choice { min-height: 150px; }
+    .choice, .choice.wide, .choice:first-child { grid-column: span 1; }
   }
 </style>
 </head>
@@ -212,12 +230,17 @@
   </section>
 
   <nav class="choices" id="choose" aria-label="What are you here for?">
-    <a class="choice" href="#fun"><img src="changelog/den-wall.jpg" width="1280" height="720" alt=""><span><b>A bit of fun and a look around</b><i>A wedding, a gallery, penguins</i></span></a>
-    <a class="choice" href="#concepts"><img src="changelog/race-field.jpg" width="1280" height="720" alt=""><span><b>Try some interesting new concepts</b><i>The sloop race, and more</i></span></a>
-    <a class="choice" href="#tutorials"><img src="changelog/helium-lesson.jpg" width="800" height="600" alt=""><span><b>The new tutorials</b><i>By puzzle: Sailing, Distilling, Carpentry</i></span></a>
-    <a class="choice top" href="#cadesim"><img src="changelog/global-cade-sim.jpg" width="880" height="583" alt=""><span><b>Want to play the new blockade sim?</b><i>The Global Cade Sim</i></span></a>
-    <a class="choice" href="#practice"><img src="changelog/gun-tower.jpg" width="1280" height="720" alt=""><span><b>I just want to practice a puzzle</b><i>Fair enough. Here's where</i></span></a>
-    <a class="choice" href="#people"><img src="changelog/wardrobe.jpg" width="1280" height="720" alt=""><span><b>Meet real pirates</b><i>The heart of the game</i></span></a>
+    <a class="choice" href="#fun"><span class="collage n3"><img src="changelog/wedding.jpg" alt=""><img src="changelog/gravee.jpg" alt=""><img src="changelog/vegas-island.jpg" alt=""></span><span class="cap"><b>A bit of fun and a look around</b><i>Mischievious's wedding, Gravee's gallery, penguins</i></span></a>
+    <a class="choice" href="#concepts"><span class="collage n3"><img src="changelog/race-field.jpg" alt=""><img src="changelog/starlit-door.jpg" alt=""><img src="changelog/rowing.jpg" alt=""></span><span class="cap"><b>Try some interesting new concepts</b><i>The sloop race, the starlit door, rowing</i></span></a>
+    <a class="choice" href="#tutorials"><span class="collage n3"><img src="changelog/helium-lesson.jpg" alt=""><img src="changelog/tzz-lesson.jpg" alt=""><img src="changelog/distilling-guide.jpg" alt=""></span><span class="cap"><b>Try out some new tutorials</b><i>Experiments for now: Distilling, Sailing, Carpentry</i></span></a>
+  </nav>
+
+  <p class="elsewhere-head" id="elsewhere">Elsewhere, made by others <span class="ext">↗</span> <small>Not part of this site. Each opens in a new tab.</small></p>
+
+  <nav class="choices out" aria-label="Elsewhere, made by others">
+    <a class="choice" id="practice" href="https://www.globalcadesim.com/#/lobby/36" target="_blank" rel="noopener"><span class="collage n1"><img src="changelog/global-cade-sim.jpg" alt=""></span><span class="cap"><b>Play blockades online <span class="ext">↗</span></b><i class="by">The Global Cade Sim, made by AMH</i><i>Battle Navigation and blockades, online.</i></span></a>
+    <a class="choice" href="https://puzzle-practice.github.io/Puzzle_Practice/#/" target="_blank" rel="noopener"><span class="collage n1 plain"><em>Puzzle Practice</em></span><span class="cap"><b>Practise puzzles <span class="ext">↗</span></b><i class="by">Puzzle Practice, made and run by the Puzzle Practice team</i><i>Practise lots of puzzles.</i></span></a>
+    <a class="choice" id="people" href="https://discord.gg/XtRHwP6XT" target="_blank" rel="noopener"><span class="collage n1"><img src="changelog/wardrobe.jpg" alt=""></span><span class="cap"><b>Meet real pirates <span class="ext">↗</span></b><i class="by">The Trophy Hunters' Discord, their own community</i><i>It's a sociable game: everything's about the people, playing puzzles together. For a friendly crowd ready to help and have fun, or to watch real pirates play and chat, this is the go-to. The top puzzlers stream on Twitch and YouTube too.</i></span></a>
   </nav>
 
   <p class="also"><a href="changelog.html">What's new, newest first</a> <span aria-hidden="true">·</span> <a href="#places">Jump straight to a place in the den</a> <span aria-hidden="true">·</span> <a href="#room">A room of your own</a></p>
@@ -268,33 +291,21 @@
     <article>
       <a class="pic" href="den.html?at=race"><img src="changelog/race-field.jpg" width="1280" height="720" loading="lazy" alt="Three sloops racing down through the start's whirlpools toward the first buoy and the gun gap"></a>
       <h3>The sloop race</h3>
-      <p>A race round a course made of puzzles. Every shortcut asks a different one of you, and every way round can win. Plan your route and a pilot sails it while you puzzle. Race bots, or friends online.</p>
-      <p class="try"><a href="den.html?at=race"><code>den.html?at=race</code></a></p>
+      <p>A race made of puzzles: every shortcut a different one, every way round able to win.</p>
+      <p class="try"><a href="den.html?at=race">Race it</a> · <a href="den.html?at=race-watch">watch one</a> · <a href="race-editor.html">lay out your own course</a> · <a href="den.html?at=door">the starlit door</a></p>
     </article>
     <article>
-      <a class="pic" href="den.html?at=race-watch"><img src="changelog/race-watch.jpg" width="1280" height="720" loading="lazy" alt="Watching Kikkit at the whirlpools' mouth: her Sailing board down the left, her sloop waiting by the three whirlpools, and the racers' places along the top"></a>
-      <h3>The race, watched</h3>
-      <p>Four racers and no player. Follow any of them and see her board as she plays it, her plan, and what she's up to in plain words. Or fly the camera round freely.</p>
-      <p class="try"><a href="den.html?at=race-watch"><code>den.html?at=race-watch</code></a></p>
-    </article>
-    <article>
-      <a class="pic" href="race-editor.html"><img src="changelog/race-editor.jpg" width="1280" height="720" loading="lazy" alt="The race course editor: the course laid out on a parchment chart, its shortcuts labelled with their size and how often they win"></a>
-      <h3>The course editor</h3>
-      <p>Lay out your own race on a chart: move the shortcuts about, check how fair it is against bots, then race it in 3D or share it as a link.</p>
-      <p class="try"><a href="race-editor.html"><code>race-editor.html</code></a></p>
-    </article>
-    <article>
-      <a class="pic" href="den.html?at=door"><img src="changelog/starlit-door.jpg" width="1280" height="720" loading="lazy" alt="A door standing open in a tall cliff, a carved wheel of stars above it lit gold, white, blue and orange, the sloop waiting at its foot"></a>
-      <h3>The starlit door</h3>
-      <p>A shortcut for a navigator. Play Duty Navigation on the rock's night sky and the stars light up on a carved wheel, the door in the cliff swings open, and the sloop sails through the tunnel behind it.</p>
-      <p class="try"><a href="den.html?at=door"><code>den.html?at=door</code></a></p>
+      <a class="pic" href="den.html?at=sea"><img src="changelog/rowing.jpg" width="1280" height="720" loading="lazy" alt="Rowing the sloop: two boards of mirror strokes, one for each side's oars, her bows swinging toward the side that pulls harder"></a>
+      <h3>Rowing</h3>
+      <p>Two boards of mirror strokes, one for each side's oars. The turn you build shows on her.</p>
+      <p class="try"><a href="den.html?at=sea">Go sailing</a>, then the oars</p>
     </article>
   </div>
-  <p class="more"><a href="#places">See more: every place, the race's among them</a></p>
+  <p class="more"><a href="#places">See more: every place in the den</a></p>
 
-  <h2 id="tutorials">The new tutorials, by puzzle</h2>
+  <h2 id="tutorials">Try out some new tutorials</h2>
 
-  <p class="lead">Each comes two ways: in 3D with a pirate playing alongside you, or to read at your own pace.</p>
+  <p class="lead">Experiments for now, by puzzle. Each comes two ways: in 3D with a pirate playing alongside you, or to read at your own pace.</p>
 
   <article>
     <h3>Sailing</h3>
@@ -329,42 +340,9 @@
   <article class="side">
     <a class="pic" href="carpentry.html"><img src="changelog/carpentry-primer.jpg" width="1280" height="720" loading="lazy" alt="The Carpentry primer: the voyage of holes, earning doubloons with quick puzzles, the harbour table and the Hole of the Day"></a>
     <div>
-      <h3>Carpentry: the primer</h3>
-      <p>A bit of fun for carpentry, and where this all started: a voyage of holes to fill, a Hole of the Day, and doubloons to bet at the harbour table. Here until something better comes along.</p>
+      <h3>Carpentry</h3>
+      <p>A bit of fun for carpentry: a voyage of holes to fill, a Hole of the Day, doubloons to bet at the harbour table.</p>
       <p class="try"><a href="carpentry.html"><code>carpentry.html</code></a></p>
-    </div>
-  </article>
-
-  <h2 id="cadesim">Want to play the new blockade sim?</h2>
-
-  <article class="side">
-    <a class="pic whole" href="https://www.globalcadesim.com/#/lobby/36" target="_blank" rel="noopener"><img src="changelog/global-cade-sim.jpg" width="880" height="583" loading="lazy" alt="A blockade in the Global Cade Sim: Dachimpy's ship and a bot's among whirlpools, rocks and flags, the score and clock at the top, the move controls and chat along the bottom"></a>
-    <div>
-      <p><b>The Global Cade Sim</b>, made by <span data-maker>a fellow pirate</span>: real blockades, with real people. It's the successor to Dachimpy's old Blockade Simulator, all grown up, and the place to practise Battle Navigation and blockades with other pirates.</p>
-      <p class="try"><a class="play" href="https://www.globalcadesim.com/#/lobby/36" target="_blank" rel="noopener">Play the Global Cade Sim</a></p>
-    </div>
-  </article>
-
-  <h2 id="practice">I just want to practice a puzzle</h2>
-
-  <article class="side">
-    <a class="pic" href="den.html?at=gun-tower"><img src="changelog/gun-tower.jpg" width="1280" height="720" loading="lazy" alt="The gun tower's deck as a Gunnery board: four cannons, crates of stores, a powder barrel and buckets"></a>
-    <div>
-      <p>Fair enough! The den has a few to play for fun: Carpentry on its wall, <a href="den.html?at=gun-tower">Gunnery in the gun tower</a>, Bilge and Sailing <a href="den.html?at=sea">out on the sloop</a>.</p>
-      <p>For plain 2D practice of lots of puzzles, Puzzle Practice is the place. Here you go:</p>
-      <p class="try"><a class="play ghost" href="https://puzzle-practice.github.io/Puzzle_Practice/#/" target="_blank" rel="noopener">Puzzle Practice</a></p>
-      <p>And for blockades, <a href="#cadesim">the Global Cade Sim</a>.</p>
-    </div>
-  </article>
-
-  <h2 id="people">Meet real pirates</h2>
-
-  <article class="side">
-    <span class="pic"><img src="changelog/wardrobe.jpg" width="1280" height="720" loading="lazy" alt="A line-up of real pirates in their outfits: Tzz, Gravee, Dalnoth, a pirate in a bear hat, Dignity, Mischievious and Kikkit"></span>
-    <div>
-      <p>It's a sociable game: everything's about the people, playing puzzles together. So go do it!</p>
-      <p>For a friendly crowd ready to help and have fun, or to watch real pirates play and chat, the Trophy Hunters' Discord is the go-to. The top puzzlers stream on Twitch and YouTube too.</p>
-      <p class="try"><a class="play" href="https://discord.gg/XtRHwP6XT" target="_blank" rel="noopener">The Trophy Hunters' Discord</a></p>
     </div>
   </article>
 
@@ -435,7 +413,7 @@
     <div>
       <div class="said" id="your-room"></div>
       <p class="sig">Dachimpy</p>
-      <p class="try"><a class="play" href="https://discord.gg/XtRHwP6XT" target="_blank" rel="noopener">Find Dachimpy on the Discord</a></p>
+      <p class="try"><a href="#people">The Discord's link is up top</a></p>
     </div>
   </article>
 
