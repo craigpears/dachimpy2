@@ -485,6 +485,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     - **Dachimpy's voice: buzzy and excited (the user, 14 Nov).** Not wry or dry ("still warm" made it
       cringy): "usually it should be more like, yay, cookies, and kind of an excited reaction ... that kind of
       buzzy, excited, great energy, I think is much more me."
+      Then, the same day: keep the dry lines too ("Apparently people say it fits me still"), "but maybe do the
+      excited reaction first as well. We can have both." So: excited first ("Yay, cookies!"), the wry line after.
     - **Dachimpy's look, from their in-game picture (13 Nov).** The first go, from words alone, "absolutely
       does not look like me"; then: "me at the back with my pink and purple wig, kilt, belt and braces, and
       shoes." So a tall pale pink beehive wig with a purple band (`beehive`, a hat with a second colour,

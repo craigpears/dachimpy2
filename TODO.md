@@ -477,6 +477,8 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     usually it should be more like, yay, cookies, and kind of an excited reaction. I think that kind of buzzy,
     excited, great energy, I think is much more me." The hug "a bit cringy, but then again, that's also partly
     the idea". So every line of Dachimpy's goes buzzy and excited ("Yay, cookies!"), not wry.
+    Then: keep the wry lines ("people say it fits me still"), "but maybe do the excited reaction first as well. We
+    can have both." The rest: "Maybe we just need to experiment with it ... I think what you said all makes sense."
   - **The order, as it really happened** (the user's own telling; to confirm the unclear bits): the raw HTML
     website first ("I thought I copy pasted you the pictures of just the kind of raw HTML website. Like that was
     supposed to be the first one"); then the first Flash try ("wasn't even a prototype ... just the first time
