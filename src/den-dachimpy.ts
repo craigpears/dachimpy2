@@ -93,8 +93,14 @@ const cardUnder = (x: number, y: number, w: number, h: number) => {
 };
 /** The hall's exhibits (along its back wall); the rest hang in the museum. */
 const IN_THE_HALL = ['began'];
+/** The museum's pictures in clusters, the order kept (the user, 14 Nov: "some of them need to be clustered
+    together a bit. Like I love the HTML one, but then the shoot [Dalnoth] ... Those next three are kind of grouped
+    together, and then the Smart Fox ones ... And the [Whirled] ones, and then a bit of those technical drawings"):
+    each of these starts a new cluster, a wider gap (CLUSTER_GAP) before it than between pictures in one. */
+export const CLUSTERS: readonly Exhibit['id'][] = ['shootDalnoth', 'first', 'setup', 'donation', 'rotations', 'lobby', 'siteV2', 'dalnothApp'];
+export const GAP = 0.55, CLUSTER_GAP = 1.6;
 /** The museum's wall, laid out from its start (`x0`): each exhibit's middle and size, a frame and its plaque
-    at a time, a step between; and where the last one ends. */
+    at a time, a step between (a wider one between clusters); and where the last one ends. */
 function museumRow(x0: number) {
   const row: { e: Exhibit; x: number; w: number; h: number }[] = [];
   let x = x0 + 1.2;
@@ -102,11 +108,12 @@ function museumRow(x0: number) {
     if (IN_THE_HALL.includes(e.id)) continue;
     const s = e.kind === 'shot' ? shotSize(e.px) : PAGE, cw = e.kind === 'shot' ? cardUnder(0, 0, s.w, s.h).w : 0;
     const half = Math.max(s.w, cw) / 2;
+    if (row.length && CLUSTERS.includes(e.id)) x += CLUSTER_GAP - GAP;
     x += half;
     row.push({ e, x, ...s });
-    x += half + 0.55;
+    x += half + GAP;
   }
-  return { row, end: x - 0.55 };
+  return { row, end: x - GAP };
 }
 
 // ---------- the house ----------

@@ -66,7 +66,7 @@ export const PANELS = {
     },
     donation: {
         title: 'A kind gift',
-        text: 'Then someone, and I wish I could remember who, kindly donated about a hundred quid to help me make a guide. Yay! I spent it on art: the banner, the title card for my videos, and the sloops cut out for the sim, every heading. Here they are!',
+        text: 'Then someone so kind, a chef on Malachite whose name I wish I could remember, donated about a hundred quid to help me make a guide. Yay! I spent it on art: the banner, the title card for my videos, and the sloops cut out for the sim, every heading. Here they are!',
     },
     gone: {
         title: 'And then',
@@ -85,7 +85,7 @@ export const ON_AN_EXHIBIT = {
     jobbers: 'Jobbers per turn! What was I thinking?',
     setup: 'The first version! Honestly, that\'s how it looked.',
     teams: 'Team One! Just me. Ready, though.',
-    donation: 'Someone was so kind! I still wish I knew who.',
+    donation: 'A chef on Malachite, so kind! I still wish I knew who.',
     banner: 'My banner! The chimp\'s me, more or less.',
     titleCard: 'The videos opened on this! Imagine the music.',
     rotations: 'All by hand! Then they were in the game\'s files all along.',

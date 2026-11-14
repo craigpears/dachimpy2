@@ -5,7 +5,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   PLAN, ARRIVE, WALLS, EXHIBITS, hang, shotSize, SHOT_MAX, PAGE, exhibitLine, FRIENDS, FRIENDS_WALL, FURNISH,
-  COOKIES, atCookies, TOUR, stopAt, HUG, COOKIE, hugSpot, SHELF, MUSEUM_LEN, IN_RED, MONKEY_MAN, IN_RAGS, IN_PINK_COAT,
+  COOKIES, atCookies, TOUR, stopAt, HUG, COOKIE, hugSpot, SHELF, MUSEUM_LEN, IN_RED, MONKEY_MAN, IN_RAGS, IN_PINK_COAT, CLUSTERS,
 } from '../src/den-dachimpy';
 import { houseById, houseList, walkable, atWayOut, step, blocksOf, BACKDROPS, lookingAt, lookView, viewAt, LOOK_HOME, remark, GAZE_START, roomAt } from '../src/den-houses';
 import type { View, Gaze } from '../src/den-houses';
@@ -96,6 +96,25 @@ describe('the museum: the old Blockade Simulator and Dachimpy.com, in order (the
     expect(inMuseum[inMuseum.length - 1].id).toBe('gone');
     // the hall: where it began (the banner and the title card moved on, to where the donation paid for them)
     expect(EXHIBITS.filter((e) => H[e.id].room === 'hall').map((e) => e.id)).toEqual(['began']);
+  });
+
+  it('hangs them in clusters, the order kept (the user, 14 Nov: "some of them need to be clustered together a bit")', () => {
+    const inMuseum = EXHIBITS.filter((e) => H[e.id].room === 'museum');
+    const gapBefore = (i: number) => (H[inMuseum[i].id].x - H[inMuseum[i].id].w / 2) - (H[inMuseum[i - 1].id].x + H[inMuseum[i - 1].id].w / 2);
+    for (const id of CLUSTERS) expect(inMuseum.some((e) => e.id === id), id).toBe(true);
+    const within: number[] = [], between: number[] = [];
+    for (let i = 1; i < inMuseum.length; i++) (CLUSTERS.includes(inMuseum[i].id) ? between : within).push(gapBefore(i));
+    expect(Math.min(...between)).toBeGreaterThan(Math.max(...within));
+    // the Dalnoth shots together, the three before Whirled together, the sloops' drawings together
+    for (const [a, b] of [['shootDalnoth', 'traverses'], ['first', 'jobbers'], ['rotations', 'rings']] as const) {
+      const ia = inMuseum.findIndex((e) => e.id === a), ib = inMuseum.findIndex((e) => e.id === b);
+      for (let i = ia + 1; i <= ib; i++) expect(CLUSTERS.includes(inMuseum[i].id), `${a}..${b}`).toBe(false);
+    }
+  });
+
+  it('says who gave the kind gift, as far as Dachimpy remembers (the user, 14 Nov: "I remember them being a chef and they were on Malachite")', () => {
+    expect(PANELS.donation.text).toMatch(/chef on Malachite/);
+    expect(ON_AN_EXHIBIT.donation).toMatch(/Malachite/);
   });
 
   it('hangs each in its room, along its back wall, none overlapping, under the ceiling', () => {

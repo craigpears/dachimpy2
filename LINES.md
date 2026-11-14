@@ -1541,7 +1541,7 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
   - *text:* "It all started when I watched Dlonelyone teaching a new pirate to sail a sloop for the first time. I loved it! I wanted to help people like that too. Teaching out loud just wasn't me, so I made Dachimpy.com instead, my own way of doing it. Helping people learn!"
 - *donation:*
   - *title:* "A kind gift"
-  - *text:* "Then someone, and I wish I could remember who, kindly donated about a hundred quid to help me make a guide. Yay! I spent it on art: the banner, the title card for my videos, and the sloops cut out for the sim, every heading. Here they are!"
+  - *text:* "Then someone so kind, a chef on Malachite whose name I wish I could remember, donated about a hundred quid to help me make a guide. Yay! I spent it on art: the banner, the title card for my videos, and the sloops cut out for the sim, every heading. Here they are!"
 - *gone:*
   - *title:* "And then"
   - *text:* "Aww. Flash got deprecated and Whirled was taken down, and the sim went with them. These days there's the Global Cade Sim, someone else's, still running. It works perfectly. No ship ever spins into the rocks. Where's the fun in that?"
@@ -1557,7 +1557,7 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 - *jobbers:* "Jobbers per turn! What was I thinking?"
 - *setup:* "The first version! Honestly, that's how it looked."
 - *teams:* "Team One! Just me. Ready, though."
-- *donation:* "Someone was so kind! I still wish I knew who."
+- *donation:* "A chef on Malachite, so kind! I still wish I knew who."
 - *banner:* "My banner! The chimp's me, more or less."
 - *titleCard:* "The videos opened on this! Imagine the music."
 - *rotations:* "All by hand! Then they were in the game's files all along."
