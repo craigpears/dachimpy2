@@ -5,7 +5,8 @@
 // rum coming. Touches the rest only through thin hooks: sailing.js builds, ticks and asks it (Space and Esc,
 // the prompt, the run's goal), Helium's island (helium-isle.js: their casks, away on the run, quiet while it
 // talks), Kikkit's (whirlpools.js: kikkitQuiet), Port Decorum's guards (imperial-isle.js: empireWatch,
-// empireQuiet), Dignity's remark (dignity.js), and a starting point (menus.js, ?at=rumrun).
+// empireQuiet), Dignity's remark (dignity.js), a starting point (menus.js, ?at=rumrun), and the first run's
+// keepsake (keepsakes.js: Helium's barrels for the den, on her deck till you're home, then at the den for good).
 import {
   RUM_RUN, RUM_CAST, STOPS, RumRun, Whistle, Scene, AT_SEA, atStop, inSight, dropFor,
   askBeats, aboardBeats, stopBeats, notYetBeats, homeBeats, whistleBeats, turnAwayBeats, againBeats, rumTargets,
@@ -26,12 +27,13 @@ import { helium, heliumCasks, heliumShip, heliumAway, heliumQuiet, heliumStock }
 import { kikkitQuiet } from './whirlpools.js';
 import { empireWatch, empireQuiet } from './imperial-isle.js';
 import { dignityRemark } from './dignity.js';
+import { keepsakeEarn, keepsakeHome } from './keepsakes.js';
 
 /* `run` the rules (RumRun); `deck` the barrels on her deck, `shown` how many of them are there just now (the
    bottom ones first as they're loaded, the top ones first ashore); `fig` Helium aboard; `her` Mischievious on
    her jetty; `ashore` the barrels left at the stops; `flying` barrels on their way; `talk` a few lines said at
    sea (Helium whistling), not a cutscene; `line` the line up over someone's head. */
-export const rum = { run: new RumRun(), whistle: new Whistle(), deck: null, shown: 0, fig: null, her: null, ashore: [], flying: [], talk: null, line: null, bub: null, chat: null, heads: {}, watching: false, notYet: false, tune: 0, boarded: false };
+export const rum = { run: new RumRun(), whistle: new Whistle(), deck: null, shown: 0, fig: null, her: null, ashore: [], flying: [], talk: null, line: null, bub: null, chat: null, heads: {}, watching: false, notYet: false, tune: 0, boarded: false, gift: false };
 
 const H = RUM_CAST.h;
 const freshChat = () => new Chatter({ loop: AT_SEA }, { secs: readSecs, gap: [30, 55], wait: 25 });
@@ -135,10 +137,10 @@ function rollAshore(n, drop) {
     }, () => { rum.shown = Math.min(rum.shown, RUM_CAST.deck.length - i - 1); }));
   }
 }
-/** The barrels rolled aboard from their cask by the spout, bottom ones first. */
-function rollAboard(from) {
+/** The barrels rolled aboard from `from` (their cask by the spout), bottom ones first: `n` of them, all by default. */
+function rollAboard(from, n = RUM_CAST.deck.length) {
   const N = RUM_CAST.deck.length;
-  for (let k = 0; k < N; k++) {
+  for (let k = 0; k < Math.min(n, N); k++) {
     fly(from.clone().add(V3(0, 0.4, 0)), deckAt(N - 1 - k), k * 0.3, (o) => { scene.remove(o); rum.shown = Math.max(rum.shown, k + 1); });
   }
 }
@@ -185,6 +187,7 @@ function ask() {
 /** Taken on: the casks off their pile, rolled aboard; them with them. */
 function take() {
   if (!rum.run.take()) return;
+  rum.gift = false;   // (Helium's barrels for the den, if still aboard, go in with the new load: at the den once you're home all the same)
   const from = heliumShip();
   rum.heads.helium = heliumQuiet(true);
   play(aboardBeats(), from, () => rollAboard(from), () => {
@@ -229,15 +232,18 @@ function turnAway() {
     toast('New quest: find a back way into Port Decorum', false, false, true);
   }, drop.moor ? V3(seaX(drop.moor.c), 0, seaZ(drop.moor.r)) : undefined);
 }
-/** Home: they hop off, back on their island. */
+/** Home: they hop off, back on their island. The first run, they roll a few barrels aboard for your den as they
+    go (keepsakes.js: yours to keep, on her deck till you're home). */
 function home() {
   if (!rum.run.home()) return;
   rum.heads.helium = heliumQuiet(false) ?? rum.heads.helium;
   const shore = (rum.heads.helium?.getWorldPosition(V3(0, 0, 0)) ?? sail.g.getWorldPosition(V3(0, 0, 0))).add(V3(0, 1.5, 0));
-  play(homeBeats(), shore, () => {}, () => {
+  const gift = keepsakeEarn('rumrun', true);
+  play(homeBeats(gift), shore, (n) => { rum.gift = true; rollAboard(shore.clone().add(V3(0, -1.5, 0)), n); }, () => {
+    landAll();
     rum.boarded = false;
     heliumAway(false);
-    toast(`Helium's home. ${rum.run.delivered} barrels delivered this voyage`);
+    toast(`Helium's home. ${rum.run.delivered} barrels delivered this voyage${gift ? `, and ${RUM_RUN.KEEP} aboard for your den` : ''}`);
   });
 }
 
@@ -290,6 +296,8 @@ export function rumTick(dt) {
   if (!rum.deck) build();
   const R = rum.run, p = sail.helm.pose;
   if (helium.on) R.stilled();
+  // Helium's barrels for the den, home with you: off her deck, at the den now (keepsakes.js).
+  if (rum.gift && keepsakeHome('rumrun')) { rum.gift = false; rum.shown = 0; }
   // Off their island, the casks filled, not at their still: they ask.
   if (settled() && !helium.on && !helium.play && atStop(p.c, p.r)?.id === 'helium' && R.canAsk(heliumCasks())) ask();
   // At Port Decorum too soon: said once a visit.
@@ -350,7 +358,7 @@ function draw(dt) {
 export function rumReset() {
   if (rum.flying.length) landAll();
   for (const b of rum.ashore) scene.remove(b);
-  Object.assign(rum, { run: new RumRun(), whistle: new Whistle(), shown: 0, ashore: [], flying: [], talk: null, line: null, chat: freshChat(), notYet: false, again: false, tune: 0, boarded: false });
+  Object.assign(rum, { run: new RumRun(), whistle: new Whistle(), shown: 0, ashore: [], flying: [], talk: null, line: null, chat: freshChat(), notYet: false, again: false, tune: 0, boarded: false, gift: false });
   if (rum.watching) empireWatch(null);
   rum.watching = false;
   heliumAway(false);

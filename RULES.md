@@ -152,8 +152,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   be some meaningful reward, even if it's a small token thing like a visible persistent change to the map, a creature
   that carries along, or some furniture, some visual representation that you've completed that quest. Like Kikkit
   going to live with the penguins." A quest's end is never only a toast: something you can see afterwards stays,
-  at the den, on the sea, or with you (Umami living at the den after his rescue is the model). Helium's rum run gets
-  a few barrels of rum for the den (TODO.md).
+  at the den, on the sea, or with you (Umami living at the den after his rescue is the model). One small piece keeps
+  them all (src/keepsakes.ts, drawn by js/den/keepsakes.js; kept in this browser, as your spouse is): what each
+  adventure leaves, aboard her on the way home, then at the den; a new adventure is one entry there and calls
+  `keepsakeEarn(id)` when it's done. Built first for Helium's rum run: taking them home the first time, they roll
+  three barrels aboard ("Oh, and three for your den"), and once you're ashore they stand behind the den's chest.
 - **Where Space does something is marked, everywhere (14 Nov).** "always make that a generic thing ... this is like a
   quest or target ... you can do that for anything, even if it's just for interacting with the tutorial, it should
   be clear." One shared marker (src/den-marks.ts, js/den/marks.js: a gold ring pulsing on the water) on the squares
