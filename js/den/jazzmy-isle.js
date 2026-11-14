@@ -64,7 +64,8 @@ export function jazzmyAboard() {
   if (sail.helm.oars) sail.helm.row(false);
   sail.helm.moor(jazzmyMooring());
   keys.clear();
-  carpetEnter({ bySea: true, hide: [jzIsle.her?.g] });
+  jazzmyWorld();   // (her island built, if it isn't yet: straight in by den.html?at=carpet)
+  carpetEnter({ bySea: true, hide: () => [jzIsle.her?.g] });
 }
 /** Her island's starting point (den.html?at=jazzmy): at sea, off its landing. */
 export function jazzmyCheat() {

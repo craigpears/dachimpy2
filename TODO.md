@@ -48,6 +48,11 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     down is the ending (short of the reef, into it, the open sea, Helium's island, Port Decorum, further on). Then
     leg two from Helium's (their still going bang to launch her?) to the blockade, round Port Decorum. Gravee's
     portrait of it after.
+  - After it went up (14 Nov, late): "Why does she seem to have two parrots now? ... she seems completely doubled up in
+    the opening scene. Okay, it does rotate around after a while. But that opening animation is not as nice as it once
+    was"; and your pirate "very out of the [shot]". Her island's own Jazzmy left standing on the jetty under the
+    ride's (straight in by ?at=carpet her island wasn't built yet when it was hidden); the opening shots to frame
+    you and her together again.
   Done the same evening: five endings (paddle, skip, hammock, rocks, over the horizon), no Jasmine line, the meter from
   the wind's own pace; her island right behind the ride's jetty (her palms and stall shared, js/den/jazzmy-props.js);
   her hair long tumbling waves past the shoulders, after her classic portrait.

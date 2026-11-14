@@ -28,6 +28,7 @@ import { bubble, bubbleAt } from './cine.js';
 import { sloopMesh, SLOOP_DECK } from './sloop.js';
 import { sail, seaX, seaZ } from './sea.js';
 import { twirl, twirlTick } from './showcase.js';
+import { marksTick } from './marks.js';
 import { IDLES } from './props-people.js';
 
 const RUN = LAY.JAZZMY.RUN;
@@ -36,8 +37,9 @@ const toast = (text, bad = false) => denToast(text, bad, false, true);
 const touch = matchMedia('(pointer: coarse)').matches;
 /** Her jetty's end (jazzmy-isle.js's jetty), where she waits: a sea square, fractional. */
 export const JETTY_END = { c: 22.85, r: 4.2 };
-/** Her turn on it, in the ride's frame: towards the sloop coming alongside, and the camera. */
-const JETTY_YAW = -2.2;
+/** Her turn on it, in the ride's frame, towards you at the tiller as the sloop comes alongside; and yours, towards her,
+    while she talks (the user, 14 Nov, of the opening: "not as nice as it once was"). */
+const JETTY_YAW = 2.67, YOU_TO_HER = -0.47;
 
 /** All there is of the ride. */
 export const carpet = {
@@ -309,8 +311,9 @@ function sitPose(J) {
 
 // ---------- in and out ----------
 /** Off to the carpet ride, at her island on the sea; `bySea`, picked up off it (jazzmy-isle.js), back aboard the sloop
-    moored there after; `hide`, things that are the ride's own while it's on (her, waiting on the jetty). */
-export function carpetEnter({ bySea = false, hide = [] } = {}) {
+    moored there after; `hide()`, things that are the ride's own while it's on (her, waiting on the jetty): asked for
+    as the ride starts, after the fade, when her island's surely built. */
+export function carpetEnter({ bySea = false, hide = () => [] } = {}) {
   if (carpet.on) return false;
   const back = bySea ? 'Back aboard' : 'Back to the den';
   $('carpet-leave').textContent = back; $('carpet-back').textContent = back;
@@ -321,8 +324,9 @@ export function carpetEnter({ bySea = false, hide = [] } = {}) {
     setUp(false);
     wearLook(carpet.you, myLook);
     // (the real sloop moored at her island, you aboard her, and her waiting on her jetty: the ride's own while it's on)
-    carpet.hidden = [sail.g, pirate.g, ...hide].filter(Boolean).map((o) => [o, o.visible]);
+    carpet.hidden = [sail.g, pirate.g, ...hide()].filter(Boolean).map((o) => [o, o.visible]);
     for (const [o] of carpet.hidden) o.visible = false;
+    marksTick(0, true);   // (the gold rings on the water where Space does something: none on the ride)
     Object.assign(carpet, { on: true, snap: true, t: 0, leaning: false });
     Object.keys(carpet.held).forEach((k) => { carpet.held[k] = false; });
     carpet.root.visible = true;
@@ -567,6 +571,8 @@ export function carpetTick(dt) {
   Y.g.position.y = SLOOP_DECK + 0.35;   // (the twirl's hop is added on each tick: from here)
   Y.arms[1].rotation.set(-0.8, 0, 0);
   if (P === 'stop') Y.body.rotation.x = 0.35; else Y.body.rotation.x = 0;
+  const opening = P === 'arrive' || P === 'hello' || P === 'ask' || P === 'where';
+  Y.g.rotation.y = opening ? YOU_TO_HER : Math.PI / 2;
   twirlTick(Y, dt, Math.PI / 2);
   poseJazz(J, P, R, dt, t);
   gullsTick(dt, t);
@@ -681,8 +687,10 @@ export function carpetCam() {
   const R = carpet.ride, P = R.phase, s = carpet.sloop.position, J = local(carpet.jazz.g), F = R.flight;
   const tall = innerWidth < innerHeight;
   let C;
-  if (P === 'arrive') C = { look: [s.x - 0.5, 1.2, 1.4], dist: 15, tilt: 0.32, yaw: 2.5 };
-  else if (P === 'hello' || P === 'ask' || P === 'where') C = { look: [J.x, 2.0, J.z], dist: 5.2, tilt: 0.25, yaw: -2.2 };
+  // (the opening from the open sea off her island: the sloop coming alongside, then you and her together, her island
+  // behind)
+  if (P === 'arrive') C = { look: [(s.x - 1.45 + J.x) / 2, 1.3, J.z / 2], dist: tall ? 18 : 13, tilt: 0.28, yaw: -2.3 };
+  else if (P === 'hello' || P === 'ask' || P === 'where') C = { look: [(s.x - 1.45 + J.x) / 2, 1.7, J.z / 2], dist: tall ? 9.5 : 7, tilt: 0.2, yaw: -2.5 };
   else if (P === 'plan' || P === 'dress') C = { look: [s.x - 1.45, 2.3, 0.6], dist: tall ? 7 : 5.2, tilt: 0.14, yaw: 2.8 };
   else if (P === 'lash') C = { look: [s.x + CARPET.RUG_X, CARPET.DECK_H, 0], dist: 3.1, tilt: 1.05, yaw: -0.05 };
   else if (P === 'board') C = { look: [s.x + 0.4, 1.6, 0.8], dist: 8.5, tilt: 0.3, yaw: 2.6 };
