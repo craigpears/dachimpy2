@@ -11,9 +11,10 @@ import type { Portrait } from '../src/den-gravee';
 import { walkable, roomAt, atWayOut, step, skipTo, hostTarget, canvasAt, brushReach, BRUSH } from '../src/den-houses';
 import type { Stretch } from '../src/den-houses';
 import { TOUR_LINES, AT_THE_DOOR, THE_SCARE, BECKON } from '../src/lines/gravee';
+import { furnitureSource, furnitureIds } from './furniture-files';
 
 const LOOK_JS = readFileSync(join(__dirname, '..', 'js', 'den-look.js'), 'utf8').replace(/\r\n/g, '\n');   // (either line ending, as checked out)
-const FURNITURE_JS = readFileSync(join(__dirname, '..', 'js', 'den', 'furniture.js'), 'utf8');
+const FURNITURE_JS = furnitureSource(), FURNITURE_IDS = furnitureIds();
 /** The ids the wardrobe offers for a slot, read from js/den-look.js (it needs three.js to run). */
 const partsOf = (slot: string) => {
   const m = LOOK_JS.match(new RegExp(`\\n  ${slot}: \\{\\n    m: \\[([\\s\\S]*?)\\],\\n    f: \\[([\\s\\S]*?)\\],\\n  \\}`))!;
@@ -35,7 +36,7 @@ describe('her house: three rooms in a row', () => {
 
   it('places only furniture the shared furniture module makes, each inside its room', () => {
     for (const p of FURNISH) {
-      expect(FURNITURE_JS, p.kind).toMatch(new RegExp(`\\b${p.kind}\\b`));
+      expect(FURNITURE_IDS, p.kind).toContain(p.kind);
       expect(PLAN.rooms.some((r) => p.x > r.x0 && p.x < r.x1 && p.z > r.z0 && p.z < r.z1), `${p.kind} at ${p.x},${p.z}`).toBe(true);
     }
     expect(FURNISH.filter((p) => p.kind === 'coffin')).toHaveLength(1);

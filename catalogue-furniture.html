@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The catalogue: furniture</title>
+<!-- The catalogue (14 Nov): a page per kind of thing in the den a pirate can look over and give feedback on, less
+     technical than the code; partly documentation, partly a test page (the user). Furniture: every piece in
+     js/den/furniture/'s registry, each pictured as the den draws it, never listed here by hand, so a piece added
+     there shows here by itself (js/den/furniture/README.md says how). Its look is the colours page's. Pirate names
+     only. -->
+<meta name="description" content="Every piece of furniture in the Pirate Den, pictured as the den draws it: chairs, candles, frames, the skeleton set, cargo and a museum's things.">
+<meta name="theme-color" content="#140d08">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,400;1,500;1,700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #2a1d13; --ink2: #5b4330; --gold: #e0a92a; --cream: #f6ead2; --dim: #cbb894; --edge: #5a412a; --paper: #f3e3c3; --paper2: #e8d2a8; --rust: #6b2a12; --link: #8a4b0f; }
+  * { box-sizing: border-box; }
+  html { background: #140d08; }
+  body { margin: 0; min-height: 100vh; color: var(--cream); font: 500 17px/1.5 'Alegreya Sans', system-ui, sans-serif;
+    background: #140d08 repeating-linear-gradient(90deg, rgba(255, 220, 160, 0.025) 0 2px, transparent 2px 120px); }
+  a { color: var(--gold); }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 16px 48px; }
+  .shelf { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin: 0 0 14px; font-size: 15px; color: #a8967a; }
+  .shelf b { color: var(--dim); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 13px; }
+  .shelf .on { color: var(--gold); font-weight: 700; text-decoration: none; border-bottom: 2px solid var(--gold); }
+  .shelf .soon { color: #7d6c55; }
+  .shelf .home { margin-left: auto; }
+  h1 { margin: 0; font: 700 clamp(30px, 6vw, 44px)/1.05 'Alegreya', serif; color: var(--gold); }
+  .lede { margin: 8px 0 0; color: var(--dim); max-width: 640px; }
+  .tell { margin: 14px 0 0; padding: 12px 16px; max-width: 640px; background: #fffaf0; color: var(--ink); border-radius: 14px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4); font-size: 16px; }
+  .tell:empty { display: none; }
+  .tell p { margin: 0 0 6px; color: var(--ink2); }
+  .tell p:first-child { font: 700 20px/1.3 'Alegreya', serif; color: var(--rust); }
+  .tell a { color: var(--link); font-weight: 700; }
+  .tell .sig { margin: 0; text-align: right; font-style: italic; color: var(--ink2); }
+  .tell .sig::before { content: '— '; }
+  h2 { display: flex; align-items: center; gap: 14px; margin: 38px 0 4px; font: 700 22px 'Alegreya', serif; color: var(--dim); }
+  h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
+  h2 small { font: 500 15px 'Alegreya Sans'; color: #a8967a; }
+  .blurb { margin: 0 0 12px; color: #a8967a; font-size: 15px; }
+  article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid #c9a35c; border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 40px rgba(120, 80, 30, 0.18); padding: 14px; margin: 0 0 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
+  li.piece { cursor: pointer; border-radius: 10px; padding: 6px; margin: -6px; outline-offset: 2px; scroll-margin-top: 40vh; }
+  li.piece:hover { background: rgba(255, 255, 255, 0.35); }
+  li.piece:focus-visible { outline: 2px solid var(--link); }
+  li.piece.on { background: rgba(255, 255, 255, 0.55); box-shadow: 0 0 0 2px var(--link); }
+  .pic { display: grid; place-items: center; aspect-ratio: 1; width: 100%; border-radius: 9px; border: 2px solid #3b2a1b;
+    background: radial-gradient(circle at 50% 40%, #4a3524, #1e140c 85%); color: #8c7a60; font-size: 13px; overflow: hidden; }
+  .pic img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  li.piece b { display: block; margin-top: 6px; font: 700 18px/1.2 'Alegreya', serif; color: var(--rust); }
+  li.piece code { font: 600 12px ui-monospace, Consolas, monospace; color: var(--ink2); }
+  li.piece p { margin: 3px 0 0; font-size: 14px; line-height: 1.35; color: var(--ink2); }
+  li.piece p.where { font-style: italic; }
+  /* The list on the left, the stage on the right (it stays in view as you scroll); on a phone, the stage on top,
+     kept in view while the list scrolls under it. */
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 0 26px; align-items: start; }
+  .stage { position: sticky; top: 16px; margin-top: 38px; padding: 10px; border-radius: 12px; border: 1px solid #c9a35c; background: radial-gradient(circle at 50% 35%, #3d2b1d, #140d08 80%); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); }
+  .stage canvas { display: block; width: 100%; height: 360px; border-radius: 8px; cursor: grab; touch-action: pan-y; }
+  .stage .bar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: 8px; font-size: 14px; color: var(--dim); }
+  .stage .bar b { color: var(--gold); font: 700 18px 'Alegreya', serif; }
+  .stage .bar code { font: 600 12px ui-monospace, Consolas, monospace; color: #a8967a; }
+  .stage .hint { width: 100%; font-size: 13px; color: #a8967a; }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .stage { order: -1; top: 0; z-index: 2; margin: 14px -6px 0; padding: 6px; border-radius: 0 0 12px 12px; }
+    .stage canvas { height: 30vh; min-height: 180px; }
+    .stage .hint { display: none; }
+  }
+  footer { margin-top: 40px; color: #8c7a60; font-size: 13px; text-align: center; }
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 10px; }
+    li.piece b { font-size: 16px; }
+    li.piece p { font-size: 13px; }
+    .shelf .home { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="shelf" aria-label="The catalogue's pages">
+    <b>The catalogue</b>
+    <a href="catalogue-colours.html">Colours</a>
+    <a class="on" href="catalogue-furniture.html" aria-current="page">Furniture</a>
+    <span class="soon">Hairstyles (coming)</span>
+    <span class="soon">Clothes (coming)</span>
+    <span class="soon">Familiars (coming)</span>
+    <a class="home" href="index.html">The Pirate Den</a>
+  </nav>
+  <h1>The catalogue: furniture</h1>
+  <p class="lede">Every piece of furniture in the den, as the den draws it: what a house is furnished with, candles, frames for the portraits, the skeleton set on Primates Rule's deck, a beach's cargo and a museum's things. Pick one to look it over on the turntable.</p>
+  <div class="tell" id="tell"></div>
+  <div class="layout">
+    <div>
+      <div id="list"></div>
+      <noscript><p class="blurb">The list is drawn from the den's own furniture by script: turn scripts on to see it.</p></noscript>
+    </div>
+    <aside class="stage" aria-label="The piece picked, on a turntable">
+      <canvas id="stage" aria-label="The piece picked, on a turntable"></canvas>
+      <div class="bar"><b id="now"></b><code id="now-id"></code>
+        <span class="hint">Pick a piece to see it here. Drag to turn it round.</span></div>
+    </aside>
+  </div>
+  <footer>Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</footer>
+</div>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
+<script type="module">
+  // Every piece from js/den/furniture/'s registry, the same the den places: nothing listed by hand.
+  import { PIECES, GROUPS } from './js/den/furniture.js';
+  import { pictureOf, furnitureStage } from './js/den/furniture-stage.js';
+  import { CATALOGUE } from './js/lines/dachimpy.js';
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  // Dachimpy's few lines up top (src/lines/dachimpy.ts, never written here); the Discord's name a link.
+  const DISCORD = "Trophy Hunters' Discord", tell = document.getElementById('tell');
+  for (const line of CATALOGUE) {
+    const p = el('p'), at = line.indexOf(DISCORD);
+    if (at < 0) p.textContent = line;
+    else {
+      const a = el('a', null, DISCORD); a.href = 'https://discord.gg/XtRHwP6XT'; a.target = '_blank'; a.rel = 'noopener';
+      p.append(line.slice(0, at), a, line.slice(at + DISCORD.length));
+    }
+    tell.append(p);
+  }
+  tell.append(el('p', 'sig', 'Dachimpy'));
+
+  const list = document.getElementById('list'), pics = new Map();
+  for (const g of GROUPS) {
+    const pieces = PIECES.filter((p) => p.group === g.id);
+    if (!pieces.length) continue;
+    const h = el('h2', null, g.name + ' '); h.append(el('small', null, `${pieces.length}`)); list.append(h);
+    list.append(el('p', 'blurb', g.blurb));
+    const art = el('article'), ul = el('ul', 'grid');
+    for (const p of pieces) {
+      const li = el('li', 'piece'); li.id = p.id;
+      const pic = el('div', 'pic', 'Drawing…'); pics.set(p.id, pic);
+      li.append(pic, el('b', null, p.name), el('code', null, p.id), el('p', null, p.about), el('p', 'where', p.where));
+      li.tabIndex = 0; li.setAttribute('role', 'button'); li.setAttribute('aria-pressed', 'false'); li.title = `Look at the ${p.name.toLowerCase()} on the turntable`;
+      li.onclick = () => pick(p.id);
+      li.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(p.id); } };
+      ul.append(li);
+    }
+    art.append(ul); list.append(art);
+  }
+
+  // The stage (js/den/furniture-stage.js): the piece picked, on a turntable. Loaded with the pictures, so the list
+  // stands even where 3D can't.
+  const byId = Object.fromEntries(PIECES.map((p) => [p.id, p]));
+  let stage = null, picked = null;
+  function pick(id, { first = false } = {}) {
+    const p = byId[id];
+    if (!p) return;
+    if (picked) { const was = document.getElementById(picked); was?.classList.remove('on'); was?.setAttribute('aria-pressed', 'false'); }
+    picked = id;
+    const li = document.getElementById(id); li.classList.add('on'); li.setAttribute('aria-pressed', 'true');
+    document.getElementById('now').textContent = p.name;
+    document.getElementById('now-id').textContent = p.id;
+    if (!first) history.replaceState(null, '', '#' + id);
+    stage?.show(p, { first });
+  }
+  // A link to one piece (catalogue-furniture.html#coffin) lands on it, on the turntable.
+  const asked = byId[decodeURIComponent(location.hash.slice(1))] ? decodeURIComponent(location.hash.slice(1)) : null;
+  pick(asked || PIECES[0].id, { first: true });
+  if (asked) document.getElementById(asked).scrollIntoView({ block: 'center' });
+
+  // (the words on a sign or a card are painted in the page's own font: loaded first)
+  await Promise.all(['700 20px Alegreya', 'italic 20px Alegreya', 'italic 700 20px Alegreya'].map((f) => document.fonts.load(f).catch(() => null)));
+  try {
+    stage = furnitureStage(document.getElementById('stage'));
+    stage.show(byId[picked], { first: true });
+  } catch (e) { console.error(e); document.querySelector('.stage').hidden = true; }
+  // Each piece's picture, a few at a time, so the page stays responsive while they're drawn.
+  const queue = [...PIECES];
+  const next = () => {
+    const t0 = performance.now();
+    while (queue.length && performance.now() - t0 < 30) {
+      const p = queue.shift(), pic = pics.get(p.id);
+      try {
+        const img = el('img'); img.alt = p.name; img.src = pictureOf(p);
+        pic.replaceChildren(img);
+      } catch (e) { console.error(p.id, e); pic.textContent = 'Couldn\'t draw it'; }
+    }
+    if (queue.length) setTimeout(next, 0);
+  };
+  next();
+</script>
+</body>
+</html>
