@@ -670,6 +670,15 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   pirate. So there needs to be a list somewhere." So every Puzzle Pirates clothing colour (YPPedia's Clothing
   palette, the limited editions too) in the wardrobe, each sampled from a real portrait where the wiki's swatch is
   off, Fable's checked on Meridian; and a public list of them all.
+- **The looks' code laid out so anyone can add a piece (14 Nov):** "it's not very obvious at all where the source
+  stuff is for all of the graphics ... I was expecting like there to be a folder somewhere that's got kind of the
+  code for drawing each item and little components, each of the colors and rendering, or like the different
+  hairstyles being a lot more modular and broken down so that if people wanted to contribute, they could just like
+  plug in something for that, or like furniture, like [what] Fable wants to do." Today the whole wardrobe (every
+  hairstyle, garment, hat, familiar and colour) is one long file, js/den-look.js, and every piece of furniture
+  another, js/den/furniture.js. So a folder of small pieces, one file each: hairstyles, garments, hats, familiars,
+  furniture, the colours (started 14 Nov: the palette as its own module), each piece registered by name, with a
+  short guide (CONTRIBUTING.md) on adding one and a test page to see it on its own.
 
 ## Spotted along the way (not asked for)
 
