@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The catalogue: colours</title>
+<!-- The catalogue (14 Nov): a page per kind of thing in the den a pirate can look over and give feedback on, less
+     technical than the code; partly documentation, partly a test page (the user). Colours first: every clothing
+     colour the wardrobe has, drawn from src/palette.ts (js/palette.js), never listed here by hand, so it can't go out
+     of date. Its look is the changelog's. Pirate names only. Furniture, hairstyles, clothes and familiars to come,
+     each rendered. -->
+<meta name="description" content="Every Puzzle Pirates clothing colour in the Pirate Den's wardrobe, standard and limited edition, and which are still to be checked against the game.">
+<meta name="theme-color" content="#140d08">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #2a1d13; --ink2: #5b4330; --gold: #e0a92a; --cream: #f6ead2; --dim: #cbb894; --edge: #5a412a; --paper: #f3e3c3; --paper2: #e8d2a8; --rust: #6b2a12; --link: #8a4b0f; }
+  * { box-sizing: border-box; }
+  html { background: #140d08; }
+  body { margin: 0; min-height: 100vh; color: var(--cream); font: 500 17px/1.5 'Alegreya Sans', system-ui, sans-serif;
+    background: #140d08 repeating-linear-gradient(90deg, rgba(255, 220, 160, 0.025) 0 2px, transparent 2px 120px); }
+  a { color: var(--gold); }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 16px 48px; }
+  .shelf { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin: 0 0 14px; font-size: 15px; color: #a8967a; }
+  .shelf b { color: var(--dim); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 13px; }
+  .shelf .on { color: var(--gold); font-weight: 700; text-decoration: none; border-bottom: 2px solid var(--gold); }
+  .shelf .soon { color: #7d6c55; }
+  .shelf .home { margin-left: auto; }
+  h1 { margin: 0; font: 700 clamp(30px, 6vw, 44px)/1.05 'Alegreya', serif; color: var(--gold); }
+  .lede { margin: 8px 0 0; color: var(--dim); max-width: 640px; }
+  .tell { margin: 14px 0 0; padding: 12px 16px; max-width: 640px; background: #fffaf0; color: var(--ink); border-radius: 14px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4); font-size: 16px; }
+  .tell:empty { display: none; }
+  .tell p { margin: 0 0 6px; color: var(--ink2); }
+  .tell p:first-child { font: 700 20px/1.3 'Alegreya', serif; color: var(--rust); }
+  .tell a { color: var(--link); font-weight: 700; }
+  .tell .sig { margin: 0; text-align: right; font-style: italic; color: var(--ink2); }
+  .tell .sig::before { content: '— '; }
+  .key { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 14px 0 0; font-size: 14px; color: var(--dim); }
+  .key span { display: inline-flex; align-items: center; gap: 6px; }
+  h2 { display: flex; align-items: center; gap: 14px; margin: 38px 0 4px; font: 700 22px 'Alegreya', serif; color: var(--dim); }
+  h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
+  h2 small { font: 500 15px 'Alegreya Sans'; color: #a8967a; }
+  .blurb { margin: 0 0 12px; color: #a8967a; font-size: 15px; }
+  article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid #c9a35c; border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 40px rgba(120, 80, 30, 0.18); padding: 14px; margin: 0 0 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px 16px; margin: 0; padding: 0; list-style: none; }
+  .dye { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 0 10px; align-items: start; }
+  /* A swatch as cloth: the colour lit from above, a fold's shadow down it, so a near-white or near-black still reads. */
+  .cloth { width: 54px; height: 54px; border-radius: 10px; border: 2px solid #3b2a1b;
+    background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.28), transparent 45%, rgba(0, 0, 0, 0.28)), linear-gradient(90deg, transparent 58%, rgba(0, 0, 0, 0.14) 66%, transparent 76%); }
+  .dye b { display: block; font: 700 18px/1.2 'Alegreya', serif; color: var(--rust); }
+  .dye .hex { font: 600 12px ui-monospace, Consolas, monospace; color: var(--ink2); }
+  .dye .from { display: block; font-size: 13px; line-height: 1.3; color: var(--ink2); margin-top: 2px; }
+  .chip { display: inline-block; width: 12px; height: 12px; border-radius: 3px; border: 1px solid #3b2a1b; vertical-align: -1px; }
+  .tag { display: inline-block; white-space: nowrap; margin-top: 4px; padding: 0 7px; border-radius: 9px; font-size: 12px; font-weight: 700; }
+  .tag.unchecked { background: #f6d9a8; color: #7a3d0c; border: 1px dashed #b06a1e; }
+  .tag.checked { background: #d9ebc4; color: #2f5418; }
+  .shades { display: flex; flex-wrap: wrap; gap: 12px 16px; margin: 0; padding: 0; list-style: none; }
+  .shades li { display: flex; align-items: center; gap: 8px; min-width: 150px; font-size: 15px; }
+  .shades .cloth { width: 32px; height: 32px; border-radius: 50%; flex: 0 0 auto; }
+  .shades i { display: block; font-size: 12px; color: var(--ink2); line-height: 1.2; }
+  /* The list on the left, the stage on the right (it stays in view as you scroll); on a phone, the stage on top,
+     kept in view while the list scrolls under it. */
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 0 26px; align-items: start; }
+  .stage { position: sticky; top: 16px; margin-top: 38px; padding: 10px; border-radius: 12px; border: 1px solid #c9a35c; background: radial-gradient(circle at 50% 35%, #3d2b1d, #140d08 80%); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); }
+  .stage canvas { display: block; width: 100%; height: 360px; border-radius: 8px; cursor: grab; touch-action: pan-y; }
+  .stage .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; font-size: 14px; color: var(--dim); }
+  .stage .bar b { color: var(--gold); font: 700 18px 'Alegreya', serif; }
+  .stage .bar .chip { width: 16px; height: 16px; border-radius: 4px; vertical-align: -3px; }
+  .stage button { margin-left: auto; font: 700 14px 'Alegreya Sans'; color: var(--ink); background: var(--gold); border: 0; border-radius: 7px; padding: 5px 12px; cursor: pointer; }
+  .stage button:hover { background: #f0bd44; }
+  .stage .hint { width: 100%; font-size: 13px; color: #a8967a; }
+  li.dye { cursor: pointer; border-radius: 9px; padding: 4px; margin: -4px; outline-offset: 2px; }
+  li.dye { scroll-margin-top: 40vh; }
+  li.dye:hover { background: rgba(255, 255, 255, 0.35); }
+  li.dye:focus-visible { outline: 2px solid var(--link); }
+  li.dye.on { background: rgba(255, 255, 255, 0.55); box-shadow: 0 0 0 2px var(--link); }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .stage { order: -1; top: 0; z-index: 2; margin: 14px -6px 0; padding: 6px; border-radius: 0 0 12px 12px; }
+    .stage canvas { height: 30vh; min-height: 180px; }
+    .stage .hint { display: none; }
+  }
+  footer { margin-top: 40px; color: #8c7a60; font-size: 13px; text-align: center; }
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 10px; }
+    .dye { grid-template-columns: 38px minmax(0, 1fr); gap: 0 8px; }
+    .dye .cloth { width: 38px; height: 38px; }
+    .dye b { font-size: 16px; }
+    .shades li { min-width: 130px; }
+    .shelf .home { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="shelf" aria-label="The catalogue's pages">
+    <b>The catalogue</b>
+    <a class="on" href="catalogue-colours.html" aria-current="page">Colours</a>
+    <span class="soon">Furniture (coming)</span>
+    <span class="soon">Hairstyles (coming)</span>
+    <span class="soon">Clothes (coming)</span>
+    <span class="soon">Familiars (coming)</span>
+    <a class="home" href="index.html">The Pirate Den</a>
+  </nav>
+  <h1>The catalogue: colours</h1>
+  <p class="lede">Every Puzzle Pirates clothing colour the den's wardrobe has, so you can dress as your own pirate: the tailor's standard palette, then the limited editions, named as YPPedia names them.</p>
+  <div class="tell" id="tell"></div>
+  <div class="key">
+    <span><span class="tag checked">From a portrait</span> sampled from a real pirate's portrait: as the game draws it</span>
+    <span><span class="tag unchecked">Not yet checked</span> YPPedia's swatch, or a guess: may be off</span>
+  </div>
+  <div class="layout">
+    <div>
+      <div id="list"></div>
+      <noscript><p class="blurb">The list is drawn from the den's own colours by script: turn scripts on to see it.</p></noscript>
+    </div>
+    <aside class="stage" aria-label="The colour tried on">
+      <canvas id="stage" aria-label="Three pirates on a turntable, and an armchair and a rug, in the colour picked"></canvas>
+      <div class="bar"><span class="chip" id="now-chip"></span><b id="now"></b><button id="again" type="button">Another outfit</button>
+        <span class="hint">Pick a colour to try it on. Drag to turn the turntable.</span></div>
+    </aside>
+  </div>
+  <footer>Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</footer>
+</div>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
+<script type="module">
+  // Every colour from src/palette.ts (compiled to js/palette.js), the same the wardrobe draws: nothing listed by hand.
+  import { PALETTE, GROUPS, HAIRS, FURS, SKIN } from './js/palette.js';
+  import { CATALOGUE } from './js/lines/dachimpy.js';
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  // Dachimpy's few lines up top (src/lines/dachimpy.ts, never written here); the Discord's name a link.
+  const DISCORD = "Trophy Hunters' Discord", tell = document.getElementById('tell');
+  for (const line of CATALOGUE) {
+    const p = el('p'), at = line.indexOf(DISCORD);
+    if (at < 0) p.textContent = line;
+    else {
+      const a = el('a', null, DISCORD); a.href = 'https://discord.gg/XtRHwP6XT'; a.target = '_blank'; a.rel = 'noopener';
+      p.append(line.slice(0, at), a, line.slice(at + DISCORD.length));
+    }
+    tell.append(p);
+  }
+  tell.append(el('p', 'sig', 'Dachimpy'));
+  const cloth = (hex, label) => { const c = el('span', 'cloth'); c.style.backgroundColor = hex; c.setAttribute('role', 'img'); c.setAttribute('aria-label', label); return c; };
+  const list = document.getElementById('list');
+  const head = (title, n, blurb) => {
+    const h = el('h2', null, title + ' '); h.append(el('small', null, `${n}`)); list.append(h);
+    if (blurb) list.append(el('p', 'blurb', blurb));
+  };
+
+  for (const g of GROUPS) {
+    const dyes = PALETTE.filter((c) => c.group === g.id);
+    head(g.name, dyes.length, g.blurb);
+    const art = el('article'), ul = el('ul', 'grid');
+    for (const c of dyes) {
+      const li = el('li', 'dye'); li.id = c.name.replace(/ /g, '-');
+      const words = el('div');
+      words.append(el('b', null, c.name), el('span', 'hex', c.hex));
+      // (Plain "YPPedia's swatch" goes without saying: the tag under it says so.)
+      const from = el('span', 'from', c.from === "YPPedia's swatch" ? '' : c.from[0].toUpperCase() + c.from.slice(1) + '.');
+      if (c.wiki) { from.append(' YPPedia\'s swatch: '); const chip = el('span', 'chip'); chip.style.background = c.wiki; chip.title = c.wiki; from.append(chip, ` ${c.wiki}.`); }
+      words.append(from, el('span', 'tag ' + (c.checked ? 'checked' : 'unchecked'), c.checked ? 'From a portrait' : 'Not yet checked'));
+      li.append(cloth(c.hex, c.name), words);
+      li.tabIndex = 0; li.setAttribute('role', 'button'); li.setAttribute('aria-pressed', 'false'); li.title = `Try ${c.name} on`;
+      li.onclick = () => pick(c.name);
+      li.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(c.name); } };
+      ul.append(li);
+    }
+    art.append(ul); list.append(art);
+  }
+
+  const shades = (title, blurb, items) => {
+    head(title, items.length, blurb);
+    const art = el('article'), ul = el('ul', 'shades');
+    for (const s of items) { const li = el('li'), w = el('span'); w.append(s.name, el('i', null, s.from)); li.append(cloth(s.hex, s.name), w); ul.append(li); }
+    art.append(ul); list.append(art);
+  };
+  shades('Hair', 'The wardrobe\'s hair colours (the game\'s hair dyes are many more: tell us yours).', HAIRS);
+  shades('Monkeys\' and squirrels\' fur', 'Furry familiars come in their natural colours and a few limited editions; the rest take any clothing colour.', FURS);
+  shades('Skin', 'The wardrobe\'s skin tones.', SKIN.map((hex, i) => ({ name: `Tone ${i + 1}`, hex, from: i === SKIN.length - 1 ? "Helium's portrait" : 'the den\'s own' })));
+
+  // The stage (js/den/colour-stage.js): a colour picked is tried on there, and named under it. Loaded on its own,
+  // so the list stands even where 3D can't.
+  const byName = Object.fromEntries(PALETTE.map((c) => [c.name, c])), idOf = (name) => name.replace(/ /g, '-');
+  let stage = null, picked = null;
+  function pick(name, { first = false } = {}) {
+    const c = byName[name];
+    if (!c) return;
+    if (picked) { const was = document.getElementById(idOf(picked)); was?.classList.remove('on'); was?.setAttribute('aria-pressed', 'false'); }
+    picked = name;
+    const li = document.getElementById(idOf(name)); li.classList.add('on'); li.setAttribute('aria-pressed', 'true');
+    document.getElementById('now').textContent = name;
+    document.getElementById('now-chip').style.background = c.hex;
+    if (!first) history.replaceState(null, '', '#' + idOf(name));
+    stage?.wear(name, { first });
+  }
+  document.getElementById('again').onclick = () => stage?.next();
+  // A link to one colour (catalogue-colours.html#hot-pink) lands on it, tried on.
+  const asked = location.hash && byName[decodeURIComponent(location.hash.slice(1)).replace(/-/g, ' ')] ? decodeURIComponent(location.hash.slice(1)).replace(/-/g, ' ') : null;
+  pick(asked || 'red', { first: true });
+  if (asked) document.getElementById(idOf(asked)).scrollIntoView({ block: 'center' });
+  import('./js/den/colour-stage.js').then(({ colourStage }) => {
+    stage = colourStage(document.getElementById('stage'));
+    stage.wear(picked, { first: true });
+  }).catch((e) => { console.error(e); document.querySelector('.stage').hidden = true; });
+</script>
+</body>
+</html>

@@ -11,14 +11,12 @@ import {
   FAMS, herFams, herLook,
 } from '../src/den-wedding';
 import { spouseOf } from '../src/den-spouse';
+import { DYES } from '../src/palette';
 import type { FamId, Look, Prop, Seat, SizeId, ThemeId, Wedding } from '../src/den-wedding';
 
 const LOOK_JS = readFileSync(join(__dirname, '..', 'js', 'den-look.js'), 'utf8');
-/** The wardrobe's own lists, read from js/den-look.js (it needs three.js to run). */
-const DYES_IN_WARDROBE = (() => {
-  const body = LOOK_JS.match(/export const DYES = \{([\s\S]*?)\n\};/)![1].replace(/\/\/.*$/gm, '');
-  return [...body.matchAll(/(?:'([^']+)'|([a-z]+)):\s*'#/g)].map((m) => m[1] ?? m[2]);
-})();
+/** The wardrobe's own dyes (js/den-look.js draws src/palette.ts's). */
+const DYES_IN_WARDROBE = Object.keys(DYES);
 const seq = (...xs: number[]) => { let i = 0; return () => xs[i++ % xs.length]; };
 const planned = (): Wedding => ({ ...dressFor(fresh('dark'), 'gory'), partner: { kind: 'suitor', i: 0 }, plot: 'raiders' });
 

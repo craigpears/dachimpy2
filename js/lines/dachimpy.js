@@ -181,6 +181,16 @@ export const FRONT_PAGE = {
         'The whole den\'s a playground of ideas, each one tried out quickly. I like them meaningful and funny, ideally with a mechanic in them. Tell me which ones you love! Now and then one becomes something really exciting, like the sloop races. And at the very least, it\'s a bit of fun.',
     ],
 };
+/** At the top of the catalogue's pages (catalogue-colours.html first), a few warm lines: a bit of fun, simple on
+    purpose, and send what's missing (the user, 14 Nov: "You got an idea, see something here that you think's
+    missing? Let me know with a description and some kind of reference, and I'm sure it can be added"; "a bit of
+    fun ... not intended to be an original creative platform ... intentionally things are ... relatively low
+    quality ... but ... high enough quality that we can have some fun with it"). The Discord's name is a link there. */
+export const CATALOGUE = [
+    'Everything the den\'s made of, laid out to look over! Yay!',
+    'It\'s all a bit of fun, kept simple on purpose: a place to try ideas out, not a work of art. Simple, but good enough to play with.',
+    'Your colour or piece missing, or not quite right? Send me a description and a picture on the Trophy Hunters\' Discord, and I\'m sure we can add it!',
+];
 export const CHARACTER = {
     name: 'Dachimpy',
     who: 'The user\'s own pirate, of the Emerald Ocean (they/them), drawn in their rose pink wig, belt and braces and '
@@ -220,5 +230,6 @@ export const CHARACTER = {
             when: 'On the site\'s front page, at the top, holding out a plate of cookies', says: FRONT_PAGE,
             each: { hello: 'Their hello', cookie: 'Clicking the cookie (then the other cookies, in turn)', question: 'Under it, all the while', yourRoom: 'Under "A room of your own": what the den is for' },
         },
+        { when: 'At the top of the catalogue\'s pages (every colour, and more to come), a line each', says: CATALOGUE },
     ],
 };

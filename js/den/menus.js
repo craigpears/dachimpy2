@@ -283,6 +283,12 @@ function palette(btn, pal, cur, set, none) {
     b.onclick = () => { palette(null); set(id); };
     box.append(b);
   }
+  // (Every clothing colour named, and where each came from: the catalogue's colours page, 14 Nov.)
+  if (pal === DYES) {
+    const a = el('a', 'all', 'Every colour, named');
+    a.href = 'catalogue-colours.html'; a.target = '_blank'; a.rel = 'noopener';
+    box.append(a);
+  }
   const r = btn.getBoundingClientRect(), host = $('dress').firstElementChild.getBoundingClientRect();
   box.style.left = `${Math.max(8, Math.min(host.width - 250, r.left - host.left - 100))}px`;
   box.style.top = `${r.bottom - host.top + 6}px`;

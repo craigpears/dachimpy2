@@ -13,6 +13,7 @@ import { smugglersAt } from '../src/den-smugglers';
 import { Chatter } from '../src/chatter';
 import { CHART, IMPERIAL, NOTES } from '../src/den-map';
 import { HALT, GRUMBLES, SIGHTED } from '../src/lines/imperial-guards';
+import { DYES } from '../src/palette';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -96,7 +97,7 @@ describe('what\'s on it: a fort, a harbour, a customs house, a market, a warehou
 
   it('they wear the Empire\'s uniform, from the wardrobe (no one-offs): the checkpoint\'s crimson and gold', () => {
     for (const id of [UNIFORM.hat, UNIFORM.top, UNIFORM.legs, UNIFORM.feet, UNIFORM.hand, UNIFORM.waist]) expect(LOOK_JS).toContain(`['${id}'`);
-    for (const dye of [UNIFORM.hatCol, UNIFORM.topCol, UNIFORM.topCol2, UNIFORM.legsCol, UNIFORM.feetCol, UNIFORM.waistCol]) expect(LOOK_JS).toMatch(new RegExp(`\\b${dye}: '#`));
+    for (const dye of [UNIFORM.hatCol, UNIFORM.topCol, UNIFORM.topCol2, UNIFORM.legsCol, UNIFORM.feetCol, UNIFORM.waistCol]) expect(DYES[dye], dye).toMatch(/^#/);   // (the wardrobe's colours: src/palette.ts)
   });
 
   it('its shore goes round its land but the jetty, which stands out on piles', () => {

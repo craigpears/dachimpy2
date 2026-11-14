@@ -1638,6 +1638,12 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
   - "Find me on the Trophy Hunters' Discord, send me a link to your pirate page, and we'll put your room together. I just need a feel for your personality."
   - "The whole den's a playground of ideas, each one tried out quickly. I like them meaningful and funny, ideally with a mechanic in them. Tell me which ones you love! Now and then one becomes something really exciting, like the sloop races. And at the very least, it's a bit of fun."
 
+### At the top of the catalogue's pages (every colour, and more to come), a line each
+
+- "Everything the den's made of, laid out to look over! Yay!"
+- "It's all a bit of fun, kept simple on purpose: a place to try ideas out, not a work of art. Simple, but good enough to play with."
+- "Your colour or piece missing, or not quite right? Send me a description and a picture on the Trophy Hunters' Discord, and I'm sure we can add it!"
+
 ## The imperial guards of Port Decorum
 
 Soldiers of the Empire in its crimson and gold, standing guard over Port Decorum, the imperial port out past the checkpoint: on the jetty's end, at the fort's gate, along the quay. The one on the jetty does the talking: by the book, politely unhelpful, a little smug that the harbour's shut to pirates.

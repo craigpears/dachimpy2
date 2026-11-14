@@ -13,7 +13,7 @@
    house): a card of words (a plaque), a shelf of trinkets, the old sim's board in miniature (simModel), and a
    plate of cookies (cookiePlate, on a table or in a hand). */
 import * as THREE from 'three';
-import { mat, mesh, woodTex, canvasTex } from './world.js';
+import { mat, mesh, woodTex, canvasTex } from './materials.js';
 import { CANVAS } from '../den-houses.js';
 import { bake } from './bake.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';

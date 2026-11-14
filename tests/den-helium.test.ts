@@ -18,6 +18,7 @@ import { isJunk } from '../src/distill-routines';
 import type { Advice } from '../src/distill-bots';
 import { AFTER, BEST, FIRE, GOAL, HELP, HELP_ELSE, LESSON, MISHAP, NERVES, ONWARD, OPENING, STEP_ONE, TELL } from '../src/lines/helium';
 import { readFileSync } from 'node:fs';
+import { FUR } from '../src/palette';
 import { join } from 'node:path';
 
 const H = LAY.HELIUM;
@@ -72,7 +73,7 @@ describe('their look: from their portrait, in the wardrobe', () => {
     expect(m![1]).toMatch(/hat: 'feline'/);
     expect(m![1]).toMatch(/top: 'raiment'/);
     expect(m![1]).toMatch(/fam: 'monkey', famCol: 'plum'/);
-    expect(LOOK_JS).toMatch(/export const FUR = \{[^}]*plum:/);
+    expect(FUR.plum).toBeDefined();
   });
 });
 

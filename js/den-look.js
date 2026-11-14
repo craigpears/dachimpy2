@@ -6,40 +6,10 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
-// The tailor's standard palette (YPPedia: Clothing palette).
-export const DYES = {
-  // (Blue and light blue sampled from Tzz's portrait, 13 Nov: her knickers' stripes and her Rag shirt; the
-  // wiki's swatches were a deep royal blue and an icy cyan the game doesn't draw.)
-  aqua: '#65c9c9', black: '#2a2a2e', blue: '#4d78cf', brown: '#7d5c35', gold: '#ffbe00', green: '#3b6c2c', grey: '#cbcdd1',
-  lavender: '#d9b0ff', 'light blue': '#8cc8f6', 'light green': '#669619', lime: '#3fd837', lemon: '#fffbbf', magenta: '#c9227b',
-  maroon: '#9e171b', mint: '#90ffb9', navy: '#434ca2', orange: '#f57c09', peach: '#ffd5a8', persimmon: '#ff5300', pink: '#fe79a4',
-  purple: '#6104ad', red: '#d72c22', rose: '#ffc4d6', tan: '#ad8047', violet: '#bf3bc4', white: '#f6f2ea', yellow: '#f8ff35',
-  // Limited editions real pirates wear: named as on YPPedia (Clothing palette), coloured as the game
-  // draws them, sampled from a portrait (the wiki's swatches aren't faithful): Dignity's coat
-  // (shadow) and its facings (atlantean), from hers (10 Nov).
-  shadow: '#674c7b', atlantean: '#afb8fe',
-  // Mischievious's (her Emerald portraits, 11 Nov): plum (a seasonal limited edition: her dress and
-  // boots in "Son of a Nutcracker!") and crimson (the deep, blue-ish red of her "What is Love?" gown).
-  plum: '#86094f', crimson: '#a8031f',
-  // Tzz's D'rizzle (her Emerald portrait, 11 Nov): a dragon in silver and vibrant red, the February 2025
-  // gold box's (YPPedia: Dragon, "Silver/Vibrant Red"; silver is also a clothing chroma, YPPedia:
-  // Clothing palette). Sampled from her portrait: his horns, and his body.
-  silver: '#a6a9bf', 'vibrant red': '#d7094a',
-};
-// (The last, a cool deep brown: Helium's, sampled from their portrait, 13 Nov; the warmer browns before it
-// drew them orange.)
-export const SKIN = ['#f6d3b0', '#f0bf8e', '#d9a066', '#b57a4a', '#8a5530', '#5c3a22', '#9a887c'];
-// (Red: Mischievious's deep red curls, from her portraits, 11 Nov. Light brown: Tzz's, sampled from hers.
-// Silver: Helium's, sampled from theirs, 13 Nov: a grey-white, not Gravee's white. Pink: Zizzy's, from "Pinky and
-// the pink", 13 Nov.)
-export const HAIR = { black: '#1f1a17', 'dark brown': '#3b2414', brown: '#6a4020', 'light brown': '#8e7543', auburn: '#7f2e16', red: '#9a0a08', ginger: '#c4642a', blonde: '#dcb565', grey: '#a09a92', silver: '#b2b9c6', white: '#ece8e0', pink: '#e8609a' };
-// Monkeys and squirrels only come in natural colours (YPPedia: Monkey), white (a champion's) and a
-// few limited editions (lavender, from a Booch Box; pink, Mischievious's monkey in "What is Love?").
-// A lavender monkey has a white face and tummy. (Plum: Helium's King, their Emerald pirate page's "plum"
-// monkey, a violet in his portrait, sampled from it, 12 Nov, and again closer, 13 Nov: a deeper, bluer purple
-// than first drawn, his face and tummy a pale lilac; not the plum dye, a magenta.)
-export const FUR = { brown: '#6b4423', tan: '#ad8047', ginger: '#b5652a', grey: '#8a8a8a', black: '#2a2a2e', cream: '#e9dcc0', white: '#f7f5f0', lavender: '#b9a9ea', pink: '#be667f', plum: '#734b91' };
-const FUR_FACE = { lavender: '#fbf8ff', plum: '#a98bc4' };
+// Every colour a pirate's drawn in (the clothing dyes, hair, fur, skin), each with where it came from, is
+// src/palette.ts: change or add a colour there, never here. The catalogue's colours page lists them all.
+import { DYES, HAIR, FUR, FUR_FACE, SKIN } from './palette.js';
+export { DYES, HAIR, FUR, SKIN };
 // Familiars in FUR's natural colours (the rest take any dye), and the colour each falls back to.
 export const FURRY = { monkey: 'brown', squirrel: 'grey' };
 // The palette a slot's first colour is chosen from, for the wardrobe: FUR for a furry familiar.
