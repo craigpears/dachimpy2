@@ -152,6 +152,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   sync, like the animated version, the 2D static version ... I think that's true of everything ... for all
   tutorials, that needs to be a rule somewhere. So we could do the same with the TZZ tutorial of how to do
   doubles and bingos or Vegas.")
+- **A read version shows the moves that teach well, not every one the bots know (14 Nov).** "Some of the moves are
+  good for behind the scenes but need hiding ... with these arrows, I really can't even see what the crawl is ...
+  [those] are scenarios, not moves ... find the diamonds in the rough." A move goes on the page if its picture shows
+  it plainly and a player would use it; the rest stay behind the scenes, the bots still playing them. Rules of thumb
+  (what to keep in mind all game) sit apart from the moves. Distilling's: src/distill-guide.ts, `PLAN`,
+  `RULES_OF_THUMB`, `BEHIND_THE_SCENES`.
 - **Every tutorial has the same shape, and you can jump in anywhere (14 Nov).** One standard structure across all
   puzzles: the basics, the phases, the tricks, the scenarios. The read guide has a sticky nav to each; the animated
   lesson asks at the start what you're after (the basics, the early or mid game, a higher Crystal Clear, the end

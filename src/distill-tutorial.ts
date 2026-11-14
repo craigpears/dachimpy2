@@ -16,7 +16,7 @@
 
 import { PHASES, PHASE_ORDER } from './distill-phase.js';
 import type { Phase } from './distill-phase.js';
-import { PLAN, READ_EXAMPLES, firstLevel, phaseExamples, readingExamples, techniqueExamples, trickExamples, trickTiles } from './distill-guide.js';
+import { PLAN, READ_EXAMPLES, RULES_OF_THUMB, firstLevel, phaseExamples, readingExamples, techniqueExamples, trickExamples, trickTiles } from './distill-guide.js';
 import type { GuideItem, Picture, Technique, Trick } from './distill-guide.js';
 import { ROUTINES } from './distill-routines.js';
 import { PATH_LABEL, SWEEP_LABEL } from './distill-bots.js';
@@ -98,6 +98,11 @@ const itemPart = (phase: Phase) => (it: GuideItem): Part => {
     : { id: it.name, title: TRICK_WORDS[it.name].title, line: TRICK_WORDS[it.name].line, shows: { kind: BURNS.includes(it.name) ? 'board' : 'moves', ref: `trick:${it.name}` }, phase, anchor: `k-${it.name}` };
 };
 const TRICK_PARTS: readonly Part[] = [...DRAG_PARTS, ...PHASE_ORDER.flatMap((p) => PLAN[p].map(itemPart(p)))];
+/** The rules of thumb (src/distill-guide.ts, RULES_OF_THUMB): with the basics, apart from the moves (14 Nov: "these
+    are scenarios, not moves"). */
+const THUMB_PARTS: readonly Part[] = RULES_OF_THUMB.map((name): Part => ({
+  id: name, title: TRICK_WORDS[name].title, line: TRICK_WORDS[name].line, shows: { kind: BURNS.includes(name) ? 'board' : 'moves', ref: `trick:${name}` }, anchor: `k-${name}`,
+}));
 
 // ---------------------------------------------------------------- the scenarios
 
@@ -125,15 +130,15 @@ const L = TUTOR;
 const CHOICES: readonly Choice[] = [
   { id: 'basics', label: 'The basics', ...L.basics, covers: ['basics', ...DRAG_PARTS.map((p) => p.id)] },
   { id: 'early', label: 'The early or mid game', ...L.early, covers: ['fire', 'fill', 'block'] },
-  // (banking whites for it, storing the junk out of their way, then the chain and its longer techniques)
-  { id: 'higher', label: 'A higher Crystal Clear', ...L.higher, covers: ['target', 'store', 'leapfrog', 'chain'] },
+  // (banking whites for it, the junk along its rows, then the chain and its longer techniques)
+  { id: 'higher', label: 'A higher Crystal Clear', ...L.higher, covers: ['target', 'leapfrog', 'chain'] },
   { id: 'end', label: 'The end game', ...L.end, covers: ['end'] },
 ];
 
 /** Distilling's tutorial (see the top of this file). */
 export const DISTILL_TUTORIAL: Tutorial = {
   puzzle: 'Distilling', teacher: 'Helium',
-  basics: BASICS, phases: PHASE_PARTS, tricks: TRICK_PARTS, scenarios: SCENARIO_PARTS, choices: CHOICES,
+  basics: [...BASICS, ...THUMB_PARTS], phases: PHASE_PARTS, tricks: TRICK_PARTS, scenarios: SCENARIO_PARTS, choices: CHOICES,
   hello: L.opening,
   anchors: { basics: 'rules', phases: 'phases', tricks: 'tricks', scenarios: 'reading' },
 };

@@ -239,8 +239,10 @@ function draw() {
     fill(li, '[data-bank]', `${l.bank} columns of whites banked (about ${l.whites})`);
     const adds = li.querySelector('[data-adds]');
     if (adds) {
-      adds.textContent = l.target === g.levels[0].target ? 'Plays: ' : 'Adds: ';
-      l.adds.forEach((t, i) => {
+      // (only the moves on the page: the rest are behind the scenes since 14 Nov, src/distill-guide.ts)
+      const shown = l.adds.filter((t) => document.getElementById(`t-${t}`));
+      adds.textContent = !shown.length ? '' : l.target === g.levels[0].target ? 'Plays: ' : 'Adds: ';
+      shown.forEach((t, i) => {
         if (i) adds.appendChild(document.createTextNode(', '));
         adds.appendChild(html('a', { href: `#t-${t}`, target: '_self' }, labels[t] ?? t));
       });
@@ -266,7 +268,8 @@ function draw() {
   }
   // The tricks side by side (src/distill-guide.ts, trickTiles): each a small picture, cropped from the lesson's board,
   // its name, what you do and its rule in Helium's words.
-  for (const box of document.querySelectorAll('[data-trick-tiles]')) for (const t of g.trickTiles) {
+  // (Not the ladder, Helium's own: it moves no white, so it's behind the scenes, 14 Nov.)
+  for (const box of document.querySelectorAll('[data-trick-tiles]')) for (const t of g.trickTiles.filter((x) => !x.bots)) {
     const f = html('figure', { id: `d-${t.trick}` });
     const svg = board(t.picture, `${t.name}: ${t.how}`);
     const { x: [x0, x1], y: [y0, y1] } = t.crop;

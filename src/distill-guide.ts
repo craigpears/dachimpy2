@@ -20,8 +20,9 @@
      found on a sorted board by `fluidMotion` and checked by `isFluid`.
    - Reading the board (src/distill-read.ts): its states and tactics, on the positions the user critiqued, each read
      as the planner reads it, with the bot's move there now (`readingExamples`).
-   - The page's order (`PLAN`, 13 Nov): the rules and a target, then each phase in a game's order with its own
-     tricks and techniques under it, simplest first.
+   - The page's order (`PLAN`, 13 Nov): the rules and a target, the rules of thumb (`RULES_OF_THUMB`, 14 Nov), then
+     each phase in a game's order with its own moves under it, simplest first; only the ones that teach well, the
+     rest `BEHIND_THE_SCENES` (14 Nov).
    - Helium's lines, quoted from src/lines/helium.ts.
    The words round them are the page's own, written by hand.
 
@@ -61,17 +62,30 @@ export type Trick = typeof TRICKS[number];
 export type GuideItem = { kind: 'technique'; name: Technique; longer?: boolean } | { kind: 'trick'; name: Trick };
 const tech = (name: Technique, longer = false): GuideItem => (longer ? { kind: 'technique', name, longer } : { kind: 'technique', name });
 const trick = (name: Trick): GuideItem => ({ kind: 'trick', name });
-/** The page in the course of a game (the user, 13 Nov: "a few of the simple things are a bit out of order ...
-    progression's a bit weird"): each phase in a game's order, and under it its own tricks and techniques, simplest
-    first. The first things a player needs (never a white down the fire, the danger by the fire) come first; the
-    chain's channels in the chain. Storing and the leapfrog sit with the blocks, not the fill: the fill weighs storing
-    down and the blocks weigh both up (src/distill-phase.ts, PHASE_WEIGHTS), storing waits till the junk on the right
-    is down to a few columns (`sortingTime`), and the leapfrog runs along a stored row. */
+/** The rules of thumb, a section of their own before the phases, apart from the moves (the user, 14 Nov: "these are
+    scenarios, not moves"): what a player needs first, whatever they're doing. */
+export const RULES_OF_THUMB: readonly Trick[] = ['white', 'danger', 'edge'];
+/** The page's moves in the course of a game (the user, 13 Nov: "a few of the simple things are a bit out of order
+    ... progression's a bit weird"): each phase in a game's order, and under it its own moves, simplest first. Only
+    the ones that teach well (14 Nov: "I love how we've got the moves like the hook, pull a line of browns. But ...
+    some of the moves are good for behind the scenes but need hiding ... it's all just a bit noisy. It feels like
+    you've got to, like, find the diamonds in the rough"); the rest are BEHIND_THE_SCENES. */
 export const PLAN: Readonly<Record<Phase, readonly GuideItem[]>> = {
-  fire: [trick('white'), trick('danger'), trick('edge'), tech('rescue'), tech('sweep')],
-  fill: [tech('junkColumn'), tech('diamond'), trick('flick'), trick('burnEarly'), tech('turnOver')],
-  block: [trick('blocks'), trick('kept'), tech('store'), tech('leapfrog'), trick('fluid')],
-  chain: [tech('channel'), trick('pair'), trick('channelIn'), tech('crawl', true), tech('hook', true), tech('figureEight', true), tech('linePull', true), tech('path')],
+  fire: [tech('sweep')],
+  fill: [tech('diamond'), tech('turnOver')],
+  block: [tech('leapfrog')],
+  chain: [tech('hook', true), tech('linePull', true)],
+};
+/** The techniques and tricks the bots still play and the tests still check, each with its board worked out, but
+    kept off the read version since 14 Nov (the crawl: "I really can't even see what the crawl is. Those arrows are so
+    confusing"; the channel made for a white: "these are scenarios, not moves"). Each phase's in its old place on the
+    page: storing waits till the junk on the right is down to a few columns (`sortingTime`), the channels and the
+    pair rescue open the chain. */
+export const BEHIND_THE_SCENES: Readonly<Record<Phase, readonly GuideItem[]>> = {
+  fire: [tech('rescue')],
+  fill: [tech('junkColumn'), trick('flick'), trick('burnEarly')],
+  block: [trick('blocks'), trick('kept'), tech('store'), trick('fluid')],
+  chain: [tech('channel'), trick('pair'), trick('channelIn'), tech('crawl', true), tech('figureEight', true), tech('path')],
 };
 
 /** A board to draw: its pieces, the drags on it (arrows, numbered in order), pieces ringed, columns shaded, the

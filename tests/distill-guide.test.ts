@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  PLAN, SORTED_RIGHT, STUCK_ON_TOP, TRICKS, pairOn, amongBlacks, endOf, firstLevel, fluidMotion, guide, isFluid, liveMove, phaseExamples, position, sameMove,
+  BEHIND_THE_SCENES, PLAN, RULES_OF_THUMB, SORTED_RIGHT, STUCK_ON_TOP, TRICKS, pairOn, amongBlacks, endOf, firstLevel, fluidMotion, guide, isFluid, liveMove, phaseExamples, position, sameMove,
   techniqueExamples, techniqueOrder, trickExamples, levelRows, unsorted, READ_EXAMPLES, readingExamples,
 } from '../src/distill-guide';
 import { STATES, TACTICS, readBoard } from '../src/distill-read';
@@ -40,14 +40,16 @@ function section(attr: string, value: string): string | null {
 const words = (s: string) => [...s.matchAll(/<p[^>]*>([^<]+(?:<[^p][^>]*>[^<]*)*)<\/p>/g)].map((m) => m[1].replace(/<[^>]+>/g, '').trim()).filter(Boolean);
 
 const g = guide();
+/** What the page shows: the rules of thumb, and each phase's moves. */
+const shownItems: GuideItem[] = [...RULES_OF_THUMB.map((name): GuideItem => ({ kind: 'trick', name })), ...PHASE_ORDER.flatMap((p) => PLAN[p])];
 
 describe('the read version: a section for everything the code has (13 Nov, "everything\'s just kept in sync")', () => {
-  it('has a section, in words, for every routine, the sweep and the path search', () => {
+  it('has a section, in words, for every move it shows (the rest behind the scenes, 14 Nov)', () => {
     const names = techniqueOrder();
     for (const r of Object.keys(ROUTINES)) expect(names).toContain(r);
     expect(names).toContain('sweep');
     expect(names).toContain('path');
-    for (const n of names) {
+    for (const n of names.filter((x) => shownItems.some((i) => i.name === x))) {
       const s = section('data-technique', n);
       expect(s, `no section for the technique ${n}`).not.toBeNull();
       expect(words(s!).join(' ').length, `no words for the technique ${n}`).toBeGreaterThan(60);
@@ -70,9 +72,9 @@ describe('the read version: a section for everything the code has (13 Nov, "ever
       expect(words(s!).length).toBeGreaterThan(0);
     }
   });
-  it('has a section for each of the user\'s tricks', () => {
+  it('has a section for each of the user\'s tricks it shows: the rules of thumb', () => {
     expect(TRICKS).toHaveLength(10);
-    for (const t of TRICKS) {
+    for (const t of RULES_OF_THUMB) {
       const s = section('data-trick', t);
       expect(s, `no section for the trick ${t}`).not.toBeNull();
       expect(words(s!).join(' ').length).toBeGreaterThan(60);
@@ -159,12 +161,31 @@ describe('every board shows what it\'s there for', () => {
 
 describe('the guide in the course of a game (13 Nov, "a few of the simple things are a bit out of order ... progression\'s a bit weird")', () => {
   const attrOf = (it: GuideItem) => `data-${it.kind}="${it.name}"`;
-  it('puts every technique and trick once, under its phase', () => {
-    const items = PHASE_ORDER.flatMap((p) => PLAN[p]);
+  it('puts every technique and trick once: on the page, or behind the scenes', () => {
+    const items = [...shownItems, ...PHASE_ORDER.flatMap((p) => BEHIND_THE_SCENES[p])];
     const techs = items.filter((i) => i.kind === 'technique').map((i) => i.name), tricks = items.filter((i) => i.kind === 'trick').map((i) => i.name);
     expect([...techs].sort()).toEqual([...techniqueOrder()].sort());
     expect([...tricks].sort()).toEqual([...TRICKS].sort());
     expect(g.plan).toBe(PLAN);
+  });
+  it('shows only the moves that teach well, 14 Nov ("it\'s all just a bit noisy ... find the diamonds in the rough"): the hook and pulling a line of browns kept, the crawl and the channel made for a white not on the page', () => {
+    for (const p of PHASE_ORDER) for (const it of BEHIND_THE_SCENES[p]) expect(page, `${it.name} is behind the scenes`).not.toContain(attrOf(it));
+    expect(page).toContain('data-technique="hook"');
+    expect(page).toContain('data-technique="linePull"');
+    expect(page).not.toContain('data-technique="crawl"');
+    expect(page).not.toContain('data-trick="channelIn"');
+    // (and nothing on it links to one that isn't there)
+    for (const m of page.matchAll(/href="#([tk]-\w+)"/g)) expect(page, m[1]).toContain(`id="${m[1]}"`);
+  });
+  it('keeps the rules of thumb apart from the moves, before the phases (14 Nov: "these are scenarios, not moves")', () => {
+    expect(RULES_OF_THUMB).toEqual(['white', 'danger', 'edge']);
+    const thumb = page.indexOf('id="thumb"'), phases = page.indexOf('id="phases"');
+    for (const t of RULES_OF_THUMB) {
+      const i = page.indexOf(`data-trick="${t}"`);
+      expect(i).toBeGreaterThan(thumb);
+      expect(i).toBeLessThan(phases);
+    }
+    for (const p of PHASE_ORDER) expect(PLAN[p].every((i) => i.kind === 'technique')).toBe(true);
   });
   it('lays the page out as the plan: each phase\'s heading and board, then its own sections, in order', () => {
     let last = page.indexOf('id="target"');
@@ -183,10 +204,10 @@ describe('the guide in the course of a game (13 Nov, "a few of the simple things
       last = at;
     }
   });
-  it('starts with what a player needs first, never a white down the fire and the danger by the fire, and keeps the channels in the chain', () => {
-    expect(PLAN.fire.slice(0, 2)).toEqual([{ kind: 'trick', name: 'white' }, { kind: 'trick', name: 'danger' }]);
-    expect(PLAN.chain[0]).toEqual({ kind: 'technique', name: 'channel' });
-    const firstTechnique = Math.min(...techniqueOrder().map((t) => page.indexOf(`data-technique="${t}"`)));
+  it('starts with what a player needs first, never a white down the fire and the danger by the fire', () => {
+    expect(RULES_OF_THUMB.slice(0, 2)).toEqual(['white', 'danger']);
+    expect(BEHIND_THE_SCENES.chain[0]).toEqual({ kind: 'technique', name: 'channel' });
+    const firstTechnique = Math.min(...techniqueOrder().map((t) => page.indexOf(`data-technique="${t}"`)).filter((i) => i >= 0));
     expect(page.indexOf('data-trick="white"')).toBeLessThan(firstTechnique);
     expect(page.indexOf('data-trick="danger"')).toBeLessThan(firstTechnique);
   });
@@ -228,8 +249,7 @@ describe('the sorted right side\'s one fluid motion (13 Nov, "once there\'s a ni
     expect(t.picture.cols).toEqual(cols);
     expect(t.picture.drags).toEqual([d]);
     expect(t.level).toBe(firstLevel('turnOver')!.label);
-    expect(PLAN.block.at(-1)).toEqual({ kind: 'trick', name: 'fluid' });
-    expect(words(section('data-trick', 'fluid')!).join(' ').length).toBeGreaterThan(60);
+    expect(BEHIND_THE_SCENES.block.at(-1)).toEqual({ kind: 'trick', name: 'fluid' });
   });
   it('isn\'t fooled: a drag that stops short among the browns isn\'t it', () => {
     const turn = d.ways.findIndex((w) => w === UP_RIGHT || w === UP_LEFT);
@@ -276,9 +296,8 @@ describe('the pair rescue in the chain (13 Nov: "this is absolute danger mode ..
     const a = choose({ cols, chain: 0, timeLeft: 15000 }, contextFor(cols, 'chain', 0, LEVELS[0].reach), LEVELS[0]);
     expect(a.drags).toEqual(p.drags);
   });
-  it('sits in the chain, straight after the channels, with words of its own', () => {
-    expect(PLAN.chain[1]).toEqual({ kind: 'trick', name: 'pair' });
-    expect(words(section('data-trick', 'pair')!).join(' ').length).toBeGreaterThan(60);
+  it('sits in the chain behind the scenes, straight after the channels (off the page since 14 Nov)', () => {
+    expect(BEHIND_THE_SCENES.chain[1]).toEqual({ kind: 'trick', name: 'pair' });
   });
 });
 
@@ -290,9 +309,8 @@ describe('the late game\'s channels (14 Nov: "they create a kind of channel for 
     expect(t.picture.shade).toEqual([8]);
     expect(playDrags(t.picture.cols, t.picture.drags)![8].every((x) => x === WHITE)).toBe(true);
   });
-  it('sits in the chain, after the pair rescue, with words of its own', () => {
-    expect(PLAN.chain[2]).toEqual({ kind: 'trick', name: 'channelIn' });
-    expect(words(section('data-trick', 'channelIn')!).join(' ').length).toBeGreaterThan(60);
+  it('sits in the chain behind the scenes, after the pair rescue (14 Nov: "these are scenarios, not moves")', () => {
+    expect(BEHIND_THE_SCENES.chain[2]).toEqual({ kind: 'trick', name: 'channelIn' });
   });
 });
 
