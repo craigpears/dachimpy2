@@ -516,6 +516,11 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     had long hair. And just everything just looks really wrong, like badly wrong. Quality and fidelity, everything
     just really needs fixing." So the friends' portraits as a whole, drawn far closer to the real ones: Dachimpy
     never with long hair, each friend's hair and colours as in their real portraits.
+- **Distilling's late game, and the CC^1 bot starting too far right (14 Nov):** a position to keep as a test (two
+  blacks stuck in the target column, `notes/distilling/48-*`); the bot to plan the late game's channels, whites
+  going right through a black channel or a brown one then a black one into the target (DISTILLING.md, "The late
+  game: whites go right"); and the first target started further left, "a person would not be wanting to put
+  themselves under so much pressure".
 
 ## Spotted along the way (not asked for)
 
