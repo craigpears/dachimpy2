@@ -1,15 +1,15 @@
-/* The wolf den's tutorial (four-tier Duty Navigation, Dignity teaching it at the wolf den's star table), described in
+/* The wolf den's tutorial (four-tier Duty Navigation, Multibella teaching it at the star table in her hut, on her island), described in
    the shape every tutorial shares (src/tutorial.ts, TUTORIALS.md). TypeScript, compiled to js/wolf-den-tutorial.js;
-   tested in tests/den-wolfden.test.ts. A first version (14 Nov): js/den/wolfden-house.js opens Dignity's lesson with its
+   tested in tests/den-wolfden.test.ts. A first version (14 Nov): js/den/wolfden-house.js opens Multibella's lesson with its
    choice (js/tutorial-choice.js), and what's picked is laid and played on one of the lesson's boards
    (src/den-wolfden.ts's BOARDS); wolf-den-guide.html, its read version, draws the same boards
    (js/wolf-den-guide-view.js), its sticky nav from this.
 
    Unlike the other tutorials it teaches the mechanics too, since a wolf den's Navigation isn't plain Duty Navigation:
    how it works and how it differs (the user, 14 Nov; TUTORIALS.md §5). Its words from the Wolf Dens Guide and
-   Multibella's telling of the wilds (IDEAS.md); Dignity's lines are src/lines/dignity.ts's TUTOR. */
+   Multibella's telling of the wilds (IDEAS.md); Multibella's lines are src/lines/multibella.ts's TUTOR. */
 import { BOARDS, type Laid } from './den-wolfden.js';
-import { TUTOR } from './lines/dignity.js';
+import { TUTOR } from './lines/multibella.js';
 import type { Part, Tutorial } from './tutorial.js';
 
 const board = (ref: string) => ({ kind: 'board' as const, ref });
@@ -40,7 +40,7 @@ const SCENARIOS: readonly Part[] = [
 ];
 
 export const WOLF_DEN_TUTORIAL: Tutorial = {
-  puzzle: 'Duty Navigation in a wolf den', teacher: 'Dignity',
+  puzzle: 'Duty Navigation in a wolf den', teacher: 'Multibella',
   basics: BASICS, phases: PHASES, tricks: TRICKS, scenarios: SCENARIOS,
   hello: TUTOR.hello,
   choices: [

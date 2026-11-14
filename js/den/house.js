@@ -241,10 +241,13 @@ function leaveSky() {
   sunOver(0, 0, 0);
   house.sky = null;
 }
-/** Into a house in the district (by its id in HOUSES). */
-export function houseEnter(id) {
+/** Into a house in the district (by its id in HOUSES); `bySea`, ashore off an island (the wolf den's hut, off
+    Multibella's: multibella-isle.js), so leaving puts you back aboard her, not at the district's door. */
+export function houseEnter(id, { bySea = false } = {}) {
   const H0 = houseById(id), S = SCENES[id];
   if (!H0 || !S || house.on) return false;
+  house.bySea = bySea;
+  $('house-leave').textContent = bySea ? 'Back aboard' : 'Leave';
   fade(() => {
     if (!house.built[id]) {
       const root = new THREE.Group();
@@ -299,8 +302,12 @@ export function houseLeave() {
     document.body.classList.remove('housing');
     toastQuiet.on = false;
     leaveSky();
-    Object.assign(pirate, { x: LODGINGS.x + 1.05 * LODGINGS.face, z: LODGINGS.z, h: 0, hs: 0, hop: null });
-    pirate.g.rotation.set(0, Math.PI / 2 * LODGINGS.face, 0);
+    // (back aboard her, moored off the island she came ashore at, the sea as it was; else out of the district's door)
+    if (!house.bySea) {
+      Object.assign(pirate, { x: LODGINGS.x + 1.05 * LODGINGS.face, z: LODGINGS.z, h: 0, hs: 0, hop: null });
+      pirate.g.rotation.set(0, Math.PI / 2 * LODGINGS.face, 0);
+    }
+    house.bySea = false;
     keys.clear();
     capEl.classList.remove('on');
     if (bye) setTimeout(() => denToast(bye), 500);

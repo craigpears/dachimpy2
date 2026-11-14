@@ -4,7 +4,7 @@ Every character's lines, and who they are, made from `src/lines/` by `npm run bu
 (`tools/lines-doc.mjs`): change a line there, not here, and the game changes with it.
 This file's history in git shows every line as it's changed.
 
-[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Gravee](#gravee) · [The Count](#the-count) · [Roobear](#roobear) · [Dachimpy](#dachimpy) · [Affame](#affame) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
+[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Multibella](#multibella) · [Gravee](#gravee) · [The Count](#the-count) · [Roobear](#roobear) · [Dachimpy](#dachimpy) · [Affame](#affame) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
 
 ## Dalnoth
 
@@ -148,35 +148,6 @@ Witty, very cute, and a stickler for the rules (she hates paperwork, and writes 
 - "Barrels. And whistling. It's always the whistling."
 - "I'm writing down "whistled". In very small, very suspicious handwriting."
 - "That sloop is lower in the water than she was. Hm."
-
-### The wolf den's hut, at her star table (four-tier Duty Navigation)
-
-- *You come in, the first time:* "Oh. It's you. Sit down, then. If I'm to catch pirates sneaking round my outpost, I need someone who can read stars."
-- *You come in again:* "Back again? The moon isn't going to chart itself."
-- *You first step up to the table:* "Four rings here, not three. The outer one has no places of its own. It's for parking stars. Officially."
-- *Your charts turn half the pack back:* "Half of them turned back already. I'm writing that down. In very neat handwriting."
-- *Your charts turn the last werewolf back: the moon's gone:* "That's the last of them back to wolf-kin. Moon's down. Nobody tell the Empire I was out here."
-- *A moment later: the moon's full again:* "And here comes the next pack. Of course it does."
-- *You chart a constellation in a chain:* "A chain! The next one's centre has gone wild. Don't waste it."
-- *You chart one with no chain (now and then):* "Charted. No chain, though. That's going in my report."
-- *You booch:* "You booched it. I'll need that in writing."
-- *You leave:* "Off you go. Mind the werewolves. And the paperwork."
-
-### Her lesson's opening choice, at the star table (T)
-
-- *Her opening line:* "Right. A wolf den's Navigation isn't the one you know."
-- *Her first question, and once it's picked:*
-  - *asks:* "Shall I start you on what's different here?"
-  - *then:* "What's different, then. Which bit?"
-- *Her second, and once it's picked:*
-  - *asks:* "Or the chains that pay?"
-  - *then:* "Chains. Pick one."
-- *Her third, and once it's picked:*
-  - *asks:* "Or shall I play you a run, start to finish?"
-  - *then:* "A run, then. Watch closely."
-- *As a lesson's board is laid ({title} its name):* "This one's {title}. Watch the board."
-- *Handing you the board:* "Your board now. I'll be here. Taking notes."
-- *Under it, in the bar:* "Chart what you can: each constellation turns werewolves back. T for her lessons again."
 
 ## Bella
 
@@ -1342,6 +1313,47 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 - *The barrels all gone:* "That's the lot. Drop me home, would you? The still won't blow itself up."
 - *Back off their island, hopping off:* "Ta. More casks, another run. Bring the sloop."
 - *Then, the first run: rolling three barrels aboard for your den, yours to keep:* "Oh, and three for your den. The good stuff. Don't tell the Empire."
+
+## Multibella
+
+She teaches the wolf den's four-ring Duty Navigation at the star table in her hut, on an island of her own off to the right of the den. A real Puzzle Pirates pirate (Multibella of Emerald), drawn from her portrait: smiling, wavy blonde hair, a magenta tricorne edged in gold, a magenta vest with gold buttons over a rose shirt, magenta trousers and boots, and Divergent, her parrot, light blue and pink, on her shoulder.
+
+Kind and practical, and encouraging ("You got this!"): the one who explained the wolf den's wild places. She helps you set a chain up, then munches chocolate chip cookies while you finish it.
+
+> "Multibella is very sweet as well" (the user, 11 Nov)
+>
+> "everyone loves cookies, so [Multibella] can be munching on choco chip cookies while they wait for you to finish what they've helped you set up" (the user, 14 Nov)
+>
+> "Thought the plan was for her to do the wolf den tutorial and would expect her to have her own island similar to others" (the user, 14 Nov)
+
+### In her wolf den's hut, at the star table (four-ring Duty Navigation)
+
+- *You come in, the first time:* "Oh, hi! Come in, come in. Cookie? They're choc chip. Pull up to the table, the stars won't chart themselves."
+- *You come in again:* "You're back! I saved you a cookie. Mostly."
+- *You first step up to the table:* "Four rings here, not three. The outer one's for parking stars, to set up chains."
+- *Your charts turn half the pack back:* "Half the pack turned back already. You got this!"
+- *Your charts turn the last werewolf back: the moon's gone:* "That's the last of them, back to wolf-kin! Moon's down. Cookie to celebrate?"
+- *A moment later: the moon's full again:* "Uh oh, here comes the next pack. Back to the stars!"
+- *You chart a constellation in a chain:* "A chain! See the next one's centre? All wild. Any star will do."
+- *You chart one with no chain (now and then):* "Charted! Finish the next one with a chain, it's worth way more."
+- *You booch:* "Oops, booched it. Happens to everyone. Deep breath, keep going."
+- *You leave:* "Bye! Take a cookie for the road."
+
+### Her lesson's opening choice, at the star table (T)
+
+- *Her opening line:* "A wolf den's Navigation isn't the one you know. Let me show you."
+- *Her first question, and once it's picked:*
+  - *asks:* "Want to start with what's different here?"
+  - *then:* "What's different, then. Which bit?"
+- *Her second, and once it's picked:*
+  - *asks:* "Or the chains that pay?"
+  - *then:* "Chains! Pick one."
+- *Her third, and once it's picked:*
+  - *asks:* "Or shall I play you a run, start to finish?"
+  - *then:* "A run, then. Watch closely."
+- *As a lesson's board is laid ({title} its name):* "This one's {title}. I'll set it up, you watch the board."
+- *Handing you the board:* "Your board now. I'll be right here with the cookies."
+- *Under it, in the bar:* "Chart what you can: each constellation turns werewolves back. T for her lessons again."
 
 ## Gravee
 

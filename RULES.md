@@ -2606,10 +2606,16 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   It's just empty space. There's no graphic for it, which I think is what really confused me." So a
   platform is targets all over, or (half of them) targets on a zigzag with the gaps on the other, and
   a gap is drawn as nothing at all, only the platform's ledge running under it.
-- **The wolf den (14 Nov, a first version), Dignity's four-ring Duty Navigation.** Asked for by Dignity (the real
-  pirate); the user, 14 Nov: "build the building, the at least do a first version of it". A hut of its own on the
-  house shell (`den.html?at=wolfden`; not in the housing district's list), Dignity at a round star table, Duty
-  Navigation's wheel lying on it, the moon and a werewolf's head at the window, cookies on a side table. Walk up to
+- **The wolf den (14 Nov, a first version), Multibella's four-ring Duty Navigation.** Asked for by Dignity (the real
+  pirate); the user, 14 Nov: "build the building, the at least do a first version of it". Taught by Multibella, on an
+  island of her own (the user, 14 Nov: "Thought the plan was for her to do the wolf den tutorial and would expect her
+  to have her own island similar to others"; it was Dignity's first): her island off to the right of the den
+  (`den.html?at=multibella`), on the captain's map unnamed as Tzz's is; off its left-hand shore Space puts you ashore,
+  into her hut (a place of its own on the house shell, not in the housing district's list), and "Back aboard" leaves
+  you moored there (`den.html?at=wolfden` goes straight in). Her look from her Emerald portrait (a magenta tricorne,
+  vest, trousers and boots, wavy blonde hair; Divergent, her parrot, light blue and pink, from her pirate page), a
+  chocolate chip cookie in her hand that she munches now and then. A round star table, Duty Navigation's wheel lying
+  on it, the moon and a werewolf's head at the window, more cookies on a side table. Walk up to
   the table and Space to chart (the camera over the table, buttons along the bottom for a phone); T for her lessons.
   The rules, a wolf den's board in `src/navigation.ts` (`den: true`), from the Wolf Dens Guide and Multibella's
   telling (IDEAS.md):

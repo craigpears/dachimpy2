@@ -32,9 +32,9 @@ export const HOUSES = [
     // Affame's (14 Nov), the queen of sweetness: a little cosy one, the four cartoons Dachimpy made her on its
     // walls, a heap of cushions and teddies to sink into. Its rules: src/den-affame.ts.
     { id: 'affame', owner: 'Affame', name: 'The Sweet Spot', kind: 'Cottage', blurb: 'Cushions, teddies, and the queen of sweetness.' },
-    // The wolf den's hut (14 Nov), its star table where Dignity teaches four-tier Duty Navigation: no house in the
-    // district, a place of its own on the same shell (`away`). Its rules: src/den-wolfden.ts.
-    { id: 'wolfden', owner: 'Dignity', name: 'The Wolf Den', kind: 'Hut', blurb: 'A star table, the moon at the window.', away: true },
+    // The wolf den's hut (14 Nov), its star table where Multibella teaches four-tier Duty Navigation, on her island: no
+    // house in the district, a place of its own on the same shell (`away`). Its rules: src/den-wolfden.ts.
+    { id: 'wolfden', owner: 'Multibella', name: 'The Wolf Den', kind: 'Hut', blurb: 'A star table, the moon at the window.', away: true },
 ];
 /** The house by its id, or null. */
 export const houseById = (id) => HOUSES.find((h) => h.id === id) ?? null;

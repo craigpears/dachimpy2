@@ -226,6 +226,17 @@ export const PIRATES = Object.fromEntries(Object.entries({
     hat: 'feline', hatCol: 'black', hatCol2: 'black', top: 'raiment', topCol: 'black', topCol2: 'gold', waist: 'none',
     legs: 'pants', legsCol: 'black', feet: 'fancy', feetCol: 'black', feetCol2: 'plum', hand: 'atlantis', fam: 'monkey', famCol: 'plum',
   },
+  // Multibella (her Emerald portrait, looked at 14 Nov), who teaches the wolf den's four-ring Duty Navigation on her
+  // island: tan skin, wavy blonde hair, smiling; a magenta tricorne edged in gold; a magenta waistcoat, gold buttons in
+  // two rows, over a rose shirt; magenta trousers with rose cuffs, magenta boots. Her familiar from her pirate page,
+  // Divergent, light blue and pink (a bird: the wardrobe's parrot). In her portrait a pink calla lily in her hand and a
+  // striped pink thing round her neck; here a chocolate chip cookie instead, for the wolf den (the user, 14 Nov:
+  // "munching on choco chip cookies").
+  Multibella: {
+    body: 'f', skin: 3, hair: 'wavy', hairCol: 'blonde', patch: false, earring: false, smile: true,
+    hat: 'tricorne', hatCol: 'magenta', hatCol2: 'gold', top: 'vest', topCol: 'magenta', topCol2: 'rose', waist: 'none',
+    legs: 'pants', legsCol: 'magenta', legsCol2: 'rose', feet: 'boots', feetCol: 'magenta', feetCol2: 'magenta', hand: 'cookie', fam: 'parrot', famCol: 'light blue', famCol2: 'pink',
+  },
   // Roobear (her Emerald portrait, as IDEAS.md describes it, 12 Nov; drawn from the description, 13 Nov), with a
   // little house of her own in the den's district (her ROOm): not all in black but deep purple, only her hair
   // black, pinned up with loose curls by the ears, crowned with a wreath of dark purple roses with gold leaves;

@@ -1,22 +1,21 @@
 /* Pirate Den: the wolf den, a first version (14 Nov). TypeScript, compiled to js/den-wolfden.js; tested in
    tests/den-wolfden.test.ts. js/den/wolfden-house.js plays it in the house shell (js/den/house.js): a hut of its own
-   (not in the housing district's list), its round star table with Duty Navigation's wheel lying on it, the moon in
-   its window. Its lines are Dignity's, src/lines/dignity.ts's WOLF_DEN; the tutorial it teaches, described in the
-   shape every tutorial shares, is src/wolf-den-tutorial.ts.
+   (not in the housing district's list) on Multibella's island (src/den-multibella.ts), its round star table with Duty
+   Navigation's wheel lying on it, the moon in its window. Its lines are Multibella's, src/lines/multibella.ts's
+   WOLF_DEN; the tutorial it teaches, described in the shape every tutorial shares, is src/wolf-den-tutorial.ts.
 
    Asked for by Dignity (the real pirate behind the checkpoint's commander): "the 4-tier duty nav in the werewolf den"
    (13 Nov), and the user, 14 Nov: "build the building, the at least do a first version of it". From IDEAS.md,
    "Dignity's tutorial: four-tier Duty Navigation in the werewolf den": the Wolf Dens Guide (a player's, on r/ypp), the
-   run in the screenshots the user shared, and Multibella's telling of the wilds. Why Dignity teaches it (the user,
-   14 Nov): "she's got to catch these pesky pirates trying to figure out the ways they're going around their little
-   outpost", so she charts the stars, and here, at a wolf den's table, they're what turns its werewolves back.
+   run in the screenshots the user shared, and Multibella's telling of the wilds. Multibella teaches it, on an island
+   of her own (the user, 14 Nov: "Thought the plan was for her to do the wolf den tutorial and would expect her to have
+   her own island similar to others"); she was Dignity at first.
 
    The puzzle is src/navigation.ts's, on a wolf den's board (`den: true`): four rings, the den's constellations, wild
    places, a chain's chart times its step. Here: the hut, the table, the moon (each window starts full, about 200
    charted points a werewolf in the next pack; each chart takes its points off, and as it wanes they turn back to
-   wolf-kin, the guide's), and the lesson's boards, each laid for a part of the tutorial and the moves Dignity plays on
-   it. Not yet (to come, with the user): the rumbles, the den's Foraging, Multibella at the table (their look first, from
-   their pirate page), the funny cutscenes. */
+   wolf-kin, the guide's), and the lesson's boards, each laid for a part of the tutorial and the moves Multibella plays on
+   it. Not yet (to come, with the user): the rumbles, the den's Foraging, the funny cutscenes. */
 import { Navigation, type Mark, type NextStar } from './navigation.js';
 import type { Plan, Piece } from './den-houses.js';
 
@@ -31,8 +30,8 @@ export const PLAN: Plan = {
 export const WALLS = { high: 3.6, low: 0.45 } as const;
 /** The back wall's face (z). */
 export const BACK = PLAN.rooms[0].z0 + 0.2;
-/** Where you come in, and where Dignity waits: at the table's left, her notes in hand. */
-export const ARRIVE = { you: { x: 0, z: 2.0 }, dignity: { x: -1.75, z: -0.55 } } as const;
+/** Where you come in, and where Multibella waits: at the table's left, a cookie in hand. */
+export const ARRIVE = { you: { x: 0, z: 2.0 }, her: { x: -1.75, z: -0.55 } } as const;
 /** The round star table: its middle, its top's radius and height, and the wheel lying on it (its width). */
 export const TABLE = { x: 0, z: -0.55, r: 1.15, top: 0.95, board: 2.0 } as const;
 /** Close enough to the table to chart at it. */
@@ -82,7 +81,7 @@ export class Moon {
 
 // ---------------------------------------------------------------- the lesson's boards
 
-/** A move Dignity plays: a ring turned (+1 clockwise, -1 anticlockwise), or the next star dropped. */
+/** A move Multibella plays: a ring turned (+1 clockwise, -1 anticlockwise), or the next star dropped. */
 export type Step = { turn: number; dir: 1 | -1 } | { drop: true };
 /** A board laid for the lesson: its stars ring by ring (0 the innermost, colours as COLOUR_NAMES: 0 yellow, 1 red,
     2 orange, 3 white, 4 blue), the constellation's places, the next star waiting, and the moves she plays on it. */
@@ -161,5 +160,5 @@ export function layBoard(name: string, random: () => number = Math.random): { ga
 export function playStep(game: Navigation, step: Step) {
   return 'drop' in step ? game.drop() : game.turn(step.dir, step.turn);
 }
-/** Seconds between Dignity's moves on a lesson's board, and how long she waits before the first. */
+/** Seconds between Multibella's moves on a lesson's board, and how long she waits before the first. */
 export const PACE_LESSON = { MOVE: 1.1, FIRST: 1.6 } as const;

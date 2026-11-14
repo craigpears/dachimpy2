@@ -2,9 +2,10 @@
    the housing district's list (den.html?at=wolfden). Its rules (the hut, the table, the moon, the lesson's boards) are
    src/den-wolfden.ts's; the puzzle src/navigation.ts's on a wolf den's board (four rings, wild places), drawn by
    nav-board.js lying on the round star table; the tutorial src/wolf-den-tutorial.ts's, its opening choice drawn by
-   js/tutorial-choice.js; Dignity's lines src/lines/dignity.ts's WOLF_DEN and TUTOR.
+   js/tutorial-choice.js; Multibella's lines src/lines/multibella.ts's WOLF_DEN and TUTOR. You come ashore here off her
+   island (multibella-isle.js), and leave back aboard.
 
-   Dignity waits at the table. Walk up to it and Space (or the button) to chart: the camera comes over the table, and
+   Multibella waits at the table, munching a cookie now and then. Walk up to it and Space (or the button) to chart: the camera comes over the table, and
    the board's yours, by its keys (Left / Right turn the ring, Up / Down pick one, Space drops) or the buttons along the
    bottom. T for her lessons: pick a part, and she lays its board and plays its moves, then hands it to you. Each
    constellation charted takes its points off the moon in the window; as it wanes, the werewolf's shadow at the window
@@ -15,7 +16,7 @@ import { PLAN, WALLS, BACK, ARRIVE, TABLE, atTable, WINDOW, FURNISH, Moon, layBo
 import { WOLF_DEN_TUTORIAL } from '../wolf-den-tutorial.js';
 import { Navigation } from '../navigation.js';
 import { blocksOf } from '../den-houses.js';
-import { WOLF_DEN, TUTOR } from '../lines/dignity.js';
+import { WOLF_DEN, TUTOR } from '../lines/multibella.js';
 import { FURNITURE, place } from './furniture.js';
 import { navBoard } from './nav-board.js';
 import { person } from './props-people.js';
@@ -29,7 +30,7 @@ const bar = document.createElement('div');
 bar.className = 'wolf-bar'; bar.id = 'wolf-bar';
 bar.innerHTML = ['<button data-k="ArrowDown" title="Lower ring (Down)">Ring in</button>', '<button data-k="ArrowLeft" title="Turn anticlockwise (Left)">&#x27F2;</button>',
   '<button data-k=" " class="drop" title="Drop the star (Space)">Drop</button>', '<button data-k="ArrowRight" title="Turn clockwise (Right)">&#x27F3;</button>',
-  '<button data-k="ArrowUp" title="Higher ring (Up)">Ring out</button>', '<button data-k="t" title="Dignity\'s lessons (T)">Lessons</button>', '<button data-k="Escape" title="Step back (Esc)">Stop</button>'].join('');
+  '<button data-k="ArrowUp" title="Higher ring (Up)">Ring out</button>', '<button data-k="t" title="Multibella\'s lessons (T)">Lessons</button>', '<button data-k="Escape" title="Step back (Esc)">Stop</button>'].join('');
 const style = document.createElement('style');
 style.textContent = `.wolf-bar { position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%); z-index: 30; display: none; gap: 6px; flex-wrap: wrap; justify-content: center; width: min(620px, calc(100vw - 32px)); }
 .wolf-bar.on { display: flex; }
@@ -126,10 +127,12 @@ export const WOLFDEN_HOUSE = {
     }
     const paintMoon = () => G.moonArt.paint(G.moon.share(), G.moon.werewolves());
     paintMoon();
-    // Dignity, at the table's side.
-    G.digP = person({ look: PIRATES.Dignity, parent: R, x: ARRIVE.dignity.x, z: ARRIVE.dignity.z, idle: 'sway', say: H.say });
+    // Multibella, at the table's side, a chocolate chip cookie in her hand.
+    G.digP = person({ look: PIRATES.Multibella, parent: R, x: ARRIVE.her.x, z: ARRIVE.her.z, idle: 'sway', say: H.say });
     G.dig = G.digP.p;
-    G.dig.g.rotation.y = Math.atan2(TABLE.x - ARRIVE.dignity.x, TABLE.z - ARRIVE.dignity.z);
+    // (turned to the room, the table at her side: she faces you as you come in)
+    G.dig.g.rotation.y = Math.atan2(TABLE.x + 0.6 - ARRIVE.her.x, TABLE.z + 2.4 - ARRIVE.her.z);
+    G.munch = 2.5;
     const line = (text) => { H.hush(); H.talk(G.dig, [text]); };
 
     // ---------- the board on the table ----------
@@ -214,11 +217,19 @@ export const WOLFDEN_HOUSE = {
         play(false);
         G.lesson = null;
         H.hush();
-        return `Dignity: "${WOLF_DEN.bye}"`;
+        return `Multibella: "${WOLF_DEN.bye}"`;
       },
       tick(dt) {
         G.board.tick(dt);
         G.digP.tick?.(dt);
+        // (munching her cookie: up to her mouth every few seconds, a little bob of the head)
+        G.munch -= dt;
+        const arm = G.dig.arms?.[1];
+        if (arm) {
+          const u = G.munch < 0 ? Math.min(1, -G.munch / 0.25, (0.9 + G.munch) / 0.25) : 0;
+          arm.rotation.x = -1.9 * Math.max(0, u);
+          if (G.munch < -0.9) G.munch = 3 + Math.random() * 3;
+        }
         if (G.lesson) lessonTick(dt);
         if (G.rising > 0 && (G.rising -= dt) <= 0) { G.moon.rise(); paintMoon(); line(WOLF_DEN.rise); }
         if (!G.tabled && atTable(H.you) && !H.talking()) { G.tabled = true; line(WOLF_DEN.table); }

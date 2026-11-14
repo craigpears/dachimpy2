@@ -21,6 +21,7 @@ import { umamiCheat } from './capybara.js';
 import { kikkitCheat, penguinsCheat } from './whirlpools.js';
 import { lodgingsOpen } from './lodgings.js';
 import { tzzCheat } from './balloon-isle.js';
+import { multibellaCheat, multibellaAshore } from './multibella-isle.js';
 import { heliumCheat } from './helium-isle.js';
 import { rumCheat } from './rumrun.js';
 import { empireCheat } from './imperial-isle.js';
@@ -603,6 +604,18 @@ function cheatPenguins() {
   cp.check.side = 'far';
 }
 /* Tzz's island (js/den/balloon-isle.js): out to sea, just off it, where her balloon lesson begins. */
+/* Multibella's island (js/den/multibella-isle.js), off to the right of the den: at sea, off its landing. The wolf
+   den's link goes on ashore, into her hut, so leaving it you're back aboard off her island. */
+function cheatMultibella() {
+  if (cine) return;
+  if (!sail.on) cheatSail();
+  multibellaCheat();
+}
+function cheatWolfDen() {
+  if (cine || house.on) return;
+  cheatMultibella();
+  multibellaAshore();
+}
 function cheatTzz() {
   if (cine) return;
   if (!sail.on) cheatSail();
@@ -767,8 +780,9 @@ const CHEAT_SECTIONS = [
     ["Helium's rum run", cheatRumRun, 'rumrun'],
     ['The imperial island', cheatEmpire, 'imperial'],
     ["The smugglers' beach", cheatSmugglers, 'smugglers'],
-    // (the wolf den's hut, a place of its own on the house shell: Dignity's four-ring Duty Navigation, 14 Nov)
-    ['The wolf den (Duty Navigation)', () => toHouse('wolfden'), 'wolfden'],
+    // (Multibella's island and her wolf den's hut on it: four-ring Duty Navigation, 14 Nov)
+    ["Multibella's island", cheatMultibella, 'multibella'],
+    ['Her wolf den (Duty Navigation)', cheatWolfDen, 'wolfden'],
   ]],
   ['The sloop race', [
     ['The sloop race', cheatRace, 'race'],

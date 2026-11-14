@@ -36,6 +36,7 @@ import { LAY, SAIL } from './den-sail.js';
 import { ISLE, isleShore, shoreOf } from './den-isle.js';
 import { KIKKIT, kikkitShore } from './den-kikkit.js';
 import { tzzShore } from './den-tzz.js';
+import { multibellaShore } from './den-multibella.js';
 import { empireShore } from './den-imperial.js';
 import { SMUGGLERS } from './den-smugglers.js';
 
@@ -144,6 +145,8 @@ export const CHART = {
   /** Tzz's island (11 Nov), a hop from Kikkit's, in plain sight, so it's on the map: drawn, never
       named (the whirlpools' islands are one point of interest: WHIRLPOOLS). */
   tzz: { shore: tzzShore().map(([c, r]): Square => [c - 0.5, r - 0.5]) },
+  /** Multibella's island (14 Nov), off to the right of the den, her wolf den's hut on it: drawn, never named, as Tzz's. */
+  multibella: { shore: multibellaShore().map(([c, r]): Square => [c - 0.5, r - 0.5]) },
   /** Port Decorum (11 Nov), the imperial island past the checkpoint, where the shipping lane leads: no
       secret, so it's drawn, one point of interest (IMPERIAL), never named, nothing said of what's there. */
   empire: { shore: empireShore().map(([c, r]): Square => [c - 0.5, r - 0.5]) },

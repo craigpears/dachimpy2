@@ -5,9 +5,11 @@ import { WOLF_DEN_TUTORIAL, wolfShows } from '../src/wolf-den-tutorial';
 import { SECTIONS, findPart } from '../src/tutorial';
 import { HOUSES, houseById, houseList } from '../src/den-houses';
 import { seeded } from '../src/mirror-row';
+import { LAY, Sea } from '../src/den-sail';
+import { multibellaAt, multibellaLandingSquares, multibellaMooring, onMultibellaLanding } from '../src/den-multibella';
 
-// The wolf den, a first version (14 Nov: "build the building, the at least do a first version of it"), Dignity's
-// tutorial of "the 4-tier duty nav in the werewolf den".
+// The wolf den, a first version (14 Nov: "build the building, the at least do a first version of it"), Multibella's
+// tutorial (asked for by Dignity) of "the 4-tier duty nav in the werewolf den".
 const played = (name: string) => {
   const b = layBoard(name, seeded(4))!;
   return { ...b, results: b.moves.map((s) => playStep(b.game, s)) };
@@ -63,7 +65,7 @@ describe('the moon (the Wolf Dens Guide: about 200 charted points a werewolf; ea
 
 describe('the hut', () => {
   it('is a place of its own on the house shell, not in the housing district\'s list (den.html?at=wolfden)', () => {
-    expect(houseById('wolfden')?.owner).toBe('Dignity');
+    expect(houseById('wolfden')?.owner).toBe('Multibella');
     expect(houseList().map((h) => h.id)).not.toContain('wolfden');
     expect(HOUSES.filter((h) => !h.away).length).toBe(houseList().length);
   });
@@ -74,12 +76,34 @@ describe('the hut', () => {
 });
 
 describe('its tutorial, in the shape every tutorial shares', () => {
-  it('has every section, Dignity teaching, and every ready part shown by one of the lesson\'s boards', () => {
-    expect(WOLF_DEN_TUTORIAL.teacher).toBe('Dignity');
+  it('has every section, Multibella teaching (14 Nov: "Thought the plan was for her to do the wolf den tutorial"), and every ready part shown by one of the lesson\'s boards', () => {
+    expect(WOLF_DEN_TUTORIAL.teacher).toBe('Multibella');
     for (const s of SECTIONS) for (const p of WOLF_DEN_TUTORIAL[s]) {
       if (p.todo) continue;
       expect(wolfShows(p.shows.ref), p.id).not.toBeNull();
     }
     expect(findPart(WOLF_DEN_TUTORIAL, 'trapdoor')?.section).toBe('tricks');
+  });
+});
+
+describe('Multibella\'s island (14 Nov: "would expect her to have her own island similar to others")', () => {
+  it('is land on the sea, with two squares of open water at least to any rock or island, on any sea', () => {
+    for (const seed of [1, 9, 42, 77]) {
+      const s = new Sea(seed), own = new Set(LAY.MULTIBELLA.LAND.map(([c, r]) => `${c},${r}`));
+      for (const [c, r] of LAY.MULTIBELLA.LAND) expect(s.open(c, r), `${c},${r}`).toBe(false);
+      for (const [c, r] of LAY.MULTIBELLA.LAND) for (let dc = -2; dc <= 2; dc++) for (let dr = -2; dr <= 2; dr++) {
+        const x = c + dc, y = r + dr;
+        if (own.has(`${x},${y}`) || x < 0 || y < 0 || x >= s.cols) continue;
+        expect(s.open(x, y), `seed ${seed}: ${x},${y} beside it`).toBe(true);
+        expect(s.windAt(x, y), `seed ${seed}: a wind at ${x},${y}`).toBeUndefined();
+      }
+    }
+  });
+  it('goes ashore from its landing, water only, where she\'s moored while you\'re in the hut', () => {
+    expect(multibellaLandingSquares().length).toBeGreaterThan(4);
+    for (const [c, r] of multibellaLandingSquares()) expect(multibellaAt(c, r)).toBe(false);
+    const m = multibellaMooring();
+    expect(onMultibellaLanding(m.c, m.r)).toBe(true);
+    expect(onMultibellaLanding(LAY.MULTIBELLA.LAND[0][0], LAY.MULTIBELLA.LAND[0][1])).toBe(false);
   });
 });

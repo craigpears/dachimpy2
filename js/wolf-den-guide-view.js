@@ -1,5 +1,5 @@
 // The wolf den's read version (wolf-den-guide.html), its pictures: every board is the den's own board
-// (js/den/nav-board.js, as it lies on Dignity's star table) laid from the lesson's boards (src/den-wolfden.ts's BOARDS):
+// (js/den/nav-board.js, as it lies on Multibella's star table) laid from the lesson's boards (src/den-wolfden.ts's BOARDS):
 // an article with data-board="name" gets that board as laid, one with data-moves="name" the board before its moves
 // and after them. The sticky nav comes from the tutorial's description (src/wolf-den-tutorial.ts), by
 // js/tutorial-nav.js. Hand-written, not compiled.
@@ -9,7 +9,7 @@ import { WOLF_DEN_TUTORIAL } from './wolf-den-tutorial.js';
 import { tutorialNav } from './tutorial-nav.js';
 
 const failed = document.querySelector('[data-failed]');
-tutorialNav(WOLF_DEN_TUTORIAL, { mount: document.querySelector('#basics'), links: [{ title: 'Learn it from Dignity', href: 'den.html?at=wolfden', target: '_blank' }] });
+tutorialNav(WOLF_DEN_TUTORIAL, { mount: document.querySelector('#basics'), links: [{ title: 'Learn it from Multibella', href: 'den.html?at=wolfden', target: '_blank' }] });
 
 /** A board's picture: the den's board drawn once, as its game stands, copied onto a canvas of its own. */
 async function picture(game) {

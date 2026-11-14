@@ -108,7 +108,7 @@ Tzz's balloon lesson (src/balloons.ts, src/den-tzz.ts) fits as it is; its read v
   one, a Vegas?", her lines in src/lines/tzz.ts.
 - **Its read version**, `sailing-guide.html`, drawn from the same routines, with the same nav.
 
-## 5. A variant of a puzzle: the wolf den's Duty Navigation (Dignity), its basics first
+## 5. A variant of a puzzle: the wolf den's Duty Navigation (Multibella, asked for by Dignity), its basics first
 
 The user, 14 Nov: "for the werewolf [Duty Nav] thing, I think that should be obviously slightly differently
 structured in that it is something where you have to explain some of the basic mechanics because it is different.
@@ -136,7 +136,7 @@ Sailing lesson shows its chain: the build and its plan marked on the board as it
 why chains pay, wild places, the moon), a phase (between the rumbles; the rumbles themselves `todo`), the tricks (the
 Trapdoor, the Echo, a combo beside the wrong star, don't reset the board) and the scenario (the run in the
 screenshots). Every part's shown on one of the lesson's boards, `src/den-wolfden.ts`'s BOARDS, each tested to do
-what its part says. Dignity's opening choice: what's different, the chains, a run. Her lesson lays the part's board
+what its part says. Multibella's opening choice (she teaches it on her island, 14 Nov; it was Dignity at first): what's different, the chains, a run. Her lesson lays the part's board
 on the star table and plays its moves (js/den/wolfden-house.js), then hands it to you; the read version,
 `wolf-den-guide.html`, draws every board before and after its moves with the den's own board. Not yet: the plain,
 quick way as a choice beside the combo way, and the build's plan marked on the board as Tzz's lesson marks hers.

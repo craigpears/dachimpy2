@@ -27,6 +27,7 @@ import { rowing, rowShut, rowKey, rowHover, rowSwap, rowTick, rowPrompt, rowShow
 import { craneKey, cranePrompt, craneOffer, craneHolds, craneTick, craneReset, craneWorld } from './crane.js';
 import { umami, umamiKey, umamiClick, umamiHover, umamiPrompt, umamiOffer, umamiReset } from './capybara.js';
 import { isleWorld, isleTick, isleAshore, canLandIsle } from './isle.js';
+import { multibellaWorld, multibellaTick, multibellaAshore, canLandMultibella } from './multibella-isle.js';
 import { station, stationKey, stationToggle, stationTick, stationPrompt, stationReset } from './sail-station.js';
 import { kikkitWorld, kikkitTick, kikkitShown, kikkitHail, kikkitPrompt, kikkitHolds, kikkitReset } from './whirlpools.js';
 import { inKikkitWaters } from '../den-kikkit.js';
@@ -217,6 +218,7 @@ export function sailKey(key) {
   else if ((key === ' ' || key === 'enter') && canHaulWreck()) haulWreck();
   else if ((key === ' ' || key === 'enter') && canLand(sail.helm)) ashore();
   else if ((key === ' ' || key === 'enter') && canLandIsle(sail.helm)) isleAshore();   // (Mischievious's isle: isle.js)
+  else if ((key === ' ' || key === 'enter') && canLandMultibella(sail.helm)) multibellaAshore();   // (her wolf den's hut: multibella-isle.js)
   else if ((key === ' ' || key === 'enter') && kikkitHail()) { /* (Kikkit, off her island: whirlpools.js) */ }
   else if ((key === ' ' || key === 'enter') && tzzHail()) { /* (Tzz's lesson again, off her island: balloon-isle.js) */ }
   else if ((key === ' ' || key === 'enter') && heliumHail()) { /* (to Helium's still, off their island: helium-isle.js) */ }
@@ -244,6 +246,7 @@ export function sailPrompt() {
   if (held === 'calm') return 'Becalmed: dead in the water till the wind picks up · 3: out oars';
   if (canLand(h)) return h.slot < 0 ? 'Off the den\'s beach · Space: go ashore · click the sea to drop a pin · 1: Sailing' : 'Under way off the den\'s beach · Space: go ashore';
   if (canLandIsle(h)) return h.slot < 0 ? 'Off the Wedding Isle · Space: go ashore · click the sea to drop a pin' : 'Under way off the Wedding Isle · Space: go ashore';
+  if (canLandMultibella(h)) return h.slot < 0 ? "Off Multibella's island · Space: ashore to her wolf den (Duty Navigation) · click the sea to drop a pin" : "Under way off Multibella's island · Space: go ashore";
   if (canHaulWreck()) return 'The old wreck · Space: haul up its treasure (Treasure Haul) · click the sea to drop a pin';
   if (h.slot < 0 && h.headwind()) return headwindPrompt();
   if (h.pin) return rumGoal() + (h.oars ? 'Rowing to the pin' : 'Under way to the pin');
@@ -260,7 +263,7 @@ export function sailOffer() {
   const go = () => sailKey(' ');
   if (umamiPrompt()) return umamiOffer();
   if (cranePrompt()) return craneOffer();
-  if (sail.helm.held() || canLand(sail.helm) || canLandIsle(sail.helm) || !canHaulWreck()) return null;
+  if (sail.helm.held() || canLand(sail.helm) || canLandIsle(sail.helm) || canLandMultibella(sail.helm) || !canHaulWreck()) return null;
   const w = sail.sea.wreck;
   return w ? { at: V3(seaX(w[0]), 0.8, seaZ(w[1])), label: 'Haul up its treasure (Treasure Haul)', go } : null;
 }
@@ -292,6 +295,7 @@ export function sailTick(dt) {
   lockWorld();   // (the canal's locks: lock.js)
   craneWorld();   // (the headland on the cove's left, the ledge and the lagoon: crane.js)
   isleWorld();   // (Mischievious's isle, out to the right of the lanes: isle.js)
+  multibellaWorld();   // (Multibella's island, her wolf den's hut on it: multibella-isle.js)
   kikkitWorld();   // (Kikkit's island, her whirlpools and Vegas Island: whirlpools.js)
   tzzWorld();   // (Tzz's island, a hop from Kikkit's, and her balloon lesson: balloon-isle.js)
   heliumWorld();   // (Helium's island by the smugglers' rocks, and Distilling at their still: helium-isle.js)
@@ -317,6 +321,7 @@ export function sailTick(dt) {
       if (e.kind === 'move' && e.bump && !sail.bumps.some((f) => f(e)) && !e.irons) sail.bumpT = e.secs * 0.45;
       if (e.kind === 'arrive' && canLand(h)) toast('Off the den\'s beach: Space to go ashore');
       if (e.kind === 'arrive' && canLandIsle(h)) toast('Off the Wedding Isle: Space to go ashore');
+      if (e.kind === 'arrive' && canLandMultibella(h)) toast("Off Multibella's island: Space to go ashore, to her wolf den");
       if (e.kind === 'push') {
         // (a gust off the Sailing board isn't the trade winds: sail-station.js)
         // (nor a whirlpool's whirl, nor the winds of Kikkit's whirlpools: whirlpools.js says what those do)
@@ -349,6 +354,7 @@ export function sailTick(dt) {
   // The locks: each one's water at its level, its gates, and the quay pump at work (lock.js).
   lockTick(dt);
   isleTick();
+  multibellaTick();
   // A gun that's fired kicks back in and runs out again as it's loaded, smoking at first.
   for (const side of ['L', 'R']) {
     const gun = sail.g.userData.guns[side], u = sail.guns.out(side);

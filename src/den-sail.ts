@@ -655,6 +655,16 @@ export const LAY = {
     LAND: [[23, 10], [24, 10], [23, 11]] as [number, number][],
     MOOR: { c: 22, r: 9, d: 2 } as Pose,
   },
+  /** Multibella's island (14 Nov; rules: src/den-multibella.ts), where her wolf den's hut is and she teaches its
+      four-ring Duty Navigation: "would expect her to have her own island similar to others". In the open water off to
+      the right of the den, on its side of everything, above the Wedding Isle: two squares of open sea at least to any
+      rock or island, and clear of the winds. LAND: four squares; LANDING: the water off its left-hand shore, where
+      Space puts you ashore; MOOR: where she's brought alongside while you're in the hut. */
+  MULTIBELLA: {
+    LAND: [[17, 4], [18, 4], [17, 5], [18, 5]] as [number, number][],
+    LANDING: { c0: 15, c1: 16, r0: 3, r1: 6 },
+    MOOR: { c: 16, r: 5, d: 0 } as Pose,
+  },
   /** Port Decorum (11 Nov; src/den-imperial.ts, js/den/imperial-isle.js), an island under imperial
       control: "just some island that's, say, under imperial control ... to create trading mechanics,
       looting mechanics, smuggling mechanics". In imperial waters, where the main shipping lane leads:
@@ -929,6 +939,11 @@ export class Sea {
     this.mouths = [{ ...KK.MOUTH }, { c: KK.OUT[0], r: KK.OUT[1], d: KK.MOUTH.d }];
     // Tzz's island, a hop from Kikkit's: land, and the water round it kept clear.
     for (const [c, r] of LAY.TZZ.LAND) { this.works.add(key(c, r)); near(c, r); }
+    // Multibella's island, off to the right of the den: land, two squares of water round it and its landing kept clear
+    // of the scattered rocks (they can fall at its foot on some seas).
+    for (const [c, r] of LAY.MULTIBELLA.LAND) { this.works.add(key(c, r)); for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) this.keep.add(key(c + a, r + b)); }
+    const MB = LAY.MULTIBELLA.LANDING;
+    for (let c = MB.c0; c <= MB.c1; c++) for (let r = MB.r0; r <= MB.r1; r++) this.keep.add(key(c, r));
     // Helium's island, past the checkpoint by the smugglers' rocks: land, the same; and their corner's one
     // way out, a wind, and its one way in, a wind of its own only the oars beat (its rocks are the reef's:
     // scatter; its water hidden: hide).
