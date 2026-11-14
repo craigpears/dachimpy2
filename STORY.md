@@ -32,7 +32,11 @@ not their ideas"). Every place is shown for what it is, proudly: Gravee's house 
 mechanic", never "a small room", nothing about anyone's place minimised ("Just show the more positive aspect"). The
 den as a quick, cheap place for ideas (14 Nov): "all of this is quick and cheap to do. It's all just getting lots of
 ideas out ... there may be one good idea that people are really excited about and interested in among them ... At
-the very least, it's a bit of fun."
+the very least, it's a bit of fun." Its looks are simple on purpose (14 Nov): "it's not going to create high quality things ...
+not ... an original creative platform, but it's a bit of fun and a place to try out the concepts. So intentionally
+things are ... relatively low quality ... partly by design, but ... high enough quality that we can have some fun
+with it." And every page invites people in: "You got an idea, see something here that you think's missing. Let me
+know with a description and some kind of reference, and I'm sure it can be added."
 
 ## The principles
 
