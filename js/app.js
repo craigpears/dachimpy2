@@ -11,7 +11,6 @@
   const comboChip = (name) => `<span class="combo">${[...name].map(letterChip).join('<span class="plus">+</span>')}</span>`;
   const chips = (letters) => `<span class="chips">${letters.map(letterChip).join('')}</span>`;
   const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
-  const pickOne = (arr) => arr[Math.floor(Math.random() * arr.length)];
   const coin = (n) => `<span class="coin" aria-hidden="true"></span><b>${n}</b>`;
 
   // How often each piece turns up: a word, and "about 1 in X pieces".
@@ -22,17 +21,12 @@
   const oneIn = (l) => Math.round(C.TOTAL_WEIGHT / C.WEIGHTS[l]);
   const rarityText = (l) => `${RARITY[l]} · about 1 in ${oneIn(l)} pieces`;
 
-  // Bookmaker's odds: the best price at or under the fair one, with a small edge for the house.
+  // Prices in the words bookmakers use.
   const PRICES = [[0.2, '1 to 5'], [0.25, '1 to 4'], [1 / 3, '1 to 3'], [0.5, '1 to 2'], [0.8, '4 to 5'], [1, 'evens'], [1.5, '6 to 4'], [2, '2 to 1'], [2.5, '5 to 2'], [3, '3 to 1'],
     [4, '4 to 1'], [5, '5 to 1'], [6, '6 to 1'], [8, '8 to 1'], [10, '10 to 1'], [12, '12 to 1'], [16, '16 to 1'], [20, '20 to 1']];
-  // Returns null when the bet is too likely to win for the house to take it.
-  const priceFor = (chance) => {
-    const fair = (1 - chance) / Math.max(chance, 1e-6) * 0.92;
-    return PRICES.filter(([m]) => m <= fair).pop() || null;
-  };
   // A tote price (winnings per doubloon staked) in the same words, rounded down to a price people know.
   const toteText = (r) => (r <= 0 ? 'only your stake back' : r >= 20 ? `${Math.floor(r)} to 1` : (PRICES.filter(([m]) => m <= r).pop() || [0, 'less than 1 to 5'])[1]);
-  const QUIZ_PAY = 2, DAILY_PAY = 25;
+  const QUIZ_PAY = 2;
   const threeDraws = C.threeDraws;
 
   // Ten-square remnants on a five-step scale, from roomy to dead.
@@ -326,334 +320,8 @@
     },
   };
 
-  // ---------- the hole run: fill a whole hole, one dealt piece at a time ----------
-  const LINES = {
-    best: ['Shipshape!', 'Lovely work.', "That's the spot."],
-    good: ['Solid.', 'Good enough to sail.', 'Nicely done.'],
-    tight: ['Getting tight…', 'Hmm, that boxes you in.'],
-    risky: ['Living dangerously!', "You'll need some luck now."],
-    dead: ['Dead end! Nothing fits what\'s left.'],
-  };
-  const AUTO_MS = 3500; // long enough to read the feedback before the next piece
-  const TAGS = { best: 'Best', good: 'Good', tight: 'Tight', risky: 'Risky', dead: 'Dead end' };
-  const SHARE = { best: '🟩', good: '🟨', tight: '🟧', risky: '🟥', dead: '⬛' };
-
-  // "about 4 times in 10", "about 1 time in 25", in words rather than percentages.
-  function timesText(c) {
-    if (c >= 0.95) return 'almost every time';
-    if (c >= 0.15) return `about ${Math.round(c * 10)} times in 10`;
-    if (c > 0) return `about 1 time in ${Math.round(1 / c)}`;
-    return 'never';
-  }
-
-  // The plain odds behind a grade.
-  function oddsLine(o) {
-    const c = C.finishChance(o.rest, o.held);
-    return c >= 1 ? 'Finishes for sure' : `Finishes ${timesText(c)}`;
-  }
-
-  // Why the green option beat yours, in the same plain odds.
-  function whyBetter(o, best) {
-    const a = C.finishChance(o.rest, o.held), b = C.finishChance(best.rest, best.held);
-    return `Yours finishes ${timesText(a)}; the green one ${b >= 1 ? 'every time' : timesText(b)}.`;
-  }
-
-  // What a placement leaves behind, in the words a carpenter would use.
-  function leavesText(o, minRagged) {
-    const info = o.info;
-    if (info.gap !== undefined) {
-      if (!info.gap) return 'Leaves a gap no piece fits';
-      return `Leaves a gap for ${an(info.gap)}${o.held.includes(info.gap) ? ", and you're holding one!" : ''}`;
-    }
-    let text;
-    if (!info.ways) text = 'Nothing can finish it';
-    else if (o.name) text = `Leaves a <b>${o.name}</b>`;
-    else if (o.rest.length === 10) text = `Finished by ${chips(info.useful)}`;
-    else if (o.neck) text = 'Cuts a bottleneck';
-    else if (o.ragged <= minRagged) text = 'Keeps it square';
-    else text = 'Leaves ragged edges';
-    return text + (o.held.length ? `<br><span class="keeps">Keeps ${o.held.map(an).join(' and ')}</span>` : '');
-  }
-  const optionNote = (o, minRagged) => `${leavesText(o, minRagged)}<br><span class="odds-line">${oddsLine(o)}</span>`;
-
-  /* opts: size, deal (pieces per step), storm, bet (purse to wager from or null),
-           header() -> html, onDone(result), seed (for the daily), replay ([choice indexes]), onChoice(i) */
-  function holeRun(el, opts) {
-    if (opts.seed != null) C.useSeed(opts.seed);
-    const grown = C.genHole(opts.size, opts.core ? C.pickCore() : null);
-    const hole = grown.hole;
-    let remaining = hole, placed = [], steps = [], deal = null, chosen = false;
-    let held = []; // with a bigger toolbox, the pieces you didn't play stay
-    const replay = (opts.replay || []).slice();
-    let autoTimer = null;
-    // Training wheels: outline the good ten-square finish hiding inside the hole.
-    const target = () => (opts.hint && grown.core && remaining.length > 10 ? grown.core : null);
-
-    const boardHtml = (fresh) => R.board(remaining, placed.map((p, i) => ({ ...p, fresh: fresh && i === placed.length - 1 })), { cell: 38, labels: false, target: target() });
-    const trail = () => `<div class="trail">${steps.map((g) => `<span class="pip ${g}" title="${TAGS[g]}"></span>`).join('')}</div>`;
-
-    function step(freshBoard) {
-      chosen = false;
-      if (remaining.length === 5) return drawStage(freshBoard);
-      deal = C.dealStep(remaining, opts.deal || 1, opts.storm, held);
-      if (!deal) { steps.push('dead'); return deadEnd(); }
-      if (replay.length) return choose(replay.shift(), true);
-      const many = deal.letters.length > 1;
-      const minRagged = Math.min(...deal.options.map((o) => o.ragged));
-      el.innerHTML = `
-        ${opts.header()}
-        <div class="run-top">
-          <div class="hole-wrap big">${boardHtml(freshBoard)}</div>
-          <div class="run-side">
-            <p class="label">${many ? 'Your toolbox' : 'Dealt to you'}</p>${R.toolbox(deal.letters)}
-            ${deal.pickOne ? '<p class="hint small">Pick one to play. The other goes back on the pile.</p>'
-              : many ? `<p class="hint small">Play one. The ${deal.letters.length > 2 ? 'others stay' : 'other stays'} in your toolbox for later.</p>` : ''}
-            ${deal.skipped ? `<p class="hint small">${deal.skipped >= 12 ? 'A few pieces' : plural(deal.skipped, 'piece')} went into your other holes first.</p>` : ''}
-            ${target() ? '<p class="hint small"><span class="target-key"></span> A good finish hides inside. Work from the outside in to reach it.</p>' : ''}
-            <p class="squares"><b>${remaining.length}</b> squares to go</p>${trail()}
-          </div>
-        </div>
-        <p class="ask">${many ? 'Which piece, and where?' : `Where does the ${letterChip(deal.letters[0])} go?`}</p>
-        <div class="options run-opts">${deal.options.map((o, i) => `
-          <button class="opt" data-i="${i}"><span class="opt-key">${i + 1}</span>
-            <span class="opt-body">${R.board(o.rest, placed.concat({ letter: o.letter, cells: o.piece, fresh: true }), { cell: 20, labels: false, target: target() })}</span>
-            <span class="opt-note"></span></button>`).join('')}
-        </div>
-        <div class="feedback" hidden></div>`;
-      el.querySelectorAll('.opt').forEach((b) => b.addEventListener('click', () => choose(+b.dataset.i)));
-      el.dataset.minRagged = minRagged;
-      keyHandler = (e) => {
-        const n = parseInt(e.key, 10);
-        if (!chosen && n >= 1 && n <= deal.options.length) { choose(n - 1); e.preventDefault(); }
-        else if (chosen && (e.key === 'Enter' || e.key === ' ')) { advance(); e.preventDefault(); }
-      };
-    }
-
-    function choose(i, silent) {
-      if (chosen) return;
-      chosen = true;
-      const o = deal.options[i];
-      steps.push(o.grade);
-      placed = placed.concat({ letter: o.letter, cells: o.piece });
-      remaining = o.rest;
-      held = o.held;
-      if (!silent && opts.onChoice) opts.onChoice(i);
-      if (silent) return o.grade === 'dead' ? deadEnd(true) : step();
-
-      el.querySelectorAll('.opt').forEach((b, j) => {
-        const x = deal.options[j];
-        b.disabled = true;
-        b.classList.add('g-' + x.grade);
-        if (j === i) b.classList.add('chosen');
-        $('.opt-note', b).innerHTML = `<span class="tag-grade ${x.grade}">${TAGS[x.grade]}</span><span class="leaves">${optionNote(x, +el.dataset.minRagged)}</span>`;
-      });
-      $('.hole-wrap', el).innerHTML = boardHtml(true);
-      $('.run-side .trail', el).outerHTML = trail();
-      $('.squares', el).innerHTML = `<b>${remaining.length}</b> squares to go`;
-      if (o.grade === 'dead' || o.grade === 'risky') shake($('.hole-wrap', el));
-
-      const fb = $('.feedback', el);
-      fb.hidden = false;
-      const good = o.grade === 'best' || o.grade === 'good';
-      const bestOpt = deal.options.find((x) => x.grade === 'best');
-      fb.innerHTML = `<div class="verdict ${good ? 'good' : o.grade === 'tight' ? 'ok' : 'bad'}">${pickOne(LINES[o.grade])}</div>
-        ${o.name ? `<p>That leaves a <b>${o.name}</b>, one of the classic two-piece finishes.</p>` : ''}
-        ${o.grade === 'best' && deal.options.filter((x) => x.grade === 'best').length > 1 ? '<p class="hint">Both green moves do about as well here: either was right.</p>' : ''}
-        ${o.grade !== 'best' && bestOpt ? `<p class="hint">The green option was stronger${bestOpt.name ? `: it leaves a <b>${bestOpt.name}</b>` : ''}. ${whyBetter(o, bestOpt)}</p>` : ''}
-        <button class="btn next">${o.grade === 'dead' ? 'See the damage' : 'Next piece'} <kbd>Enter</kbd></button>
-        ${good ? '<span class="auto"><i></i></span>' : ''}`;
-      $('.next', fb).addEventListener('click', advance);
-      // Quick-fire: good moves roll straight on.
-      if (good) autoTimer = setTimeout(advance, AUTO_MS);
-    }
-
-    function advance() {
-      clearTimeout(autoTimer);
-      if (!chosen) return;
-      if (steps[steps.length - 1] === 'dead') deadEnd(); else step(true);
-    }
-
-    function deadEnd() {
-      const result = { masterpiece: false, steps, hole, placed, remaining, dead: true };
-      el.innerHTML = `${opts.header()}
-        <div class="run-top"><div class="hole-wrap big">${boardHtml()}</div>
-          <div class="run-side"><div class="verdict bad">Dead end.</div>
-          <p>No piece can fill what's left exactly. You'd have to overlap with extra pieces, so this hole won't be a Masterpiece.</p>${trail()}</div></div>
-        <button class="btn next">Carry on <kbd>Enter</kbd></button>`;
-      shake($('.hole-wrap', el));
-      finish(result);
-    }
-
-    function drawStage(fresh) {
-      const gap = C.identify(remaining);
-      if (held.includes(gap)) return savedFinish(gap);
-      const offer = priceFor(threeDraws(gap));
-      const [mult, price] = offer || [0, ''];
-      const wallet = opts.bet && offer ? opts.bet() : null;
-      let stake = 0;
-      el.innerHTML = `
-        ${opts.header()}
-        <div class="run-top">
-          <div class="hole-wrap big">${boardHtml(fresh)}</div>
-          <div class="run-side">
-            <p class="label">The last gap needs</p>
-            <div class="need">${R.piece(gap, remaining, { cell: 18 })}<div><b>${an(gap)}</b><br><span class="hint">About 1 in ${oneIn(gap)} pieces is ${an(gap)}.<br>With three draws, one turns up ${timesText(threeDraws(gap))}.</span></div></div>
-            ${trail()}
-          </div>
-        </div>
-        <div class="draw-zone">
-          <p class="ask">${opts.bet ? `You get three draws. Do you think ${an(gap)} will turn up?` : `You get three draws to find ${an(gap)}.`}</p>
-          ${wallet != null ? `
-            <div class="bet">
-              <p class="label">Bet your doubloons · pays ${price}</p>
-              <div class="stakes">${[0, 5, 10, 25].filter((v) => v <= wallet).map((v) => `<button class="stake${v === 0 ? ' on' : ''}" data-v="${v}">${v ? coin(v) : 'No bet'}</button>`).join('')}
-              ${wallet > 0 ? `<button class="stake" data-v="${wallet}">All in · ${coin(wallet)}</button>` : ''}</div>
-            </div>` : opts.bet && !offer ? '<p class="hint">The bookie won\'t take bets on a sure thing.</p>' : ''}
-          <div class="cards">${[0, 1, 2].map((i) => `<div class="card" data-i="${i}"><div class="card-in"><div class="face back"></div><div class="face front"></div></div></div>`).join('')}</div>
-          <button class="btn draw">Draw! <kbd>Enter</kbd></button>
-        </div>`;
-      el.querySelectorAll('.stake').forEach((b) => b.addEventListener('click', () => {
-        stake = +b.dataset.v;
-        el.querySelectorAll('.stake').forEach((x) => x.classList.toggle('on', x === b));
-      }));
-      let drawing = false;
-      const go = () => { if (!drawing) { drawing = true; draw(gap, () => stake, mult); } };
-      $('.draw', el).addEventListener('click', go);
-      keyHandler = (e) => { if (e.key === 'Enter' || e.key === ' ') { go(); e.preventDefault(); } };
-    }
-
-    // You kept exactly the piece the last gap needs: no draw, no bet, just drop it in.
-    function savedFinish(gap) {
-      C.useSeed(null);
-      placed = placed.concat({ letter: gap, cells: remaining });
-      const gapCells = remaining;
-      remaining = [];
-      el.innerHTML = `${opts.header()}
-        <div class="run-top"><div class="hole-wrap big glow">${R.board(remaining, placed.map((p, i) => ({ ...p, fresh: i === placed.length - 1 })), { cell: 38, labels: false })}</div>
-          <div class="run-side"><div class="verdict good">A Masterpiece!</div>
-          <p>You saved ${an(gap)} for exactly this gap. No waiting, no luck needed.</p>
-          <p class="hint">This is the habit the best carpenters have: keep the common piece and spend the awkward ones early.</p>${trail()}</div></div>
-        <button class="btn next">Carry on <kbd>Enter</kbd></button>`;
-      finish({ masterpiece: true, steps, hole, placed, remaining, drawsUsed: 0, betDelta: 0, gapCells });
-    }
-
-    function draw(gap, getStake, mult) {
-      const stake = getStake();
-      $('.draw', el).disabled = true;
-      el.querySelectorAll('.stake').forEach((b) => { b.disabled = true; });
-      const draws = [0, 1, 2].map(() => C.dealLetter(false));
-      const hitAt = draws.indexOf(gap);
-      const shown = hitAt === -1 ? 3 : hitAt + 1;
-      C.useSeed(null);
-      let i = 0;
-      const flipNext = () => {
-        const card = el.querySelector(`.card[data-i="${i}"]`);
-        const l = draws[i];
-        $('.front', card).innerHTML = R.piece(l, null, { cell: 12, box: 70 }) + `<span>${l}</span>`;
-        card.classList.add('flipped');
-        if (l === gap) card.classList.add('hit');
-        i++;
-        if (i < shown) setTimeout(flipNext, 650);
-        else setTimeout(() => settle(hitAt !== -1, stake, mult, hitAt), 700);
-      };
-      setTimeout(flipNext, 200);
-    }
-
-    function settle(hit, stake, mult, hitAt) {
-      const gapCells = remaining;
-      if (hit) {
-        placed = placed.concat({ letter: C.identify(gapCells), cells: gapCells });
-        remaining = [];
-        $('.hole-wrap', el).innerHTML = boardHtml(true);
-        $('.hole-wrap', el).classList.add('glow');
-      } else {
-        shake($('.hole-wrap', el));
-        el.querySelectorAll('.card').forEach((c) => c.classList.add('miss'));
-      }
-      const won = stake ? (hit ? Math.round(stake * mult) : -stake) : 0;
-      const zone = $('.draw-zone', el);
-      zone.insertAdjacentHTML('beforeend', `<div class="settle">
-        <div class="verdict ${hit ? 'good' : 'bad'}">${hit ? 'A Masterpiece!' : 'No luck.'}</div>
-        <p>${hit ? `It turned up on draw ${hitAt + 1}.` : `No ${letterChip(C.identify(gapCells))} in three draws. The hole sat too long, so you'd finish it with extra pieces.`}
-        ${stake ? (hit ? ` Your bet pays ${coin('+' + won)}.` : ` You lose your ${coin(stake)}.`) : ''}</p>
-        <button class="btn next">Carry on <kbd>Enter</kbd></button></div>`);
-      finish({ masterpiece: hit, steps, hole, placed, remaining, drawsUsed: hit ? hitAt + 1 : 3, betDelta: won });
-    }
-
-    function finish(result) {
-      C.useSeed(null);
-      const btn = el.querySelector('.next');
-      const done = () => { keyHandler = null; opts.onDone(result); };
-      btn.addEventListener('click', done);
-      keyHandler = (e) => { if (e.key === 'Enter' || e.key === ' ') { done(); e.preventDefault(); } };
-      if (opts.onFinish) opts.onFinish(result);
-    }
-
-    step();
-  }
-
-  // ---------- Hole of the Day ----------
-  const EPOCH = Date.UTC(2026, 10, 1);
-  function today() {
-    const d = new Date();
-    return Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - EPOCH) / 864e5) + 1;
-  }
-
-  function shareText(n, r) {
-    const end = r.dead ? '⬛ dead end' : r.masterpiece ? `⭐ Masterpiece on draw ${r.drawsUsed}` : '💨 missed the draw';
-    return `Hole of the Day #${n}\n${r.steps.map((g) => SHARE[g]).join('')} ${end}`;
-  }
-
-  function dailyPage() {
-    const n = today();
-    const saved = store.get().daily || {};
-    const mine = saved.day === n && saved.v === 4 ? saved : { day: n, v: 4, choices: [] };
-    const streak = store.get().dailyStreak || { last: 0, count: 0 };
-
-    const header = () => `<header class="run-bar"><span class="eyebrow">Hole of the Day</span><b>#${n}</b>
-      <span class="hint">Same hole for everyone today</span></header>`;
-
-    function showResult(r) {
-      const text = shareText(n, r);
-      main.innerHTML = `<article class="daily-done">
-        ${header()}
-        <div class="run-top">
-          <div class="hole-wrap big ${r.masterpiece ? 'glow' : ''}">${R.board(r.remaining, r.placed, { cell: 38, labels: false })}</div>
-          <div class="run-side">
-            <div class="verdict ${r.masterpiece ? 'good' : 'bad'}">${r.masterpiece ? 'A Masterpiece!' : r.dead ? 'Dead end.' : 'So close.'}</div>
-            <pre class="share">${text}</pre>
-            <button class="btn copy">Copy result</button>
-            <p class="hint">Daily streak <b>${streak.count}</b> · a new hole tomorrow.</p>
-          </div>
-        </div>
-        <p><a class="btn ghost" href="#/">Set sail on the voyage →</a></p>
-      </article>`;
-      $('.copy', main).addEventListener('click', async (e) => {
-        try { await navigator.clipboard.writeText(text); e.target.textContent = 'Copied!'; } catch { e.target.textContent = 'Select the text to copy'; }
-      });
-    }
-
-    if (mine.result) return showResult(mine.result);
-
-    main.innerHTML = `<article><section class="run"></section></article>`;
-    holeRun($('.run', main), {
-      size: 4, deal: 3, core: true, seed: 7919 * n + 13, header, replay: mine.choices,
-      bet: () => purse.get(),
-      onChoice: (i) => { mine.choices.push(i); store.patch('daily', mine); },
-      onFinish: (r) => {
-        if (r.betDelta) purse.add(r.betDelta, r.betDelta > 0 ? 'Bet won' : 'Bet lost');
-        if (r.masterpiece) purse.add(DAILY_PAY, 'Daily Masterpiece');
-        mine.result = { masterpiece: r.masterpiece, steps: r.steps, dead: !!r.dead, drawsUsed: r.drawsUsed, placed: r.placed, remaining: r.remaining };
-        store.patch('daily', mine);
-        const s = store.get().dailyStreak || { last: 0, count: 0 };
-        if (s.last !== n) store.patch('dailyStreak', { last: n, count: r.masterpiece ? (s.last === n - 1 ? s.count + 1 : 1) : 0 });
-      },
-      onDone: () => dailyPage(),
-    });
-  }
-
-  // ---------- the betting table: four holes, one pile, bets between every piece ----------
-  const TABLE_DRAWS = 5, STAKE_STEP = 5, HOLE_NAMES = 'ABCD';
+  // ---------- the harbour table's holes: four holes, one pile ----------
+  const TABLE_DRAWS = 5, HOLE_NAMES = 'ABCD';
 
   // What a hole still needs, given how far it has got.
   function needsText(h, st) {
@@ -665,329 +333,36 @@
       <p class="hint small">Starts with ${chips(h.useful)}: about 1 in ${starts} pieces, then needs the one that fits what's left</p>`;
   }
 
-  /* Like in-play betting: five pieces come off the pile one at a time, and before each one you
-     can back any open hole at the price going right then. Prices move as the table changes. */
-  function betPage() {
-    let topUp = false;
-    if (purse.get() < STAKE_STEP) { purse.add(10 - purse.get(), 'From the quartermaster'); topUp = true; }
-    const holes = C.genBetTable(TABLE_DRAWS);
-    const state = C.tableState(holes);
-    const bets = holes.map(() => []); // placed bets: { amt, mult }
-    const pending = holes.map(() => 0); // stakes you're adding before the next piece
-    let drawsLeft = TABLE_DRAWS, prices = [], chances = [], busy = false;
-    const pendingTotal = () => pending.reduce((a, b) => a + b, 0);
-    const backed = (i) => bets[i].reduce((a, b) => a + b.amt, 0);
-    const returns = (i) => bets[i].reduce((a, b) => a + Math.round(b.amt * (1 + b.mult)), 0);
-    // When two holes need the same piece, the one with more riding on it gets it.
-    const order = () => holes.map((_, i) => i).sort((a, b) => backed(b) + pending[b] - backed(a) - pending[a] || a - b);
-    const holeBoard = (i, fresh) => R.board(state[i].rest, state[i].placed.map((p, j) => ({ ...p, fresh: fresh && j === state[i].placed.length - 1 })), { cell: 22, labels: false });
-
-    // Price every open hole for the pieces still to come. A longer run than the generator's keeps the house edge honest.
-    function reprice() {
-      chances = C.tableChances(holes, drawsLeft, 3000, state, order());
-      prices = holes.map((_, i) => (state[i].done || !drawsLeft ? null : priceFor(chances[i])));
-    }
-
-    main.innerHTML = `
-      <article class="bet-page">
-        <header class="page-head">
-          <p class="eyebrow">Harbour games</p>
-          <h1>Place your bets</h1>
-          <p class="lede">Four holes, one pile of timber. ${TABLE_DRAWS} pieces come off the pile, one at a time. Each goes into a hole it finishes; otherwise it starts a two-piece hole, or it's a spare. A piece only fills one hole, so if two holes need the same piece, it goes to the one with more of your money on it. Bet before every piece: the prices move as the holes fill.</p>
-        </header>
-        ${topUp ? '<p class="hint">Your purse ran dry, so the quartermaster spots you 10 doubloons. Masterpieces on the voyage and in Hole of the Day earn far more.</p>' : ''}
-        <div class="purse-bar bet-purse"><span>Your purse ${coin(`<span class="purse-live">${purse.get()}</span>`)}</span><span>On this piece ${coin('<span class="staked-n">0</span>')}</span><span class="hint">The house always keeps a small edge. Masterpieces are how you really earn.</span></div>
-        <div class="table-holes">${holes.map((h, i) => `
-          <div class="tcard" data-i="${i}">
-            <div class="t-head"><span class="t-name">${HOLE_NAMES[i]}</span><span class="t-price"></span></div>
-            <div class="hole-wrap t-board">${holeBoard(i)}</div>
-            <div class="t-needs"></div>
-            <div class="t-stake"><button class="sbtn minus" aria-label="Take ${STAKE_STEP} off ${HOLE_NAMES[i]}">−</button>
-              <span class="t-amt">${coin('<span class="amt-n">0</span>')}</span>
-              <button class="sbtn plus" aria-label="Add ${STAKE_STEP} on ${HOLE_NAMES[i]}">+${STAKE_STEP}</button></div>
-            <div class="t-backed hint small"></div>
-            <div class="t-result"></div>
-          </div>`).join('')}</div>
-        <div class="draw-zone">
-          <div class="cards">${Array.from({ length: TABLE_DRAWS }, (_, i) => `<div class="card-slot"><div class="card" data-i="${i}"><div class="card-in"><div class="face back"></div><div class="face front"></div></div></div><span class="card-cap"></span></div>`).join('')}</div>
-          <button class="btn draw"></button>
-          <div class="settle" hidden></div>
-        </div>
-      </article>`;
-
-    const cards = main.querySelectorAll('.tcard');
-
-    function paint() {
-      holes.forEach((h, i) => {
-        const c = cards[i], st = state[i], price = prices[i];
-        $('.t-price', c).innerHTML = st.done ? '' : price ? `pays <b>${price[1]}</b>` : drawsLeft ? 'No bets: too likely' : '';
-        $('.t-needs', c).innerHTML = needsText(h, st)
-          + (!st.done && drawsLeft ? `<p class="t-odds">From the ${plural(drawsLeft, 'piece')} left: finished ${timesText(chances[i])}</p>` : '');
-        $('.t-stake', c).hidden = !price && !pending[i];
-        $('.amt-n', c).textContent = pending[i];
-        c.classList.toggle('backed', backed(i) + pending[i] > 0);
-        $('.t-backed', c).innerHTML = bets[i].length && !st.done && drawsLeft
-          ? `Backed ${coin(backed(i))} · returns ${coin(returns(i))} if finished` : '';
-      });
-      $('.staked-n', main).textContent = pendingTotal();
-      const d = $('.draw', main);
-      d.hidden = !drawsLeft;
-      d.innerHTML = `Draw piece ${TABLE_DRAWS - drawsLeft + 1} of ${TABLE_DRAWS} <kbd>Enter</kbd>`;
-    }
-
-    // Stakes leave the purse as you place them, so the purse always shows what you have left.
-    function setStake(i, d) {
-      if (busy || (!prices[i] && d > 0)) return;
-      const step = Math.max(-pending[i], Math.min(d, purse.get()));
-      if (!step) return;
-      pending[i] += step;
-      purse.add(-step);
-      reprice();
-      paint();
-    }
-    onLeave = () => { if (pendingTotal()) purse.add(pendingTotal()); };
-    cards.forEach((c, i) => {
-      $('.plus', c).addEventListener('click', () => setStake(i, STAKE_STEP));
-      $('.minus', c).addEventListener('click', () => setStake(i, -STAKE_STEP));
-    });
-
-    function draw() {
-      if (busy || !drawsLeft) return;
-      busy = true;
-      // Lock in this round's stakes at the prices showing now.
-      // A stake on a hole the bookie has stopped pricing goes back to the purse.
-      holes.forEach((_, i) => {
-        if (pending[i]) { if (prices[i]) bets[i].push({ amt: pending[i], mult: prices[i][0] }); else purse.add(pending[i]); }
-        pending[i] = 0;
-      });
-      main.querySelectorAll('.sbtn').forEach((b) => { b.disabled = true; });
-      $('.draw', main).disabled = true;
-
-      const n = TABLE_DRAWS - drawsLeft;
-      const l = C.weightedLetter();
-      const card = main.querySelector(`.card[data-i="${n}"]`);
-      $('.front', card).innerHTML = R.piece(l, null, { cell: 12, box: 70 }) + `<span>${l}</span>`;
-      card.classList.add('flipped');
-      const i = C.tableDraw(holes, state, l, order());
-      drawsLeft--;
-      setTimeout(() => {
-        const cap = card.parentElement.querySelector('.card-cap');
-        if (i < 0) { cap.textContent = 'Spare'; card.classList.add('miss'); }
-        else {
-          cap.innerHTML = `Into <b>${HOLE_NAMES[i]}</b>`;
-          $('.t-board', cards[i]).innerHTML = holeBoard(i, true);
-          if (state[i].done) {
-            card.classList.add('hit');
-            cards[i].classList.add('done');
-            $('.t-board', cards[i]).classList.add('glow');
-            const win = returns(i);
-            $('.t-result', cards[i]).innerHTML = `<span class="tag-grade best">Finished</span>${win ? ` ${coin('+' + (win - backed(i)))}` : ''}`;
-            if (win) purse.add(win, `Hole ${HOLE_NAMES[i]} pays out, stake back included`);
-          }
-        }
-        reprice();
-        busy = false;
-        main.querySelectorAll('.sbtn').forEach((b) => { b.disabled = false; });
-        $('.draw', main).disabled = false;
-        paint();
-        if (!drawsLeft) settle();
-      }, 450);
-    }
-
-    function settle() {
-      let lost = 0;
-      holes.forEach((_, i) => {
-        if (state[i].done) return;
-        const s = backed(i);
-        lost += s;
-        $('.t-result', cards[i]).innerHTML = `<span class="tag-grade risky">Bodged</span>${s ? ` ${coin(-s)}` : ''}`;
-        if (s) shake($('.t-board', cards[i]));
-      });
-      const staked = holes.reduce((a, _, i) => a + backed(i), 0);
-      const won = holes.reduce((a, _, i) => a + (state[i].done ? returns(i) : 0), 0);
-      const net = won - staked;
-      const fin = holes.map((_, i) => (state[i].done ? HOLE_NAMES[i] : null)).filter(Boolean);
-      const box = $('.settle', main);
-      box.hidden = false;
-      box.innerHTML = `<div class="verdict ${net > 0 ? 'good' : net < 0 ? 'bad' : 'ok'}">${net > 0 ? `You're up ${coin(net)}` : net < 0 ? `You're down ${coin(-net)}` : staked ? 'You break even.' : 'No bets this time.'}</div>
-        <p>${fin.length ? `Finished: <b>${fin.join(', ')}</b>.` : 'Nothing got finished.'} ${lost ? `The bodged holes cost you ${coin(lost)}.` : ''}</p>
-        <button class="btn next">Next table <kbd>Enter</kbd></button>`;
-      $('.next', box).addEventListener('click', betPage);
-    }
-
-    reprice();
-    paint();
-    $('.draw', main).addEventListener('click', draw);
-    keyHandler = (e) => {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
-      e.preventDefault();
-      if (drawsLeft) draw(); else if ($('.next', main)) betPage();
-    };
-  }
-
-  // ---------- the voyage ----------
-  /* The trail starts at the very end of a hole and works backwards: each port moves the
-     start one piece further out from a good two-piece finish. */
-  const PORTS = [
-    { id: 'quay', name: 'Driftwood Quay', size: 2, deal: 1, core: true, x: 110, y: 250,
-      tip: "We start at the very end of a hole: ten squares, two pieces. Place the first so the gap left over is a shape you'll see often. A P-shaped gap is the best of all." },
-    { id: 'bay', name: 'Barnacle Bay', size: 3, deal: 1, core: true, hint: true, x: 285, y: 115,
-      tip: "Same endings, one piece further back. The dashed outline marks a good finish hiding in the hole. Fill the outside so that shape is what's left." },
-    { id: 'reef', name: 'Tarpot Reef', size: 3, deal: 2, core: true, x: 460, y: 245,
-      tip: "Now you hold two pieces, and the one you don't play stays for later. Put the awkward piece into the odd corner and keep the P for the finish. If you're holding exactly what the last gap needs, it's a Masterpiece with no luck needed." },
-    { id: 'strait', name: 'Gullwing Strait', size: 4, deal: 2, core: true, hint: true, x: 635, y: 110,
-      tip: 'Twenty squares, two steps back. The outline returns to show you where you are heading. Square off the hole from the outside in, and don\'t cut across it.' },
-    { id: 'maw', name: "Kraken's Maw", size: 4, deal: 3, storm: true, x: 805, y: 235,
-      tip: "A full toolbox of three, like the real puzzle, and storm timber: X, I and their friends turn up far more often. No outlines. Spend the awkward pieces in the odd corners while the hole is big, and keep your P close." },
-  ];
-  const HOLES_PER_PORT = 3;
-
-  function voyage() {
-    return Object.assign({ unlocked: 1, stars: {}, streak: 0 }, store.get().voyage || {});
-  }
-  const saveVoyage = (v) => store.patch('voyage', v);
-
-  function mapSvg(v) {
-    const pts = PORTS.map((p) => [p.x, p.y]);
-    let d = `M${pts[0][0]} ${pts[0][1]}`;
-    for (let i = 1; i < pts.length; i++) {
-      const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
-      d += ` C${x0 + 80} ${y0}, ${x1 - 80} ${y1}, ${x1} ${y1}`;
-    }
-    const cur = Math.min(v.unlocked, PORTS.length) - 1;
-    return `<svg class="map" viewBox="0 0 900 340" role="img" aria-label="Voyage map">
-      <rect width="900" height="340" rx="16" class="sea"/>
-      ${Array.from({ length: 14 }, (_, i) => `<path class="wave" d="M${(i * 137) % 860 + 10} ${(i * 71) % 300 + 20}q8 -6 16 0t16 0"/>`).join('')}
-      <path d="${d}" class="route"/>
-      ${PORTS.map((p, i) => {
-        const open = i < v.unlocked, stars = v.stars[p.id] || 0;
-        return `<a href="${open ? '#/port/' + p.id : '#/'}" class="isle ${open ? 'open' : 'locked'}${i === cur ? ' current' : ''}" aria-label="${p.name}">
-          ${i === cur ? `<circle cx="${p.x}" cy="${p.y}" r="44" class="ring"/>` : ''}
-          <ellipse cx="${p.x}" cy="${p.y + 6}" rx="40" ry="20" class="sand"/>
-          <ellipse cx="${p.x - 4}" cy="${p.y}" rx="26" ry="13" class="grass"/>
-          <text x="${p.x}" y="${p.y + 46}" class="isle-name">${open ? p.name : '???'}</text>
-          <text x="${p.x}" y="${p.y + 64}" class="isle-stars">${open ? '★'.repeat(stars) + '☆'.repeat(HOLES_PER_PORT - stars) : ''}</text>
-        </a>`;
-      }).join('')}
-      <g class="ship" transform="translate(${PORTS[cur].x - 10} ${PORTS[cur].y - 54})">
-        <path d="M-14 14h40l-7 9h-26z" class="hull"/><path d="M5 -10v24h17z" class="sail"/><path d="M3 -4v18h-14z" class="sail"/>
-      </g>
-    </svg>`;
-  }
-
-  // Where to earn doubloons, best payers first. On the landing page, and wherever a purse runs dry.
+  // ---------- the landing page ----------
+  /* Trimmed on 14 Nov (the user: "the voyage thing we've dropped, [Hole] of the Day we've dropped. Practice bets
+     doesn't seem relevant, just have [the] Harbour table ... that can really be trimmed down"): two quick
+     puzzles to earn doubloons, the harbour table to bet them, and the workshop. */
   const EARN = [
     { href: '#/games/pair', icon: '◧', name: 'Which pair fits?', pays: `up to ${coin(PAIR_PAY[4])} a puzzle` },
-    { href: '#/daily', icon: '☀', name: 'Hole of the Day', pays: `${coin(DAILY_PAY)} for a Masterpiece` },
     { href: '#/games/remnant', icon: '◨', name: 'Which gap?', pays: `${coin(QUIZ_PAY)} a puzzle` },
-    { href: '#/', icon: '⚓', name: 'The voyage', pays: 'Masterpieces pay, more on a streak' },
   ];
   const earnLinks = (skip) => `<div class="earn-links">${EARN.filter((e) => e.href !== skip).map((e) => `<a class="earn" href="${e.href}"><i>${e.icon}</i><b>${e.name}</b><span>${e.pays}</span></a>`).join('')}</div>`;
 
   function home() {
-    const v = voyage();
-    const n = today();
-    const daily = store.get().daily;
-    const dailyDone = daily && daily.day === n && daily.result;
-    const next = PORTS[Math.min(v.unlocked, PORTS.length) - 1];
     main.innerHTML = `
       <article class="home">
         <header class="page-head">
           <p class="eyebrow">A carpentry primer</p>
-          <h1>Fill the hull, one hole at a time.</h1>
-          <p class="lede">Each piece you're dealt goes into the hole, and you choose where. Fill a hole with no wasted squares and it's a Masterpiece.</p>
+          <h1>Which piece fills the hole?</h1>
+          <p class="lede">Quick Carpentry puzzles. Earn doubloons, then bet them at the harbour table.</p>
         </header>
         <section class="start">
           <div class="step">
             <p class="eyebrow">Step 1</p><h2>Earn doubloons</h2>
-            <p>${purse.get() < 5 ? '<b>Your purse is empty.</b> ' : ''}Quick puzzles fill your purse, and the harder ones pay far more.</p>
-            ${earnLinks('#/')}
+            ${earnLinks()}
           </div>
           <a class="step face-off" href="#/games/table">
-            <p class="eyebrow">Step 2</p><h2>Face off at the harbour table</h2>
-            <p>Bet your doubloons against other pirates, with a new round every 45 seconds. The richest pirates top the leaderboard.</p>
+            <p class="eyebrow">Step 2</p><h2>The harbour table</h2>
+            <p>Bet against other pirates, a new round every 45 seconds.</p>
             <span class="btn">Take a seat →</span>
           </a>
         </section>
-        <a class="daily-card" href="#/daily">
-          <div><p class="eyebrow">Hole of the Day #${n}</p>
-          <h3>${dailyDone ? (daily.result.masterpiece ? 'Masterpiece! Come back tomorrow.' : 'Done for today. Come back tomorrow.') : 'Today\'s hole is waiting.'}</h3>
-          <p class="hint">One 20-square hole, the same for everyone. Share your result.</p></div>
-          <span class="btn">${dailyDone ? 'See result' : 'Play'}</span>
-        </a>
-        <section class="voyage-wrap">
-          <div class="purse-bar"><span>Purse ${coin(purse.get())}</span><span>Masterpiece streak <b>${v.streak}</b></span>
-            <a class="btn" href="#/port/${next.id}">Sail to ${next.name} →</a></div>
-          <div class="map-wrap">${mapSvg(v)}</div>
-          <p class="hint">Three holes at every port. Every Masterpiece earns doubloons, more on a streak. Bet them against other pirates at the harbour table. <button class="linkish reset">Start a new voyage</button></p>
-        </section>
       </article>`;
-    $('.reset', main).addEventListener('click', () => {
-      if (confirm('Start the voyage again from Driftwood Quay? Your stars will be reset, but you keep your purse.')) { store.patch('voyage', null); home(); }
-    });
-  }
-
-  function portPage(id) {
-    const idx = PORTS.findIndex((p) => p.id === id);
-    const port = PORTS[idx];
-    const v = voyage();
-    if (!port || idx >= v.unlocked) { location.hash = '#/'; return; }
-    const results = [];
-
-    const header = () => {
-      const cur = voyage();
-      return `<header class="run-bar"><a href="#/" class="back">← Map</a><b>${port.name}</b>
-        <span class="holes">${Array.from({ length: HOLES_PER_PORT }, (_, i) => `<span class="hdot ${results[i] ? (results[i].masterpiece ? 'won' : 'lost') : i === results.length ? 'now' : ''}"></span>`).join('')}</span>
-        <span>Streak <b>${cur.streak}</b></span></header>`;
-    };
-
-    main.innerHTML = `<article class="port-intro">
-      <p class="eyebrow">Port ${idx + 1} of ${PORTS.length}</p><h1>${port.name}</h1>
-      <div class="mentor"><div class="mentor-face" aria-hidden="true">⚓</div><blockquote><p>${port.tip}</p><cite>The old shipwright</cite></blockquote></div>
-      <p class="hint">${HOLES_PER_PORT} holes of ${port.size * 5} squares${port.deal > 1 ? ', with two pieces in your toolbox each turn' : ''}.</p>
-      <button class="btn begin">Start puzzling <kbd>Enter</kbd></button></article>`;
-    const begin = () => playHole();
-    $('.begin', main).addEventListener('click', begin);
-    keyHandler = (e) => { if (e.key === 'Enter') { begin(); e.preventDefault(); } };
-
-    function playHole() {
-      main.innerHTML = '<article><section class="run"></section></article>';
-      holeRun($('.run', main), {
-        size: port.size, deal: port.deal, storm: port.storm, core: port.core, hint: port.hint, header,
-        onFinish: (r) => {
-          const cur = voyage();
-          if (r.masterpiece) {
-            cur.streak++;
-            const reward = 5 * port.size + 2 * (cur.streak - 1);
-            purse.add(reward, cur.streak > 1 ? `Masterpiece · streak ${cur.streak}` : 'Masterpiece');
-            r.reward = reward;
-          } else cur.streak = 0;
-          saveVoyage(cur);
-          results.push(r);
-        },
-        onDone: () => (results.length < HOLES_PER_PORT ? playHole() : portDone()),
-      });
-    }
-
-    function portDone() {
-      const cur = voyage();
-      const stars = results.filter((r) => r.masterpiece).length;
-      cur.stars[port.id] = Math.max(cur.stars[port.id] || 0, stars);
-      cur.unlocked = Math.max(cur.unlocked, Math.min(idx + 2, PORTS.length));
-      saveVoyage(cur);
-      const nextPort = PORTS[idx + 1];
-      main.innerHTML = `<article class="port-done">
-        <p class="eyebrow">${port.name}</p>
-        <h1>${['Back to the drawing board.', 'One Masterpiece.', 'Two Masterpieces!', 'A clean sweep!'][stars]}</h1>
-        <div class="big-stars">${'★'.repeat(stars)}<span>${'☆'.repeat(HOLES_PER_PORT - stars)}</span></div>
-        <div class="done-holes">${results.map((r) => `<figure>${R.board(r.remaining, r.placed, { cell: 16, labels: false })}
-          <figcaption>${r.steps.map((g) => SHARE[g]).join('')} ${r.masterpiece ? '⭐' : r.dead ? '⬛' : '💨'}${r.reward ? ` ${coin('+' + r.reward)}` : ''}</figcaption></figure>`).join('')}</div>
-        <p>Purse ${coin(purse.get())}</p>
-        <p class="actions">${nextPort ? `<a class="btn" href="#/port/${nextPort.id}">Sail to ${nextPort.name} →</a>` : '<span class="verdict good">You sailed the whole voyage!</span>'}
-          <a class="btn ghost" href="#/port/${port.id}" data-again>Replay ${port.name}</a> <a class="btn ghost" href="#/">Map</a></p>
-      </article>`;
-      $('[data-again]', main).addEventListener('click', (e) => { e.preventDefault(); portPage(port.id); });
-    }
   }
 
   // ---------- workshop ----------
@@ -1214,8 +589,7 @@
     async function newRound() {
       try { view = await load(); } catch {
         view = null;
-        body.innerHTML = `<p>The harbour table needs the online server, and it can't be reached from here.</p>
-          <p><a class="btn" href="#/games/bets">Play the practice table</a></p>`;
+        body.innerHTML = `<p>The harbour table needs the online server, and it can't be reached from here.</p>`;
         return;
       }
       offset = view.now - Date.now();
@@ -1467,11 +841,9 @@
   // ---------- router ----------
   const ROUTES = {
     '/': home,
-    '/daily': dailyPage,
     '/games/pair': () => quizPage(QUIZZES.pair),
     '/games/remnant': () => quizPage(QUIZZES.remnant),
     '/games/table': harbourPage,
-    '/games/bets': betPage,
     '/pieces': piecesPage,
     '/two-piece': twoPiecePage,
     '/lab': labPage,
@@ -1483,9 +855,8 @@
     if (onLeave) { const f = onLeave; onLeave = null; f(); }
     C.useSeed(null);
     purse.render();
-    const port = path.match(/^\/port\/(\w+)$/);
-    if (port) portPage(port[1]); else (ROUTES[path] || home)();
-    const navPath = port ? '/' : path;
+    (ROUTES[path] || home)();   // (an old link to the voyage, a port or Hole of the Day: the landing page)
+    const navPath = ROUTES[path] ? path : '/';
     document.querySelectorAll('.nav a').forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + navPath));
     window.scrollTo(0, 0);
   }

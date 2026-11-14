@@ -891,6 +891,12 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   kind of splash screen things, because that first loading screen just looks horrible." So the den loads behind
   the front page's banner look: the monkey, the dotted trail, the X and the sloop.
 
+- **The Carpentry primer trimmed (14 Nov):** "there's a few bits that just aren't interesting. Like the voyage thing
+  we've dropped, [Hole] of the Day we've dropped. Practice bets doesn't seem relevant, just have [the] Harbour table.
+  I think that can really be trimmed down." So no voyage, Hole of the Day or practice table: a short landing page,
+  Which pair fits? and Which gap? to earn doubloons, the harbour table to bet them, and the workshop. The front
+  page's Carpentry picture is Which pair fits? now.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
