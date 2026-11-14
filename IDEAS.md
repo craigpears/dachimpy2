@@ -2711,6 +2711,12 @@ Puzzle Pirates, or one to make), before anything's built.
   or a streak across drops). The user: "I think [they] could win the [duty nav] explanation slot if so", so if
   their explanation is the one that lands, they may be the one credited for it (or teaching it) in the
   tutorial. To settle with the user once they've explained it.
+- **Settled (14 Nov), from another still of the same run:** it's one move's chain, as the guide says. The user:
+  "it is a single. He clears the oranges, and then the red comes down, which I guess is what turns it wild
+  because it was a combo, and then you get it. Okay, that makes sense." The oranges' clear (Single, +3) turned
+  the constellation's place beside it wild (a clear in a chain wilds any slot on or beside what it cleared), the
+  stars falling after it made the second clear (Double, +6), and a red falling into the wild place charted it on
+  step 3: the board's first constellation, 71, times 3 is the +213.
 
 ## Distilling with a higher skill cap: fun variations (13 Nov)
 
