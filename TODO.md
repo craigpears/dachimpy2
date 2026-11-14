@@ -1001,6 +1001,8 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   And (14 Nov): "Umami needs to be in the portraits too as a friend": his portrait in Dachimpy's house (Hugs and
   Cookies), hung with the friends', painted as the capybara. Done 14 Nov: "Umami, Captain Capybara" in the friends'
   room, in his captain's hat and jacket.
+  And (14 Nov), on playing as him: "That's hilarious. I think that needs a tiny thing in What's New is him playable
+  as a character": a smaller update on What's new, a thumbnail of him walking the den in his hat. Done 14 Nov.
 
 - **The Distilling guide trimmed to its best moves (14 Nov):** "I love how we've got the moves like the hook, pull a
   line of browns. But ... some of the moves are good for behind the scenes but need hiding. Like, with these arrows,
