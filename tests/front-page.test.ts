@@ -7,7 +7,7 @@ describe('the front page', () => {
   it('lists the sticky menu in the order its sections appear on the page ("really off-putting", 14 Nov)', () => {
     const nav = page.match(/<nav class="jump"[\s\S]*?<\/nav>/)![0];
     const ids = [...nav.matchAll(/href="#([\w-]+)"/g)].map((m) => m[1]);
-    expect(ids.length).toBeGreaterThan(3);
+    expect(ids.length).toBeGreaterThanOrEqual(2);
     const at = ids.map((id) => {
       const i = page.indexOf(`id="${id}"`);
       expect(i, `#${id} is on the page`).toBeGreaterThan(-1);

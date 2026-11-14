@@ -827,6 +827,23 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   with Evervault's calm and Stripe docs' quieter menu as the pull. The screenshots compared are in notes/theme/ on
   this machine (not committed).
 
+- **The front page's top trimmed: one bar, no odd heading, the choices one at a time? (14 Nov):** "there's quite a
+  bit to trim, like the bit where it's got the pirate den. What is that there for? Are we able to get the menu into
+  one row and trim that somehow? Like, you got what's new twice. And do we really need to open up with new concepts
+  and things when they are the first things being shown on the page underneath it?" And "What are you here for?":
+  "conceptually, yes, but as text, no." And "do each of those things want to be three side by side? What does it
+  look like if they're each full width, so that it makes it so you're looking at one thing at a time?" So one bar:
+  the den's name, a few links (no repeats, not the three the choices already show) and Play the den; no heading
+  over the choices; and the choices shown both ways, side by side and full width, for the user to pick.
+
+- **The choices full width, their pictures captioned; the bar trimmed again (14 Nov):** of full width, one at a
+  time: "B needs some refinement, but it definitely has the better kind of feel ... the pictures are kind of cropped
+  and distorted a bit weirdly. So if anything, ... subtitle text pictures or something like that." And the bar: "do
+  we need that top menu ... maybe ... places, what's new, and [the] call to the den, but ... how it's designed, does
+  that really need a menu item ... hierarchically quite close to ... the test pages ... down the bottom. ... Same with
+  elsewhere ... that really trims down the menus." So each choice full width, its pictures whole (16:9) with a
+  caption under each; the bar just Places, What's new and Play the den; How it's designed linked at the foot.
+
 ## Spotted along the way (not asked for)
 
 - **The camera indoors:** walk into the shack and its near wall hides you. Fade it out then.
