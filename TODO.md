@@ -534,6 +534,10 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   Maybe that can come under the tutorials because that still has some relevance until we have something that
   supersedes it. Just that it's a bit of fun for carpentry ... it just needs to move away from being the front and
   center." Started 14 Nov.
+  And the test pages at the foot (14 Nov): "I don't want them to be like guiding people there, but I want some way of
+  easily getting back to them just from the home page ... a link at the bottom to here are a few test pages, mostly
+  for me, but ... if you want to see distilling being played at high speed, or the distilling setups that the
+  tutorials have been trained on, that's all here."
 
 ## Spotted along the way (not asked for)
 
