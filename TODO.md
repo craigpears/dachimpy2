@@ -521,6 +521,15 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   going right through a black channel or a brown one then a black one into the target (DISTILLING.md, "The late
   game: whites go right"); and the first target started further left, "a person would not be wanting to put
   themselves under so much pressure".
+- **A welcome page tying the tutorials together: "what are you here for?" (14 Nov):** "some kind of a page that
+  starts tying together like the tutorial side of this ... when you come in, you should be ... given the option of
+  ... what are you here for?" The choices: "just having a bit of fun and a look around" (the den); "I want to try
+  some interesting new concepts" (the race and the rest); "I want to look at the new tutorials", shown by puzzle,
+  for now Sailing and Distilling, noted as proofs of concept; and "I just want to practice a puzzle", answered
+  plainly: "That's not really the goal here. I'm a tutorial website, not a puzzle practice." For each tutorial "a
+  nice graphical link to either the animated 3D guided version or the 2D version", explained at the start: "we
+  have a nice fun version. They help play alongside you and give you the situations and such ... there are static
+  versions of everything for those that prefer it." (Sailing has no read version yet: Tzz's is still to do.)
 
 ## Spotted along the way (not asked for)
 
