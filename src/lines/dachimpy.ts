@@ -44,7 +44,7 @@ export const TOUR_LINES = {
   ],
   friends: [
     'And this is the best room: the people! My friends, from all those years.',
-    'The middle of the wall is for the truly special ones.',
+    'Everyone on these walls is special to me! Every single one.',
   ],
 } as const;
 
@@ -120,22 +120,26 @@ export const ON_AN_EXHIBIT = {
   gone: 'Oh, the new one! It works perfectly. Shame, really.',
 } as const;
 
-/** Their friends' portraits' titles, by id (src/den-dachimpy.ts's FRIENDS): the den's pirates by a title of
-    Dachimpy's, and Dachimpy's own portraits with friends by their real titles (IDEAS.md, "Dachimpy's pirate
-    pages and portraits, both oceans"). Pirate names only. */
+/** Their friends' portraits' titles, by id (src/den-dachimpy.ts's FRIENDS): the den's pirates, and friends with
+    no portrait of the two of them, by a title of Dachimpy's; Dachimpy's own portraits with friends by their real
+    titles (IDEAS.md, "Dachimpy's pirate pages and portraits, both oceans"). Pirate names only. */
 export const FRIEND_TITLES = {
   dalnoth: 'Dalnoth, First on the Board',
   dignity: 'Dignity, Never Off Duty',
   mischievious: 'Mischievious, at a Wedding',
   monkeyMan: 'The Monkey Man',
   gravee: 'Oh, Gawd!',
+  balloffire: 'Balloffire, Top Gunner',
   kikkit: 'Kikkit: Cursed & Cookied',
   zizzy: 'Zizzy: Pinky and the Pink',
+  daquan: 'Daquan: Scabard\'s Group',
   sanne: 'Sanne: Monkey Couple',
+  whiterose: 'Whiterose, Heart of the Game',
   tzz: 'Tzz, and D\'rizzle',
   helium: 'Helium, Eyebrows Pending',
   roobear: 'Roobear, Ears Roobed',
   welcomeBack: 'Welcome Back Dachimpy!',
+  everyone: 'Everyone I Blockaded With',
   thanks: 'Thank You',
 } as const;
 /** About each friend's portrait, by id, as you stop by it (once a visit each). */
@@ -145,21 +149,27 @@ export const ON_A_FRIEND = {
   mischievious: 'Mischievious! Always a wedding somewhere.',
   monkeyMan: 'Ha, the Monkey Man! That\'s me, 2007. Some things never change.',
   gravee: 'Oh, Gawd! Gravee and me, in the jaws of her Familiar Plaice. That face says it all.',
-  kikkit: 'Kikkit! Truly special. Every Valentine\'s, a portrait, and always cookies.',
-  zizzy: 'Zizzy! Truly special. Pinky and the pink: both of us in pink, of course.',
-  sanne: 'Sanne! Truly special. Monkey Couple, 2007: matching red, a monkey each.',
+  balloffire: 'Balloffire! The best gunner I know. Watching her gun is pure magic.',
+  kikkit: 'Kikkit! Every Valentine\'s, a portrait, and always cookies.',
+  zizzy: 'Zizzy! Pinky and the pink: both of us in pink, of course.',
+  daquan: 'Daquan! My partner in crime through the whole thing. Right in the middle, where he belongs.',
+  sanne: 'Sanne! Monkey Couple, 2007: matching red, a monkey each.',
+  whiterose: 'Whiterose! For the life of the game, she\'d switch from Vanguard to the other side. Miss you, Whiterose!',
   tzz: 'Tzz! She gave me my best teaming tip: don\'t stall. Ever.',
   helium: 'Helium! Ask about the eyebrows. Actually, don\'t.',
   roobear: 'Roobear! Robert roobed my ears too.',
   welcomeBack: 'Fable welcomed me back, last June! It was so good to be home.',
+  everyone: 'Yay, all of you! Names change, I forget, but every one of you is here.',
   thanks: 'That one\'s for everyone! It\'s the people that made it.',
 } as const;
 /** The page for "Welcome Back Dachimpy!" (with Fable, whose look's still to check: no figure). */
 export const WELCOME_BACK = 'With Fable, June 2025.';
 /** The thank-you, on a page in the friends' room: to everyone who makes Puzzle Pirates what it is. */
 export const THANKS = 'To my friends on these walls, and everyone who isn\'t: everyone who makes Puzzle Pirates such an awesome place. Thank you.';
-/** The sign over the truly special ones, in the middle of the friends' wall. */
-export const SPECIAL = 'Truly special';
+/** A page for everyone else they blockaded with, whose names have changed or slipped away (the user, 14 Nov:
+    "there are many names of people like that I blockaded with, but they keep changing their names, and I can't
+    remember who they are. So they're here"). Pirate names only, and only names checked on yoweb. */
+export const EVERYONE = 'To everyone I blockaded with, whatever you\'re called now: Mems, Kenchio, my old Hunter crew, and all of you whose names I\'ve lost. You\'re here!';
 
 /** After the tour, as you wander: now and then, while they're near. */
 export const CHATTER = [
@@ -211,6 +221,7 @@ export const CHARACTER: Character = {
     { on: '14 Nov', said: 'usually it should be more like, yay, cookies, and kind of an excited reaction. I think that kind of buzzy, excited, great energy, I think is much more me.' },
     { on: '14 Nov', said: 'Apparently people say it fits me still, but maybe do the excited reaction first as well. We can have both.' },
     { on: '14 Nov', said: 'Each version requires some variation of shooting [Dalnoth] ... and then it\'s become tradition.' },
+    { on: '14 Nov', said: 'I\'m feeling a bit bad about having a few people in my house that are labelled as the special ones, because everybody\'s special.' },
   ],
   lines: [
     { when: 'At the door when you come in, a hug first', says: AT_THE_DOOR, each: { first: 'Your first visit', again: 'Coming back' } },
@@ -225,7 +236,7 @@ export const CHARACTER: Character = {
     { when: 'About the exhibit you\'ve stopped by or turned to look at (once a visit each), and under it close up', says: ON_AN_EXHIBIT },
     { when: 'The titles on their friends\' portraits', says: FRIEND_TITLES },
     { when: 'About the friend\'s portrait you\'ve stopped by (once a visit each)', says: ON_A_FRIEND },
-    { when: 'The thank-you on the friends\' wall, and the sign over the truly special ones', says: { thanks: THANKS, special: SPECIAL, welcomeBack: WELCOME_BACK } },
+    { when: 'The pages on the friends\' wall: the thank-you, everyone they blockaded with, and "Welcome Back Dachimpy!"', says: { thanks: THANKS, everyone: EVERYONE, welcomeBack: WELCOME_BACK } },
     { when: 'Now and then, as you wander after the tour', says: CHATTER },
     { when: 'As you leave', says: [GOODBYE] },
     {

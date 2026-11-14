@@ -74,7 +74,7 @@ function museumRow(x0) {
 const M0 = 4.5;
 /** How long the museum is: room for every exhibit, a step at either end. */
 export const MUSEUM_LEN = Math.ceil(museumRow(0).end + 1.0);
-const M1 = M0 + MUSEUM_LEN, F1 = M1 + 16;
+const M1 = M0 + MUSEUM_LEN, F1 = M1 + 21;
 /** Three rooms in a row, the camera looking in from the front (their front walls cut low, a doll's house):
     the hall you come in at, the museum, and their friends' room. */
 export const PLAN = {
@@ -111,8 +111,16 @@ export function hang() {
 /** What Dachimpy says of an exhibit or a friend's portrait (by its id), as you stand looking at it, or under
     it in the close view. Null for anything else. */
 export const exhibitLine = (id) => ON_AN_EXHIBIT[id] ?? ON_A_FRIEND[id] ?? null;
-const FC = (M1 + F1) / 2, SMALL = { w: 0.8, h: 1.0, y: 1.8 }, BIG = { w: 1.08, h: 1.35, y: 1.82 };
+const SMALL = { w: 0.8, h: 1.0, y: 1.8 }, BIG = { w: 1.08, h: 1.35, y: 1.82 };
+/** The wall's middle (x), and the step between frames: the middle's big ones, from them to the small ones, and
+    between the small ones. */
+export const FC = (M1 + F1) / 2;
+const STEP = { big: 1.45, edge: 1.5, small: 1.0 };
+/** Where the `i`th frame from the middle hangs, on `side` (-1 left, +1 right): the middle's two either side of
+    its centre first, then the small ones on out. */
+const along = (side, i) => FC + side * (i < 3 ? i * STEP.big : 2 * STEP.big + STEP.edge + (i - 3) * STEP.small);
 const friend = (id, x, o) => ({ id, title: FRIEND_TITLES[id], x, ...SMALL, ...o });
+const mid = (id, x, o) => friend(id, x, { ...BIG, middle: true, ...o });
 /** A friend's portrait, painted close (knees up, big in the frame): them (their look in PIRATES, `dress` over
     it, turned `yaw`), and Dachimpy beside them if they shared it (`with`: Dachimpy's look, dressed as they
     were for that sitting). */
@@ -154,26 +162,37 @@ const KIKKIT_CURSED = { hat: 'bandana', hatCol: 'red', top: 'frilly', topCol: 'w
     the pink kilt, a monkey on the shoulder. Zizzy in pink, her pink hair loose to the shoulders. */
 export const IN_PINK = { patch: true, fam: 'monkey', famCol: 'brown' };
 const ZIZZY_PINK = { hair: 'wavy', earring: 'both' };
+/** "Scabard's group" (Emerald, 31 Mar 2008, at Scabard's Estate, Daquan's copy and Dachimpy's): Dachimpy in a pink
+    coat and pink breeches, short brown hair (never long), a full beard, gold hoops, barefoot. Daquan as his look is, from that
+    sitting. (Fordenis and Scabard, in it too, aren't drawn: their looks aren't in the den. Nor are everyone's
+    false noses and glasses: there's nothing in the wardrobe for them.) */
+export const IN_PINK_COAT = {
+    hat: 'none', hair: 'short', hairCol: 'brown', beard: 'full', earring: 'both', patch: false,
+    top: 'swashbuckler', topCol: 'pink', topCol2: 'pink', waist: 'none', legs: 'pants', legsCol: 'pink', bareLegs: false, feet: 'bare', fam: 'none',
+};
+const DAQUAN_GROUP = { hat: 'none', feet: 'bare' };
 export const FRIENDS = [
-    friend('dalnoth', FC - 7.0, { portrait: sat('Dalnoth', 'sea') }),
-    friend('dignity', FC - 6.0, { portrait: sat('Dignity', 'den') }),
-    friend('mischievious', FC - 5.0, { portrait: sat('Mischievious', 'cafe') }),
-    friend('monkeyMan', FC - 4.0, { portrait: sat('Dachimpy', 'beach', { dress: MONKEY_MAN }) }),
-    friend('gravee', FC - 2.95, { portrait: sat('Gravee', 'sea', { dress: GRAVEE_IN_RAGS, with: IN_RAGS }) }),
-    friend('kikkit', FC - 1.45, { ...BIG, special: true, portrait: sat('Kikkit', 'bloodmoon', { dress: KIKKIT_CURSED, with: CURSED }) }),
-    friend('zizzy', FC, { ...BIG, special: true, portrait: sat('Zizzy', 'night', { dress: ZIZZY_PINK, with: IN_PINK }) }),
+    friend('dalnoth', along(-1, 8), { portrait: sat('Dalnoth', 'sea') }),
+    friend('dignity', along(-1, 7), { portrait: sat('Dignity', 'den') }),
+    friend('mischievious', along(-1, 6), { portrait: sat('Mischievious', 'cafe') }),
+    friend('monkeyMan', along(-1, 5), { portrait: sat('Dachimpy', 'beach', { dress: MONKEY_MAN }) }),
+    friend('gravee', along(-1, 4), { portrait: sat('Gravee', 'sea', { dress: GRAVEE_IN_RAGS, with: IN_RAGS }) }),
+    friend('balloffire', along(-1, 3), { portrait: sat('Balloffire', 'night') }),
+    mid('kikkit', along(-1, 2), { portrait: sat('Kikkit', 'bloodmoon', { dress: KIKKIT_CURSED, with: CURSED }) }),
+    mid('zizzy', along(-1, 1), { portrait: sat('Zizzy', 'night', { dress: ZIZZY_PINK, with: IN_PINK }) }),
+    mid('daquan', FC, { portrait: sat('Daquan', 'beach', { dress: DAQUAN_GROUP, with: IN_PINK_COAT }) }),
     // (Sanne turned a little more, so her blonde hair, tied back, shows)
-    friend('sanne', FC + 1.45, { ...BIG, special: true, portrait: sat('Sanne', 'beach', { with: IN_RED, yaw: -0.45 }) }),
-    friend('tzz', FC + 2.95, { portrait: sat('Tzz', 'autumn') }),
-    friend('helium', FC + 4.0, { portrait: sat('Helium', 'night') }),
-    friend('roobear', FC + 5.0, { portrait: sat('Roobear', 'pinksea') }),
-    friend('welcomeBack', FC + 6.0, { page: 'welcomeBack' }),
-    friend('thanks', FC + 7.0, { page: 'thanks' }),
+    mid('sanne', along(1, 1), { portrait: sat('Sanne', 'beach', { with: IN_RED, yaw: -0.45 }) }),
+    mid('whiterose', along(1, 2), { portrait: sat('Whiterose', 'bloodmoon') }),
+    friend('tzz', along(1, 3), { portrait: sat('Tzz', 'autumn') }),
+    friend('helium', along(1, 4), { portrait: sat('Helium', 'night') }),
+    friend('roobear', along(1, 5), { portrait: sat('Roobear', 'pinksea') }),
+    friend('welcomeBack', along(1, 6), { page: 'welcomeBack' }),
+    friend('everyone', along(1, 7), { page: 'everyone' }),
+    friend('thanks', along(1, 8), { page: 'thanks' }),
 ];
 /** The friends' wall (its face's z). */
 export const FRIENDS_WALL = FROOM.z0 + WALL_T;
-/** The sign over the truly special ones. */
-export const SPECIAL_SIGN = { x: FC, w: 2.4, h: 0.42, y: 2.95 };
 // ---------- the furniture ----------
 /** The cookie plate, on the hall's table: walk up to it for another. */
 export const COOKIES = { x: 2.7, z: -1.6, near: 1.35 };
@@ -182,6 +201,8 @@ export const COOKIES = { x: 2.7, z: -1.6, near: 1.35 };
 export const MODEL = { z: 1.15 };
 /** Their trinkets' shelf, against the friends' room's right-hand wall. */
 export const SHELF = { x: F1 - 0.45, z: -1.7, yaw: -Math.PI / 2 };
+/** How far from the middle the candles stand: between the middle's frames and the small ones. */
+const CANDLES = 2 * STEP.big + (STEP.edge + BIG.w / 2 - SMALL.w / 2) / 2;
 export function furnish() {
     const H = hang();
     return [
@@ -194,11 +215,11 @@ export function furnish() {
         // The museum: a runner down it, and the model of the sim's board by "Blockade!".
         { kind: 'runner', x: (MUSEUM.x0 + MUSEUM.x1) / 2, z: 0.35, col: '#2a5a7a' },
         { kind: 'simModel', x: H.inPlay.x, z: MODEL.z, yaw: Math.PI },
-        // The friends' room: a rug, candles either side of the truly special ones, a chair, the trinkets' shelf.
+        // The friends' room: a rug, candles either side of the middle, a chair, the trinkets' shelf.
         { kind: 'rug', x: FC, z: 0.5, col: '#5b2c6f' },
-        { kind: 'candelabra', x: FC - 2.28, z: FROOM.z0 + 0.45 },
-        { kind: 'candelabra', x: FC + 2.28, z: FROOM.z0 + 0.45 },
-        { kind: 'armchair', x: FC - 5.2, z: 1.4, yaw: 2.4, col: '#c46a8f' },
+        { kind: 'candelabra', x: FC - CANDLES, z: FROOM.z0 + 0.45 },
+        { kind: 'candelabra', x: FC + CANDLES, z: FROOM.z0 + 0.45 },
+        { kind: 'armchair', x: FC - 6.2, z: 1.4, yaw: 2.4, col: '#c46a8f' },
         { kind: 'shelf', x: SHELF.x, z: SHELF.z, yaw: SHELF.yaw },
     ];
 }

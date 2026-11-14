@@ -1025,6 +1025,24 @@ Meridian ... Also check all my portraits for connections to other friends on bot
 - **The pink wig and kilt** are Dachimpy's on Meridian since 2007 (the pink beehive in "Peppy and her Monkey",
   "Anchy's HAWT pink moment", "Pinky and the pink"), a kilt in "I love you babae". And on Emerald "Reverie" is the crew
   (the user's "Who in Reverie could be" the race commentator).
+- **Checked 14 Nov, for the friends' room ("everybody's special"):** **Daquan** (Emerald, once Hunter; Captain of
+  Infestus, Prince of Subtle Tease; on Meridian too): the one portrait with Dachimpy is "Scabard's group" (Emerald,
+  31 Mar 2008, at Scabard's Estate: Dachimpy in pink, Fordenis, Scabard, Daquan, all in false noses and glasses);
+  his look then, from it and "Daquan" (18 Jan 2008): tan, short black hair, a black bandana, a black goatee and
+  moustache, gold hoops, a long black coat with gold buttons, black breeches. His portrait now is pink and gold with
+  an octopus (Emerald), pink rags with a monkey (Meridian). **Balloffire** (Emerald, Senior Officer of Tilted; #1
+  Gunner): tan, long blonde hair, a big navy hat, an eyepatch, navy top bare at the middle, gold belt, navy
+  trousers, a monkey; no portrait with Dachimpy. (A Meridian Balloffire, also #1 Gunner, has no portrait.)
+  **Whiterose** (Meridian, once Viridian; YPPedia: a governor of Conglin, Garden Cradle, Viridis, Olive and Terra;
+  "Vanguard Memorial Fort" in her portraits): fair, long wavy blonde hair crowned with red roses, an eyepatch, a red
+  coat faced in black, a short red skirt, a seahorse; no portrait with Dachimpy. **Mems:** an Emerald pirate page
+  (Officer of Skull Bashers) and a Meridian one; which is the old Viridian friend, and her look, not known.
+  **Kenchio:** real, on Emerald (Captain of Sinica, King of Invicta; governor of Aimuari, as in Daquan's 2012
+  portraits) and Meridian. **Seatner:** no pirate by that name, nor Seetner or Seatnar, on either ocean: left out.
+  **The Hunter crew:** yoweb shows only today's crews, and YPPedia has no Aurora on Hunter (Auroras on Viridian,
+  2010 to 2012, then Meridian; Sage, Cobalt, Obsidian). YPPedia does list Dachimpy as a senior officer of Kikkit's
+  **Cookies Reign Supreme** on Hunter (2009, flag Swinging Pink Bananas, Dachimpy's flag there), and a Viridian
+  Dachimpy in Silver Dragons (Dragon Lords). So the page says "my old Hunter crew", unnamed, till the user knows.
 - **Sanne's look** (Meridian portraits): fair skin, blonde hair tied back, a monkey on her shoulder; matching red
   (shirt, trousers, a gold buckle, white boots) in "Monkey Couple"; a gold crown and sceptre, green and black, in
   "I love you babae". **Zizzy's:** fair skin, long pink hair, a pink off-shoulder gown.
@@ -1067,8 +1085,8 @@ Still open:
 - The trinkets are stand-ins (a jar of cookies, a model sloop, a ship in a bottle, a gold cup, a chest): the
   real ones are on Dachimpy's pirate pages, to put on the shelf. Mini and the cuddly monkeys: what they look like,
   from the user's photos, still to come.
-- Fable (in "Welcome Back Dachimpy!") and the other friends in Dachimpy's portraits (Daquan, Milleh, Scabard and
-  the rest): their looks to check before they're drawn; Fable's frame is its title on a page meanwhile.
+- Fable (in "Welcome Back Dachimpy!") and the other friends in Dachimpy's portraits (Milleh, Scabard, Fordenis and
+  the rest; Daquan's drawn since 14 Nov): their looks to check before they're drawn; Fable's frame is its title on a page meanwhile.
   "Swan Molestation" waits for a swan; "Cursed & Cookied" is drawn as Kikkit beside Dachimpy, its scene not
   recreated.
 - The cookie kept (in your hold, or on a shelf at home): not yet; a cookie each visit for now.

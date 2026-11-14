@@ -8,11 +8,11 @@
    shell's exhibits); Tab for them all close up, each with its plaque (picture-view.js). */
 import { PIRATES } from '../den-look.js';
 import {
-  PLAN, ARRIVE, WALLS, FURNISH, EXHIBITS, hang, exhibitLine, FRIENDS, FRIENDS_WALL, SPECIAL_SIGN, TOUR, stopAt,
+  PLAN, ARRIVE, WALLS, FURNISH, EXHIBITS, hang, exhibitLine, FRIENDS, FRIENDS_WALL, TOUR, stopAt,
   HUG, COOKIE, hugSpot, atCookies, MUSEUM_LEN,
 } from '../den-dachimpy.js';
 import { blocksOf, readSecs } from '../den-houses.js';
-import { AT_THE_DOOR, THE_COOKIE, ANOTHER_COOKIE, TOUR_LINES, PLAQUES, PANELS, CHATTER, GOODBYE, THANKS, SPECIAL, WELCOME_BACK } from '../lines/dachimpy.js';
+import { AT_THE_DOOR, THE_COOKIE, ANOTHER_COOKIE, TOUR_LINES, PLAQUES, PANELS, CHATTER, GOODBYE, THANKS, EVERYONE, WELCOME_BACK } from '../lines/dachimpy.js';
 import { IN_DACHIMPYS_HOUSE } from '../lines/you.js';
 import { PACE } from '../chatter.js';
 import { FURNITURE, place } from './furniture.js';
@@ -24,9 +24,10 @@ import { cine } from './cine.js';
 import { V3 } from './world.js';
 
 /** The pages: the museum's panels of story, the portrait with Fable (whose look's still to check: its title,
-    no figure), and the thank-you (src/lines/dachimpy.ts). */
+    no figure), the one for everyone they blockaded with, and the thank-you (src/lines/dachimpy.ts). */
 const pageOf = (id) => {
   if (id === 'welcomeBack') return paintPage({ title: 'Welcome Back Dachimpy!', text: WELCOME_BACK, kind: 'night' });
+  if (id === 'everyone') return paintPage({ title: 'Everyone I Blockaded With', text: EVERYONE, withHeart: true });
   if (id === 'thanks') return paintPage({ title: 'Thank You', text: THANKS, withHeart: true });
   return paintPage({ title: PANELS[id].title, text: PANELS[id].text, withHeart: id === 'began' || id === 'donation' });
 };
@@ -59,14 +60,13 @@ export const DACHIMPY_HOUSE = {
     // (a few sconces down the museum, between its frames)
     const mus = EXHIBITS.filter((e) => HUNG[e.id].room === 'museum').map((e) => HUNG[e.id]);
     for (let i = 1; i < mus.length - 1; i += 3) G.ticks.push(place(R, FURNITURE.sconce({ y: 2.7 }), (mus[i].x + mus[i].w / 2 + mus[i + 1].x - mus[i + 1].w / 2) / 2, mus[i].wall, 0));
-    // ---------- their friends, the truly special ones in the middle under their sign ----------
+    // ---------- their friends, the closest in the middle (no one labelled: everybody's special) ----------
     for (const fr of FRIENDS) {
-      const f = place(R, FURNITURE.frame({ w: fr.w, h: fr.h, y: fr.y, plaque: fr.title, ornate: !!fr.special || !!fr.page }), fr.x, FRIENDS_WALL, 0);
+      const f = place(R, FURNITURE.frame({ w: fr.w, h: fr.h, y: fr.y, plaque: fr.title, ornate: !!fr.middle || !!fr.page }), fr.x, FRIENDS_WALL, 0);
       if (fr.portrait) G.queue.push({ f, portrait: fr.portrait });
       else f.setPicture(pageTexture(page(fr.page)));
       G.exhibits.push({ id: fr.id, x: fr.x, y: fr.y, z: FRIENDS_WALL });
     }
-    place(R, FURNITURE.sign({ text: SPECIAL, w: SPECIAL_SIGN.w, h: SPECIAL_SIGN.h, y: SPECIAL_SIGN.y, col: '#6a2a4a' }), SPECIAL_SIGN.x, FRIENDS_WALL, 0);
     /** Paints the next friend's portrait waiting (one a tick: each is a little work). */
     const paintNext = () => {
       const q = G.queue.shift();

@@ -1469,6 +1469,8 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 > "Apparently people say it fits me still, but maybe do the excited reaction first as well. We can have both." (the user, 14 Nov)
 >
 > "Each version requires some variation of shooting [Dalnoth] ... and then it's become tradition." (the user, 14 Nov)
+>
+> "I'm feeling a bit bad about having a few people in my house that are labelled as the special ones, because everybody's special." (the user, 14 Nov)
 
 ### At the door when you come in, a hug first
 
@@ -1501,7 +1503,7 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
   - "Bugs and all. Especially the bugs."
 - *Into the friends' room:*
   - "And this is the best room: the people! My friends, from all those years."
-  - "The middle of the wall is for the truly special ones."
+  - "Everyone on these walls is special to me! Every single one."
 
 ### The plaques under the pictures, in order
 
@@ -1573,13 +1575,17 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 - *mischievious:* "Mischievious, at a Wedding"
 - *monkeyMan:* "The Monkey Man"
 - *gravee:* "Oh, Gawd!"
+- *balloffire:* "Balloffire, Top Gunner"
 - *kikkit:* "Kikkit: Cursed & Cookied"
 - *zizzy:* "Zizzy: Pinky and the Pink"
+- *daquan:* "Daquan: Scabard's Group"
 - *sanne:* "Sanne: Monkey Couple"
+- *whiterose:* "Whiterose, Heart of the Game"
 - *tzz:* "Tzz, and D'rizzle"
 - *helium:* "Helium, Eyebrows Pending"
 - *roobear:* "Roobear, Ears Roobed"
 - *welcomeBack:* "Welcome Back Dachimpy!"
+- *everyone:* "Everyone I Blockaded With"
 - *thanks:* "Thank You"
 
 ### About the friend's portrait you've stopped by (once a visit each)
@@ -1589,19 +1595,23 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 - *mischievious:* "Mischievious! Always a wedding somewhere."
 - *monkeyMan:* "Ha, the Monkey Man! That's me, 2007. Some things never change."
 - *gravee:* "Oh, Gawd! Gravee and me, in the jaws of her Familiar Plaice. That face says it all."
-- *kikkit:* "Kikkit! Truly special. Every Valentine's, a portrait, and always cookies."
-- *zizzy:* "Zizzy! Truly special. Pinky and the pink: both of us in pink, of course."
-- *sanne:* "Sanne! Truly special. Monkey Couple, 2007: matching red, a monkey each."
+- *balloffire:* "Balloffire! The best gunner I know. Watching her gun is pure magic."
+- *kikkit:* "Kikkit! Every Valentine's, a portrait, and always cookies."
+- *zizzy:* "Zizzy! Pinky and the pink: both of us in pink, of course."
+- *daquan:* "Daquan! My partner in crime through the whole thing. Right in the middle, where he belongs."
+- *sanne:* "Sanne! Monkey Couple, 2007: matching red, a monkey each."
+- *whiterose:* "Whiterose! For the life of the game, she'd switch from Vanguard to the other side. Miss you, Whiterose!"
 - *tzz:* "Tzz! She gave me my best teaming tip: don't stall. Ever."
 - *helium:* "Helium! Ask about the eyebrows. Actually, don't."
 - *roobear:* "Roobear! Robert roobed my ears too."
 - *welcomeBack:* "Fable welcomed me back, last June! It was so good to be home."
+- *everyone:* "Yay, all of you! Names change, I forget, but every one of you is here."
 - *thanks:* "That one's for everyone! It's the people that made it."
 
-### The thank-you on the friends' wall, and the sign over the truly special ones
+### The pages on the friends' wall: the thank-you, everyone they blockaded with, and "Welcome Back Dachimpy!"
 
 - *thanks:* "To my friends on these walls, and everyone who isn't: everyone who makes Puzzle Pirates such an awesome place. Thank you."
-- *special:* "Truly special"
+- *everyone:* "To everyone I blockaded with, whatever you're called now: Mems, Kenchio, my old Hunter crew, and all of you whose names I've lost. You're here!"
 - *welcomeBack:* "With Fable, June 2025."
 
 ### Now and then, as you wander after the tour
