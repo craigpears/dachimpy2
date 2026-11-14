@@ -2717,6 +2717,13 @@ Puzzle Pirates, or one to make), before anything's built.
   the constellation's place beside it wild (a clear in a chain wilds any slot on or beside what it cleared), the
   stars falling after it made the second clear (Double, +6), and a red falling into the wild place charted it on
   step 3: the board's first constellation, 71, times 3 is the +213.
+- **Montebello's explanation (14 Nov, pasted by the user), the correction:** two ways to make wilds:
+  - a constellation charted as part of a combo makes the next constellation's centre ring wholly wild;
+  - a combo that charts no constellation turns the places it cleared, and the places beside them, wild.
+  In the run: the reds' clear on "Double" turned wild the constellation's place that already held a blue
+  star (the wrong colour till then), and with it wild the blue counted, so the constellation charted on the
+  "Triple" step. No star had to fall into it. (Matches the guide; Montebello's the clearer telling, and the
+  one to credit for the explanation.)
 - **Why Dignity teaches it (14 Nov):** the user: "Maybe we could put Dignity in the game as [the one] to get [it
   from], because ... she's got to catch these pesky pirates trying to figure out the ways they're going around
   their little outpost." Dignity, the checkpoint's commander, charts the stars to find the hidden ways pirates
