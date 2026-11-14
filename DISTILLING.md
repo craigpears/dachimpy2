@@ -2133,6 +2133,11 @@ past-saving ones (P13, P14, P16, P18, P19) recorded as "past saving, the lead-up
 judged batch moved under its themes, two new ones among them: "Close, not trapped" (P20, P21, P22: P21 and P22 were found
 as like P5 and P6, trapped; the user judged them not, so they moved, and the challenge test now checks the reader no
 longer reads them so) and "Hoisting" (P17). P26 moved to quick sorting (its doomed white given up, it reads so).
+- **Still doing it (14 Nov, after the merge; `notes/distilling/47-cc1-still-no-plan.webp`):** "No, it's still doing
+  it." The CC^1 bot a while in: its column second from the fire lit, whites in it broken up by blacks, the rest of the
+  whites spread across the middle and the bottom rows of columns 2 to 8, no buffer of junk built. "Maybe I'll keep
+  refreshing and go back and show ... where it actually starts to diverge. Because again, this is too late." The
+  opening (P.BUFFER, P.KEEP_FILL) is still off; earlier boards from the user to come, to aim the next try at.
 - **Trapped, measured by what it takes** (src/distill-risk.ts, `freeCost`; src/distill-read.ts, `isTrapped`): a white's
   cheapest way out in one drag or two (the swaps, two more a drag to spot and pick up: junk brought into its place,
   after any one piece of junk near it moved first). Trapped when there's none or it's 14 or more; or near the top (two
