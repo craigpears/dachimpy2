@@ -3,13 +3,14 @@
    lines and plaques src/lines/dachimpy.ts's, yours you.ts's. This places the shared furniture (furniture.js:
    the cookie table, the model of the old sim's board, the trinkets' shelf, the plaques), hangs the exhibits
    (exhibits.js: the screenshots and the pages of story) and their friends' portraits (portraits.js), and plays
-   them: at the door, every visit, a hug and then a cookie (more from the plate on the hall's table); then they
+   them: at the door, every visit, a hug and then a cookie, really handed over (the plate held out, you take one,
+   it's in your hand and you munch it, crumbs and all: held.js's pieces); more from the plate on the hall's table; then they
    show you round (the shell walks them: they're its `host`), and tell you about whatever you stop by (the
    shell's exhibits); Tab for them all close up, each with its plaque (picture-view.js). */
 import { PIRATES } from '../den-look.js';
 import {
   PLAN, ARRIVE, WALLS, FURNISH, EXHIBITS, hang, exhibitLine, FRIENDS, FRIENDS_WALL, TOUR, stopAt,
-  HUG, COOKIE, hugSpot, atCookies, MUSEUM_LEN,
+  HUG, hugSpot, cookieBeat, cookieApart, atCookies, MUSEUM_LEN,
 } from '../den-dachimpy.js';
 import { blocksOf, readSecs } from '../den-houses.js';
 import { AT_THE_DOOR, THE_COOKIE, ANOTHER_COOKIE, TOUR_LINES, PLAQUES, PANELS, CHATTER, GOODBYE, THANKS, EVERYONE } from '../lines/dachimpy.js';
@@ -18,7 +19,8 @@ import { PACE } from '../chatter.js';
 import { FURNITURE, place } from './furniture.js';
 import { paint, paintFlat } from './portraits.js';
 import { bliss } from './creatures.js';
-import { person, IDLES } from './props-people.js';
+import { person, IDLES, reachTo, MOUTH } from './props-people.js';
+import { HELD, inHand, crumbs } from './held.js';
 import { photoTexture, photoArt, paintPage, pageTexture } from './exhibits.js';
 import { cine } from './cine.js';
 import { V3 } from './world.js';
@@ -46,6 +48,7 @@ export const DACHIMPY_HOUSE = {
       if (piece.tick) G.ticks.push(piece);
     }
     G.blocks = blocksOf(FURNISH);
+    G.crumbs = crumbs(R);   // (a cookie munched)
     // ---------- the exhibits: the hall's, then the museum's, oldest first ----------
     const HUNG = hang();
     G.exhibits = [];
@@ -76,7 +79,8 @@ export const DACHIMPY_HOUSE = {
 
     // ---------- them (a talking pirate: props-people.js) ----------
     G.themP = person({
-      look: PIRATES.Dachimpy, parent: R, x: ARRIVE.them.x, z: ARRIVE.them.z, idle: 'sway', say: H.say,
+      // (a plate of cookies always to hand, put away for the hug: the wardrobe's, held.js's)
+      look: { ...PIRATES.Dachimpy, hand: 'cookies' }, parent: R, x: ARRIVE.them.x, z: ARRIVE.them.z, idle: 'sway', say: H.say,
       // (after their tour, a word now and then while you're by them, never over something they're saying)
       lines: CHATTER, random: true, gap: PACE.ASIDE,
       earshot: () => !cine && !G.greet && !H.talking() && (G.themP.talking() || !H.house.lines.has(G.them)) && Math.hypot(G.them.x - H.you.x, G.them.z - H.you.z) < 4.5,
@@ -104,6 +108,7 @@ export const DACHIMPY_HOUSE = {
     function endGreet() {
       const g = G.greet;
       G.greet = null;
+      if (g.cookie) inHand(H.you, null);
       bliss(H.you, false); IDLES.stand(H.you);
       G.themP.setIdle('sway');
       return g;
@@ -133,9 +138,18 @@ export const DACHIMPY_HOUSE = {
         }
         return;
       }
-      // the cookie
-      if (g.t >= g.read + COOKIE.said && !g.said) { g.said = true; H.say(you, IN_DACHIMPYS_HOUSE.cookie, 1.8); }
-      if (g.t >= g.read + COOKIE.done) {
+      // the cookie, handed over: you reach for the plate, take one, munch it (src/den-dachimpy.ts's beats)
+      const b = cookieBeat(g.t, g.read), plate = G.themP.prop;
+      // (a step back from the hug, to have room for the plate between you)
+      if (g.spot.side) { them.x = you.x + g.spot.side * cookieApart(g.t); them.g.position.x = them.x; }
+      them.g.rotation.y = g.spot.yaw;
+      IDLES.stand(you);
+      reachTo(you, plate ? plate.getWorldPosition(V3()).add(V3(0, 0.06, 0)) : null, b.reach, b.mouth);
+      if (b.held && !g.cookie) { g.cookie = inHand(you, HELD.cookie.make()); plate?.take?.(); }
+      if (g.cookie) { g.cookie.bite(b.eaten); g.cookie.faceAs(you.body); }
+      if (b.bitten > (g.bitten || 0)) { g.bitten = b.bitten; G.crumbs.spill(you.body.localToWorld(V3(0, MOUTH.y - 0.05, MOUTH.z + 0.04))); }
+      if (b.said && !g.said) { g.said = true; H.say(you, IN_DACHIMPYS_HOUSE.cookie, 1.8); }
+      if (b.done) {
         const was = endGreet();
         if (was.first || G.tour < TOUR.length) H.talk(them, [THE_COOKIE.onward]);
       }
@@ -185,6 +199,7 @@ export const DACHIMPY_HOUSE = {
         const you = H.you, them = G.them;
         paintNext();
         G.ticks.forEach((p) => p.tick(dt));
+        G.crumbs.tick(dt);
         if (G.greet) { greetTick(dt); return; }
         // Their tour: at each stop they've come to, their lines for it.
         if (!cine && !H.talking() && G.tour < TOUR.length) {
@@ -202,7 +217,10 @@ export const DACHIMPY_HOUSE = {
       cam() {
         if (!G.greet || G.greet.phase === 'come') return null;
         const you = H.you, them = G.them, C = H.home();
-        return { look: V3((you.x + them.x) / 2, 1.3, (you.z + them.z) / 2), dist: Math.min(C.dist, 4.4), tilt: 0.22, yaw: -G.greet.spot.side * 0.35 };   // (round to see their face)
+        // (round to see their face for the hug; then, as the cookie's offered, round a little the other way, to see
+        // yours as you take it and munch it: your hand's on this side, src/den-dachimpy.ts's hugSpot)
+        const g = G.greet, k = g.phase === 'cookie' ? Math.min(1, g.t / 1.2) : 0, side = g.spot.side;
+        return { look: V3((you.x + them.x) / 2, 1.3, (you.z + them.z) / 2), dist: Math.min(C.dist, 4.4), tilt: 0.22, yaw: -side * 0.35 + side * 1.1 * k * k * (3 - 2 * k) };
       },
       // (Space moves their talk on first: the cookies are offered only when no one's talking.)
       prompt() {

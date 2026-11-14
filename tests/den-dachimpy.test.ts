@@ -5,7 +5,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   PLAN, ARRIVE, WALLS, EXHIBITS, hang, shotSize, SHOT_MAX, PAGE, exhibitLine, FRIENDS, FRIENDS_WALL, FURNISH,
-  COOKIES, atCookies, TOUR, stopAt, HUG, COOKIE, hugSpot, SHELF, MUSEUM_LEN, IN_RED, MONKEY_MAN, IN_RAGS, IN_PINK_COAT, CLUSTERS,
+  COOKIES, atCookies, TOUR, stopAt, HUG, COOKIE, hugSpot, cookieBeat, cookieSaid, cookieDone, cookieApart, SHELF, MUSEUM_LEN, IN_RED, MONKEY_MAN, IN_RAGS, IN_PINK_COAT, CLUSTERS,
 } from '../src/den-dachimpy';
 import { houseById, houseList, walkable, atWayOut, step, blocksOf, BACKDROPS, lookingAt, lookView, viewAt, LOOK_HOME, remark, GAZE_START, roomAt } from '../src/den-houses';
 import type { View, Gaze } from '../src/den-houses';
@@ -426,6 +426,77 @@ describe('a hug and a cookie at the door, every visit (IDEAS.md: "hugs and cooki
     expect(atCookies(ARRIVE.you)).toBe(false);
     expect(ANOTHER_COOKIE.length).toBeGreaterThan(1);
     expect(FURNITURE_JS).toMatch(/cookies/);
+  });
+});
+
+describe('the cookie handed over for real, and cookies in hand (14 Nov: "cookies need to actually be an animation in there")', () => {
+  const HOUSE_JS = readFileSync(join(ROOT, 'js', 'den', 'dachimpy-house.js'), 'utf8');
+  const HELD_JS = readFileSync(join(ROOT, 'js', 'den', 'held.js'), 'utf8');
+  const PEOPLE_JS = readFileSync(join(ROOT, 'js', 'den', 'props-people.js'), 'utf8');
+
+  it('has you reach for the plate, take one into your hand, bring it up and munch it, then your hand down', () => {
+    const read = 2.5, at = (t: number) => cookieBeat(t, read);
+    expect(at(0)).toMatchObject({ reach: 0, mouth: 0, held: false, eaten: 0 });   // (the plate held out, you still)
+    expect(at((COOKIE.reach + COOKIE.take) / 2).reach).toBeGreaterThan(0);
+    expect(at(COOKIE.take - 0.01).reach).toBeCloseTo(1, 1);   // (your hand at the plate as you take one)
+    expect(at(COOKIE.take - 0.01).held).toBe(false);
+    expect(at(COOKIE.take).held).toBe(true);   // (one in your hand)
+    expect(at(COOKIE.up).mouth).toBe(1);   // (up at your mouth)
+    for (let i = 0; i < COOKIE.bites.length; i++) expect(at(COOKIE.bites[i]).bitten).toBe(i + 1);
+    expect(at(COOKIE.bites[0]).eaten).toBeGreaterThan(0);
+    const last = COOKIE.bites[COOKIE.bites.length - 1];
+    expect(at(last)).toMatchObject({ eaten: 1, held: false });   // (all gone)
+    expect(at(last + COOKIE.down).mouth).toBe(0);   // (your hand down again)
+    // (the arm never jumps: each step's a little one)
+    for (let t = 0; t < cookieDone(read); t += 0.02) {
+      const a = at(t), b = at(t + 0.02);
+      expect(Math.abs(b.reach - a.reach) + Math.abs(b.mouth - a.mouth), `t ${t.toFixed(2)}`).toBeLessThan(0.15);
+    }
+  });
+
+  it('steps back from the hug for it, somewhere clear, your cookie hand on the camera\'s side', () => {
+    expect(cookieApart(0)).toBeCloseTo(HUG.side, 5);
+    expect(cookieApart(COOKIE.back)).toBeCloseTo(COOKIE.apart, 5);
+    expect(cookieApart(COOKIE.reach)).toBeGreaterThan(HUG.side);   // (back before you reach)
+    const B = blocksOf(FURNISH);
+    const h = hugSpot(PLAN, ARRIVE.you, B);
+    expect(h.side).toBe(1);   // (on your right as you face them: the house looks in from +z)
+    for (const you of [ARRIVE.you, { x: HALL.x0 + 0.4, z: 0 }, { x: HALL.x1 - 0.4, z: 0 }, { x: COOKIES.x, z: COOKIES.z + 0.8 }]) {
+      const s = hugSpot(PLAN, you, B);
+      if (s.side) expect(walkable(PLAN, you.x + s.side * COOKIE.apart, you.z), `${you.x}, ${you.z}`).toBe(true);
+    }
+  });
+
+  it("never has you speak over their line or before your first bite, nor end before the munching's done", () => {
+    for (const read of [0.5, 2, 4, 6]) {
+      expect(cookieSaid(read)).toBeGreaterThanOrEqual(read + COOKIE.said);
+      expect(cookieSaid(read)).toBeGreaterThan(COOKIE.bites[0]);
+      expect(cookieDone(read)).toBeGreaterThanOrEqual(cookieSaid(read) + COOKIE.done);
+      expect(cookieDone(read)).toBeGreaterThan(COOKIE.bites[COOKIE.bites.length - 1] + COOKIE.down);
+      expect(cookieBeat(cookieSaid(read) - 0.01, read).said).toBe(false);
+      expect(cookieBeat(cookieDone(read), read).done).toBe(true);
+    }
+  });
+
+  it('plays it at the door: the cookie from the plate into your hand, a bite at a time, crumbs falling', () => {
+    expect(HOUSE_JS).toMatch(/cookieBeat\(g\.t, g\.read\)/);
+    expect(HOUSE_JS).toMatch(/inHand\(you, HELD\.cookie\.make\(\)\); plate\?\.take\?\.\(\)/);
+    expect(HOUSE_JS).toMatch(/g\.cookie\.bite\(b\.eaten\)/);
+    expect(HOUSE_JS).toMatch(/G\.crumbs\.spill\(/);
+    expect(HOUSE_JS).toMatch(/reachTo\(you, /);
+    expect(HOUSE_JS).toMatch(/hand: 'cookies'/);   // (Dachimpy's plate always to hand)
+  });
+
+  it("has a plate of cookies, a cookie and a paintbrush among the wardrobe's things in hand, drawn by the pieces the scenes use", () => {
+    for (const id of ['cookies', 'cookie', 'brush']) expect(partsOf('hand')).toContain(id);
+    const held = [...HELD_JS.match(/export const HELD = \{([\s\S]*?)\r?\n\};/)![1].matchAll(/\n {2}([a-z]+): \{ name:/g)].map((m) => m[1]);
+    expect(held.sort()).toEqual(['brush', 'cookie', 'cookies']);
+    for (const id of held) expect(partsOf('hand')).toContain(id);   // (every scene's prop is a wardrobe item too)
+    expect(LOOK_JS).toMatch(/else if \(HELD\[L\.hand\]\) \{/);
+    expect(HELD_JS).toMatch(/cookiePlate\(\{ n: left \}\)/);   // (the hall table's plate, the one piece)
+    expect(PEOPLE_JS).toMatch(/export const HOLDS = \{ paint: 'brush', offer: 'cookies', hug: null \}/);
+    expect(PEOPLE_JS).toMatch(/HELD\[name\]\.make\(\)/);
+    expect(PEOPLE_JS).not.toMatch(/const PROPS = \{/);   // (no second copy of a prop)
   });
 });
 

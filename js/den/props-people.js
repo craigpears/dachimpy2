@@ -7,7 +7,8 @@
    say, bubble, shown, tall, earshot, face }) is a pirate from a look standing in a scene doing an idle
    animation picked by name from IDLES (swaying, a tipsy sway with a swig, talking, waving, clapping,
    painting, giggling, cowering, screaming, twisting a balloon, ta-da, a hug, holding something out...),
-   holding what that idle holds (HOLDS: a brush to paint, a plate of cookies to offer), and, if it's given
+   holding what that idle holds (HOLDS: a brush to paint, a plate of cookies to offer, held.js's pieces, the
+   wardrobe's too; nothing, its own put away, to hug), and, if it's given
    something to say, saying it:
    - what, and in what order: `script` (src/chatter.ts's Script: an intro once, then a loop for ever, the
      intro retold after each time round if it says, asides by name), or just `lines`, round and round
@@ -25,10 +26,10 @@ import * as THREE from 'three';
 import { makePirate, animateWalk } from './world.js';
 import { familiarTick } from '../den-look.js';
 import { Chatter, PACE } from '../chatter.js';
-import { readSecs, CANVAS, BRUSH, brushReach } from '../den-houses.js';
+import { readSecs, CANVAS, brushReach } from '../den-houses.js';
 import { fright } from './creatures.js';
 import { bubble as pageBubble, bubbleAt } from './cine.js';
-import { cookiePlate } from './furniture.js';
+import { HELD, inHand } from './held.js';
 
 const rest = (p) => {
   p.arms.forEach((a) => a.rotation.set(0, 0, 0));
@@ -116,12 +117,39 @@ export const IDLES = {
   /** Holding something out to you in the right hand (HOLDS: a plate of cookies), the other hand open. */
   offer: (p, t, talking, plate) => {
     rest(p);
-    p.arms[0].rotation.set(-1.15 + Math.sin(t * 2) * 0.03, 0, 0.08);
-    if (plate) plate.rotation.x = 1.15 - Math.sin(t * 2) * 0.03;   // (kept level, whatever the arm's doing)
+    // (held out in front, in towards the middle, between the two of you)
+    p.arms[0].rotation.set(-1.15 + Math.sin(t * 2) * 0.03, 0, 0.3);
+    if (plate) { const a = p.arms[0].rotation; plate.rotation.order = 'ZYX'; plate.rotation.set(-a.x, 0, -a.z); }   // (kept level, whatever the arm's doing)
     p.arms[1].rotation.set(-0.45, 0, -0.3);
     if (talking) p.body.rotation.x = Math.sin(t * 4.2) * 0.03;
   },
+  /** Munching something in the right hand (a cookie: held.js's): the hand up at the mouth, the head bobbing with
+      each chew, the other hand under it for the crumbs. */
+  munch: (p, t) => {
+    rest(p);
+    toMouth(p, 1);
+    p.arms[0].rotation.x += Math.sin(t * 9) * 0.04;
+    p.arms[1].rotation.set(-0.9, 0, -0.35);
+    p.body.rotation.x = -0.03 + Math.abs(Math.sin(t * 9)) * 0.03;
+  },
 };
+
+/** Where a hand holds something up to a figure's mouth, on its body (the wardrobe's: its eyes are at 0.952,
+    src/eyes.ts): a cookie's top edge at the lips. */
+export const MOUTH = { y: 0.8, z: 0.33 };
+const v0 = new THREE.Vector3(), v1 = new THREE.Vector3(), clamp01 = (k) => Math.max(0, Math.min(1, k));
+/** The right arm reaching: `k` (0 to 1) of the way from hanging down to its hand at a point in the world
+    (`world`, a Vector3, or null: something held out, Dachimpy's plate), then `mouth` (0 to 1) of the way on from
+    there to its hand at its mouth (a cookie, munched). Any figure from the wardrobe. */
+export function reachTo(p, world, k, mouth = 0) {
+  const sh = p.arms[0].position;
+  v0.set(0, -1, 0);
+  if (world && k > 0) { p.body.worldToLocal(v1.copy(world)).sub(sh).normalize(); v0.lerp(v1, clamp01(k)); }
+  if (mouth > 0) { v1.set(-sh.x, MOUTH.y - sh.y, MOUTH.z).normalize(); v0.lerp(v1, clamp01(mouth)); }
+  aim(p.arms[0], v0.x, v0.y, v0.z);
+}
+/** The right arm `k` (0 to 1) of the way from hanging down to its hand at its mouth. */
+export const toMouth = (p, k) => reachTo(p, null, 0, k);
 
 /** Points an arm (hanging down from its shoulder, as the wardrobe's do) along (dx, dy, dz), in its
     figure's own frame (+z ahead). */
@@ -131,35 +159,9 @@ function aim(arm, dx, dy, dz) {
 }
 
 /* What an idle holds in its right hand while it's on (whatever the look holds, a candle, a tankard, is
-   put away meanwhile): any figure doing it gets one. Each a little piece from the hand, along the arm. */
-const PROPS = {
-  /** A paintbrush: a wooden handle, a brass ferrule, bristles dipped in paint, its tip BRUSH.tip from
-      the shoulder (src/den-houses.ts). */
-  brush() {
-    // From a little behind the fist (+y, the hand's at 0) out to the tip, down the arm (-y).
-    const g = new THREE.Group(), tip = -(BRUSH.tip - 0.5), ferrule = tip + 0.09, bristles = tip + 0.05;
-    const piece = (geo, col, y0, y1, o = {}) => {
-      const m = new THREE.Mesh(geo(Math.abs(y0 - y1)), new THREE.MeshStandardMaterial({ color: col, roughness: 0.6, ...o }));
-      m.position.y = (y0 + y1) / 2; m.castShadow = true; g.add(m);
-    };
-    piece((h) => new THREE.CylinderGeometry(0.012, 0.009, h, 8), '#7a3b1e', 0.06, ferrule);
-    piece((h) => new THREE.CylinderGeometry(0.009, 0.013, h, 8), '#c9a13c', ferrule, bristles, { metalness: 0.7, roughness: 0.3 });
-    piece((h) => new THREE.ConeGeometry(0.014, h, 8).rotateX(Math.PI), '#b0182a', bristles, tip);
-    g.position.y = -0.5;   // (in the hand: the 'paint' idle slides it along a touch to dab)
-    return g;
-  },
-  /** A plate of cookies (furniture.js's cookiePlate), on the palm: the 'offer' idle keeps it level. */
-  cookies() {
-    const g = new THREE.Group(), plate = cookiePlate({ n: 5 });
-    plate.position.set(0, 0.0, 0.07);
-    g.add(plate);
-    g.position.y = -0.6;
-    return g;
-  },
-};
-/** By idle: what it holds (PROPS). */
-export const HOLDS = { paint: 'brush', offer: 'cookies' };
-
+   put away meanwhile): any figure doing it gets one. Each one of held.js's pieces, the wardrobe's too (a
+   look can hold one all the time); null, nothing: its own put away (a hug's both arms round you). */
+export const HOLDS = { paint: 'brush', offer: 'cookies', hug: null };
 const v = new THREE.Vector3();
 
 /** A pirate from a look, standing about in a scene: see the top of this file. */
@@ -185,7 +187,7 @@ export function person({
     chatty: true,
     /** The line on show (so a new one's put up once). */
     shown: null,
-    /** What its idle has in its hand (HOLDS), if anything. */
+    /** What its idle has in its hand (HOLDS), if anything (its figure's `inHand`, held.js's). */
     prop: null,
     /** A scene's say in which way it faces, over `face` (a world point { x, z }, or null): a performer
         turned to its audience (balloons.js). */
@@ -266,11 +268,10 @@ export function person({
       }
     },
   };
-  /** Puts what an idle holds in its right hand (PROPS, by name), its own put away meanwhile; or none. */
+  /** Puts what an idle holds in its right hand (HOLDS: held.js's, by name), its own put away meanwhile; or none. */
   function hold(name) {
-    if (P.prop) { P.prop.removeFromParent(); P.prop.traverse((m) => { m.geometry?.dispose(); m.material?.dispose(); }); P.prop = null; }
-    if (name && PROPS[name]) { P.prop = PROPS[name](); p.arms[0].add(P.prop); }
-    if (p.held) p.held.visible = !P.prop;
+    P.prop = inHand(p, name && HELD[name] ? HELD[name].make() : null);
+    if (p.held && name === null) p.held.visible = false;   // (empty-handed: its own put away too)
   }
   hold(HOLDS[P.idle]);
   P.setScript(script || (lines?.length ? scriptOf(lines, {}) : null), { begun });

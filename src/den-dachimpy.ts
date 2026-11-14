@@ -325,16 +325,45 @@ export function stopAt(from: number, x: number, z: number): number {
    one, and they take you on to meet their friends. While it lasts you stand still. `side`: how far to your side
    they stand to hug; `secs`: how long the hug lasts; `said`: when you say yours. */
 export const HUG = { side: 0.62, secs: 3.0, said: 1.2 } as const;
-/** The cookie's beats, seconds after their line about it's been up long enough to read (so the two never talk over
-    each other): yours, and the end. */
-export const COOKIE = { said: 0.1, done: 1.8 } as const;
-/** Where they stand to hug you: beside you, to your left if there's room, else your right (`side`: -1 left,
-    +1 right), facing you (`yaw`: 0 faces +z); you turned to face them (`youYaw`). */
+/* The cookie changing hands (the user, 14 Nov: "cookies need to actually be an animation in there"): the plate
+   held out as they say their line (a step back from the hug first, `apart`, to have room), you reach for it (`reach` to `take`, when one's in your hand and the plate's
+   one fewer), bring it up to your mouth (by `up`) and munch it in `bites`, crumbs falling with each, then your
+   hand down again (`down` seconds). Seconds from the plate held out; your line (`said`) once their line's been up
+   long enough to read (so the two never talk over each other) and you've had your first bite, the end (`done`)
+   after that, never before the last bite's down. */
+export const COOKIE = { apart: 1.0, back: 0.5, reach: 0.5, take: 1.1, up: 1.55, bites: [1.85, 2.45, 3.05], down: 0.45, said: 0.1, done: 1.8 } as const;
+/** How far beside you they stand, `t` seconds into the cookie: from the hug's `side` they ease back a step to
+    `apart` (in `back` seconds), room for the plate between you and your hand up to your mouth. */
+export const cookieApart = (t: number): number => { const k = Math.max(0, Math.min(1, t / COOKIE.back)); return HUG.side + (COOKIE.apart - HUG.side) * k * k * (3 - 2 * k); };
+/** Where the cookie's got to, `t` seconds after the plate's held out, their line `read` seconds long to read:
+    your right arm `reach` (0 to 1) of the way out to the plate and `mouth` (0 to 1) of the way on up to your
+    mouth; whether the cookie's in your hand (`held`), how much of it's `eaten` (0 to 1) and how many bites
+    (`bitten`); whether you've said yours (`said`), and whether it's all over (`done`). */
+export function cookieBeat(t: number, read: number): { reach: number; mouth: number; held: boolean; eaten: number; bitten: number; said: boolean; done: boolean } {
+  const ease = (x: number) => { const k = Math.max(0, Math.min(1, x)); return k * k * (3 - 2 * k); };
+  const last = COOKIE.bites[COOKIE.bites.length - 1], bitten = COOKIE.bites.filter((b) => t >= b).length;
+  // (out to the plate; then from the plate on up, `mouth` over `reach`, which lets go once it's up; then from the
+  // mouth down)
+  const reach = t < COOKIE.take ? ease((t - COOKIE.reach) / (COOKIE.take - COOKIE.reach)) : 1 - ease((t - COOKIE.up) / (COOKIE.bites[0] - COOKIE.up));
+  const mouth = t < COOKIE.take ? 0 : t < last ? ease((t - COOKIE.take) / (COOKIE.up - COOKIE.take)) : 1 - ease((t - last) / COOKIE.down);
+  return {
+    reach, mouth, held: t >= COOKIE.take && bitten < COOKIE.bites.length, eaten: bitten / COOKIE.bites.length, bitten,
+    said: t >= cookieSaid(read), done: t >= cookieDone(read),
+  };
+}
+/** When you say yours: their line read, your first bite had. */
+export const cookieSaid = (read: number): number => Math.max(read + COOKIE.said, COOKIE.bites[0] + 0.25);
+/** When it's all over: after your line, and never before the last bite's been had and your hand's down. */
+export const cookieDone = (read: number): number => Math.max(cookieSaid(read) + COOKIE.done, COOKIE.bites[COOKIE.bites.length - 1] + COOKIE.down + 0.2);
+/** Where they stand to hug you: beside you, on the right (+x) if there's room, else the left (`side`: -1 left,
+    +1 right), facing you (`yaw`: 0 faces +z); you turned to face them (`youYaw`). (On the right, you face +x and
+    your right hand, the one you take the cookie in and munch it with, is on the camera's side: the house looks in
+    from +z. 14 Nov.) */
 export function hugSpot(plan: Plan, you: { x: number; z: number }, blocks: readonly Block[] = []): { x: number; z: number; yaw: number; youYaw: number; side: number } {
   const clear = (x: number, z: number) => walkable(plan, x, z) && blocks.every((b) => Math.hypot(x - b.x, z - b.z) > b.r + 0.3);
-  for (const s of [-1, 1]) {
+  for (const s of [1, -1]) {
     const x = you.x + s * HUG.side;
-    if (clear(x, you.z)) return { x, z: you.z, yaw: -s * Math.PI / 2, youYaw: s * Math.PI / 2, side: s };
+    if (clear(x, you.z) && clear(you.x + s * COOKIE.apart, you.z)) return { x, z: you.z, yaw: -s * Math.PI / 2, youYaw: s * Math.PI / 2, side: s };   // (and room to step back for the cookie)
   }
   return { x: you.x, z: you.z - HUG.side, yaw: 0, youYaw: Math.PI, side: 0 };
 }

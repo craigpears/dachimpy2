@@ -9,6 +9,8 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 // Every colour a pirate's drawn in (the clothing dyes, hair, fur, skin), each with where it came from, is
 // src/palette.ts: change or add a colour there, never here. The catalogue's colours page lists them all.
 import { DYES, HAIR, FUR, FUR_FACE, SKIN } from './palette.js';
+// Things in hand a scene needs too (a plate of cookies, a cookie, a paintbrush): js/den/held.js's, the one piece each.
+import { HELD } from './den/held.js';
 export { DYES, HAIR, FUR, SKIN };
 // Familiars in FUR's natural colours (the rest take any dye), and the colour each falls back to.
 export const FURRY = { monkey: 'brown', squirrel: 'grey' };
@@ -65,8 +67,8 @@ export const PARTS = {
   // (The Atlantis trinket: Helium's, a glowing blue jar worked in gold, from their portrait, 13 Nov. A bowl of
   // blueberries: Roobear's, blue-and-white china, 13 Nov.)
   hand: {
-    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present'], ['atlantis', 'Atlantis trinket'], ['blueberries', 'Bowl of blueberries']],
-    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present'], ['atlantis', 'Atlantis trinket'], ['blueberries', 'Bowl of blueberries']],
+    m: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present'], ['atlantis', 'Atlantis trinket'], ['blueberries', 'Bowl of blueberries'], ['cookies', 'Plate of cookies'], ['cookie', 'Cookie'], ['brush', 'Paintbrush']],
+    f: [['none', 'Nothing'], ['tankard', 'Tankard'], ['spyglass', 'Spyglass'], ['bouquet', 'Bouquet'], ['pistol', 'Pistol'], ['goblet', 'Wine glass'], ['scepter', 'Sceptre'], ['jug', 'Stone jug'], ['candle', 'Candle'], ['gift', 'Present'], ['atlantis', 'Atlantis trinket'], ['blueberries', 'Bowl of blueberries'], ['cookies', 'Plate of cookies'], ['cookie', 'Cookie'], ['brush', 'Paintbrush']],
   },
   // (Squirrel, bat, krakling: real familiars, from expeditions and treasure chests: YPPedia, Familiar.
   // Dragon: from gold boxes; its first colour is its horns', its second its body's, as YPPedia says
@@ -1539,6 +1541,10 @@ export function dressPirate(look, opts = {}) {
     bw.position.set(0, -0.6, 0.1);
     arms[0].add(bw);
     held = bw;
+  } else if (HELD[L.hand]) {
+    // The things in hand a scene needs too (js/den/held.js): Dachimpy's cookies, Gravee's paintbrush.
+    held = HELD[L.hand].make();
+    arms[0].add(held);
   }
   // A familiar rides on the left shoulder, as in Puzzle Pirates' portraits.
   const fam = makeFamiliar(L);
