@@ -1573,14 +1573,27 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       caught up drives her ahead (both sides pulled, if not on the same move). Each bit of pull
       matched also straightens up a quarter of what's left of the lead, into forward pull too, as
       her keel holds her straight: rowed steadily, one side pulling up to one and a half times the
-      other never turns her. Only a lead of 7.5 (two and a half squares' pull) turns her, a quarter
-      turn, and the turn uses it up: three threes on one side don't, a Bingo on one side does, a
-      Vegas on one side swings her half round ("you just end up rowing in circles"). From the bots
-      (tools/row-bots.mjs, 30 games of 60 moves): a player out to row straight never turns, one who
-      clears whatever's biggest, never minding the side, turns about every eight moves, and one out
-      to turn her does it in three or four moves. (At 6 the side-blind player turned every six
-      moves and rowed a circle in most games; at 9 a Bingo on one side didn't turn her.) A board
-      glows its colour while its side's lead waits, and flashes as it pulls. Rules:
+      other never turns her. Only a lead of 6 (two squares' pull) turns her, a quarter turn, and
+      the turn uses it up: three threes on one side don't, a Bingo on one side does, a Vegas on one
+      side swings her half round ("you just end up rowing in circles").
+      - **A lopsided Bingo's worth turns her, even by accident (14 Nov).** The lead was 7.5 (10 Nov)
+        till the user played it: a Bingo on one side "doesn't seem to obviously happen ... I want it
+        to be possible to almost do accidentally if you leave it", and the same with "the
+        equivalent of a bingo" from smaller clears "if you don't balance out the other side". At 7.5
+        a Bingo (8) was only just enough: a three cleared on the mirrored board on the same move, or
+        the other side a three ahead, left it short (one in five one-sided Bingos in the side-blind
+        bot's play didn't turn her). At 6 it turns her through either, and a Good, a three, a Great
+        and a Good on one side with nothing on the other turn her too. From the bots
+        (tools/row-bots.mjs, 30 games of 60 moves), 7.5 then 6: a player out to row straight never
+        turns; one who clears whatever's biggest, never minding the side, turns every eight moves,
+        then every six, and rows a circle in 53% of games, then 67%; one out to turn her does it in
+        3.6 moves, then 2.9. (At 9 a Bingo on one side didn't turn her at all.)
+      - **You see her turn (14 Nov):** the view behind her used to turn with her every moment, so a
+        quarter turn swung the sea round while she stayed pointing up the screen, and the turn
+        hardly showed. Now the view comes round a moment after her: mid-turn she's swung about 50°
+        on the screen, and the view follows her round over a second or two. And it's said: "Bingo!
+        She comes round to port!"
+      A board glows its colour while its side's lead waits, and flashes as it pulls. Rules:
       `src/mirror-row.ts` (BALANCE, Stroke).
     - **The turn goes the way you'd expect** (the user: "if you pull on the right-hand side, it
       should definitely go right"): more pull from the right-hand board (starboard) turns her
@@ -1602,8 +1615,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       keeps rowing while the other rests (its rower stroking up to 2.4 a second faster, its sweep
       swinging up to 60% wider, white water churned up at its blade as it bites), and her bows
       swing toward it (up to 0.4 of a quarter turn, about 36°, with a whole turn's lead) as she
-      heels into it. All eased so a little lead shows plainly: a three on one side, 0.13 of a
-      turn, shows as 0.3 of the most. The boards still glow their colour while their lead waits.
+      heels into it. All eased so a little lead shows plainly: a three on one side, 0.17 of a
+      turn, shows as 0.34 of the most. The boards still glow their colour while their lead waits.
       ("We're going to have to prototype a bit more": the numbers are LEAN and CREW in
       `src/den-row.ts`.)
     - **The pieces and the water stay Bilge's (10 Nov):** "part I did love of this similarity
@@ -1742,7 +1755,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
       alongside it; Space builds a crane by Carpentry, a part at a time: its foot, its post and its
       jib, about four pieces each, thirteen in all. Each part's frame is laid on the ledge and
       filled with the deck patch's tray (1, 2, 3, dealt fair), keys and mouse, the camera looking
-      down on it from over the cove, her mast struck and you ashore on the ledge by it. The den's
+      down on it from over the cove, her mast struck and you ashore on the ledge by it. While you
+      build she lies off the ledge a little, out of the way (the user, 14 Nov: "the ship now does
+      seem to be overlapping with the puzzle, so that it's obscuring it a bit"): her side had come
+      over the frame's last rows; now the frame and the room round it where a piece sticks out are
+      clear of her, on a desktop and a phone alike, and she comes back in under the jib once it's
+      built. The den's
       frame rules: a piece covers an empty square, clear of the pieces in, and may stick out over
       the edge (here up to two squares); empty-handed, Space or a click picks up the piece you're
       pointing at, any of them, and Backspace takes the last one back out, as everywhere you build

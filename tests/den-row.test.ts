@@ -194,7 +194,7 @@ describe(`"the next move compass is a bit confusing ... the left right arrows ar
   it(`scaled to how big the turn is, and a little lead still shows plainly`, () => {
     const small = new RowBoard(), big = new RowBoard();
     small.pull({ port: ROW.THREE, starboard: 0 });   // (a three on port alone)
-    big.pull({ port: 6, starboard: 0 });
+    big.pull({ port: BALANCE.TURN - 1, starboard: 0 });   // (just short of a turn)
     expect(small.leading('port')).toBeGreaterThan(0.25);
     expect(big.leading('port')).toBeGreaterThan(small.leading('port'));
     expect(big.sweep('port').reach).toBeGreaterThan(small.sweep('port').reach);

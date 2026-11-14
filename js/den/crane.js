@@ -414,6 +414,12 @@ const slewed = (v, s) => V3(POST.x + v.x * Math.cos(s) + v.z * Math.sin(s), POST
 const poseYaw = () => Math.PI / 2 - sail.helm.pose.d * Math.PI / 2;
 const alongYaw = () => (Math.cos(poseYaw() - Math.PI / 2) >= -1e-6 ? Math.PI / 2 : -Math.PI / 2);
 const ALONG_X = POST.x + TIP.x;
+/* While you build the crane she lies off the ledge by this much more, out toward the cove (the user,
+   14 Nov: "the ship now does seem to be overlapping with the puzzle, so that it's obscuring it a
+   bit"): warped in under the jib her side came over the frame's last rows and the room past them
+   where a piece sticks out to be sawn. Off by this, her near side is clear of that room, seen from
+   above as the frame is (den.js, the patch's view), at a desktop's size and a phone's. */
+const BUILD_OFF = 1.6;
 const coveSpot = () => ({ p: V3(ALONG_X, COVE_Y, seaZ(CRANE.LEDGE[1])), yaw: alongYaw() });
 const lagoonSpot = () => ({ p: REST.clone(), yaw: REST_YAW });
 const TOP = HT + 1.2;   // her (deck - SLOOP_DECK) up the cliff: her keel clear of the clifftop
@@ -656,12 +662,14 @@ export function craneTick(dt) {
     stretch(W.hookRope, tip, W.hook.position.clone().setY(tip.y - HOOK_REST + 0.2), 0.03);
   }
   if (K().trip && crane.go && tripTick(dt)) return;
-  // Stopped by the ledge, she's warped in alongside it (and back out as she sails off).
+  // Stopped by the ledge, she's warped in alongside it (and back out as she sails off); while you
+  // build, she lies off it a little, clear of the frame (BUILD_OFF).
   const by = K().where === 'cove' && sail.on && h.pose.c === CRANE.LEDGE[0] && h.pose.r === CRANE.LEDGE[1] && h.idle() && !h.oars;
   if (K().where === 'cove') crane.warp = Math.max(0, Math.min(1, (crane.warp ?? 0) + (by ? dt : -dt * 2) * 1.2));
+  crane.off = Math.max(0, Math.min(1, (crane.off ?? 0) + (atFrame ? dt : -dt) * 1.5));
   if (crane.warp > 0 && K().where === 'cove') {
     const u = ease(crane.warp);
-    sail.g.position.x += (ALONG_X - sail.g.position.x) * u;
+    sail.g.position.x += (ALONG_X + BUILD_OFF * ease(crane.off) - sail.g.position.x) * u;
     sail.g.position.z += (seaZ(CRANE.LEDGE[1]) - sail.g.position.z) * u;
     sail.g.rotation.y = lerpA(sail.g.rotation.y, alongYaw(), u);
     if (sail.on) standAboard();
@@ -729,7 +737,7 @@ export function craneReset() {
   const W = crane.W;
   if (crane.go) arrive('cove');
   crane.rules = new Crane();
-  crane.hoist = null; crane.go = null; crane.slew = 0; crane.said = {}; crane.ledgeG = null; crane.moor = null;
+  crane.hoist = null; crane.go = null; crane.slew = 0; crane.said = {}; crane.ledgeG = null; crane.moor = null; crane.off = 0;
   document.body.classList.remove('cine');
   if (!W) return;
   for (const g of crane.parts) g.removeFromParent();
