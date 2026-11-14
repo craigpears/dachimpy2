@@ -34,6 +34,17 @@
   a { color: var(--gold); }
   img { display: block; max-width: 100%; }
   .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
+  /* The old Dachimpy.com banner, the monkey with the map, at the very top (the user, 14 Nov: "my beloved banner and
+     monkey ... Where's my monkey banner?"). The same picture is in Dachimpy's museum. */
+  .banner { display: block; width: 100%; height: auto; aspect-ratio: 902 / 137; border-radius: 10px; border: 2px solid #3b2a1b;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); margin: 0 0 16px; }
+  /* A menu that stays at the top as you scroll (the user, 14 Nov: "I definitely need a sticky navigation menu"):
+     every section of the page, sliding sideways on a phone rather than wrapping. */
+  .jump { position: sticky; top: 0; z-index: 10; display: flex; gap: 4px; overflow-x: auto; white-space: nowrap; scrollbar-width: none;
+    margin: 14px -16px 0; padding: 8px 16px; background: rgba(20, 13, 8, 0.94); border-bottom: 1px solid var(--edge); backdrop-filter: blur(4px); }
+  .jump::-webkit-scrollbar { display: none; }
+  .jump a { flex: none; padding: 5px 11px; border-radius: 999px; color: var(--dim); text-decoration: none; font-weight: 700; font-size: 15px; }
+  .jump a:hover, .jump a:focus-visible { color: var(--ink); background: var(--gold); }
   header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 20px; margin-bottom: 8px; }
   h1 { margin: 0; font: 700 clamp(34px, 7vw, 52px)/1.05 'Alegreya', serif; color: var(--gold); }
   .lede { margin: 6px 0 0; color: var(--dim); max-width: 600px; }
@@ -44,7 +55,7 @@
   .play.ghost:hover { color: var(--ink); background: var(--gold); }
   article .play.ghost { color: var(--link); border-color: var(--link); }
   article .play.ghost:hover { color: var(--paper); background: var(--link); }
-  h2 { display: flex; align-items: center; gap: 14px; margin: 42px 0 14px; font: 700 24px 'Alegreya', serif; color: var(--dim); scroll-margin-top: 12px; }
+  h2 { display: flex; align-items: center; gap: 14px; margin: 42px 0 14px; font: 700 24px 'Alegreya', serif; color: var(--dim); scroll-margin-top: 64px; }
   h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
   h2.ask { font-size: clamp(26px, 5vw, 34px); color: var(--gold); margin-top: 30px; }
   article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid #c9a35c; border-radius: 12px;
@@ -101,8 +112,7 @@
      row of choices under its own heading, each going straight out, marked ↗, its maker named; their only place on
      the page. The picture above, the words below, so the Discord's whole line fits. */
   .ext { font-family: system-ui, sans-serif; font-weight: 700; }
-  .elsewhere-head { margin: 22px 2px 10px; font: 700 19px 'Alegreya', serif; color: var(--dim); }
-  .elsewhere-head small { font: 500 14px 'Alegreya Sans'; color: #a8967a; margin-left: 6px; }
+  .elsewhere-head { margin: 22px 2px 10px; font: 700 19px 'Alegreya', serif; color: var(--dim); scroll-margin-top: 64px; }
   .choice { display: flex; flex-direction: column; min-height: 0; }
   .choice .collage { position: relative; inset: auto; height: 170px; flex: none; }
   .choices.out .collage { height: 130px; }
@@ -139,7 +149,6 @@
   article.side { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 4px 18px; align-items: start; }
   article.side h3 { margin-top: 2px; }
 
-  .also { margin: 14px 2px 0; color: var(--dim); font-size: 16px; }
   .lead { margin: -4px 2px 14px; color: var(--dim); }
   .more { margin: 12px 2px 0; text-align: right; font-weight: 700; }
   .more a::after { content: ' →'; }  /* The launch pad: every place in the den with a link (den.html?at=...), a small picture and a line each; the
@@ -203,7 +212,8 @@
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="top">
+  <img class="banner" src="houses/dachimpy/museum/09-header-banner.jpg" width="902" height="137" alt="Dachimpy.com: a monkey in a blue cap hanging from a treasure map's dotted trail, over a sea with a ship">
   <header>
     <div>
       <h1>The Pirate Den</h1>
@@ -216,6 +226,17 @@
     </div>
   </header>
 
+  <nav class="jump" aria-label="On this page">
+    <a href="#top">Top</a>
+    <a href="#fun">A bit of fun</a>
+    <a href="#concepts">New concepts</a>
+    <a href="#tutorials">Tutorials</a>
+    <a href="#elsewhere">Elsewhere</a>
+    <a href="#places">Jump to a place</a>
+    <a href="#room">A room of your own</a>
+    <a href="changelog.html">What's new</a>
+  </nav>
+
   <section class="welcome">
     <figure class="host">
       <img src="changelog/dachimpy-welcome.webp" width="214" height="529" alt="Dachimpy, in a tall pink beehive wig, purple braces and a pink tartan kilt, holding out a plate of cookies">
@@ -227,9 +248,11 @@
            click on it or expand it if they want it"). The fuller version is design.html's "Who it's for". -->
       <details class="about">
         <summary>What is this place?</summary>
-        <p><b>For the middle:</b> you know the basics (the game's own tutorials teach those) and want the techniques, a puzzle at a time.</p>
-        <p><b>Proofs of concept,</b> each tutorial two ways: a fun 3D one, a pirate playing alongside you, and a static one to read.</p>
-        <p><b>Real mastery</b> comes from the game and its people: <a href="#people">meet them</a>.</p>
+        <p>A playground of ideas for learning Puzzle Pirates' puzzles. It's for when you know the basics, the game's own
+          tutorials see to those, and you'd like to get better at a puzzle or two.</p>
+        <p>Each tutorial comes two ways: played in 3D with a pirate beside you, or laid out to read at your own pace.
+          They're experiments, so some will work better than others.</p>
+        <p>And the way to really get good? Play the game, and talk to <a href="#people">its people</a>. They're lovely.</p>
       </details>
     </div>
   </section>
@@ -240,16 +263,14 @@
     <a class="choice" href="#tutorials"><span class="collage n3"><img src="changelog/helium-lesson.jpg" alt=""><img src="changelog/tzz-lesson.jpg" alt=""><img src="changelog/distilling-guide.jpg" alt=""></span><span class="cap"><b>Try out some new tutorials</b><i>Experiments for now: Distilling, Sailing, Carpentry</i></span></a>
   </nav>
 
-  <p class="elsewhere-head" id="elsewhere">Elsewhere, made by others <span class="ext">↗</span> <small>Not part of this site. Each opens in a new tab.</small></p>
+  <p class="elsewhere-head" id="elsewhere">Elsewhere, made by others <span class="ext">↗</span></p>
 
   <nav class="choices out" aria-label="Elsewhere, made by others">
     <a class="choice" id="practice" href="https://www.globalcadesim.com/#/lobby/36" target="_blank" rel="noopener"><span class="collage n1"><img src="changelog/global-cade-sim.jpg" alt=""></span><span class="cap"><b>Play blockades online <span class="ext">↗</span></b><i class="by">The Global Cade Sim, made by AMH</i><i>Battle Navigation and blockades, online.</i></span></a>
     <a class="choice" href="https://yppedia.puzzlepirates.com/" target="_blank" rel="noopener"><span class="collage n1 plain"><em>YPPedia</em></span><span class="cap"><b>Look up the basics <span class="ext">↗</span></b><i class="by">YPPedia, the wiki written by the game's players</i><i>Every puzzle's rules and basic mechanics, and good guides.</i></span></a>
-    <a class="choice" href="https://puzzle-practice.github.io/Puzzle_Practice/#/" target="_blank" rel="noopener"><span class="collage n1 plain"><em>Puzzle Practice</em></span><span class="cap"><b>Practise puzzles <span class="ext">↗</span></b><i class="by">Puzzle Practice, made and run by the Puzzle Practice team</i><i>Practise lots of puzzles.</i></span></a>
+    <a class="choice" href="https://puzzle-practice.github.io/Puzzle_Practice/#/" target="_blank" rel="noopener"><span class="collage n1 plain"><em>Puzzle Practice</em></span><span class="cap"><b>Practise puzzles <span class="ext">↗</span></b><i class="by">Puzzle Practice, made by Jice</i><i>Practise lots of puzzles.</i></span></a>
     <a class="choice" id="people" href="https://discord.gg/XtRHwP6XT" target="_blank" rel="noopener"><span class="collage n1"><img src="changelog/wardrobe.jpg" alt=""></span><span class="cap"><b>Meet real pirates <span class="ext">↗</span></b><i class="by">The Trophy Hunters' Discord, their own community</i><i>It's a sociable game: everything's about the people, playing puzzles together. For a friendly crowd ready to help and have fun, or to watch real pirates play and chat, this is the go-to. The top puzzlers stream on Twitch and YouTube too.</i></span></a>
   </nav>
-
-  <p class="also"><a href="changelog.html">What's new, newest first</a> <span aria-hidden="true">·</span> <a href="#places">Jump straight to a place in the den</a> <span aria-hidden="true">·</span> <a href="#room">A room of your own</a></p>
 
   <h2 id="fun">A bit of fun and a look around</h2>
 

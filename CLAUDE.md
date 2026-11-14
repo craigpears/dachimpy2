@@ -1,6 +1,7 @@
 # Carpentry primer
 
-The front page, `index.html` (14 Nov): hand-written, in the changelog's look, Dachimpy greeting you (their lines in
+The front page, `index.html` (14 Nov): hand-written, in the changelog's look, the old Dachimpy.com monkey banner
+at its top and a menu of its sections stuck to the top as you scroll, Dachimpy greeting you (their lines in
 `src/lines/dachimpy.ts`, `FRONT_PAGE`) and "what are you here for?": the den, the new concepts, the tutorials by
 puzzle (each its 3D lesson and its read version), the Global Cade Sim, practice, real pirates; then the launch pad,
 `#places`, every `?at=` link grouped with a picture each (the den's Places button, in place of a Cheats button),
