@@ -693,6 +693,15 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   The colours page with a scene beside it (14 Nov): "some test scene on the right ... a selection of distinct
   furniture and a few pirates that are kind of spinning around, maybe through different outfits that end up being
   dressed in the colour that you've selected."
+  And the "Your pirate" wardrobe itself (14 Nov): "could really do with an upgrade as well ... some of the things is
+  fine, [the] tongue out, yes, no ... but ... if you've got like so many different hairstyles, scrolling through a
+  list doesn't feel like it's enough ... a two-column thing. So on the right, if you're choosing your beard, you can
+  see all of them with a preview of what each looks like, especially with things like that and the colors
+  selection ... the names of the colors next to them ... people are going to know things by name as well, because
+  they're used to coming from Puzzle Pirates." So: the yes/no toggles stay simple; for anything with many choices
+  (hair, beards, hats, clothes, familiars, colours), a list of names on one side and a grid of previews of each
+  on the other, every colour shown with its Puzzle Pirates name; the previews drawn by the same registry as the
+  catalogue pages.
 
 ## Spotted along the way (not asked for)
 
