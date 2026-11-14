@@ -180,6 +180,7 @@
   .jump .go a[aria-current] { color: var(--text); background: var(--tile-hi); }
   .jump .go a:hover, .jump .go a:focus-visible { color: var(--accent-text); }
   .jump .play { flex: none; padding: 10px 24px; font-size: 19px; }
+  @media (max-width: 360px) { .jump .play { padding: 9px 16px; font-size: 17px; } }   /* both links still whole on the narrowest phones */
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .lede { margin: 14px 0 0; color: var(--dim); max-width: 640px; }
   .play { display: inline-block; font: 700 17px 'Alegreya Sans'; color: var(--on-accent); background: var(--accent); border-radius: 8px; padding: 9px 18px; text-decoration: none; white-space: nowrap; }
@@ -310,8 +311,9 @@
     body { font-size: 16px; }
     /* Taller for its width, so cut at the right (xMinYMid slice), and the ship sails in beside the X (fits down to 320px). */
     .banner { aspect-ratio: auto; height: 84px; }
-    .bn-ship { display: none; }   /* (the longer wordmark takes its place) */
-    .bn-word { font-size: 40px; }
+    /* The wordmark smaller, so the sloop still sails in after it (14 Nov: "I'd like the sloop on mobile"). */
+    .bn-word { font-size: 30px; }
+    .bn-ship { transform-box: fill-box; transform-origin: center; transform: translate(-360px, 3px) scale(.8); }
     .about { grid-column: 1 / -1; margin-top: 10px; }
     article.side { grid-template-columns: 1fr; }
     .cards { grid-template-columns: 1fr; }

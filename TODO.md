@@ -864,6 +864,10 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   big first picture: "look at how other sites do this ... they just have it three side by side, having different
   heights ... for the pictures is very jarring." So the banner reads "Dachimpy's Pirate Den", the bar Places, What's
   new and a bigger Play the den, and each choice's three pictures the same size side by side.
+  Then, of the phone banner losing its sloop: "we definitely need the sloop in the banner. Don't make the text too
+  big. That one with the sloop is fine. Not when it's bigger ... ideally you would just make the text a bit smaller
+  or something, but I'd like the sloop on mobile." So on a phone the wordmark is smaller and the sloop is back,
+  sailing in after it.
 
 ## Spotted along the way (not asked for)
 
