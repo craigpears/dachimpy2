@@ -26,7 +26,13 @@ sends you on to other pirates.
 Duty Navigation in the werewolf den); the den itself "cute and a bit of fun ... a bit of a goof", which is why the
 user enjoys it; the sloop races "a thing, I think, with more potential". Racing online and crews, not so far. And
 the den's spirit: a place for pirates' own rooms and adventures, "meaningful and funny, ideally in a mechanical
-sense", most of them duds, "but ... there might be that one thing that leads to something really fun".
+sense". Of the user's own experiments, most may fizzle, "but ... there might be that one thing that leads to
+something really fun" (the duds are the user's own ideas, never anyone's room: 14 Nov, "I'm talking about my ideas,
+not their ideas"). Every place is shown for what it is, proudly: Gravee's house "a big gallery concept and a fun
+mechanic", never "a small room", nothing about anyone's place minimised ("Just show the more positive aspect"). The
+den as a quick, cheap place for ideas (14 Nov): "all of this is quick and cheap to do. It's all just getting lots of
+ideas out ... there may be one good idea that people are really excited about and interested in among them ... At
+the very least, it's a bit of fun."
 
 ## The principles
 

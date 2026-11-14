@@ -563,6 +563,10 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   page, which I think is the go-to." https://discord.gg/XtRHwP6XT
   And Dachimpy at the door (14 Nov): "put my little pink character in ... Obviously, I need to welcome you to the
   site. Like, would you like a cookie? That'd be hilarious."
+  And at a glance (14 Nov): "I want things to be quick and discoverable ... they should at least maybe pick one or
+  two things ... a specific teaser of, like, go play [Mischievious's] wedding or the [sloop] race, the distilling
+  ... give a sample of some of the things ... easy, scroll to view ... you can go into a section to see more, but it
+  should at least show you some of the things at a glance without you having to click and interact."
 - **The front page as the launch pad, and what the den is for (14 Nov):** below "what are you here for?", the
   changelog's link and a way to "jump to specific places ... then we could get rid of the cheats menu and we can
   have this as a launch pad into that." And a short, light section on the den's goals: "you want your own adventure
@@ -574,12 +578,23 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   "I like things to be meaningful and funny, like ideally in a mechanical sense ... who knows, this could be a
   proposal in a game ... most of ... this is just kind of going to be a dud, but ... there might be that one thing
   that leads to something really fun, like ... the [sloop] races."
+  Then (14 Nov): "when I say most ideas will be duds, it's like I'm talking about my ideas, not their ideas. And
+  [Gravee's] is definitely not a small room. That was a big gallery concept and a fun mechanic ... that just feels
+  demeaning ... Just show the more positive aspect, please."
 - **Race online and crew play off the den's main menu (14 Nov):** "some of those buttons on the menu need to be a
   bit more contextual ... race online, play with the crew. I don't think anybody's really cared so far, so I don't
   want them as prominent menu positions if nobody cares." They stay, reachable where they belong (racing online
   from the race's start, the crew where crews are), not up front. The feedback so far: people care about
   "tutorials that are actually in demand, like werewolves"; the den is "cute and a bit of fun ... a bit of a goof";
   "the [sloop] races is a thing, I think, with more potential."
+- **The Global Cade Sim in the museum, with a link (14 Nov):** "Need the new cade sim referenced too:
+  https://www.globalcadesim.com/#/lobby/36 Absolutely deserves a link. Not the best picture but a placeholder for now,
+  if I ever update it." The user's screenshot (Dachimpy sailing it against a bot, flags, whirlpools, winds) as its
+  exhibit after "And Then", its plaque and Dachimpy's line, and the link from the close view; also linked from the
+  front page's practice choice, for blockade practice. The picture didn't reach the disk: the user to save the file.
+  Then: the link is what deserves prominence, on the front page, its own "what are you here for?" choice: "if you want
+  to go play the new blockade sim made by [its maker]" (name to come from the user). The museum's picture can wait:
+  "I'm going to go at least do a better picture of it ... a bit more justice to get into the midst of things."
 
 ## Spotted along the way (not asked for)
 
