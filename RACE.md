@@ -1437,6 +1437,30 @@ check, a share link, and the den's own race for 3D.
   gate open, shrugging off the winds, "Bigger ships ride out the winds" in IDEAS.md), the sloop slips through the
   narrow gaps and coves a frigate can't take; some routes open to both. Ties in with the frigate-and-sloop board
   (IDEAS.md, "A war frigate and a sloop on one board") and blasting through the gate (§12's decision).
+  - **Racing in a frigate or a sloop: the proof of concept (14 Nov).** On the unlinked frigate-test.html (Sail, its
+    default): a small test sea, 24 by 18 squares, a line of rocks across it with two ways through, a buoy past it,
+    both ships on it at once (each in the other's way), steered one at a time by the den's own helm (src/den-sail.ts:
+    the pin, the pilot, W A D, the turn's clock), each by her handling. Rules in src/ship-handling.ts (any ship's
+    handling, what fits where; the helm and sea subclassed, `ShipSea`, `ShipHelm`) and src/two-ships.ts (the test
+    sea); its 3D js/den/two-ships.js; tests/ship-handling.test.ts. The handling, as decided for it:
+    - **Moves a turn:** YPPedia's tokens, the sloop 4, a war frigate 3.
+    - **Pace:** the sloop the den's 1 s a square; a war frigate 1.5 s (`HANDLING.FRIGATE_PACE`, not YPPedia's: in
+      Battle Navigation a token is a token; here she's heavier to drive). With her fewer moves, about 1.2 to 1.35
+      times as long over a distance.
+    - **Size on the squares, from her hull** against the den's 4 m square: her length rounded (her ends can
+      overhang), her beam rounded up (her sides mustn't scrape). The sloop 1 by 1; Primates Rule (15 m by 4.6) 4
+      along and 2 across, so a one-square gap is too narrow for her: no special rule, just her beam.
+    - **Turning wide:** a turn is a quarter circle `radius` squares round, half her length: the sloop 1 (Battle
+      Navigation's turn exactly), the frigate 2 (two ahead, two across). Every square she covers at every step of a
+      move has to be open water, so she needs room to turn; a turn she's no room for leaves her as she was.
+    - **Guns:** shots a side a broadside, YPPedia's (the sloop 1 small, a war frigate 2 large), out of her middle
+      squares, 3 squares' range; a side loads again in 2 s (small) or 3 s (large).
+    - **The two obstacles:** a narrow gap one square wide (the sloop's); a channel three wide with a boom of chained
+      logs across it, which only large guns hurt: 4 shots, two of her broadsides, then open water for both. The
+      sloop's small guns bounce off it.
+    To try with the user: whether the pace and the turn feel right in a frigate; the obstacles in the real race
+    (the imperial gate as the frigate's boom, §12; the narrow ways as the sloop's); whether the frigate also rides
+    out the winds and whirlpools ("Bigger ships ride out the winds", IDEAS.md), not built.
 
 ## 12. Open questions
 
