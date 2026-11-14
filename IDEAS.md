@@ -2628,6 +2628,23 @@ so the puzzle's there to teach from; Dignity, already in the den, the natural te
 every tutorial has (RULES.md). To pin down with the user (or Dignity): what "four-tier" means here (four rings, a
 four-tier constellation, or the duty's tiers of difficulty), and what and where the werewolf den is (a place in
 Puzzle Pirates, or one to make), before anything's built.
+- **What players say, and a looting run watched (14 Nov).** The user asked on Discord about wolf-den looting
+  nav and shared what came back. Pandayay: you don't need triples for "fren"; go fast enough and singles do it,
+  and any good set of doubles will too. Duty Navigation is hard, and the higher-level tactics shouldn't put a
+  learner off. Four screenshots of a good player's run:
+  1. A constellation of four places up at once (two yellow, an orange, a red), the next star waiting on the
+     left spoke.
+  2. "Single! +3": one line of three cleared.
+  3. "Double! +6": what fell after it made a second line in the same move. The top place now holds a star
+     (it looked multicoloured to the user).
+  4. "Triple! Constellation! +213": the third clear of the cascade filled the constellation. Its places flash
+     multicoloured as it goes, and it scores about seventy times a line.
+  My reading of them: the game is to set a cascade going whose last clear fills the constellation; lines alone score next to
+  nothing. That's how src/navigation.ts already scores: a line a point a star times its step in the cascade
+  (+3, +6, +9 as in the pictures), and a constellation filled by a combo three times its points. Not yet in the
+  den: the board naming the cascade "Single!", "Double!", "Triple!" over the stars. Still to pin down: what
+  "fren" is (the duty's top rating while looting, frenzy?) and whether a constellation's places really turn
+  wild (any colour) mid-cascade or only flash as it goes.
 
 ## Distilling with a higher skill cap: fun variations (13 Nov)
 
