@@ -540,6 +540,12 @@ the rubble settle back after half a minute.
     Space anywhere in the race's waters, no race on, takes you back to it (14 Nov: "if I try moving at all, there's
     no way to get back into the race"; src/den-race.ts, `inRaceWaters`). The chart's words a size bigger (14 Nov: "a
     bit vague on the map ... tiny text above the locks").
+  - **Each shortcut drawn as it's sailed (the user, 14 Nov: "if I hover over rocks, why is it showing an L shape? ...
+    You just go straight up ... The bribe ... should be more like X marks the spot and then shows you where you cut
+    through ... the line goes further up than just through the imperial outpost"):** a shortcut's line on the charts
+    goes straight through its own water, from where the long way turns away from it to where it comes out onto the
+    leg above (src/race-sim.ts, `cutLine`, `cutInT`, `cutOutT`); the gate's just the gate's few squares; the bribe the
+    gate's line, the wreck an X where it lies. Only drawn: the race's seconds are CUTS'.
 
 ## 6. Racing each other: position and risk
 

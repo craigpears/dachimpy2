@@ -150,6 +150,8 @@
     #planchart .pc-stops circle { stroke-width: 4; }
     #planchart .pc-stops circle.on { fill: rgba(217, 160, 32, .35); stroke: #a8780f; }
     #planchart .pc-stops circle.hot { fill: rgba(31, 111, 154, .25); stroke: #1f6f9a; }
+    #planchart .pc-stops path.x { fill: none; stroke-width: 7; stroke-linecap: round; }
+    #planchart .pc-stops path.x.on { stroke: #a8780f; } #planchart .pc-stops path.x.hot { stroke: #1f6f9a; }
     #planchart .pc-opt { cursor: pointer; }
     #planchart .pc-hit { fill: rgba(246, 234, 208, .6); stroke: rgba(74, 44, 20, .5); stroke-width: 1.5; stroke-dasharray: 5 4; }
     #planchart .pc-opt.on .pc-hit { fill: rgba(240, 196, 90, .8); stroke: #a8780f; stroke-width: 3; stroke-dasharray: none; }
@@ -762,7 +764,7 @@
     // The den in one file, built by `npm run build` (tools/bundle.mjs). Locally, its modules as they
     // are, so a change shows on a reload (?bundle tries the bundle).
     const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !new URLSearchParams(location.search).has('bundle');
-    import(local ? './js/den.js' : './js/den.MSKNWZXF.js')
+    import(local ? './js/den.js' : './js/den.KP2WKERC.js')
       .then(() => requestAnimationFrame(() => requestAnimationFrame(() => {   // (the den's first frame drawn: the splash fades)
         const s = document.getElementById('splash');
         s.classList.add('gone');

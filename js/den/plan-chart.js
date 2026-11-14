@@ -112,7 +112,9 @@ function drawHot() {
 /** Where she stops: your route's stops in gold, the one pointed at in blue. */
 function drawStops(hotP) {
   const S = big.sheet, mine = new Set(P().plan.map((id, leg) => optKey(leg, id)));
-  const ring = (p, cls) => p.stops.map(([c, r]) => `<circle class="${cls}" cx="${S.X(c).toFixed(1)}" cy="${S.Y(r).toFixed(1)}" r="${(SQ * 0.48).toFixed(1)}"/>`).join('');
+  // (the bribe's wreck an X where it lies, its coins hauled up there: 14 Nov, "it should be more like X marks the spot")
+  const x = (c, r, cls) => { const X = S.X(c), Y = S.Y(r), k = SQ * 0.36; return `<path class="${cls} x" d="M${(X - k).toFixed(1)} ${(Y - k).toFixed(1)}L${(X + k).toFixed(1)} ${(Y + k).toFixed(1)}M${(X + k).toFixed(1)} ${(Y - k).toFixed(1)}L${(X - k).toFixed(1)} ${(Y + k).toFixed(1)}"/>`; };
+  const ring = (p, cls) => p.stops.map(([c, r], i) => (p.id === 'bribe' && i === 0 ? x(c, r, cls) : `<circle class="${cls}" cx="${S.X(c).toFixed(1)}" cy="${S.Y(r).toFixed(1)}" r="${(SQ * 0.48).toFixed(1)}"/>`)).join('');
   big.el.querySelector('.pc-stops').innerHTML = big.places.filter((p) => mine.has(optKey(p.leg, p.id))).map((p) => ring(p, 'on')).join('') + (hotP ? ring(hotP, 'hot') : '');
 }
 function detail(p) {

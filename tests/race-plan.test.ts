@@ -299,7 +299,7 @@ describe('the plan\'s strip: the course and each choice\'s time (13 Nov: "you ne
     for (const q of RC.HEADWIND) expect(head).toContainEqual(q);
     const long2 = choiceLines(1, 'long')[0];
     expect(near(long2[0], [long2[0][0], S[1].r])).toBe(true);
-    expect(choiceLines(0, 'bribe').length).toBe(2);   // (the wreck's notch, then the gate)
+    expect(choiceLines(0, 'bribe').length).toBe(1);   // (the gate: the wreck an X on the chart, not a line out and back, 14 Nov)
     // (the whole long way, one line from the line to the finish; a plan's lines join up end to end)
     expect(planLines(longPlan()).length).toBe(1);
     const ls = planLines(['long', 'headwind', 'whirls', 'locks', 'crane']);
@@ -313,3 +313,23 @@ describe('the plan\'s strip: the course and each choice\'s time (13 Nov: "you ne
   });
 });
 void FIELD; void Field; void courseSea;
+
+/* 14 Nov, the plan's chart: "if I hover over rocks, why is it showing an L shape? Like, well, there's no L shape. You
+   just go straight up. I don't know why it's showing it as if you double back. The same with driftwood. The bribe looks
+   a bit weird as well. Like, why is it a hook shape? I know it should be more like X marks the spot and then shows you
+   where you cut through ... Locks is doing a bit of a weird L-shaped thing as well. And the triples gap." */
+describe('each shortcut drawn straight through its gap (14 Nov: "there\'s no L shape. You just go straight up")', () => {
+  it('comes out of the rocks, the driftwood, the locks, the Double\'s and the Triple\'s gaps at the gap\'s own column, no step sideways or back', () => {
+    for (const [leg, id] of [[2, 'rocks'], [2, 'forage'], [3, 'locks'], [1, 'double'], [4, 'triple']] as const) {
+      const line = choiceLines(leg, id)[0], [a, b] = line.slice(-2);
+      expect(b[0], `${id} comes out where its gap does`).toBeCloseTo(a[0], 6);
+      expect(b[1], `${id} comes out onto the leg above`).toBeGreaterThanOrEqual(a[1]);
+      expect(S.some((s) => s.r === b[1]), `${id} ends on a leg`).toBe(true);
+    }
+  });
+  it('draws the bribe as the gate it gets you through, the wreck a mark where it lies, and a route joins up end to end', () => {
+    expect(choiceLines(0, 'bribe')).toEqual(choiceLines(0, 'shoot'));
+    const ls = planLines(['bribe', 'door', 'forage', 'locks', 'triple']);
+    for (let i = 1; i < ls.length; i++) expect(ls[i][0], `line ${i}`).toEqual(ls[i - 1][ls[i - 1].length - 1]);
+  });
+});

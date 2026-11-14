@@ -17,7 +17,7 @@
    kept from load. Where each shortcut's words go (wordsAt) is shared too, so the two charts label alike. */
 import { LAY, SAIL, Sea } from './den-sail.js';
 import { RACE, LONG_ROUTE } from './den-race.js';
-import { CUTS, choiceLines, longBetween, LEG_T } from './race-sim.js';
+import { CUTS, choiceLines, cutInT, cutOutT, longBetween, LEG_T } from './race-sim.js';
 import { SHELTER } from './den-racers.js';
 import { CHECK } from './den-checkpoint.js';
 import { RIVALS } from './den-rivals.js';
@@ -459,9 +459,9 @@ export function choicePlaces() {
         const st = stopsOf(o.id), says = [...new Set(st.map((s) => s.say.replace(/ \d+ of \d+/, '')))];
         const wid = WORDS_OF[o.id], cuts = o.cuts.filter((c) => c !== 'zigzag');
         const line = choiceLines(leg, o.id);
-        // (the long way it leaves: from where its first shortcut leaves the long way to where its last rejoins it)
-        const main = cuts.filter((c) => c !== 'wreck'), cut = main.length ? CUTS[main[main.length - 1]] : null;
-        const skips = cut ? longBetween(CUTS[main[0]].tIn, cut.tOut) : longBetween(LEG_T[leg], LEG_T[leg + 1]);
+        // (the long way it leaves: from where its first shortcut leaves the long way to where its last comes out onto it)
+        const main = cuts.filter((c) => c !== 'wreck');
+        const skips = main.length ? longBetween(cutInT(main[0]), cutOutT(main[main.length - 1])) : longBetween(LEG_T[leg], LEG_T[leg + 1]);
         let words, lines;
         // (the long way on its leg, where its name goes, the way it's sailed: "Leg 1: the long way →", "← Leg 2: the long way")
         if (!wid) {

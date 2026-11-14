@@ -396,22 +396,60 @@ export function longBetween(t0: number, t1: number): [number, number][] {
 }
 /** Seconds round the long way where each leg starts, and the finish (LEG_T[5]: the run home's start). */
 export const LEG_T: number[] = [0, ...[1, 2, 3, 4, 5].map((s) => CORNER_T[LONG_ROUTE.findIndex((p) => p[1] === routeRow(s))]), SIM.LONG];
-/** A shortcut's line: off the long way, through its own water (the headwind gap's dog-leg, the door's rock and
-    its tunnel's far end), and back onto it. */
+/** Seconds round the long way where it passes square (c, r) along one of its legs; `or` where r isn't a leg's row
+    (a turn's) or the leg doesn't run by c. */
+function tauOn(c: number, r: number, or: number): number {
+  const s = RC.STRETCHES.findIndex((x) => x.r === r);
+  if (s < 0) return or;
+  try { return tauAt(s, c); } catch { return or; }
+}
+/** A shortcut's line as drawn (the plan's charts): straight up through its own water from the leg below to the leg
+    above, in at its first square's column and out at its last's (the headwind gap's dog-leg, the door's rock and its
+    tunnel's far end). Never the sideways step to where the long way would have had her by the time she's through:
+    that drew an L, and a doubling back where it lay behind (the user, 14 Nov: "if I hover over rocks, why is it
+    showing an L shape? Like, well, there's no L shape. You just go straight up ... The same with driftwood ... Locks
+    is doing a bit of a weird L-shaped thing as well. And the triples gap"). Only drawn: the race's seconds are
+    CUTS'. */
 export function cutLine(id: CutId): [number, number][] {
-  const c = CUTS[id], by = id === 'headwind' ? RC.HEADWIND : id === 'door' ? [D.OFF[0]] : TRIPS[id].by;
+  const c = CUTS[id];
   // (the wreck: from the gate along the leg to its notch, in and out, and back to the gate, wherever it lies)
   if (id === 'wreck') { const g = sq(CUTS.guns.tIn), w = sq(c.tIn); return [g, w, [WR[0], WR[1]], w, g]; }
-  return [sq(c.tIn), ...by.map(([x, y]) => [x, y] as [number, number]), sq(c.tOut)];
+  return [sq(cutInT(id)), ...byOf(id).map(([x, y]) => [x, y] as [number, number]), sq(cutOutT(id))];
 }
-/** A leg's choice as a line on the course: the long way along the leg, or its shortcut's (and for the bribe, the
-    wreck's notch as well). */
+/** A shortcut's own squares (the headwind gap's dog-leg, the door's rock, its trip's). */
+const byOf = (id: CutId): readonly (readonly [number, number])[] => (id === 'headwind' ? RC.HEADWIND : id === 'door' ? [D.OFF[0]] : TRIPS[id].by);
+/** When the long way passes where a shortcut's drawn line leaves it: where it turns away from the shortcut's first
+    square, if it runs on beside it a while first (up the side of the fort to row 49, the gate straight on: its line
+    the gate's own few squares, 14 Nov: "the line goes further up than just through the imperial outpost ... I don't
+    think the imperial gateway is that big"); else where she leaves it (CUTS' tIn). */
+export function cutInT(id: CutId): number {
+  const c = CUTS[id], by = byOf(id);
+  if (!by.length) return c.tIn;
+  const [x, y] = by[0];
+  let t = c.tIn;
+  LONG_ROUTE.forEach(([cc, rr], i) => { if (CORNER_T[i] > t && CORNER_T[i] < c.tOut && Math.abs(cc - x) < 1 && rr < y) t = CORNER_T[i]; });
+  return t;
+}
+/** When the long way passes where a shortcut's drawn line comes out onto it: at its last square's column on the leg
+    above (out at a turn, or with no squares of its own, when it rejoins: CUTS' tOut). The route's drawn on from there. */
+export function cutOutT(id: CutId): number {
+  const c = CUTS[id], by = byOf(id);
+  if (!by.length) return c.tOut;
+  const [x, y] = by[by.length - 1], b = sq(c.tOut);
+  // (the long way's own turn passing right by it, as by the gate: there; else onto the leg above its last square)
+  if (Math.abs(b[0] - x) < 1) return c.tOut;
+  const above = RC.STRETCHES.find((s) => s.r >= y);
+  return above ? tauOn(x, above.r, c.tOut) : c.tOut;
+}
+/** A leg's choice as a line on the course: the long way along the leg, or its shortcut's (the bribe's, the gate's:
+    the wreck it's paid from is marked where it is, an X, not a line out and back, 14 Nov: "it should be more like X
+    marks the spot and then shows you where you cut through"). */
 export function choiceLines(leg: number, id: Choice): [number, number][][] {
-  const cuts = optionOf(leg, id)?.cuts.filter((c) => c !== 'zigzag') ?? [];
+  const cuts = optionOf(leg, id)?.cuts.filter((c) => c !== 'zigzag' && c !== 'wreck') ?? [];
   return cuts.length ? cuts.map(cutLine) : [longBetween(LEG_T[leg], LEG_T[leg + 1])];
 }
 /** A plan's whole route as lines on the course: the long way, but for each shortcut it takes, in order, its
-    own line from where it leaves the long way to where it rejoins it. */
+    own line from where it leaves the long way to where it comes out onto it again (the wreck marked, not drawn). */
 export function planLines(plan: Plan): [number, number][][] {
   const out: [number, number][][] = [];
   let t = 0;
@@ -419,12 +457,12 @@ export function planLines(plan: Plan): [number, number][][] {
   for (const id of cuts) {
     if (id === 'zigzag' || id === 'wreck') continue;
     const c = CUTS[id];
-    if (c.tIn < t - 1e-6) continue;
-    out.push(longBetween(t, c.tIn));
-    // (bribing the gate: out to the wreck and back to it first)
-    if (id === 'guns' && cuts.includes('wreck')) out.push(cutLine('wreck'));
+    // (its gap's mouth a square or so behind where the last came out, as the whirlpools' is behind the headwind gap's:
+    // across to it; else along the long way to it)
+    const at = out.length ? out[out.length - 1][out[out.length - 1].length - 1] : null, tIn = cutInT(id);
+    out.push(tIn < t - 1e-6 && at ? [at, sq(tIn)] : longBetween(t, tIn));
     out.push(cutLine(id));
-    t = c.tOut;
+    t = cutOutT(id);
   }
   out.push(longBetween(t, SIM.LONG));
   return out;
