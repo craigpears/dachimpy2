@@ -110,6 +110,8 @@
   .choices.out .by { font-size: 13px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: #d4b06a; }
   .collage.plain { display: grid; place-items: center; background: linear-gradient(160deg, #3b5d4a, #24392d); }
   .collage.plain em { font: italic 700 26px 'Alegreya', serif; color: #f3e3c3; }
+  .choices.out { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .choices.out .choice { grid-column: span 1; }
   .choice b { display: block; font: 700 22px/1.15 'Alegreya', serif; color: var(--gold); }
   .choice i { display: block; font-style: normal; font-size: 15px; color: var(--dim); margin-top: 3px; }
   .choice:hover b { color: #ffd166; }
@@ -169,6 +171,8 @@
     .choice, .choice.wide { grid-column: span 1; }
     .choice .collage { height: 130px; }
     .choice:first-child { grid-column: span 2; }
+    .choices.out { grid-template-columns: 1fr 1fr; }
+    .choices.out .choice:first-child { grid-column: span 1; }
     .choice b { font-size: 19px; }
     .choice i { font-size: 14px; }
   }
@@ -194,6 +198,7 @@
   @media (max-width: 420px) {
     .choices { grid-template-columns: 1fr; }
     .choice, .choice.wide, .choice:first-child { grid-column: span 1; }
+    .choices.out { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -239,6 +244,7 @@
 
   <nav class="choices out" aria-label="Elsewhere, made by others">
     <a class="choice" id="practice" href="https://www.globalcadesim.com/#/lobby/36" target="_blank" rel="noopener"><span class="collage n1"><img src="changelog/global-cade-sim.jpg" alt=""></span><span class="cap"><b>Play blockades online <span class="ext">↗</span></b><i class="by">The Global Cade Sim, made by AMH</i><i>Battle Navigation and blockades, online.</i></span></a>
+    <a class="choice" href="https://yppedia.puzzlepirates.com/" target="_blank" rel="noopener"><span class="collage n1 plain"><em>YPPedia</em></span><span class="cap"><b>Look up the basics <span class="ext">↗</span></b><i class="by">YPPedia, the wiki written by the game's players</i><i>Every puzzle's rules and basic mechanics, and good guides.</i></span></a>
     <a class="choice" href="https://puzzle-practice.github.io/Puzzle_Practice/#/" target="_blank" rel="noopener"><span class="collage n1 plain"><em>Puzzle Practice</em></span><span class="cap"><b>Practise puzzles <span class="ext">↗</span></b><i class="by">Puzzle Practice, made and run by the Puzzle Practice team</i><i>Practise lots of puzzles.</i></span></a>
     <a class="choice" id="people" href="https://discord.gg/XtRHwP6XT" target="_blank" rel="noopener"><span class="collage n1"><img src="changelog/wardrobe.jpg" alt=""></span><span class="cap"><b>Meet real pirates <span class="ext">↗</span></b><i class="by">The Trophy Hunters' Discord, their own community</i><i>It's a sociable game: everything's about the people, playing puzzles together. For a friendly crowd ready to help and have fun, or to watch real pirates play and chat, this is the go-to. The top puzzlers stream on Twitch and YouTube too.</i></span></a>
   </nav>
