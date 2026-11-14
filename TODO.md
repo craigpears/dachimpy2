@@ -506,6 +506,12 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   - **"Did you know?", not "not brave enough" (14 Nov):** "I wasn't quite brave enough to do what [Dlonelyone]
     did. I don't think that's a representation of me ... I wanted to do that, but it wasn't a good fit for me.
     So this is what I did instead." Teaching out loud wasn't their fit; Dachimpy.com was their way of helping.
+  - **"Monkey Couple" looks awful (14 Nov):** "we definitely need to do work improving the monkey couple ... it's
+    not even appropriate to put into here the words of what that looks like other than, oh my God, what is
+    that?" Dachimpy's dress for it is a sash for a top (likely a bare chest with a sash) and the monkey placed by
+    the familiar slot. The real portrait (Meridian, 5 Jan 2007): the two in matching red, a shirt and trousers, a
+    gold buckle, white boots, each with a monkey on the shoulder, on a beach. Redo it to that, and look at it close
+    up before it's shown.
 
 ## Spotted along the way (not asked for)
 
