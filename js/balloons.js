@@ -141,9 +141,13 @@ export function route(g, t) {
                 out.unshift(from.get(k)[1]);
             return out;
         }
-        const next = [
-            [r, c - 1, u, 'left'], [r, c + 1, u, 'right'], [r, c, ((u + 1) % 4), 'turnR'], [r, c, ((u + 3) % 4), 'turnL'],
-        ];
+        // (a turn as the pair turns, Sailing.turned: keeping its lower row, pushing off what's in the way)
+        const next = [[r, c - 1, u, 'left'], [r, c + 1, u, 'right']];
+        for (const [dir, step] of [[1, 'turnR'], [-1, 'turnL']]) {
+            const to = g.turned(r, c, u, dir);
+            if (to)
+                next.push([...to, step]);
+        }
         // (down last: of the shortest ways, the one a player takes, across and turned first, then dropped,
         // sliding in sideways only where it has to, under a platform)
         if (g.sinks(r, c, u))

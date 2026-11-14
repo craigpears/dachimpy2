@@ -2525,6 +2525,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     it only turned in place; where it came to rest wasn't a place Sailing.drop would take, so it was
     dropped straight down its column from the top instead, landing on whatever was over the nook. Now
     moves() turns the way the pair does, so it lands where it was turned (tests/sail-pair.test.ts).
+  - **A turn keeps the pair's lower row (14 Nov).** "when I rotate things, they do still seem to jump up
+    further than the visual position would indicate." A turn kept the pair's top row, so an upright pair
+    turned flat had its lower half jump up a row, and the board, easing from the old top row, slid it up
+    or down after. Now an upright pair turned flat lies along its lower square's row, and a flat one
+    turned upright stands on its own row, its other half above (at the very top, with no row above, it
+    hangs down from the top row as before). Turning round and round it neither climbs nor sinks. Pushing
+    off: a column either way on that row first, then the other row. The board draws it turned where it
+    is at once (Sailing.turned; Tzz's routes turn the same way, src/balloons.ts route).
+- **A grace a tile from booching (14 Nov).** "it just feels really easy to booch on the top. Like, it
+  drops a bit too quickly ... maybe ... just be a bit slower when you're one tile away from booching." While
+  the pair would come to rest with a square in the top two rows (booching, or a tile from it), it falls by
+  itself at half pace, and rests twice as long before it lands, time to tuck it into the last spaces or
+  steer it off (`FALL.GRACE`, `FALL.NEAR`, src/sail-pair.ts). Space speeds it as ever.
 - **Sailing's platforms are blocks, never a little row (11 Nov).** "Platforms never look that small.
   Like, they're always like 2 by 3 or 3 by 3, aren't they? I mean, check the actual official pages."
   YPPedia's "Sailing" page gives no sizes in words; its "typical sailing board" picture shows a 2 by

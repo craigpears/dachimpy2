@@ -56,7 +56,7 @@
    Not on YPPedia, so made up here (say so if it matters): the exact deal (sizes, how its colours
    fall beyond the user's rule, fixed pieces), how fast difficulty rises and when it resets, whether
    the target points are inside the chain's multiplier (here they're not), and turning: a pair turns
-   about its first square, and turned against a wall it pushes off it (src/sail-pair.ts).
+   keeping its lower row (turned()), and turned against a wall it pushes off it (src/sail-pair.ts).
 
    The den's twist (the user, 10 Nov: "set up a Vegas, and go like 7 forwards in one go"): each drop's
    chain is a run straight ahead, in one go (runFor). The real game has nothing like it: there, the
@@ -259,14 +259,21 @@ export class Sailing {
         a row up. The one turn, for a pair steered live (src/sail-pair.ts) and for moves(): a pair pushed
         off a piece into a nook under a ledge used to come to rest somewhere moves() didn't know, and was
         dropped straight down its column instead, on top of the ledge (the user, 12 Nov: "if you hit the
-        space bar and then rotate the piece, it kind of jumps halfway back up the screen"). */
+        space bar and then rotate the piece, it kind of jumps halfway back up the screen").
+        Its lower row stays where it is (the user, 14 Nov: "when I rotate things, they do still seem to jump
+        up further than the visual position would indicate"): an upright pair turned flat lies along its
+        lower square's row, and a flat one turned upright stands on its own row, its other half above. It
+        used to keep its top row, so turned flat its lower half jumped up a row. Only where that can't be
+        (the top of the board, a piece in the way on both sides) does it take the other row: the one under
+        a flat pair turned upright, the upper one of an upright pair turned flat, the row-up push. */
     turned(row, col, turn, dir) {
         const t = ((turn + (dir > 0 ? 1 : 3)) % 4);
-        const away = col < W / 2 ? 1 : -1;
-        for (const [dr, dc] of [[0, 0], [0, away], [0, -away], [-1, 0]]) {
-            if (row + dr >= 0 && this.open(row + dr, col + dc, t))
-                return [row + dr, col + dc, t];
-        }
+        const away = col < W / 2 ? 1 : -1, low = t & 1 ? -1 : 1; // (the row its lower square keeps)
+        for (const dr of [low, 0])
+            for (const dc of [0, away, -away]) {
+                if (row + dr >= 0 && this.open(row + dr, col + dc, t))
+                    return [row + dr, col + dc, t];
+            }
         return null;
     }
     /** Every place the pair can be steered to and come to rest, sliding and turning (turned(), pushing

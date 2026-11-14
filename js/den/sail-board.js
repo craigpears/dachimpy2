@@ -251,7 +251,7 @@ function padMake(B) {
 
 // A board's own state: its canvas, what's on it, what's playing out.
 const state = (cv) => ({ cv, g: cv.getContext('2d'), k: 0, dpr: 1, back: null, sig: '', rect: null, game: null,
-  pieces: new Map(), platforms: [], pops: [], bits: [], rings: [], glit: [], queue: [], prev: null, holdT: 0, steps: 0, banner: null, fall: null, shown: { r: 0, c: SPAWN[0] },
+  pieces: new Map(), platforms: [], pops: [], bits: [], rings: [], glit: [], queue: [], prev: null, holdT: 0, steps: 0, banner: null, fall: null, shown: { r: 0, c: SPAWN[0], turn: 0 },
   hi: null, what: null, fading: [] });
 
 /** The board's size in its own units (pixels at scale 1), and where a square of it is: for a board put
@@ -373,7 +373,7 @@ const settling = (B) => [...B.pieces.values()].some((q) => Math.abs(q.y - q.ty) 
 export const sailBoardBusy = (B) => B.queue.length > 0 || !!B.doomed || !!B.after || settling(B);
 /** A new pair's come in at the top: it's drawn there at once, not glided up from where the last one
     landed. */
-export function sailBoardSnap(B) { B.shown = { r: 0, c: SPAWN[0] }; }
+export function sailBoardSnap(B) { B.shown = { r: 0, c: SPAWN[0], turn: 0 }; }
 
 function pop(B, q, delay, red = false) {
   B.pops.push({ x: q.x, y: q.y, p: q.p, t: -delay, gone: false, red, blk: q.blk ?? 0 });
@@ -502,8 +502,12 @@ export function sailBoardTick(B, dt, pair, sp = null) {
   for (const b of B.bits) { b.x += b.vx * dt; b.y += b.vy * dt; b.vy += 14 * dt; b.vx *= 1 - dt * 1.5; b.rot += b.vr * dt; }
   if (B.banner && (B.banner.t += dt) > 1.6) B.banner = null;
   // The falling pair glides to where it is: down, where it's fallen to between rows (pair.y), smooth
-  // at any speed; a step (a show's pair moved by hand) or a slide eased.
+  // at any speed; a step (a show's pair moved by hand) or a slide eased. Turned, it's drawn turned where
+  // it is at once, its rows not eased: a turn keeps one of its rows (Sailing.turned), and easing from its
+  // old top row slid it up or down the board after (the user, 14 Nov: "when I rotate things, they do
+  // still seem to jump up further than the visual position would indicate").
   if (pair) {
+    if (B.shown.turn !== pair.turn) { B.shown.turn = pair.turn; B.shown.r = pair.y?.() ?? pair.row; }
     const k = Math.min(1, dt * 18), y = pair.y?.() ?? pair.row, d = y - B.shown.r;
     B.shown.r = d >= 0 && d < 1 ? y : B.shown.r + d * k;   // (a whole row at once: a show's step, eased)
     B.shown.c += (pair.col - B.shown.c) * k;

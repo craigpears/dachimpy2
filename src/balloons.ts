@@ -153,9 +153,9 @@ export function route(g: Sailing, t: Twist): Step[] | null {
       for (let k = id(r, c, u); from.get(k); k = from.get(k)![0]) out.unshift(from.get(k)![1]);
       return out;
     }
-    const next: [number, number, Drop['turn'], Step][] = [
-      [r, c - 1, u, 'left'], [r, c + 1, u, 'right'], [r, c, ((u + 1) % 4) as Drop['turn'], 'turnR'], [r, c, ((u + 3) % 4) as Drop['turn'], 'turnL'],
-    ];
+    // (a turn as the pair turns, Sailing.turned: keeping its lower row, pushing off what's in the way)
+    const next: [number, number, Drop['turn'], Step][] = [[r, c - 1, u, 'left'], [r, c + 1, u, 'right']];
+    for (const [dir, step] of [[1, 'turnR'], [-1, 'turnL']] as const) { const to = g.turned(r, c, u, dir); if (to) next.push([...to, step]); }
     // (down last: of the shortest ways, the one a player takes, across and turned first, then dropped,
     // sliding in sideways only where it has to, under a platform)
     if (g.sinks(r, c, u)) next.push([r + 1, c, u, 'down']);
