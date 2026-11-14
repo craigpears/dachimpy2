@@ -574,6 +574,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   "I like things to be meaningful and funny, like ideally in a mechanical sense ... who knows, this could be a
   proposal in a game ... most of ... this is just kind of going to be a dud, but ... there might be that one thing
   that leads to something really fun, like ... the [sloop] races."
+  Then (14 Nov): "when I say most ideas will be duds, it's like I'm talking about my ideas, not their ideas. And
+  [Gravee's] is definitely not a small room. That was a big gallery concept and a fun mechanic ... that just feels
+  demeaning ... Just show the more positive aspect, please."
 - **Race online and crew play off the den's main menu (14 Nov):** "some of those buttons on the menu need to be a
   bit more contextual ... race online, play with the crew. I don't think anybody's really cared so far, so I don't
   want them as prominent menu positions if nobody cares." They stay, reachable where they belong (racing online
