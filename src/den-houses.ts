@@ -39,7 +39,7 @@ export const HOUSES: readonly House[] = [
   // Dachimpy's (13 Nov), the user's own pirate: their house doubles as a museum of the old Blockade Simulator
   // and Dachimpy.com, and keeps their friends on its walls; a hug and a cookie at the door. Its rules:
   // src/den-dachimpy.ts.
-  { id: 'dachimpy', owner: 'Dachimpy', name: 'The Museum', kind: 'Manor', blurb: 'Hugs and cookies at the door. The old sims, oldest first.' },
+  { id: 'dachimpy', owner: 'Dachimpy', name: 'Hugs and Cookies', kind: 'Manor', blurb: 'Hugs and cookies at the door. Friends first, then the old sims.' },
 ];
 
 /** The house by its id, or null. */

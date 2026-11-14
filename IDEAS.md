@@ -1049,7 +1049,7 @@ Meridian ... Also check all my portraits for connections to other friends on bot
   Mems and Kenchio.
 - **Sanne's look** (Meridian portraits): fair skin, blonde hair tied back, a monkey on her shoulder; matching red
   (shirt, trousers, a gold buckle, white boots) in "Monkey Couple"; a gold crown and sceptre, green and black, in
-  "I love you babae". **Zizzy's:** fair skin, long pink hair, a pink off-shoulder gown.
+  "I love you babae". **Zizzy's:** fair skin, long pink hair, a pink off-shoulder gown. (The user, 14 Nov, from their trinkets: Zizzy was likely RebelSqrrl on Hunter.)
 
 **Cookies and hugs at the door; the house doubles as the museum (11 Nov):** "a random thing about
 myself as well is I'm very well known for giving just like hugs and cookies ... anyone that comes
@@ -2217,6 +2217,11 @@ thing. I don't see a huge need to continue any of that over yet." So no tie to D
 flag's name, Imperial Coalition, to confirm on YPPedia.
 
 ## Affame, the queen of sweetness (11 Nov)
+
+**Pictures for her little house (14 Nov):** the user made her a few: "The dame of everlasting sweetness things I
+made for Affame to show in her little house XD" (four cartoons: the "Dame of Everlasting Sweetness, Melt-Apart
+Springer of Pastries" scroll and crown, a cosy one among cushions and teddies, "Sweetness War", and the "Sweetness
+Index: off the charts!"). A little house of hers with them on its walls; the image files to be saved into the project.
 
 "Need to work affame into it somewhere... I have dubbed her the queen of sweetness so she can have a nice
 kind peaceful role somewhere." **Affame** (she; a real pirate, pirate name as the user spelt it, to check

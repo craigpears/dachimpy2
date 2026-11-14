@@ -1489,7 +1489,7 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
   - "Cookie time! Fresh ones!"
   - "Yay, cookies! Still warm."
   - "Ooh, your cookie! One, as promised."
-- *Then, on to the museum:* "Now come and see! The old sims, oldest first. My pride and joy."
+- *Then, on to their friends:* "Now come and meet everyone! My friends first, then the old sims."
 
 ### Another cookie from the plate on the hall's table, one in turn
 
@@ -1501,14 +1501,14 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 ### Showing you round, as you come to each stop
 
 - *In the hall:*
-  - "Yay, you're here! This is my house. And the museum. Both, really."
-  - "Everything I ever made for Puzzle Pirates is through there. In order!"
-- *Into the museum:*
-  - "Ooh, here we go! Stop by any of them and I'll tell you all about it."
-  - "Bugs and all. Especially the bugs."
+  - "Yay, you're here! This is my house. And a museum, at the back."
+  - "My friends are through there first. People first, always!"
 - *Into the friends' room:*
-  - "And this is the best room: the people! My friends, from all those years."
+  - "Ooh, the best room: the people! My friends, from all those years."
   - "Everyone on these walls is special to me! Every single one."
+- *Into the museum, last:*
+  - "And here's the museum! Stop by any of them and I'll tell you all about it."
+  - "Bugs and all. Especially the bugs."
 
 ### The plaques under the pictures, in order
 
@@ -1587,9 +1587,6 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 - *sanne:* "Sanne: Monkey Couple"
 - *whiterose:* "Whiterose, Heart of the Game"
 - *affame:* "Affame, Queen of Sweetness"
-- *tzz:* "Tzz, and D'rizzle"
-- *helium:* "Helium, Eyebrows Pending"
-- *roobear:* "Roobear, Ears Roobed"
 - *welcomeBack:* "Welcome Back Dachimpy!"
 - *everyone:* "Everyone I Blockaded With"
 - *thanks:* "Thank You"
@@ -1605,12 +1602,9 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 - *kikkit:* "Kikkit! Every Valentine's, a portrait, and always cookies."
 - *zizzy:* "Zizzy! Pinky and the pink: both of us in pink, of course."
 - *daquan:* "Daquan! My partner in crime through the whole thing. Right in the middle, where he belongs."
-- *sanne:* "Sanne! Monkey Couple, 2007: matching red, a monkey each."
+- *sanne:* "Sanne! She got me a real cuddly monkey, Cheeky, aka Minnie. Then a whole gang: Chunky, Charlie, Fuddles..."
 - *whiterose:* "Whiterose! For the life of the game, she'd switch from Vanguard to the other side. Miss you, Whiterose!"
 - *affame:* "Affame! The queen of sweetness. Such a sweety, honestly."
-- *tzz:* "Tzz! She gave me my best teaming tip: don't stall. Ever."
-- *helium:* "Helium! Ask about the eyebrows. Actually, don't."
-- *roobear:* "Roobear! Robert roobed my ears too."
 - *welcomeBack:* "Fable! Welcome back, eggs and all, last June. It was so good to be home."
 - *everyone:* "Yay, all of you! Names change, I forget, but every one of you is here."
 - *thanks:* "That one's for everyone! It's the people that made it."

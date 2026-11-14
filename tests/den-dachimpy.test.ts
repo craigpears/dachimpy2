@@ -19,7 +19,8 @@ const partsOf = (slot: string) => {
   const m = LOOK_JS.match(new RegExp(`\\n  ${slot}: \\{\\n    m: \\[([\\s\\S]*?)\\],\\n    f: \\[([\\s\\S]*?)\\],\\n  \\}`))!;
   return [...(m[1] + m[2]).matchAll(/\['([a-z]+)'/g)].map((x) => x[1]);
 };
-const [HALL, MUSEUM, FRIENDS_ROOM] = PLAN.rooms;
+const roomOf = (id: string) => PLAN.rooms.find((r) => r.id === id)!;
+const HALL = roomOf('hall'), MUSEUM = roomOf('museum'), FRIENDS_ROOM = roomOf('friends');
 const H = hang();
 /** A JPEG's size, from its SOF marker. */
 function jpegSize(file: string): [number, number] {
@@ -40,16 +41,17 @@ describe('their house in the district, which doubles as the museum', () => {
     expect(readFileSync(join(ROOT, 'js', 'den', 'house.js'), 'utf8')).toMatch(/dachimpy: DACHIMPY_HOUSE/);
   });
 
-  it('has the hall, the museum and the friends\' room in a row, a doorway between each, walked end to end', () => {
-    expect(PLAN.rooms.map((r) => r.id)).toEqual(['hall', 'museum', 'friends']);
+  it('has the hall, the friends\' room and the museum in a row, the people first (14 Nov: "you get the special people right in the entrance, and then the museum can be the bit at the end"), a doorway between each, walked end to end', () => {
+    expect(PLAN.rooms.map((r) => r.id)).toEqual(['hall', 'friends', 'museum']);
+    expect(TOUR.map((s) => s.id)).toEqual(['hall', 'friends', 'museum']);
     expect(walkable(PLAN, ARRIVE.you.x, ARRIVE.you.z)).toBe(true);
     expect(walkable(PLAN, ARRIVE.them.x, ARRIVE.them.z)).toBe(true);
     expect(atWayOut(PLAN, ARRIVE.you.x, ARRIVE.you.z + 0.3)).toBe(true);
     const B = blocksOf(FURNISH);
     let x: number = ARRIVE.you.x, z = 0;
-    for (let i = 0; i < 2000 && x < FRIENDS_ROOM.x1 - 0.6; i++) [x, z] = step(PLAN, x, z, x + 0.05, z, B);
-    expect(x).toBeGreaterThanOrEqual(FRIENDS_ROOM.x1 - 0.61);
-    expect(roomAt(PLAN, x, z)?.id).toBe('friends');
+    for (let i = 0; i < 4000 && x < MUSEUM.x1 - 0.6; i++) [x, z] = step(PLAN, x, z, x + 0.05, z, B);
+    expect(x).toBeGreaterThanOrEqual(MUSEUM.x1 - 0.61);
+    expect(roomAt(PLAN, x, z)?.id).toBe('museum');
   });
 
   it('places only furniture the shared furniture module makes, each in a room, none in your way at the door', () => {
@@ -92,10 +94,10 @@ describe('the museum: the old Blockade Simulator and Dachimpy.com, in order (the
     expect([...xs].sort((a, b) => a - b)).toEqual(xs);
     const files = inMuseum.flatMap((e) => (e.kind === 'shot' ? [e.file] : []));
     expect([...files].sort()).toEqual(files);
-    expect(inMuseum[0].id).toBe('guide');
+    expect(inMuseum[0].id).toBe('began');   // (where it began, first in the museum, the hall left to the people)
     expect(inMuseum[inMuseum.length - 1].id).toBe('gone');
-    // the hall: where it began (the banner and the title card moved on, to where the donation paid for them)
-    expect(EXHIBITS.filter((e) => H[e.id].room === 'hall').map((e) => e.id)).toEqual(['began']);
+    // nothing in the hall now: the friends' room straight after it, the museum last
+    expect(EXHIBITS.filter((e) => H[e.id].room === 'hall').map((e) => e.id)).toEqual([]);
   });
 
   it('hangs them in clusters, the order kept (the user, 14 Nov: "some of them need to be clustered together a bit")', () => {
@@ -276,12 +278,17 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
     expect(EVERYONE).toMatch(/Dalnoth/);
   });
 
-  it('hangs Whiterose right beside Daquan, in the middle with Kikkit, Zizzy and Sanne (14 Nov)', () => {
-    const byX = [...FRIENDS].sort((a, b) => a.x - b.x).map((f) => f.id);
-    const d = byX.indexOf('daquan');
-    expect([byX[d - 1], byX[d + 1]]).toContain('whiterose');
-    const middle = FRIENDS.filter((f) => f.middle).map((f) => f.id).sort();
-    expect(middle).toEqual(['daquan', 'kikkit', 'sanne', 'whiterose', 'zizzy']);
+  it('hangs the four closest in the hall, big, the first thing you see as you come in; no one else there, not Dachimpy (14 Nov)', () => {
+    const inHall = FRIENDS.filter((f) => f.x > HALL.x0 && f.x < HALL.x1).map((f) => f.id).sort();
+    expect(inHall).toEqual(['daquan', 'kikkit', 'sanne', 'zizzy']);
+    for (const id of inHall) expect(FRIENDS.find((f) => f.id === id)!.middle).toBe(true);
+    for (const f of FRIENDS.filter((g) => g.x > HALL.x0 && g.x < HALL.x1)) {
+      expect(f.x - f.w / 2).toBeGreaterThan(HALL.x0 + 0.3);
+      expect(f.x + f.w / 2).toBeLessThan(HALL.x1 - 0.3);
+    }
+    expect(HALL.z0).toBe(FRIENDS_ROOM.z0);   // (the same back wall's line: FRIENDS_WALL)
+    expect(FRIENDS.find((f) => f.id === 'whiterose')!.middle).toBeFalsy();
+    expect(houseById('dachimpy')?.name).toBe('Hugs and Cookies');
   });
 
   it('has Fable in "Welcome Back Dachimpy!", and Felinee beside Kikkit (the user, 14 Nov: "Need Fable as one of the people in the portraits in my house"; Felinee "absolutely on the edge of being special"; "Put her next to Kikkit")', () => {
@@ -292,9 +299,11 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
     expect(s.who === 'pirate' && s.company?.[0]).toMatchObject({ kind: 'pirate', name: 'Dachimpy' });
     // ("Hot Pink and Indigo :)", Fable's own words)
     expect(LOOK_JS).toMatch(/Fable: \{[\s\S]*?topCol: 'indigo', topCol2: 'hot pink'/);
-    const byX = [...FRIENDS].sort((a, b) => a.x - b.x).map((f) => f.id);
-    const k = byX.indexOf('kikkit');
-    expect(byX[k - 1]).toBe('felinee');
+    // (Felinee nearest the friends' room's middle, on the edge of the four)
+    const inRoom = FRIENDS.filter((f) => f.x > FRIENDS_ROOM.x0 && f.x < FRIENDS_ROOM.x1);
+    const fc = (FRIENDS_ROOM.x0 + FRIENDS_ROOM.x1) / 2;
+    const nearest = Math.min(...inRoom.map((f) => Math.abs(f.x - fc)));
+    expect(Math.abs(FRIENDS.find((f) => f.id === 'felinee')!.x - fc)).toBeCloseTo(nearest, 5);
     expect(FRIENDS.find((f) => f.id === 'felinee')!.middle).toBeFalsy();
   });
 
@@ -312,9 +321,9 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
 
   it('labels no one special, everybody\'s special (14 Nov: "I\'m feeling a bit bad about having a few people in my house that are labelled as the special ones, because everybody\'s special"): the closest in the middle, bigger, Daquan at its centre', () => {
     const middle = FRIENDS.filter((f) => f.middle).map((f) => f.id);
-    expect([...middle].sort()).toEqual(['daquan', 'kikkit', 'sanne', 'whiterose', 'zizzy']);
-    const mid = (FRIENDS_ROOM.x0 + FRIENDS_ROOM.x1) / 2;
-    expect(FRIENDS.find((f) => f.id === 'daquan')!.x).toBeCloseTo(mid, 5);   // ("my partner in crime through the whole thing")
+    expect([...middle].sort()).toEqual(['daquan', 'kikkit', 'sanne', 'zizzy']);
+    const mid = (HALL.x0 + HALL.x1) / 2;
+    expect(Math.abs(FRIENDS.find((f) => f.id === 'daquan')!.x - mid)).toBeLessThan(1);   // ("my partner in crime through the whole thing")
     for (const f of FRIENDS) {
       if (f.middle) { expect(Math.abs(f.x - mid)).toBeLessThan(3); continue; }
       for (const s of FRIENDS.filter((g) => g.middle)) expect(s.w * s.h).toBeGreaterThan(f.w * f.h);
@@ -376,7 +385,7 @@ describe('their friends\' room: the trinkets and the portraits (IDEAS.md, "The t
   });
 
   it('hangs them along the back wall without overlapping, inside the room', () => {
-    const F = [...FRIENDS].sort((a, b) => a.x - b.x);
+    const F = [...FRIENDS].filter((f) => f.x > FRIENDS_ROOM.x0).sort((a, b) => a.x - b.x);   // (the four in the hall: above)
     for (let i = 1; i < F.length; i++) expect(F[i].x - F[i].w / 2 - 0.15, F[i].id).toBeGreaterThan(F[i - 1].x + F[i - 1].w / 2);
     for (const f of F) { expect(f.x - f.w / 2).toBeGreaterThan(FRIENDS_ROOM.x0 + 0.3); expect(f.x + f.w / 2).toBeLessThan(FRIENDS_ROOM.x1 - 0.3); }
     expect(FRIENDS_WALL).toBeCloseTo(FRIENDS_ROOM.z0 + 0.2, 5);

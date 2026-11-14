@@ -17,11 +17,11 @@ export const AT_THE_DOOR = {
   again: 'You came back! Yay! Hug first. Then cookies.',
 } as const;
 
-/** After the hug, the cookie: the first visit, then one of the others in turn; and on to the museum. */
+/** After the hug, the cookie: the first visit, then one of the others in turn; and on to their friends. */
 export const THE_COOKIE = {
   first: 'Yay, cookies! Everyone who comes in gets a cookie. House rule.',
   again: ['Cookie time! Fresh ones!', 'Yay, cookies! Still warm.', 'Ooh, your cookie! One, as promised.'],
-  onward: 'Now come and see! The old sims, oldest first. My pride and joy.',
+  onward: 'Now come and meet everyone! My friends first, then the old sims.',
 } as const;
 
 /** Another cookie from the plate on the hall's table (walk up to it and ask), one in turn. */
@@ -35,16 +35,16 @@ export const ANOTHER_COOKIE = [
 /** Showing you round, a stop at a time: the lines they say when you get there. */
 export const TOUR_LINES = {
   hall: [
-    'Yay, you\'re here! This is my house. And the museum. Both, really.',
-    'Everything I ever made for Puzzle Pirates is through there. In order!',
-  ],
-  museum: [
-    'Ooh, here we go! Stop by any of them and I\'ll tell you all about it.',
-    'Bugs and all. Especially the bugs.',
+    'Yay, you\'re here! This is my house. And a museum, at the back.',
+    'My friends are through there first. People first, always!',
   ],
   friends: [
-    'And this is the best room: the people! My friends, from all those years.',
+    'Ooh, the best room: the people! My friends, from all those years.',
     'Everyone on these walls is special to me! Every single one.',
+  ],
+  museum: [
+    'And here\'s the museum! Stop by any of them and I\'ll tell you all about it.',
+    'Bugs and all. Especially the bugs.',
   ],
 } as const;
 
@@ -136,9 +136,6 @@ export const FRIEND_TITLES = {
   sanne: 'Sanne: Monkey Couple',
   whiterose: 'Whiterose, Heart of the Game',
   affame: 'Affame, Queen of Sweetness',
-  tzz: 'Tzz, and D\'rizzle',
-  helium: 'Helium, Eyebrows Pending',
-  roobear: 'Roobear, Ears Roobed',
   welcomeBack: 'Welcome Back Dachimpy!',
   everyone: 'Everyone I Blockaded With',
   thanks: 'Thank You',
@@ -154,12 +151,9 @@ export const ON_A_FRIEND = {
   kikkit: 'Kikkit! Every Valentine\'s, a portrait, and always cookies.',
   zizzy: 'Zizzy! Pinky and the pink: both of us in pink, of course.',
   daquan: 'Daquan! My partner in crime through the whole thing. Right in the middle, where he belongs.',
-  sanne: 'Sanne! Monkey Couple, 2007: matching red, a monkey each.',
+  sanne: 'Sanne! She got me a real cuddly monkey, Cheeky, aka Minnie. Then a whole gang: Chunky, Charlie, Fuddles...',
   whiterose: 'Whiterose! For the life of the game, she\'d switch from Vanguard to the other side. Miss you, Whiterose!',
   affame: 'Affame! The queen of sweetness. Such a sweety, honestly.',
-  tzz: 'Tzz! She gave me my best teaming tip: don\'t stall. Ever.',
-  helium: 'Helium! Ask about the eyebrows. Actually, don\'t.',
-  roobear: 'Roobear! Robert roobed my ears too.',
   welcomeBack: 'Fable! Welcome back, eggs and all, last June. It was so good to be home.',
   everyone: 'Yay, all of you! Names change, I forget, but every one of you is here.',
   thanks: 'That one\'s for everyone! It\'s the people that made it.',
@@ -236,11 +230,11 @@ export const CHARACTER: Character = {
   ],
   lines: [
     { when: 'At the door when you come in, a hug first', says: AT_THE_DOOR, each: { first: 'Your first visit', again: 'Coming back' } },
-    { when: 'After the hug, a cookie', says: THE_COOKIE, each: { first: 'Your first visit', again: 'Coming back, one in turn', onward: 'Then, on to the museum' } },
+    { when: 'After the hug, a cookie', says: THE_COOKIE, each: { first: 'Your first visit', again: 'Coming back, one in turn', onward: 'Then, on to their friends' } },
     { when: 'Another cookie from the plate on the hall\'s table, one in turn', says: ANOTHER_COOKIE },
     {
       when: 'Showing you round, as you come to each stop', says: TOUR_LINES,
-      each: { hall: 'In the hall', museum: 'Into the museum', friends: 'Into the friends\' room' },
+      each: { hall: 'In the hall', friends: 'Into the friends\' room', museum: 'Into the museum, last' },
     },
     { when: 'The plaques under the pictures, in order', says: PLAQUES },
     { when: 'The museum\'s panels of story, where there\'s no picture', says: PANELS },

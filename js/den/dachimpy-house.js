@@ -151,10 +151,11 @@ export const DACHIMPY_HOUSE = {
       // ...and all of them close up, one at a time (the shell's: picture-view.js), in the order they hang, each
       // with its plaque; the screenshots as they are, the pages and portraits as on the wall.
       pictures: {
-        name: 'Exhibits', who: 'Dachimpy',
+        name: 'Pictures', who: 'Dachimpy',
+        // (the friends first, left to right, as the rooms go: the people first, the museum after)
         list: () => [
+          ...[...FRIENDS].sort((a, b) => a.x - b.x).map((f) => ({ id: f.id, title: f.title, x: f.x, z: FRIENDS_WALL, fr: f })),
           ...EXHIBITS.map((e) => ({ id: e.id, title: e.title, x: HUNG[e.id].x, z: HUNG[e.id].wall, ex: e })),
-          ...FRIENDS.map((f) => ({ id: f.id, title: f.title, x: f.x, z: FRIENDS_WALL, fr: f })),
         ],
         art(p) {
           G.flat ||= new Map();

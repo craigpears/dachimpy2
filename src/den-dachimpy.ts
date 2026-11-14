@@ -91,8 +91,8 @@ const cardUnder = (x: number, y: number, w: number, h: number) => {
   const cw = Math.max(0.8, Math.min(1.0, w)), ch = 0.42;
   return { x, y: y - h / 2 - FRAME_T - 0.06 - ch / 2, w: cw, h: ch };
 };
-/** The hall's exhibits (along its back wall); the rest hang in the museum. */
-const IN_THE_HALL = ['began'];
+/** The hall's exhibits (along its back wall): none now, the people first (below); all hang in the museum. */
+const IN_THE_HALL: string[] = [];
 /** The museum's pictures in clusters, the order kept (the user, 14 Nov: "some of them need to be clustered
     together a bit. Like I love the HTML one, but then the shoot [Dalnoth] ... Those next three are kind of grouped
     together, and then the Smart Fox ones ... And the [Whirled] ones, and then a bit of those technical drawings"):
@@ -117,22 +117,24 @@ function museumRow(x0: number) {
 }
 
 // ---------- the house ----------
-/** The hall's back wall, the museum's start and length, and the friends' room after it (metres). */
-const M0 = 4.5;
+/** The hall's back wall, the friends' room straight after it, and the museum last (metres). The people first (the
+    user, 14 Nov: "you get the special people right in the entrance, and then the museum can be the bit at the end
+    ... The people are the most special and important thing to me"). */
+const F0 = 4.5, F1 = F0 + 23;
 /** How long the museum is: room for every exhibit, a step at either end. */
 export const MUSEUM_LEN = Math.ceil(museumRow(0).end + 1.0);
-const M1 = M0 + MUSEUM_LEN, F1 = M1 + 23;
+const M0 = F1, M1 = M0 + MUSEUM_LEN;
 /** Three rooms in a row, the camera looking in from the front (their front walls cut low, a doll's house):
-    the hall you come in at, the museum, and their friends' room. */
+    the hall you come in at, their friends' room, and the museum. */
 export const PLAN: Plan = {
   rooms: [
-    { id: 'hall', name: 'The hall', x0: -4.5, x1: M0, z0: -3, z1: 3, paper: '#4a2b3e' },
+    { id: 'hall', name: 'The hall', x0: -4.5, x1: F0, z0: -3, z1: 3, paper: '#4a2b3e' },
+    { id: 'friends', name: 'The friends\' room', x0: F0, x1: F1, z0: -3, z1: 3, paper: '#3d2c4a' },
     { id: 'museum', name: 'The museum', x0: M0, x1: M1, z0: -2, z1: 2.2, paper: '#1f3a52' },
-    { id: 'friends', name: 'The friends\' room', x0: M1, x1: F1, z0: -3, z1: 3, paper: '#3d2c4a' },
   ],
   doors: [
+    { x0: F0 - 0.5, x1: F0 + 0.5, z0: -0.9, z1: 0.9 },
     { x0: M0 - 0.5, x1: M0 + 0.5, z0: -0.9, z1: 0.9 },
-    { x0: M1 - 0.5, x1: M1 + 0.5, z0: -0.9, z1: 0.9 },
   ],
   out: { x: 0, z: 2.35, r: 0.9 },
 };
@@ -140,16 +142,16 @@ export const PLAN: Plan = {
 export const ARRIVE = { you: { x: 0, z: 2.0 }, them: { x: 1.0, z: 0.9 } } as const;
 /** Tall walls. */
 export const WALLS = { high: 3.6, low: 0.45 } as const;
-const HALL = PLAN.rooms[0], MUSEUM = PLAN.rooms[1], FROOM = PLAN.rooms[2];
+const room = (id: string) => PLAN.rooms.find((r) => r.id === id)!;
+const HALL = room('hall'), MUSEUM = room('museum'), FROOM = room('friends');
 /** How far out from a room's back wall its pictures hang (the wall's thickness). */
 export const WALL_T = 0.2;
 
-/** Where each exhibit hangs, by id: where it began in the middle of the hall's back wall, then the museum's,
-    in order, a frame and its plaque at a time. */
+/** Where each exhibit hangs, by id: along the museum's wall, where it began first, in order, a frame and its
+    plaque at a time. */
 export function hang(): Record<string, Hung> {
   const out: Record<string, Hung> = {};
-  const hallZ = HALL.z0 + WALL_T, musZ = MUSEUM.z0 + WALL_T;
-  out.began = { room: 'hall', x: 0, y: 1.8, w: PAGE.w * 1.2, h: PAGE.h * 1.2, wall: hallZ, card: null };
+  const musZ = MUSEUM.z0 + WALL_T;
   for (const { e, x, w, h } of museumRow(MUSEUM.x0).row) {
     const y = e.kind === 'shot' ? SHOT_MAX.y : 1.85;
     out[e.id] = { room: 'museum', x, y, w, h, wall: musZ, card: e.kind === 'shot' ? cardUnder(x, y, w, h) : null };
@@ -164,25 +166,23 @@ export const exhibitLine = (id: string): string | null => (ON_AN_EXHIBIT as Reco
 /* Their friends on the wall, each painted from their look in PIRATES (pirate names only): the real pirates
    already in the den, and some of Dachimpy's own portraits with friends, recreated under their real titles
    (IDEAS.md, "Dachimpy's pirate pages and portraits, both oceans", checked 13 and 14 Nov). No one's labelled
-   special (the user, 14 Nov: "everybody's special"): the closest simply hang in the middle, bigger (`middle`),
-   Daquan, "my partner in crime through the whole thing", at its centre, Whiterose right beside him, Kikkit, Zizzy
-   and Sanne with them in portraits they shared with Dachimpy. Then, nearest the middle, the friends closest after
-   them; the den's own characters further out (the user's guidance, 14 Nov). A portrait with
-   Felinee, from the Hunter days, right beside Kikkit (the user, 14 Nov: "absolutely on the edge of being special";
-   "Put her next to Kikkit"). Fable in "Welcome Back Dachimpy!", the two of them in white rags (the user, 14 Nov:
-   "Need Fable as one of the people in the portraits in my house"). Then a
-   page for everyone they blockaded with, whatever they're called now, and one of thanks to everyone who makes
-   Puzzle Pirates what it is. */
+   special (the user, 14 Nov: "everybody's special"): the four closest hang in the hall, big (`middle`), the first
+   thing you see as you come in, in portraits they shared with Dachimpy: Kikkit, Daquan, Sanne and Zizzy. The
+   friends' room after it, the closer nearer its middle; Fable in "Welcome Back Dachimpy!", the two of them in white
+   rags; Dachimpy's own portrait at its far end. Then a page for everyone they blockaded with, whatever they're
+   called now, and one of thanks to everyone who makes Puzzle Pirates what it is. */
 export type FriendId = keyof typeof FRIEND_TITLES;
 export interface Friend { id: FriendId; title: string; x: number; y: number; w: number; h: number; middle?: boolean; portrait?: Portrait; page?: 'everyone' | 'thanks' }
 const SMALL = { w: 0.8, h: 1.0, y: 1.8 }, BIG = { w: 1.08, h: 1.35, y: 1.82 };
-/** The wall's middle (x), and the step between frames: the middle's big ones, from them to the small ones, and
-    between the small ones. */
-export const FC = (M1 + F1) / 2;
-const STEP = { big: 1.45, edge: 1.5, small: 1.0 };
-/** Where the `i`th frame from the middle hangs, on `side` (-1 left, +1 right): the middle's two either side of
-    its centre first, then the small ones on out. */
-const along = (side: -1 | 1, i: number) => FC + side * (i < 3 ? i * STEP.big : 2 * STEP.big + STEP.edge + (i - 3) * STEP.small);
+/** The friends' room's middle (x). */
+export const FC = (F0 + F1) / 2;
+/** The hall: Dachimpy's closest four, big, the first thing you see as you come in (the user, 14 Nov), a step
+    (IN_HALL) apart, either side of its middle (x 0). */
+const IN_HALL = 1.5;
+const hallAt = (i: number) => (i - 1.5) * IN_HALL;
+/** The friends' room: a row either side of its middle, the first FIRST from it, a step (ROW) between. */
+const FIRST = 1.1, ROW = 1.35;
+const along = (side: -1 | 1, i: number) => FC + side * (FIRST + (i - 1) * ROW);
 const friend = (id: FriendId, x: number, o: Partial<Friend>): Friend => ({ id, title: FRIEND_TITLES[id], x, ...SMALL, ...o });
 const mid = (id: FriendId, x: number, o: Partial<Friend>): Friend => friend(id, x, { ...BIG, middle: true, ...o });
 type Dress = Record<string, string | number | boolean>;
@@ -246,25 +246,25 @@ const FABLE_IN_RAGS: Dress = {
   feet: 'boots', feetCol: 'light blue', hook: true, fam: 'parrot', famCol: 'aqua', famCol2: 'light blue',
 };
 export const FRIENDS: readonly Friend[] = [
-  friend('dignity', along(-1, 8), { portrait: sat('Dignity', 'den') }),
-  friend('mischievious', along(-1, 7), { portrait: sat('Mischievious', 'cafe') }),
-  friend('monkeyMan', along(-1, 6), { portrait: sat('Dachimpy', 'beach', { dress: MONKEY_MAN }) }),
-  friend('gravee', along(-1, 5), { portrait: sat('Gravee', 'sea', { dress: GRAVEE_IN_RAGS, with: IN_RAGS }) }),
-  friend('balloffire', along(-1, 4), { portrait: sat('Balloffire', 'night') }),
-  friend('felinee', along(-1, 3), { portrait: sat('Felinee', 'sea') }),
-  mid('kikkit', along(-1, 2), { portrait: sat('Kikkit', 'bloodmoon', { dress: KIKKIT_CURSED, with: CURSED }) }),
-  mid('zizzy', along(-1, 1), { portrait: sat('Zizzy', 'night', { dress: ZIZZY_PINK, with: IN_PINK }) }),
-  mid('daquan', FC, { portrait: sat('Daquan', 'beach', { dress: DAQUAN_GROUP, with: IN_PINK_COAT }) }),
+  // The hall, as you come in: the four closest, big (`middle`). (Its back wall's on the friends' room's line,
+  // FRIENDS_WALL.)
+  mid('kikkit', hallAt(0), { portrait: sat('Kikkit', 'bloodmoon', { dress: KIKKIT_CURSED, with: CURSED }) }),
+  mid('daquan', hallAt(1), { portrait: sat('Daquan', 'beach', { dress: DAQUAN_GROUP, with: IN_PINK_COAT }) }),
   // (Sanne turned a little more, so her blonde hair, tied back, shows)
-  mid('whiterose', along(1, 1), { portrait: sat('Whiterose', 'bloodmoon') }),
-  mid('sanne', along(1, 2), { portrait: sat('Sanne', 'beach', { with: IN_RED, yaw: -0.45 }) }),
-  friend('affame', along(1, 3), { portrait: sat('Affame', 'night') }),
-  friend('welcomeBack', along(1, 4), { portrait: sat('Fable', 'night', { dress: FABLE_IN_RAGS, with: WELCOME_BACK_RAGS, yaw: -0.3 }) }),
-  friend('tzz', along(1, 5), { portrait: sat('Tzz', 'autumn') }),
-  friend('helium', along(1, 6), { portrait: sat('Helium', 'night') }),
-  friend('roobear', along(1, 7), { portrait: sat('Roobear', 'pinksea') }),
-  friend('everyone', along(1, 8), { page: 'everyone' }),
-  friend('thanks', along(1, 9), { page: 'thanks' }),
+  mid('sanne', hallAt(2), { portrait: sat('Sanne', 'beach', { with: IN_RED, yaw: -0.45 }) }),
+  mid('zizzy', hallAt(3), { portrait: sat('Zizzy', 'night', { dress: ZIZZY_PINK, with: IN_PINK }) }),
+  // The friends' room, a row either side of its middle, the closer nearer it.
+  friend('felinee', along(-1, 1), { portrait: sat('Felinee', 'sea') }),
+  friend('balloffire', along(-1, 2), { portrait: sat('Balloffire', 'night') }),
+  friend('gravee', along(-1, 3), { portrait: sat('Gravee', 'sea', { dress: GRAVEE_IN_RAGS, with: IN_RAGS }) }),
+  friend('mischievious', along(-1, 4), { portrait: sat('Mischievious', 'cafe') }),
+  friend('dignity', along(-1, 5), { portrait: sat('Dignity', 'den') }),
+  friend('monkeyMan', along(-1, 6), { portrait: sat('Dachimpy', 'beach', { dress: MONKEY_MAN }) }),
+  friend('affame', along(1, 1), { portrait: sat('Affame', 'night') }),
+  friend('welcomeBack', along(1, 2), { portrait: sat('Fable', 'night', { dress: FABLE_IN_RAGS, with: WELCOME_BACK_RAGS, yaw: -0.3 }) }),
+  friend('whiterose', along(1, 3), { portrait: sat('Whiterose', 'bloodmoon') }),
+  friend('everyone', along(1, 4), { page: 'everyone' }),
+  friend('thanks', along(1, 5), { page: 'thanks' }),
 ];
 /** The friends' wall (its face's z). */
 export const FRIENDS_WALL = FROOM.z0 + WALL_T;
@@ -277,24 +277,22 @@ export const COOKIES = { x: 2.7, z: -1.6, near: 1.35 } as const;
 export const MODEL = { z: 1.15 } as const;
 /** Their trinkets' shelf, against the friends' room's right-hand wall. */
 export const SHELF = { x: F1 - 0.45, z: -1.7, yaw: -Math.PI / 2 } as const;
-/** How far from the middle the candles stand: between the middle's frames and the small ones. */
-const CANDLES = 2 * STEP.big + (STEP.edge + BIG.w / 2 - SMALL.w / 2) / 2;
 export function furnish(): Piece[] {
   const H = hang();
   return [
-    // The hall: a rug, an armchair, the cookie table, candles either side of where it began.
+    // The hall: a rug, an armchair, the cookie table, candles either side of the four on its back wall.
     { kind: 'rug', x: 0, z: 0.3, col: '#7a3a5c' },
     { kind: 'armchair', x: -3.4, z: -0.9, yaw: 0.8, col: '#c46a8f' },
     { kind: 'table', x: COOKIES.x, z: COOKIES.z },
-    { kind: 'candelabra', x: -1.0, z: HALL.z0 + 0.45 },
-    { kind: 'candelabra', x: 1.0, z: HALL.z0 + 0.45 },
+    { kind: 'candelabra', x: -3.3, z: HALL.z0 + 0.45 },
+    { kind: 'candelabra', x: 3.3, z: HALL.z0 + 0.45 },
     // The museum: a runner down it, and the model of the sim's board by "Blockade!".
     { kind: 'runner', x: (MUSEUM.x0 + MUSEUM.x1) / 2, z: 0.35, col: '#2a5a7a' },
     { kind: 'simModel', x: H.inPlay.x, z: MODEL.z, yaw: Math.PI },
-    // The friends' room: a rug, candles either side of the middle, a chair, the trinkets' shelf.
+    // The friends' room: a rug, candles at its middle, a chair, the trinkets' shelf.
     { kind: 'rug', x: FC, z: 0.5, col: '#5b2c6f' },
-    { kind: 'candelabra', x: FC - CANDLES, z: FROOM.z0 + 0.45 },
-    { kind: 'candelabra', x: FC + CANDLES, z: FROOM.z0 + 0.45 },
+    { kind: 'candelabra', x: FC - 0.36, z: FROOM.z0 + 0.45 },
+    { kind: 'candelabra', x: FC + 0.36, z: FROOM.z0 + 0.45 },
     { kind: 'armchair', x: FC - 6.2, z: 1.4, yaw: 2.4, col: '#c46a8f' },
     { kind: 'shelf', x: SHELF.x, z: SHELF.z, yaw: SHELF.yaw },
   ];
@@ -304,12 +302,12 @@ export const FURNISH: readonly Piece[] = furnish();
 // ---------- the tour ----------
 /** Their tour, stop by stop: where you have to come to (`at`, within `near`) for them to say a stop's
     lines, and where they wait for you there (`them`). Walk ahead and they skip on with you. */
-export type TourStop = 'hall' | 'museum' | 'friends';
+export type TourStop = 'hall' | 'friends' | 'museum';
 export interface Stop { id: TourStop; at: { x: number; z: number }; near: number; them: { x: number; z: number } }
 export const TOUR: readonly Stop[] = [
   { id: 'hall', at: { x: 0, z: -0.7 }, near: 1.8, them: { x: 1.4, z: -1.5 } },
+  { id: 'friends', at: { x: FROOM.x0 + 1.6, z: 0 }, near: 1.6, them: { x: FROOM.x0 + 2.8, z: 1.0 } },
   { id: 'museum', at: { x: MUSEUM.x0 + 1.6, z: 0 }, near: 1.6, them: { x: MUSEUM.x0 + 2.6, z: 1.0 } },
-  { id: 'friends', at: { x: M1 + 1.6, z: 0 }, near: 1.6, them: { x: M1 + 2.8, z: 1.0 } },
 ];
 /** The stop to say next: the furthest from `from` on that you're at (so walking ahead skips them on), or -1
     if you're at none of them. */
@@ -324,7 +322,7 @@ export function stopAt(from: number, x: number, z: number): number {
 // ---------- a hug and a cookie at the door ----------
 /* Every visit, at the door: a hug first, then a cookie (IDEAS.md, "Cookies and hugs at the door"). They come
    to your side, face you and hug you, your eyes shut, a moment; then hold out a plate of cookies, you take
-   one, and they take you on into the museum. While it lasts you stand still. `side`: how far to your side
+   one, and they take you on to meet their friends. While it lasts you stand still. `side`: how far to your side
    they stand to hug; `secs`: how long the hug lasts; `said`: when you say yours. */
 export const HUG = { side: 0.62, secs: 3.0, said: 1.2 } as const;
 /** The cookie's beats, seconds after their line about it's been up long enough to read (so the two never talk over
