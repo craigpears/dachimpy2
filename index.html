@@ -60,7 +60,7 @@
     --ink2: #5a4740;
     --ink-head: #5b2c26;                   /* a card's heading */
     --bubble: #fffaf4;
-    --coming-a: #ebdfcd; --coming-b: #e3d4be; --coming-edge: #ab927a; --coming-text: #8a7462;
+    --coming-a: #ebdfcd; --coming-b: #e3d4be; --coming-edge: #ab927a; --coming-text: #665243;
     --crumb: #b9752e;                      /* the cookie's crumbs */
     /* The calls to action: rose and purple. */
     --accent: #e48fae;                     /* rose: a button, the menu's place, a choice's frame on hover */
@@ -87,7 +87,7 @@
     --tile: rgba(255, 230, 180, 0.05); --tile-hi: rgba(255, 230, 180, 0.12); --plain-a: #3b5d4a; --plain-b: #24392d;
     --paper: #f3e3c3; --paper2: #e8d2a8; --paper-edge: #c9a35c; --paper-glow: rgba(120, 80, 30, 0.18);
     --ink: #2a1d13; --ink2: #5b4330; --ink-head: #6b2a12; --bubble: #fffaf0;
-    --coming-a: #eadbb8; --coming-b: #e3d1aa; --coming-edge: #a88a5c; --coming-text: #8c7356;
+    --coming-a: #eadbb8; --coming-b: #e3d1aa; --coming-edge: #a88a5c; --coming-text: #66513a;
     --accent: #e0a92a; --accent-hi: #f0bd44; --accent-text: #e0a92a; --on-accent: #2a1d13;
     --accent2: #e0a92a; --accent2-text: #d4b06a; --link: #8a4b0f; --link-hi: #6b2a12;
     --sky-top: #142235; --sky-low: #3d6d93; --glow: rgba(224, 169, 42, 0.25); --sea-top: #2a5878; --sea-low: #142a3c;
@@ -178,6 +178,14 @@
   .host img { width: 130px; height: auto; filter: drop-shadow(0 10px 14px var(--shadow)); }
   /* The cookie: over the plate in the picture, a click for one (and a "Yay!"). */
   .cookie { position: absolute; left: 0; top: 52%; width: 54px; height: 34px; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 50%; }
+  /* Usable first (the user, 14 Nov: "ideally like those colors, but not at the expense of like usability"): every
+     link and button shows where the keyboard is, rose on the dark, the link's own colour on parchment. */
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .way:focus-visible, .bubble a:focus-visible { outline-color: var(--link); }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
   .cookie:hover, .cookie:focus-visible { outline: 2px dashed var(--accent); outline-offset: 2px; }
   .crumb { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--crumb); pointer-events: none; animation: crumb .9s ease-in forwards; }
   @keyframes crumb { to { transform: translate(var(--dx), 70px) rotate(200deg); opacity: 0; } }

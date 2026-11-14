@@ -112,6 +112,11 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   circle, each picking one of the dealt pieces, and the whole crew shares the grade and the pay.
 - Dropped ideas: *Commit or wait* (not interesting).
 
+- **Usable first, then the colours (14 Nov):** "I'd ideally like those colors, but not at the expense of like
+  usability." Good user experience comes before a theme on every page: words readable against what they sit on
+  (4.5:1 at least, tested on the front page for every theme), every link and button showing where the keyboard is,
+  motion calmed for anyone who asks their browser for less, and links and buttons that look like links and buttons.
+
 ## Pirate Den (3D prototype, `den.html`)
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
