@@ -162,11 +162,15 @@ describe('her whirlpools, as Puzzle Pirates\' are (YPPedia, 11 Nov)', () => {
     for (let t = 0; t < 30; t += 0.02) said.push(...w.watch(h.tick(0.02), h));
     expect(said).toEqual(['caught', 'back']);
     expect(h.pose).toEqual(MOUTH);
-    // The pilot: out past the reef the long way round, never onto a whirlpool nor the winds that feed them.
-    const p = new Helm(new Sea(9), MOUTH), ev: SailEvent[] = [];
-    expect(p.drop(...OUT)).toEqual(OUT);
+    // The pilot: out past the reef the long way round, never onto a whirlpool nor the winds that feed them:
+    // to the open sea just beside their winds home. (Since 14 Nov not to OUT, the reef's far side off the gap,
+    // which only her Double and Helium's corner get to: tests/helium-corner.test.ts.)
+    const p = new Helm(new Sea(9), MOUTH), ev: SailEvent[] = [], BESIDE: [number, number] = [K.WINDS[6][0] - 1, K.WINDS[6][1]];
+    expect(s.windAt(...BESIDE)).toBeUndefined();
+    expect(s.windAt(BESIDE[0] + 1, BESIDE[1])).toBeDefined();
+    expect(p.drop(...BESIDE)).toEqual(BESIDE);
     for (let t = 0; t < 400 && p.pin; t += 0.05) ev.push(...p.tick(0.05));
-    expect(at(p.pose)).toEqual(OUT);
+    expect(at(p.pose)).toEqual(BESIDE);
     expect(ev.some((e) => e.kind === 'push' && e.whirl)).toBe(false);
     expect(s.plot(MOUTH, ...PENGUINS, null, true)).toBeNull();
   });
@@ -335,8 +339,10 @@ describe(`"Make sure you can't get to Penguin Island without going through the w
   it('going round behind it, from the den, past the checkpoint or from Port Decorum\'s waters, nowhere near the penguins can be reached', () => {
     for (const seed of [1, 9, 17]) {
       const s = new Sea(seed), got = reachedAround(s);
-      // (the open sea past the reef is reached the long way, by the checkpoint's gate: so this is a real search)
-      expect(got.has(`${OUT[0]},${OUT[1]}`), `seed ${seed}`).toBe(true);
+      // (the open sea past the reef is reached the long way, by the checkpoint's gate: so this is a real search;
+      // beside the whirlpools' winds home, since OUT off the gap is hers and Helium's corner's alone, 14 Nov)
+      expect(got.has(`${K.WINDS[6][0] - 1},${K.WINDS[6][1]}`), `seed ${seed}`).toBe(true);
+      expect(got.has(`${OUT[0]},${OUT[1]}`), `seed ${seed}`).toBe(false);
       expect(got.has(`${LAY.WRECK[0] + 1},${LAY.WRECK[1]}`)).toBe(true);
       for (const [c, r] of round()) expect(got.has(`${c},${r}`), `seed ${seed}: ${c},${r}`).toBe(false);
     }

@@ -707,10 +707,39 @@ export const LAY = {
         checkpoint, in the open water on the far side of the smugglers' rocks from their cove (where their rum
         would go out, once smuggling's built), two squares clear of the rocks and open sea all round. Shaped
         as Tzz's, three squares, and everything of their placed from LAND[0]. MOOR: where she's brought
-        alongside as their lesson begins, out of its shot. */
+        alongside as their lesson begins, out of its shot.
+        Their corner, one way in and one way out (14 Nov). The user, on the rum run: "If you want to get to
+        Helium's hideout, you have to do a 90-degree turn by rowing, because there's no way of bumping yourself
+        there. I really like that ... I think that should be the only way of getting to Helium's little corner
+        ... But there should be a wind still so that you can get from his den to the front of where the
+        Imperial Fort is. So it kind of becomes a one-way thing of getting back out." Their island's water, the
+        corner between the checkpoint's reef, the smugglers' rocks and the race's line of rocks, had been open
+        to the sea round Port Decorum's back. Now:
+        - ROCKS (drawn as the reef is, with it in Sea.reef) shut its bottom off, from the smugglers' rocks down
+          to the race's line, but for the gap the wind out leaves by, a bend either side of it so no gust
+          ever runs in through it.
+        - WAY_IN: the one way in, off Kikkit's reef's far side (KIKKIT.OUT, where her whirlpools' Double puts
+          you): turn to starboard there and row in. A wind of its own on the corridor's first square blowing
+          out of it, so under sail she's in irons heading in, and a gust stops short of it (`oars`: src/
+          den-sailing.ts, gustPath); at the oars she rows in. Out of it, with the wind, she sails.
+        - WIND: the one way out, a wind from beside their island (below its ring), out through the gap and
+          round under Port Decorum's back to its far corner, where it leaves her heading up its side to its
+          front (it can't run on up beside it: Port Decorum's own two squares of open sea, and Primates Rule's,
+          are kept clear of any wind). Laid as the trade winds' lanes are, each straight run {at, d, n}.
+        So the corner's water is hidden, as the smugglers' run is (Sea.hidden): only the whirlpools and the
+        oars get there. Tested in tests/helium-corner.test.ts. */
     HELIUM: {
         LAND: [[22, 28], [23, 28], [22, 29]],
         MOOR: { c: 21, r: 27, d: 2 },
+        ROCKS: [[19, 34], [19, 36], [18, 36], [17, 35]],
+        WAY_IN: { c0: 17, c1: 17, r0: 20, r1: 20, d: 3, s: 2, oars: true },
+        WIND: [
+            { at: [22, 31], d: 0, n: 4 },
+            { at: [22, 35], d: 3, n: 4 },
+            { at: [18, 35], d: 2, n: 1 },
+            { at: [18, 34], d: 3, n: 9 },
+            { at: [9, 34], d: 2, n: 1 },
+        ],
     },
     /** Primates Rule, the user's war frigate (src/den-frigate.ts; src/den-moored.ts), at anchor, still to
         come (11 Nov: "add that to the scene somewhere so you can just, once you start getting out to sea,
@@ -837,7 +866,8 @@ export class Sea {
         its right-hand gun to the sea's edge but where the passage runs through it, and the rocks round
         the whirlpools and round Vegas Island. Rocks like any other to sail by. */
     reef = new Set();
-    /** Water reached only by way of the whirlpools (the smugglers' run and its cove: LAY.SMUGGLERS):
+    /** Water reached only by way of the whirlpools (the smugglers' run and its cove: LAY.SMUGGLERS; and
+        since 14 Nov Helium's corner, a Double over them and the oars in: LAY.HELIUM, hide):
         open to sail on, but never got to from the den without them, so not counted when every open
         square's checked for a way there (allReachable). */
     hidden = new Set();
@@ -930,11 +960,16 @@ export class Sea {
             this.works.add(key(c, r));
             near(c, r);
         }
-        // Helium's island, past the checkpoint by the smugglers' rocks: land, the same.
+        // Helium's island, past the checkpoint by the smugglers' rocks: land, the same; and their corner's one
+        // way out, a wind, and its one way in, a wind of its own only the oars beat (its rocks are the reef's:
+        // scatter; its water hidden: hide).
         for (const [c, r] of LAY.HELIUM.LAND) {
             this.works.add(key(c, r));
             near(c, r);
         }
+        for (const { at: [c, r], d, n } of LAY.HELIUM.WIND)
+            for (let i = 0; i < n; i++)
+                this.wind.set(key(c + DC[d] * i, r + DR[d] * i), d);
         // Port Decorum, the imperial island: land, the same.
         for (const [c, r] of LAY.EMPIRE.LAND) {
             this.works.add(key(c, r));
@@ -954,7 +989,7 @@ export class Sea {
                 for (let b = -2; b <= 2; b++)
                     this.keep.add(key(c + a, r + b));
         }
-        this.zones = LAY.ZONES.map((z) => ({ ...z }));
+        this.zones = [...LAY.ZONES, LAY.HELIUM.WAY_IN].map((z) => ({ ...z }));
         // The sloop race's course out past her (LAY.RACE; src/den-race.ts): its spits (land, drawn by
         // js/den/race.js) and the barrier of driftwood across a gap in one (works till it's cleared:
         // src/den-race.ts, Barrier), its whirlpool channel and the winds round it (a way through, as
@@ -1030,8 +1065,10 @@ export class Sea {
         const reef = laid ? Array.from({ length: K.REEF.c1 - K.REEF.c0 + 1 }, (_, i) => key(K.REEF.c0 + i, K.ROW)) : [];
         // (the reef but where Kikkit's whirlpools and winds run through it; the rocks round them; and the
         // smugglers' rocks round Port Decorum's back)
-        this.reef = new Set([...reef.filter((k) => !this.whirls.has(k) && !this.wind.has(k)), ...[...LAY.KIKKIT.REEF, ...LAY.SMUGGLERS.ROCKS, ...LAY.RACE.REEF].filter(() => laid).map(([c, r]) => key(c, r))]);
+        this.reef = new Set([...reef.filter((k) => !this.whirls.has(k) && !this.wind.has(k)), ...[...LAY.KIKKIT.REEF, ...LAY.SMUGGLERS.ROCKS, ...LAY.HELIUM.ROCKS, ...LAY.RACE.REEF].filter(() => laid).map(([c, r]) => key(c, r))]);
         this.rocks = new Set([...this.cliff, ...this.works, ...this.reef, ...[...LAY.SIDES, ...LAY.FAR, ...LAY.HARBOUR].filter(() => laid).map(([c, r]) => key(c, r))]);
+        if (laid)
+            this.hide();
         const H = SAIL.HOME, COLS = SAIL.SCATTER.COLS, ROWS = SAIL.SCATTER.ROWS;
         for (let n = 0; n < SAIL.CLUMPS; n++) {
             let c = Math.floor(roll() * COLS), r = 2 + Math.floor(roll() * (ROWS - 2));
@@ -1046,6 +1083,29 @@ export class Sea {
                 if (c < 0 || c >= COLS || r < 1 || r >= ROWS)
                     break;
             }
+        }
+    }
+    /** Helium's corner (LAY.HELIUM, 14 Nov), hidden water as the smugglers' run is: every square of sea
+        that joins their island's without crossing a wind (its way out) or the whirlpools, so its corridor
+        in and Kikkit's reef's far side (KIKKIT.OUT) with it, got to only by her whirlpools and the oars. */
+    hide() {
+        const at = [], seen = new Set();
+        const go = (c, r) => {
+            const k = key(c, r);
+            if (seen.has(k) || !this.open(c, r) || this.windAt(c, r) !== undefined)
+                return;
+            seen.add(k);
+            at.push([c, r]);
+            this.hidden.add(k);
+        };
+        for (const [c, r] of LAY.HELIUM.LAND)
+            for (let a = -1; a <= 1; a++)
+                for (let b = -1; b <= 1; b++)
+                    go(c + a, r + b);
+        for (let i = 0; i < at.length; i++) {
+            const [c, r] = at[i];
+            for (let d = 0; d < 4; d++)
+                go(c + DC[d], r + DR[d]);
         }
     }
     /** The way the trade wind blows on this square, if it's a lane. */

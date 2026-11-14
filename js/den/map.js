@@ -139,8 +139,8 @@ function mapTexture() {
     }
   };
   // (and the rocks round Port Decorum's back: drawn whole, the smugglers' run behind them as rock too,
-  // till you've found the beach there)
-  for (const sq of [...CHART.rocks, ...CHART.kikkit.reef, ...(chart.smugglers ? CHART.smugglers.rocks : CHART.smugglers.whole)]) rockAt(...Q(sq));
+  // till you've found the beach there; and the rocks across the bottom of Helium's corner)
+  for (const sq of [...CHART.rocks, ...CHART.kikkit.reef, ...(chart.smugglers ? CHART.smugglers.rocks : CHART.smugglers.whole), ...CHART.helium.rocks]) rockAt(...Q(sq));
 
   // Kikkit's island, a little sandy one by the reef's end, a palm on it; and Vegas Island beyond, the
   // penguins', only once you've been there (hidden gems are never hinted).
