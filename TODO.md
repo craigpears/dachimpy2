@@ -1010,6 +1010,11 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   style flag outside, just outside the gate. What has happened here?" A far buoy's number is drawn nearer so it
   always reads (12 Nov), and that ran on land too. Done 14 Nov: the buoys' numbers only while you're out at sea.
 
+- **Umami runs the wrong way once he's freed (14 Nov):** "I ... did the foraging thing, and then [he] ended up coming
+  out the wrong way. [He] ran right instead of left." As built, he breaks out on the mud at the bank's foot, bounds
+  right along it (east, toward her mooring by the bank) and leaps in to swim to her. Which way he should go, and
+  why left looked right, to pin down with the user.
+
 - **The Distilling guide trimmed to its best moves (14 Nov):** "I love how we've got the moves like the hook, pull a
   line of browns. But ... some of the moves are good for behind the scenes but need hiding. Like, with these arrows,
   I really can't even see what the crawl is. Those arrows are so confusing. [A] channel made for [a white] ... these
