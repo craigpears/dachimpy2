@@ -283,8 +283,8 @@ function palette(btn, pal, cur, set, none) {
     b.onclick = () => { palette(null); set(id); };
     box.append(b);
   }
-  // (Every clothing colour named, and where each came from: the catalogue's colours page, 14 Nov.)
-  if (pal === DYES) {
+  // (Every colour named: the catalogue's colours page, 14 Nov.)
+  if (Object.keys(DYES).every((n) => n in pal)) {
     const a = el('a', 'all', 'Every colour, named');
     a.href = 'catalogue-colours.html'; a.target = '_blank'; a.rel = 'noopener';
     box.append(a);
@@ -326,7 +326,7 @@ export function dressRows() {
     const r = row(label);
     chooser(r, PARTS[k][L.body], L[k], look(k));
     if (L[k] === 'none' || (k === 'hand' && !HAND_DYED.includes(L.hand))) return;   // (nothing to dye; a tankard's pewter; a bouquet's flowers are dyed)
-    swatch(r, paletteOf(L, k), L[k + 'Col'], look(k + 'Col'), k === 'hand' ? 'Flowers' : 'Colour');   // (a monkey's or a squirrel's fur only comes in natural colours)
+    swatch(r, paletteOf(L, k), L[k + 'Col'], look(k + 'Col'), k === 'hand' ? 'Flowers' : 'Colour');   // (a monkey's or a squirrel's fur: its natural colours first, then any dye)
     if (twoColours(L, k)) swatch(r, DYES, L[k + 'Col2'], look(k + 'Col2'), 'Second colour');
   };
   if (dress.tab === 'pirate') {

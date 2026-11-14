@@ -8,9 +8,9 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 // Every colour a pirate's drawn in (the clothing dyes, hair, fur, skin), each with where it came from, is
 // src/palette.ts: change or add a colour there, never here. The catalogue's colours page lists them all.
-import { DYES, HAIR, FUR, FUR_FACE, SKIN } from './palette.js';
+import { DYES, HAIR, HAIRS, FUR, FURS, FUR_FACE, SKIN } from './palette.js';
 export { DYES, HAIR, FUR, SKIN };
-// Familiars in FUR's natural colours (the rest take any dye), and the colour each falls back to.
+// Furry familiars (fur in its natural colours or any dye: FUR), and the colour each falls back to.
 export const FURRY = { monkey: 'brown', squirrel: 'grey' };
 // The palette a slot's first colour is chosen from, for the wardrobe: FUR for a furry familiar.
 export const paletteOf = (look, slot) => (slot === 'fam' && FURRY[look.fam] ? FUR : DYES);
@@ -116,11 +116,11 @@ export function cleanLook(o) {
 const pickOf = (o) => Object.keys(o)[Math.floor(Math.random() * Object.keys(o).length)];
 const pickIn = (list) => list[Math.floor(Math.random() * list.length)][0];
 export function randomLook(body = Math.random() < 0.5 ? 'm' : 'f') {
-  const L = { body, skin: Math.floor(Math.random() * SKIN.length), hairCol: pickOf(HAIR), patch: Math.random() < 0.4, earring: pickIn(EARRINGS), smile: Math.random() < 0.5, grin: Math.random() < 0.15, hook: Math.random() < 0.15,
+  const L = { body, skin: Math.floor(Math.random() * SKIN.length), hairCol: pickIn(HAIRS.map((c) => [c.name])), patch: Math.random() < 0.4, earring: pickIn(EARRINGS), smile: Math.random() < 0.5, grin: Math.random() < 0.15, hook: Math.random() < 0.15,
     tongue: Math.random() < 0.08, tattoos: Math.random() < 0.15, wristband: Math.random() < 0.15, starfish: Math.random() < 0.05, pegleg: Math.random() < 0.08 };
   for (const slot of Object.keys(PARTS)) L[slot] = pickIn(PARTS[slot][body]);
   for (const kk of DYE_KEYS) L[kk] = pickOf(DYES);
-  if (FURRY[L.fam]) L.famCol = pickOf(FUR);
+  if (FURRY[L.fam]) L.famCol = pickIn(FURS.map((c) => [c.name]));
   return cleanLook(L);
 }
 export const partName = (look, slot) => PARTS[slot][look.body].find(([id]) => id === look[slot])?.[1] || '';
@@ -152,13 +152,13 @@ export const PIRATES = Object.fromEntries(Object.entries({
     legs: 'pants', legsCol: 'shadow', feet: 'fancy', feetCol: 'shadow', feetCol2: 'atlantean', hand: 'spyglass', fam: 'monkey', famCol: 'lavender',
   },
   // Mischievious (Emerald), as in her portrait now, "Son of a Nutcracker!" (a Wanted poster, 26 Oct
-  // 2026; checked 11 Nov): a mass of black curls, a big grin, gold earrings; the Feminine feline
-  // (a black eye mask with cat's ears), a plum Dress top trimmed white, a plum short dress bottom,
-  // plum fancy boots with white tops; a pistol in her right hand, a hook for her left, her grey squirrel.
+  // 2026; 11 Nov): a mass of black curls, a big grin, gold earrings; the Feminine feline
+  // (a black eye mask with cat's ears), a wine Dress top trimmed white, a wine short dress bottom,
+  // wine fancy boots with white tops; a pistol in her right hand, a hook for her left, her grey squirrel.
   Mischievious: {
     body: 'f', skin: 2, hair: 'curly', hairCol: 'black', patch: false, earring: 'both', smile: true, hook: true,
-    hat: 'feline', hatCol: 'black', hatCol2: 'black', top: 'dresstop', topCol: 'plum', topCol2: 'white', waist: 'none',
-    legs: 'short', legsCol: 'plum', feet: 'fancy', feetCol: 'plum', feetCol2: 'white', hand: 'pistol', fam: 'squirrel', famCol: 'grey',
+    hat: 'feline', hatCol: 'black', hatCol2: 'black', top: 'dresstop', topCol: 'wine', topCol2: 'white', waist: 'none',
+    legs: 'short', legsCol: 'wine', feet: 'fancy', feetCol: 'wine', feetCol2: 'white', hand: 'pistol', fam: 'squirrel', famCol: 'grey',
   },
   // Kikkit (her Emerald portrait, as IDEAS.md has it, 10 Nov), out on her island by the reef: black
   // curls crowned with red roses, an eyepatch, gold hoops, her tongue out, blue swirling tattoos on her
