@@ -4,7 +4,7 @@ Every character's lines, and who they are, made from `src/lines/` by `npm run bu
 (`tools/lines-doc.mjs`): change a line there, not here, and the game changes with it.
 This file's history in git shows every line as it's changed.
 
-[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Gravee](#gravee) · [The Count](#the-count) · [Roobear](#roobear) · [Dachimpy](#dachimpy) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
+[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Gravee](#gravee) · [The Count](#the-count) · [Roobear](#roobear) · [Dachimpy](#dachimpy) · [Affame](#affame) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
 
 ## Dalnoth
 
@@ -37,7 +37,7 @@ Beaten after the third wave, he leaves his cannon, rows in, stomps up the beach 
 
 ## You
 
-Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, and only at the den's short, cheesy moments: picking up the captain's map, and riding the crane up the cliff and down again, your own wedding, screaming at a vampire in Gravee's house, having an ear roobed in Roobear's, a hug and a cookie at Dachimpy's door, and sailing by Primates Rule, not ready yet, coming into the smugglers' cove behind Port Decorum, and, warily, at Helium's still just after it's gone bang.
+Your own pirate, dressed as you like from the wardrobe (or as any real pirate in it). You say little, and only at the den's short, cheesy moments: picking up the captain's map, and riding the crane up the cliff and down again, your own wedding, screaming at a vampire in Gravee's house, having an ear roobed in Roobear's, a hug and a cookie at Dachimpy's door, sinking into Affame's cushions, and sailing by Primates Rule, not ready yet, coming into the smugglers' cove behind Port Decorum, and, warily, at Helium's still just after it's gone bang.
 
 ### Picking up the captain's map, at the end of Dalnoth's cutscene
 
@@ -88,6 +88,11 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 - *Their hug:* "Aww."
 - *Their cookie:* "Mm! Still warm."
 - *Another from the plate on the hall's table:* "Just one more."
+
+### Sinking into Affame's cushion corner, among her teddies
+
+- *The first time:* "Mmm. So soft."
+- *Another time:* "...Five more minutes."
 
 ### Helium's rum run: as they ask you along, before their "Delivering" (\`smuggling\`); turned away at Port Decorum's jetty (\`home\`)
 
@@ -1643,6 +1648,59 @@ Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry li
 - "Everything the den's made of, laid out to look over! Yay!"
 - "It's all a bit of fun, kept simple on purpose: a place to try ideas out, not a work of art. Simple, but good enough to play with."
 - "Your colour or piece missing, or not quite right? Send me a description and a picture on the Trophy Hunters' Discord, and I'm sure we can add it!"
+
+## Affame
+
+A real pirate of the Emerald Ocean (by her pirate name only), the queen of sweetness: Dachimpy dubbed her so, and made her four cartoons to hang in her little house in the den's housing district (being knighted Dame of Everlasting Sweetness, Melt-Apart Springer of Pastries, with a candy cane; at peace among cushions and teddies; the Sweetness War; the Sweetness Index, off the charts). Drawn from her pirate page's portrait: long pink hair under a pink-and-navy striped wrap, a long navy coat with a magenta panel.
+
+Kind, sweet and playful, a gentle, peaceful part: she shows you her pictures, and her cushion corner, where everyone's welcome.
+
+> "I have dubbed her the queen of sweetness so she can have a nice kind peaceful role somewhere." (the user, 11 Nov)
+>
+> "Affame is a sweety" (the user, 14 Nov)
+>
+> "The dame of everlasting sweetness things I made for Affame to show in her little house XD" (the user, 14 Nov)
+
+### Answering the door when you knock
+
+- *Your first visit:* "Oh, hello, sweetness! Come in, come in. Mind the teddies."
+- *Coming back:* "You came back! The teddies said you would."
+
+### Showing you round, as you come to each stop
+
+- *In the middle of her room, before her four pictures:*
+  - "Dachimpy made me these. I hung them up the very same day."
+  - "Have a look. I'll tell you about each one."
+- *By her cushion corner:*
+  - "And this is the cushion corner."
+  - "Everyone's welcome in it. The teddies insist."
+
+### About the picture you've stopped by or turned to look at (once a visit each), and under it in the close view
+
+- *Dame of Everlasting Sweetness:* "The day I was made Dame of Everlasting Sweetness. With a candy cane! Melt-Apart Springer of Pastries is the rest of it."
+- *Cushions and Teddies:* "That's me in my happy place. Cushions, teddies, and absolutely no hurry."
+- *Sweetness War:* "The Sweetness War. A love card against a cupcake. Nobody lost. That's the best kind of war."
+- *Sweetness Index: Off the Charts!:* "The Sweetness Index. Off the charts, see? It's raining chocolate. Very scientific."
+
+### As you come up out of her cushions
+
+- *The first time:* "There. Isn't that better? Stay as long as you like."
+- *Another time, one in turn:*
+  - "Teddy says hello."
+  - "Softest spot on the seven seas."
+  - "Shh. The cushions are working."
+
+### Now and then, as you wander her room after the tour
+
+- "Would you like a pastry? They melt apart. That's the whole point."
+- "Queen of sweetness. It's not an official title. Well. It's a little bit official."
+- "Be kind to someone today. You can start with yourself."
+- "The teddies all have names. I'm still deciding most of them."
+- "If the Sweetness War ever starts again, I've got cupcakes ready."
+
+### As you leave
+
+- "Bye, sweetness! Come back soon."
 
 ## The imperial guards of Port Decorum
 
