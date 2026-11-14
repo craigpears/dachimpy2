@@ -644,6 +644,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   the wall; and a page for everyone else: Mems, the Hunter crew (its name, Aurora?, to check), and all the
   blockaders whose names have changed, "they're here". Daquan's look (he) from his pirate page and his portraits
   with Dachimpy; Balloffire's (she) and Mems's (they, not known) before they're drawn.
+  More names for that page (14 Nov): "is it Seatner? There's like Kenchio on Hunter. I mean, not really my close"
+  (spellings to check). And the trinkets: "I need to go take a bunch of screenshots ... of all my trinkets because
+  they all need to go in here" (the user's screenshots to come; the shelf's stand-ins until then).
 
 ## Spotted along the way (not asked for)
 
