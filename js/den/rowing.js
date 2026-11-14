@@ -95,6 +95,7 @@ function rowOpen() {
   boardsLay(rowing.boards, rowing.board.row.boards);
   rowing.boards.el.style.display = '';
   rowing.lowT = 0;
+  rowing.camRy = null;
   rowing.yaw0 = view.yaw; rowing.pitch0 = view.pitch;   // (the camera behind her, turned from there as you turn it: rowCam)
   struck(true);
   underBoard(true);
@@ -150,10 +151,13 @@ function swap() {
   const both = m.combos.every((x) => x === 'Vegas!') ? 'Double Vegas!' : m.combos.every((x) => x === 'Bingo!') ? 'Double Bingo!' : m.combos.filter(Boolean).join(' + ');
   const flying = m.steps.filter((s) => s === 'F').length >= CREW.FLYING;
   const crazy = SIDES.filter((s) => B.crazy(s) && !rowing.crazy[s]);
-  if (flying) toast(`${both || 'Heave!'} Both sides rowing like crazy: she's flying!`);
-  else if (crazy.length === 2) toast(`${both} Both rowers going like crazy!`);
-  else if (crazy.length) toast(`${both} The ${crazy[0]} rower's going like crazy!`);
-  else if (both) toast(both);
+  // (and when it turned her, which way: the user, 14 Nov, a Bingo on one side's turn "doesn't seem to
+  // obviously happen")
+  const t = m.steps.find((s) => s !== 'F'), round = t ? ` She comes round to ${t === 'L' ? 'port' : 'starboard'}!` : '';
+  if (flying) toast(`${both || 'Heave!'} Both sides rowing like crazy: she's flying!${round}`);
+  else if (crazy.length === 2) toast(`${both} Both rowers going like crazy!${round}`);
+  else if (crazy.length) toast(`${both} The ${crazy[0]} rower's going like crazy!${round}`);
+  else if (both || round) toast(`${both}${round}`.trim());
 }
 // A debug hook (window.den.rowPull): pull as a move on the boards would, without the boards, e.g.
 // { port: 15, starboard: 15 } for a Vegas on each side at once.
@@ -182,6 +186,7 @@ export function rowTick(dt, busy = false) {
   const want = wanted(busy);
   if (want !== rowing.on) { if (rowing.on) rowShut(); if (want) rowOpen(); }
   if (!rowing.on) return;
+  camTick(dt);
   const B = rowing.board;
   // Where they go: clear of the prompt at the bottom (measured now and then: it changes as you go).
   if ((rowing.lowT -= dt) <= 0) { rowing.lowT = 0.5; rowing.low = $('dock').getBoundingClientRect().top; rowing.top = document.querySelector('.hud')?.getBoundingClientRect().bottom ?? 0; }
@@ -280,12 +285,25 @@ export function rowShown(p) {
 /* The camera while rowing (the user, 10 Nov: "I know it's like zoomed in is good to see the puzzle,
    but like I can't see where I'm rowing"): behind her and above, turned with her as she turns, so
    the sea she's rowing into fills the part of the screen between the boards (above them, when
-   they're along the bottom): her, the next few squares ahead, the rocks and the red rings. Not
+   they're along the bottom): her, the next few squares ahead, the rocks and the red rings. It
+   comes round a moment after she does (camTick, above), so you see her turn. Not
    turned with her lean into the pull, though (rowShown): you see her angle toward the turn that's
    building, and creep ahead (the view following her only half of the way). */
+/* Seeing her turn (the user, 14 Nov, of a Bingo on one side: "that doesn't seem to obviously
+   happen"): the view kept square behind her every moment, so when she came round a quarter it was
+   the sea that swung and she stayed pointing up the screen, the turn hardly showing. So the view
+   comes round behind her a moment later (CAM_LAG): she swings round on the screen, plainly, and
+   then the view follows her round. */
+const CAM_LAG = 1.6;   // (how quickly the view comes round, a share of what's left a second: about 40° behind her mid-turn)
+function camTick(dt) {
+  const want = Math.PI / 2 - sail.helm.now().a * Math.PI / 2;
+  if (rowing.camRy == null) { rowing.camRy = want; return; }
+  const d = want - rowing.camRy;
+  rowing.camRy += Math.atan2(Math.sin(d), Math.cos(d)) * Math.min(1, dt * CAM_LAG);
+}
 export function rowCam() {
   const A = rowing.applied ?? { f: 0, y: 0 }, L = rowing.layout ?? { wide: true, free: { x: 0, y: 0, w: innerWidth, h: innerHeight } };
-  const ry = sail.g.rotation.y + A.y * Math.PI / 2, bow = V3(Math.cos(ry), 0, -Math.sin(ry));
+  const ry = rowing.camRy ?? sail.g.rotation.y + A.y * Math.PI / 2, bow = V3(Math.cos(ry), 0, -Math.sin(ry));
   const at = sail.g.position.clone().setY(0).addScaledVector(bow, -A.f * SAIL.CELL * 0.5);
   // Her low in the sea's part of the screen (three quarters of the way down it; a bit higher when
   // it's a strip above the boards, to keep her clear of them), the sea ahead of her above: so the look's ahead of her by what puts her there, seen from TILT up and DIST back.

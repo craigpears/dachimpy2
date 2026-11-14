@@ -81,6 +81,29 @@ describe('one-sided clears lean her toward that side', () => {
     expect(new Stroke().row({ port: 0, starboard: 8 })).toEqual(['R']);
     expect(new Stroke().row({ port: 8, starboard: 0 })).toEqual(['L']);
   });
+  describe('"a bingo on one side ... doesn\'t seem to obviously happen" (14 Nov): a lopsided Bingo\'s worth turns her, even by accident', () => {
+    it('a Bingo on one side turns her though the mirrored board clears a three on the same move', () => {
+      expect(new Stroke().row({ port: 8, starboard: ROW.THREE })).toContain('L');
+      expect(new Stroke().row({ port: ROW.THREE, starboard: 8 })).toContain('R');
+    });
+    it('a Bingo on one side turns her though the other side was a three ahead', () => {
+      const s = new Stroke();
+      expect(s.row({ port: 0, starboard: ROW.THREE })).toEqual([]);
+      expect(s.row({ port: 8, starboard: 0 })).toContain('L');
+    });
+    it('"possible to almost do accidentally if you leave it": the same pull from smaller clears on one side, left unbalanced, turns her too', () => {
+      // A Good, a three, a Great and a Good on port, starboard clearing nothing.
+      const s = new Stroke(), steps = [1.5, 1, 2, 1.5].flatMap((p) => s.row({ port: p, starboard: 0 }));
+      expect(steps).toEqual(['L']);
+      // Port pulling four times starboard's, move after move: her keel doesn't hold that.
+      const t = new Stroke(), more = Array.from({ length: 6 }, () => t.row({ port: 2, starboard: 0.5 })).flat();
+      expect(more).toContain('L');
+    });
+    it('but three threes on one side still don\'t', () => {
+      const s = new Stroke();
+      expect([0, 1, 2].flatMap(() => s.row({ port: ROW.THREE, starboard: 0 })).filter((x) => x !== 'F')).toEqual([]);
+    });
+  });
   it('a Vegas on one side swings her right round', () => {
     expect(new Stroke().row({ port: 0, starboard: 15 })).toEqual(['R', 'R']);
   });

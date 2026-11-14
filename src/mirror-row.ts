@@ -104,14 +104,19 @@ export interface Puller {
      pulling up to 1 + 2 * KEEL times the other never turns her.
    - Only a lead of TURN turns her: a quarter turn, and it uses the lead up. */
 export const BALANCE = {
-  /** Lead it takes to turn her a quarter: two and a half squares' pull, so a Bingo on one side
-      (8) turns her and three threes on one side don't. From the bots (tools/row-bots.mjs, 10 Nov,
-      30 games of 60 moves, five kinds): at 7.5 a player out to row straight never turns, one who
-      just clears whatever's biggest, never minding the side, turns about every eight moves, and
-      one out to turn her to starboard does it in three or four. At 6 the side-blind player turned
-      every six moves and rowed a circle in three games of four; at 9 a Bingo on one side didn't
-      turn her. */
-  TURN: 7.5,
+  /** Lead it takes to turn her a quarter: two squares' pull, so a Bingo on one side (8) turns her
+      plainly, even when the mirrored board clears a three on the same move or the other side was a
+      three ahead, and the same pull built up from smaller clears on one side, left unbalanced, does
+      too; three threes on one side don't. It was 7.5 (10 Nov) till the user, 14 Nov: a Bingo on one
+      side "doesn't seem to obviously happen", "possible to almost do accidentally if you leave it":
+      at 7.5 any pull at all on the other side first (a three's worth and the keel's share of it)
+      left a Bingo short, a one-sided Bingo turning her 19 times in 24 in the side-blind bot's play,
+      22 in 24 at 6. From the bots (tools/row-bots.mjs, 30 games of 60 moves, five kinds), 7.5 then
+      6: a player out to row straight never turns (0.1 turns a game, then none); one who just clears
+      whatever's biggest, never minding the side, turns every 8 moves, then every 6, and rows a
+      circle in 53% of games, then 67%; one out to turn her does it in 3.6 moves, then 2.9. (At 9 a
+      Bingo on one side didn't turn her at all.) */
+  TURN: 6,
   /** Of each bit of pull matched, how much of the lead it straightens up. */
   KEEL: 0.25,
 };

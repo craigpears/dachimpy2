@@ -154,7 +154,7 @@ export const LEAN = {
   /** Radians she heels into it then. */
   HEEL: 0.16,
   /** The turn building, as she shows it, goes as its share of a whole turn to this power: under 1,
-      a little lead shows plainly (a three on one side, 0.13 of a turn, shows as 0.3). */
+      a little lead shows plainly (a three on one side, 0.17 of a turn, shows as 0.34). */
   SHOW: 0.6,
 };
 

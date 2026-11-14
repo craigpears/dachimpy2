@@ -34,6 +34,8 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
 - **The wedding, showered in gifts (12 Nov):** the gifts theme and plot, and Mischievious's newer
   lines (the presents all for her, the loopy weddings).
 - **Primates Rule (11 Nov):** beside the sloop on the unlinked `frigate-test.html`.
+- **Rowing's turn (14 Nov):** a lopsided Bingo's worth turns her at a lead of 6 now (was 7.5), the view
+  coming round a moment after her so the turn shows, and it's said; is it turning too often by accident?
 - **Older, still unseen:** the captain's map's cutscene with Dalnoth redrawn; the towers, lower
   middle and night sky; the cove (each under "Asked for", below).
 
@@ -653,17 +655,6 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   And Whiterose (she), from Viridian (now Meridian), a place of her own: "she was so incredible. The one pirate you could really
   trust to care about the life of the game instead of taking the most powerful side, she would switch from Vanguard
   and play the other side, will always remember that ❤️ miss you whiterose!"
-- **Rowing: a lopsided Bingo's worth should turn her, even by accident (14 Nov):** after hearing a Bingo on one side
-  gives a quarter turn and a Vegas a half: "not even Vegas, but just a bit of an accidental ... I want it to be
-  possible to almost do accidentally if you leave it ... the original idea was if you did like a bingo on one side,
-  yeah, it would do a quarter turn. Like that doesn't seem to obviously happen, but it should also be possible with
-  the same score, like the equivalent of a bingo, but with ... if you don't balance out the other side." So a Bingo
-  on one side plainly turns her a quarter in play, and so does the same pull built up from smaller clears on one
-  side left unbalanced; check why it doesn't show in play (the keel's straightening, the threshold, or the turn
-  not reading on screen).
-- **The crane in Umami's quest: the ship covers the puzzle (14 Nov):** "I'm doing the crane part of the Umami
-  Capybara quest, and the ship now does seem to be overlapping with the puzzle, so that it's obscuring it a bit."
-  The board should sit clear of her.
 - **Every dye in the wardrobe, and a list of them (14 Nov):** Fable is asking about her periwinkle colour (the den
   has no periwinkle). "Are you able to check that we've definitely got full coverage of all the colours? Look at
   Fable on Meridian ... Is that a purple? ... people are going to be sad if they can't completely recreate their
