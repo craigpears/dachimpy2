@@ -516,6 +516,23 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     had long hair. And just everything just looks really wrong, like badly wrong. Quality and fidelity, everything
     just really needs fixing." So the friends' portraits as a whole, drawn far closer to the real ones: Dachimpy
     never with long hair, each friend's hair and colours as in their real portraits.
+  - **Done 14 Nov** (branch worktree-agent-a10095a7cebbed134): the order as told (src/den-dachimpy.ts's EXHIBITS),
+    the banner, title card and sloops moved to a page on the donation; Dachimpy.com's versions found in the old
+    site's archive (its own screenshots of versions one to five, and its pictures), the last version's home page
+    and Shoot Dalnoth page rebuilt from its own templates; Shoot Dalnoth in the first version (and Dalnoth
+    traversing the board) and the last. Every line excited first, the wry after. "Did you know?" without the
+    bravery (the user: "it wasn't a good fit for me. So this is what I did instead"). Privacy: version three's,
+    four's (Twitter) and five's other names blanked. Still to pin down: "the orangey one, then the one with a
+    nicer background" (no two such screens in the archive: the Team One lobby's orange bars and the sky lobby are
+    the likeliest; a second sky lobby, `SetupScreenSecondVersion`, is in the archive, not shown); and the site's
+    versions two to five had no Shoot Dalnoth in what was kept.
+  - **The friends' portraits (14 Nov):** "Monkey Couple" "oh my God, what is that?", "I'm pretty sure I've never
+    had long hair", "Quality and fidelity, everything just really needs fixing"; then: "I like how blocky people
+    are ... but I think things like hair and clothing need more", as Tzz and Helium got, "a bit higher quality than
+    Playmobil". **Done 14 Nov:** each dressed as the real portrait (yoweb, both oceans), painted close in bigger
+    frames; short, long, tied-back and wavy hair and the beehive wig laid in strands, streaked; plain shirts and
+    shirts with belt open at the neck with collar points and buttons; the sash knotted, its ends hanging. Left
+    for a follow-up: curly, bun, braids still balls and spheres (Kikkit's curls read well enough).
 - **Distilling's late game, and the CC^1 bot starting too far right (14 Nov):** a position to keep as a test (two
   blacks stuck in the target column, `notes/distilling/48-*`); the bot to plan the late game's channels, whites
   going right through a black channel or a brown one then a black one into the target (DISTILLING.md, "The late

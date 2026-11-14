@@ -1,101 +1,123 @@
 /* Pirate Den: Dachimpy (src/lines/character.ts says how these files go), the user's own pirate, in their
    house in the den's housing district, which doubles as a museum. Said in speech bubbles by
    js/den/dachimpy-house.js as they hug you at the door, give you a cookie and show you round: the museum
-   of the old Blockade Simulator and Dachimpy.com (src/den-dachimpy.ts's EXHIBITS, oldest first), then
-   their friends (src/den-dachimpy.ts's FRIENDS). Their plaques are here too: written by them, in their
-   voice. */
+   of the old Blockade Simulator and Dachimpy.com (src/den-dachimpy.ts's EXHIBITS, in order), then their
+   friends (src/den-dachimpy.ts's FRIENDS). Their plaques are here too: written by them, in their voice.
+
+   Their voice (the user, 14 Nov): buzzy and excited first ("more like, yay, cookies, and kind of an excited
+   reaction ... that kind of buzzy, excited, great energy, I think is much more me"), and then the dry line
+   may follow ("Apparently people say it fits me still, but maybe do the excited reaction first as well. We
+   can have both."). */
 import type { Character } from './character.js';
 
 /** At the door when you come in, every visit: a hug first (IDEAS.md: "I'm very well known for giving just
     like hugs and cookies ... anyone that comes into my house ... I need to give them cookies"). */
 export const AT_THE_DOOR = {
-  first: 'Welcome, welcome! Come here, you. Hug first.',
-  again: 'You came back! Hug first. Then cookies.',
+  first: 'Hiii! Welcome, welcome! Come here, you. Hug first!',
+  again: 'You came back! Yay! Hug first. Then cookies.',
 } as const;
 
 /** After the hug, the cookie: the first visit, then one of the others in turn; and on to the museum. */
 export const THE_COOKIE = {
-  first: 'And a cookie. Everyone who comes in gets a cookie. House rule.',
-  again: ['Cookie! Fresh ones.', 'Your cookie. Still warm.', 'One cookie, as promised.'],
-  onward: 'Now come and see. The old sims, oldest first. My pride and joy.',
+  first: 'Yay, cookies! Everyone who comes in gets a cookie. House rule.',
+  again: ['Cookie time! Fresh ones!', 'Yay, cookies! Still warm.', 'Ooh, your cookie! One, as promised.'],
+  onward: 'Now come and see! The old sims, oldest first. My pride and joy.',
 } as const;
 
 /** Another cookie from the plate on the hall's table (walk up to it and ask), one in turn. */
 export const ANOTHER_COOKIE = [
-  'Have another. I insist.',
-  'There\'s always another cookie.',
-  'That\'s three. I\'m not counting. I am counting.',
-  'Take two. One for the road.',
+  'Yes! Have another. I insist.',
+  'Ooh, more cookies! There\'s always another cookie.',
+  'Yay, three! I\'m not counting. I am counting.',
+  'Take two! One for the road.',
 ] as const;
 
 /** Showing you round, a stop at a time: the lines they say when you get there. */
 export const TOUR_LINES = {
   hall: [
-    'So this is my house. And the museum. Both, really.',
-    'Everything I ever made for Puzzle Pirates, through there. Oldest first.',
+    'Yay, you\'re here! This is my house. And the museum. Both, really.',
+    'Everything I ever made for Puzzle Pirates is through there. In order!',
   ],
   museum: [
-    'Here we are. Stop by any of them and I\'ll tell you about it.',
+    'Ooh, here we go! Stop by any of them and I\'ll tell you all about it.',
     'Bugs and all. Especially the bugs.',
   ],
   friends: [
-    'And this room\'s the people. My friends, from all those years.',
+    'And this is the best room: the people! My friends, from all those years.',
     'The middle of the wall is for the truly special ones.',
   ],
 } as const;
 
-/** The plaques, under each exhibit and with it close up (src/den-dachimpy.ts's EXHIBITS, by id): what
-    IDEAS.md says of each version, and where it says nothing, what the screenshot plainly shows. */
+/** The plaques, under each picture and with it close up (src/den-dachimpy.ts's EXHIBITS, by id): the user's
+    own telling (IDEAS.md; TODO.md, 14 Nov), the old site's own words, and what each picture plainly shows. */
 export const PLAQUES = {
-  banner: 'The banner from the top of Dachimpy.com: the chimp in his blue pirate hat, a dashed trail to the X, the cliffs, and the sloop on its green ring.',
-  titleCard: 'The title card from my guide videos: the logo over the sea, faint jigsaw pieces across it, and a little ship sailing in at the corner.',
-  first: 'The first prototype board. One whirlpool, one little ship, three moves: left, forward, right. Then Execute Move. It moved! I was thrilled.',
-  beforeWhirled: 'The version before Whirled. I bet nobody even recognises it. Flags, rocks, whirlpools and winds, your ship counting its lefts, forwards and rights, chat beside it, on SmartFoxServer.',
-  jobbers: 'It tried to be realistic: Starting Jobbers and Jobbers per Turn for each team, so you had to fill your ship with jobbers. Too complicated. I simplified it to just the ship navigating part.',
-  wireframe: 'The plan for the game set-up, in grey boxes: an Admiral and Navs for each team, chat, and the user list.',
-  lobby: 'The Blockade Sim\'s lobby: choose your ship, your jobbers Weak, Normal or Elite, and tick Ready. Blockade practice without gathering hundreds of jobbers.',
-  teams: 'The teams: Spectators, Team One and Team Two. That\'s me on Team One, on Normal, ready.',
-  create: 'Create Your Game: max players, rated or not, the map, the turn time, and friendly fire. Ticked, of course.',
-  inPlay: 'The finished thing, live on Whirled from 13 April 2010: isometric, the Blockade! move panel, the clock. And now and then your ship would spin and hop into the rocks. That gave it character.',
-  rotations: 'A sloop for every heading, drawn by hand by someone I paid a tiny bit, back in the day. Poor guy. I love them.',
-  rings: 'The same sloops, turning round on their rings.',
+  guide: 'Version one! An insanely basic HTML page of plain links, autumn 2008: movement, winds and rocks, whirlpools, shooting, collisions, then practice boards. It planned a Survival Game. Still planning.',
+  shootDalnoth: 'The very first Shoot Dalnoth! A little game on the Shooting page: Dalnoth\'s face on four squares, winds and a whirlpool to reach him. No hatred towards Dalnoth. Every version since has shot him. Tradition.',
+  traverses: 'Then Dalnoth traverses the board! A health bar, move generation, bilge, and him roaming about trying to get away. Same hull for you both, so set it up as hard as you like. Sink him before he crosses!',
+  first: 'My first go at Flash! Not even a prototype: one whirlpool, one little ship, left, forward, right, then Execute Move. It moved! I was thrilled.',
+  beforeWhirled: 'The version before Whirled, on SmartFoxServer! Flags, rocks, whirlpools and winds, your ship counting its lefts, forwards and rights, chat beside it. I bet nobody recognises it.',
+  jobbers: 'Ooh, it tried to be realistic! Starting Jobbers and Jobbers per Turn for each team, so you had to fill your ship with jobbers. Too complicated. I simplified it to just the ship navigating part.',
+  setup: 'The game set-up screen, the very first version! Not a wireframe: that really is how it looked. An Admiral and Navs for each team, chat, and the user list.',
+  teams: 'Teams! Spectators, Team One and Team Two, in bright orange. That\'s me on Team One, on Normal, ticked and ready.',
+  banner: 'The banner! Paid for with that kind gift: the chimp in his blue pirate hat, a dashed trail to the X, the cliffs, and the sloop on its green ring. The chimp\'s me, more or less.',
+  titleCard: 'The title card for my guide videos, from the same gift! The logo over the sea, faint jigsaw pieces across it, a little ship sailing in at the corner. Imagine the music.',
+  rotations: 'A sloop for every heading, every one cut out by hand! I paid someone a little of that gift for it. Poor guy. Then someone pointed out the game\'s own files had them all along. After all that time scraping.',
+  rings: 'Round and round! The same sloops, turning on their rings. Still makes me smile.',
+  lobby: 'The Blockade Sim\'s lobby, all grown up, its art from that gift! Choose your ship, your jobbers Weak, Normal or Elite, and tick Ready. Blockade practice without gathering hundreds of jobbers.',
+  create: 'Create Your Game, on Whirled! Max players, rated or not, the map, the turn time, and friendly fire. Ticked, of course.',
+  inPlay: 'The finished thing, live on Whirled from 13 April 2010! Isometric, the Blockade! move panel, the clock. And now and then your ship would spin and hop into the rocks. That gave it character.',
+  siteV2: 'Dachimpy.com, version two, spring 2009! Parchment scrolls for menus: Stations, Piracy, Crafting, Carousing. Here, my Gunning guide: wild style, the two-cannon loop, board sitting, central looping.',
+  siteV3: 'Version three, 2010: the blue one, the banner on top! Guides for every puzzle, the apps, the updates. 13 April: "Blockade simulator is up on whirled!" Views so far: one.',
+  siteV4: 'Version four, 2011! A picture for every puzzle, a Donate button, and the news on Twitter. So modern.',
+  siteV5: 'Version five, autumn 2011! The news on top, carousels of every puzzle under it, and comments at last. Then the nav sims came back. Dalnoth too, obviously.',
+  siteLatest: 'The last version, 2012 to 2014, built properly at last! Piracy, Carousing, Crafting, the Blockade Sim, articles, hyper-ranking. Put back together here from its own files.',
+  dalnothApp: 'Shoot Dalnoth, back on 8 November 2011 and there to the end: over three thousand plays! Flash won\'t run any more, so here he is, standing still. He\'s used to it.',
 } as const;
 
-/** The museum's panels of story, where there's no picture: the start, the first version, and the end. Each
-    a title and its words, on a painted page of its own. */
+/** The museum's panels of story, where there's no picture: the start, the donation, and the end. Each a
+    title and its words, on a painted page of its own. */
 export const PANELS = {
   began: {
     title: 'Did you know?',
-    text: 'It all started when I watched Dlonelyone showing a new pirate how to sail a sloop for the first time. I wished I could do that too. I wasn\'t quite brave enough, not out loud. So I made Dachimpy.com instead: a quieter way of doing the same thing. Helping people learn.',
+    text: 'It all started when I watched Dlonelyone teaching a new pirate to sail a sloop for the first time. I loved it! I wanted to help people like that too. Teaching out loud just wasn\'t me, so I made Dachimpy.com instead, my own way of doing it. Helping people learn!',
   },
-  guide: {
-    title: 'Version one',
-    text: 'An insanely basic HTML page: the Bnav Guide. Plain links. Ship movement; winds and rocks; whirlpools; shooting and grappling; collisions. Then practice boards, and "Dalnoth traverses the board", I to III. Its last line planned a Survival Game: waves of bot ships, each harder than the last.',
+  donation: {
+    title: 'A kind gift',
+    text: 'Then someone, and I wish I could remember who, kindly donated about a hundred quid to help me make a guide. Yay! I spent it on art: the banner, the title card for my videos, and the sloops cut out for the sim, every heading. Here they are!',
   },
   gone: {
     title: 'And then',
-    text: 'Flash got deprecated and Whirled was taken down, and the sim went with them. These days there\'s the Global Cade Sim, someone else\'s, still running. It works perfectly. No ship ever spins into the rocks. Where\'s the fun in that?',
+    text: 'Aww. Flash got deprecated and Whirled was taken down, and the sim went with them. These days there\'s the Global Cade Sim, someone else\'s, still running. It works perfectly. No ship ever spins into the rocks. Where\'s the fun in that?',
   },
 } as const;
 
 /** About the exhibit you're looking at (the house shell's: src/den-houses.ts's lookingAt), by its id, once a
     visit each; also under it in the close view. Short: it's said in a bubble. */
 export const ON_AN_EXHIBIT = {
-  began: 'That\'s where it all started. Watching her.',
-  banner: 'My banner. The chimp\'s me, more or less.',
-  titleCard: 'The videos opened on this. Imagine the music.',
-  guide: 'Version one. Insanely basic. I was so proud of it.',
-  first: 'Look at that little ship. Execute Move!',
-  beforeWhirled: 'You don\'t recognise it, do you? Nobody does.',
-  jobbers: 'Jobbers per turn. What was I thinking?',
-  wireframe: 'All grey boxes. The dream was in there somewhere.',
+  began: 'Ooh, that\'s where it all started! Watching her.',
+  guide: 'Version one! Insanely basic. I was so proud of it.',
+  shootDalnoth: 'Shoot Dalnoth! The very first. Sorry, Dalnoth.',
+  traverses: 'Look, he roams! Still sinks, mind.',
+  first: 'Aww, look at that little ship! Execute Move!',
+  beforeWhirled: 'Ooh, the one before Whirled! Nobody ever recognises it.',
+  jobbers: 'Jobbers per turn! What was I thinking?',
+  setup: 'The first version! Honestly, that\'s how it looked.',
+  teams: 'Team One! Just me. Ready, though.',
+  donation: 'Someone was so kind! I still wish I knew who.',
+  banner: 'My banner! The chimp\'s me, more or less.',
+  titleCard: 'The videos opened on this! Imagine the music.',
+  rotations: 'All by hand! Then they were in the game\'s files all along.',
+  rings: 'Round and round! Still makes me smile.',
   lobby: 'Choose your ship! The jobbers came along for free.',
-  teams: 'Team One. Just me. Ready, though.',
-  create: 'Friendly fire on. Obviously.',
-  inPlay: 'Sometimes she\'d spin into the rocks. Character, that is.',
-  rotations: 'Every one of those by hand. Poor guy. I love them.',
-  rings: 'Round and round. Still makes me smile.',
-  gone: 'The new one works perfectly. Shame, really.',
+  create: 'Friendly fire on! Obviously.',
+  inPlay: 'Yay, Blockade! Sometimes she\'d spin into the rocks. Character, that is.',
+  siteV2: 'Parchment scrolls! Very piratey. Very 2009.',
+  siteV3: 'The blue one! One view on the Blockade Simulator. Mine.',
+  siteV4: 'A picture for every puzzle! I loved this one.',
+  siteV5: 'Comments at last! People told me things.',
+  siteLatest: 'The last one! Proper code, finally.',
+  dalnothApp: 'Dalnoth again! It\'s tradition now.',
+  gone: 'Oh, the new one! It works perfectly. Shame, really.',
 } as const;
 
 /** Their friends' portraits' titles, by id (src/den-dachimpy.ts's FRIENDS): the den's pirates by a title of
@@ -118,19 +140,19 @@ export const FRIEND_TITLES = {
 } as const;
 /** About each friend's portrait, by id, as you stop by it (once a visit each). */
 export const ON_A_FRIEND = {
-  dalnoth: 'Dalnoth. He was on my very first boards. He took it well.',
-  dignity: 'Dignity. She runs the checkpoint. Very firmly. Bella helps.',
-  mischievious: 'Mischievious. Always a wedding somewhere.',
-  monkeyMan: 'The Monkey Man. That\'s me, 2007. Some things never change.',
-  gravee: 'Oh, Gawd! Gravee and me, aboard her Familiar Plaice. That face says it all.',
-  kikkit: 'Kikkit. Truly special. Every Valentine\'s, a portrait, and always cookies.',
-  zizzy: 'Zizzy. Truly special. Pinky and the pink: both of us in pink, of course.',
-  sanne: 'Sanne. Truly special. Monkey Couple, 2007: matching red, a monkey each.',
-  tzz: 'Tzz. She gave me my best teaming tip: don\'t stall. Ever.',
-  helium: 'Helium. Ask about the eyebrows. Actually, don\'t.',
-  roobear: 'Roobear. Robert roobed my ears too.',
-  welcomeBack: 'Fable welcomed me back, last June. It was good to be home.',
-  thanks: 'That one\'s for everyone. It\'s the people that made it.',
+  dalnoth: 'Dalnoth! He was on my very first boards. He took it well.',
+  dignity: 'Ooh, Dignity! She runs the checkpoint. Very firmly. Bella helps.',
+  mischievious: 'Mischievious! Always a wedding somewhere.',
+  monkeyMan: 'Ha, the Monkey Man! That\'s me, 2007. Some things never change.',
+  gravee: 'Oh, Gawd! Gravee and me, in the jaws of her Familiar Plaice. That face says it all.',
+  kikkit: 'Kikkit! Truly special. Every Valentine\'s, a portrait, and always cookies.',
+  zizzy: 'Zizzy! Truly special. Pinky and the pink: both of us in pink, of course.',
+  sanne: 'Sanne! Truly special. Monkey Couple, 2007: matching red, a monkey each.',
+  tzz: 'Tzz! She gave me my best teaming tip: don\'t stall. Ever.',
+  helium: 'Helium! Ask about the eyebrows. Actually, don\'t.',
+  roobear: 'Roobear! Robert roobed my ears too.',
+  welcomeBack: 'Fable welcomed me back, last June! It was so good to be home.',
+  thanks: 'That one\'s for everyone! It\'s the people that made it.',
 } as const;
 /** The page for "Welcome Back Dachimpy!" (with Fable, whose look's still to check: no figure). */
 export const WELCOME_BACK = 'With Fable, June 2025.';
@@ -141,29 +163,33 @@ export const SPECIAL = 'Truly special';
 
 /** After the tour, as you wander: now and then, while they're near. */
 export const CHATTER = [
-  'Another cookie? There\'s always another cookie.',
-  'The ship spinning into the rocks? That was a feature.',
-  'Tab, if you want a proper look at them.',
-  'Mind the crumbs. Actually, I don\'t mind.',
-  'I\'ve got hugs in reserve, if you need one.',
+  'Ooh, another cookie? There\'s always another cookie.',
+  'The ship spinning into the rocks? That was a feature!',
+  'Tab, if you want a proper look at them!',
+  'Yay, crumbs! Mind them. Actually, I don\'t mind.',
+  'I\'ve got hugs in reserve, if you need one!',
 ] as const;
 
 /** Seeing you out. */
-export const GOODBYE = 'Bye! Take a cookie for the road!';
+export const GOODBYE = 'Byeee! Take a cookie for the road!';
 
 export const CHARACTER: Character = {
   name: 'Dachimpy',
   who: 'The user\'s own pirate, of the Emerald Ocean (they/them), drawn in their rose pink wig, belt and braces and '
     + 'kilt. They made the Blockade Simulator and Dachimpy.com, guides and sims for helping people learn the '
-    + 'puzzles, a quieter way of doing what they saw Dlonelyone do one day: teaching a new pirate to sail.\n\n'
-    + 'Warm, proud of everything they built, bugs and all, and well known for hugs and cookies: everyone who '
-    + 'comes into their house gets both. Their house in the den\'s housing district doubles as a museum of the '
-    + 'old sims, oldest first, and keeps their friends on its walls.',
+    + 'puzzles: their own way of doing what they saw Dlonelyone do one day, teaching a new pirate to sail.\n\n'
+    + 'Buzzy, excited, great energy: "Yay, cookies!" first, and then, maybe, the dry line after. Proud of '
+    + 'everything they built, bugs and all, and well known for hugs and cookies: everyone who comes into their '
+    + 'house gets both. Their house in the den\'s housing district doubles as a museum of the old sims and every '
+    + 'version of Dachimpy.com, in order, Dalnoth shot in every one, and keeps their friends on its walls.',
   theUser: [
     { on: '11 Nov', said: 'It very much fits me, kind of just ... showing you around all the history of the things that I\'ve built. They are my pride and joy.' },
     { on: '11 Nov', said: 'I\'m very well known for giving just like hugs and cookies ... anyone that comes into my house, which I guess you can double up as a museum, I need to give them cookies.' },
     { on: '11 Nov', said: 'the bugs are what made it, kept it interesting. They gave it the character.' },
     { on: '13 Nov', said: 'my museum house idea ... Definitely seems [ready]' },
+    { on: '14 Nov', said: 'usually it should be more like, yay, cookies, and kind of an excited reaction. I think that kind of buzzy, excited, great energy, I think is much more me.' },
+    { on: '14 Nov', said: 'Apparently people say it fits me still, but maybe do the excited reaction first as well. We can have both.' },
+    { on: '14 Nov', said: 'Each version requires some variation of shooting [Dalnoth] ... and then it\'s become tradition.' },
   ],
   lines: [
     { when: 'At the door when you come in, a hug first', says: AT_THE_DOOR, each: { first: 'Your first visit', again: 'Coming back' } },
@@ -171,9 +197,9 @@ export const CHARACTER: Character = {
     { when: 'Another cookie from the plate on the hall\'s table, one in turn', says: ANOTHER_COOKIE },
     {
       when: 'Showing you round, as you come to each stop', says: TOUR_LINES,
-      each: { hall: 'In the hall, under the banner', museum: 'Into the museum', friends: 'Into the friends\' room' },
+      each: { hall: 'In the hall', museum: 'Into the museum', friends: 'Into the friends\' room' },
     },
-    { when: 'The plaques under the exhibits, oldest first', says: PLAQUES },
+    { when: 'The plaques under the pictures, in order', says: PLAQUES },
     { when: 'The museum\'s panels of story, where there\'s no picture', says: PANELS },
     { when: 'About the exhibit you\'ve stopped by or turned to look at (once a visit each), and under it close up', says: ON_AN_EXHIBIT },
     { when: 'The titles on their friends\' portraits', says: FRIEND_TITLES },

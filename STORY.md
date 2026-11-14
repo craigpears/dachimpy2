@@ -205,9 +205,10 @@ Built (✓), being built (▶) and to come (·). Details of each are in RULES.md
    the small house only, to see where it goes.
    The third is Dachimpy's own (13 Nov), the user's pirate, which doubles as a museum: a hug and a
    cookie at the door, every visit, as Dachimpy always gave them; then the story of the Blockade
-   Simulator told on its walls, oldest first, from the user's own screenshots, each with a plaque in
-   Dachimpy's words, bugs and all (the sim was helping people learn in a quieter way, which is what the
-   den's teachers do too); and a room of friends, the truly special ones in the middle (Kikkit, Zizzy
+   Simulator and Dachimpy.com told on its walls in the order it happened (14 Nov), from the user's own
+   screenshots and the old site's own files, Dalnoth shot in its first version and its last, each with a
+   plaque in Dachimpy's excited words, bugs and all (Dachimpy.com was their own way of helping people learn,
+   which is what the den's teachers do too); and a room of friends, the truly special ones in the middle (Kikkit, Zizzy
    and Sanne), and a thank-you to everyone who makes Puzzle Pirates what it is. The museum keeps the
    story of the sims; the house keeps the people.
    Or find Kikkit on her little island right of the checkpoint, rambling the real way through her

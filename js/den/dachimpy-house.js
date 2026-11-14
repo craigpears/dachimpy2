@@ -28,7 +28,7 @@ import { V3 } from './world.js';
 const pageOf = (id) => {
   if (id === 'welcomeBack') return paintPage({ title: 'Welcome Back Dachimpy!', text: WELCOME_BACK, kind: 'night' });
   if (id === 'thanks') return paintPage({ title: 'Thank You', text: THANKS, withHeart: true });
-  return paintPage({ title: PANELS[id].title, text: PANELS[id].text, withHeart: id === 'began' });
+  return paintPage({ title: PANELS[id].title, text: PANELS[id].text, withHeart: id === 'began' || id === 'donation' });
 };
 
 export const DACHIMPY_HOUSE = {
@@ -58,7 +58,7 @@ export const DACHIMPY_HOUSE = {
     }
     // (a few sconces down the museum, between its frames)
     const mus = EXHIBITS.filter((e) => HUNG[e.id].room === 'museum').map((e) => HUNG[e.id]);
-    for (const i of [1, 4, 7, 10]) if (mus[i + 1]) G.ticks.push(place(R, FURNITURE.sconce({ y: 2.7 }), (mus[i].x + mus[i].w / 2 + mus[i + 1].x - mus[i + 1].w / 2) / 2, mus[i].wall, 0));
+    for (let i = 1; i < mus.length - 1; i += 3) G.ticks.push(place(R, FURNITURE.sconce({ y: 2.7 }), (mus[i].x + mus[i].w / 2 + mus[i + 1].x - mus[i + 1].w / 2) / 2, mus[i].wall, 0));
     // ---------- their friends, the truly special ones in the middle under their sign ----------
     for (const fr of FRIENDS) {
       const f = place(R, FURNITURE.frame({ w: fr.w, h: fr.h, y: fr.y, plaque: fr.title, ornate: !!fr.special || !!fr.page }), fr.x, FRIENDS_WALL, 0);
