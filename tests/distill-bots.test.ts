@@ -1,7 +1,7 @@
 /* Distilling's bots and their planner (src/distill-bots.ts): every bot the same plan, a target chain each, its
    techniques the routines of src/distill-routines.ts picked by stage, at a person's pace, by the rules (12 Nov).
    What each reaches is tools/distill-bots.mjs's to measure (DISTILLING.md §4). */
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { BLACK, BROWN, BURN_TICKS, COLS, DOWN_RIGHT, Distilling, SHORT, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn, parseBoard } from '../src/distilling';
 import { DistillBot, HELIUM, LEVELS, MENU, P, PAIR_LABEL, chainContext, chainOver, chainZones, nextChainAt, bankFor, brownSweep, clearComingUp, dangerZones, edgeWhites, joinedUp, levelFor, rightOrder, tieBreak, whitesInJunk, advise, backward, choose, contextFor, judge, junkAcross, levelNamed, playSession, tierNamed, turnsIn, weigh } from '../src/distill-bots';
 import type { Advice } from '../src/distill-bots';
@@ -253,10 +253,8 @@ describe('nothing trapped (13 Nov, the eighteenth note)', () => {
     // only way left was a white: trapped.
     for (const t of LEVELS) for (let seed = 1; seed <= 6; seed++) {
       const g = new Distilling(seeded(seed)), cols = g.cols;
-      const bot = new DistillBot(t), a = bot.plan(g);
-      // (Stage I's rule: a bot already in the chain from the first look, CC^1 and CC^2 with a column or two banked on a
-      // fresh board, brings whites right, out of the buffer columns into the one it fills, 13 Nov.)
-      if (a.kind !== 'move' || bot.stage === 'chain') continue;
+      const a = new DistillBot(t).plan(g);
+      if (a.kind !== 'move') continue;
       const after = playDrags(cols, a.drags)!;
       expect(trappedWhites(after), `${t.name} on seed ${seed}`).toBeLessThanOrEqual(trappedWhites(cols));
       if (seed === 1) expect(after[6][0] === WHITE && cols[6][0] !== WHITE, t.name).toBe(false);
@@ -670,12 +668,28 @@ describe('the chain\'s rule of thumb, shared with Helium (13 Nov: "if you\'ve go
 });
 
 describe('the CC^1 opening (the user, 13 Nov, watching CC^1: "it should be like trying to build it in the second or third column, like close to what\'s being burnt, just to have a bit of burnt buffer")', () => {
-  it('on a fresh board the first chain\'s column is two or three in from the fire, the columns right of it burning first as a buffer, 13 Nov', () => {
-    for (let seed = 1; seed <= 6; seed++) {
-      const g = new Distilling(seeded(seed)), bot = new DistillBot(levelNamed('cc1')), a = bot.plan(g);
-      expect(bot.stage, `seed ${seed}`).toBe('chain');
-      expect(bot.burns, `seed ${seed}`).toBeGreaterThanOrEqual(P.BUFFER);
-      expect(a.column, `seed ${seed}`).toBeLessThanOrEqual(COLS - 1 - P.BUFFER);
+  // Built, and off by default since 14 Nov (it cost CC^1 whites in the bots' run: P.BUFFER, P.KEEP_FILL); tested with
+  // them on, for the user to decide.
+  const was = { BUFFER: P.BUFFER, KEEP_FILL: P.KEEP_FILL };
+  beforeAll(() => { P.BUFFER = 2; P.KEEP_FILL = 1; });
+  afterAll(() => { Object.assign(P, was); });
+  it('on a fresh board the first chain waits for a buffer: junk columns clear of white built or burned by the fire first, its whites got out, 13 Nov (and 14 Nov: a buffer begun in the chain burned its whites)', () => {
+    for (let seed = 1; seed <= 3; seed++) {
+      const g = new Distilling(seeded(seed)), bot = new DistillBot(levelNamed('cc1'));
+      expect(bot.plan(g).stage, `seed ${seed}`).toBe('junk');
+      let started = false;
+      playSession(g, levelNamed('cc1'), 2, undefined, (a) => {
+        if (started || a.stage !== 'chain') return;
+        started = true;
+        // Built right behind the junk: every column right of it is junk to burn (more junk than white), none a column
+        // of whites skipped over.
+        for (let x = a.column! + 1; x < COLS; x++) {
+          const c = g.cols[x], w = c.filter((p) => p === WHITE).length;
+          expect(c.length - w, `seed ${seed}, column ${x + 1}`).toBeGreaterThan(w);
+        }
+      });
+      expect(started, `seed ${seed}`).toBe(true);
+      expect(g.whitesBurned, `seed ${seed}`).toBe(0);
     }
   });
   it('never a white moved back out of the column it\'s filling, 13 Nov ("it doesn\'t seem to actually try and get the whites there ... and then it\'s just moved that out")', () => {

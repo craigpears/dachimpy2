@@ -907,15 +907,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   the browns": a brown sunk through blacks, lifting them (or a black lifted through browns), so blacks and browns
   come together rather than split further. A named move with its own goal (src/distill-goals.ts, 'hoist'). In
   damage control the fills come from junk near the gaps only (two columns); with none, the bot hoists rather than
-  sweep a brown from far off to the top right ("reinforcing the damage"). In the block phase with the junk the
-  wrong way up, hoists are on offer too.
+  sweep a brown from far off to the top right ("reinforcing the damage"). (Hoists offered in the block phase too
+  cost CC^5 its target in the bots' run, so they're off there, 14 Nov.)
 - **Distilling: a brown brought down goes to the V's tip (13 Nov, P29, P30).** "the point of the browns down is
   you want them at that kind of bottom left tip": sorting the ladder or the tail, a brown brought down to the
   leftmost black of the V's bottom, in for it, comes first.
 - **Distilling: the first chain's column two or three in from the fire (13 Nov, watching CC^1).** "build it in the
-  second or third column, like close to what's being burnt, just to have a bit of burnt buffer": a bot's first
-  chain leaves at least two columns by the fire to burn as junk first (any with two pieces of junk or more), and
-  never takes a white back out of the column it's filling.
+  second or third column, like close to what's being burnt, just to have a bit of burnt buffer": built (a bot's
+  first chain waits till two junk columns clear of white are built or burned by the fire; in the chain, never a white
+  taken back out of the column it's filling), but off by default since 14 Nov: in the bots' run each made CC^1 burn
+  more whites (DISTILLING.md, seventeenth run). The user to decide.
+- **Distilling: a plan seen through (14 Nov).** The white a bot's move only opened the way to is its next move's to
+  free, unless something burning sooner needs the move (P1: freed by move 3).
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one

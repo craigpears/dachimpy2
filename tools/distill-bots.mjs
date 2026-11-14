@@ -66,6 +66,7 @@ import { Distilling, WHITE, BROWN, BLACK, BURNT, TALL, UP_LEFT, DOWN_LEFT, neigh
 import { LEVELS, P, bankFor, levelNamed, playSession } from '../js/distill-bots.js';
 import { M, playDrags } from '../js/distill-routines.js';
 import { S } from '../js/distill-score.js';
+import { READ } from '../js/distill-read.js';
 import { PHASE_WEIGHTS } from '../js/distill-phase.js';
 import { seeded } from '../js/mirror-row.js';
 
@@ -76,6 +77,7 @@ const L = 'wbK*x';
 if (process.env.MEASURE) Object.assign(M, JSON.parse(process.env.MEASURE));
 if (process.env.PLAN) Object.assign(P, JSON.parse(process.env.PLAN));
 if (process.env.SCORE) Object.assign(S, JSON.parse(process.env.SCORE));
+if (process.env.READ) Object.assign(READ, JSON.parse(process.env.READ));   // the board reader's thresholds (src/distill-read.ts)
 if (process.env.PHASE_W) for (const [k, v] of Object.entries(JSON.parse(process.env.PHASE_W))) PHASE_WEIGHTS[k] = v;
 
 // A white trapped, measured here so a run before a change and one after use the same yardstick (the user,
