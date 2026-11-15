@@ -747,6 +747,6 @@ export class Bots {
         if (g.kind === 'ram')
             return `making for ${b.ship(g.on).name}, to ram her`;
         const buoy = BLOCKADE.BUOYS[g.i];
-        return `${b.reaches(s, buoy) ? 'holding' : 'making for'} the ${['', 'one', 'two', 'three'][buoy.pennants]}-pennant buoy${inHeart(...buoy.at) ? ' in the heart' : ''}`;
+        return `${b.reaches(s, buoy) ? 'holding' : 'making for'} the ${['', 'one', 'two', 'three', 'four', 'five'][buoy.pennants] ?? buoy.pennants}-pennant buoy${inHeart(...buoy.at) ? ' in the heart' : ''}`;
     }
 }

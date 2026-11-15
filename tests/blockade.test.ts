@@ -118,9 +118,13 @@ describe('the board, as a blockade board is, and more epic (15 Nov: "three or fo
     expect(g).not.toBeNull();
     expect(g!.kind === 'buoy' && inHeart(...B.BUOYS[g!.i].at)).toBe(false);
   });
-  it('buoys of one to three pennants, the best, the three, in the heart', () => {
-    expect(Math.max(...B.BUOYS.filter((x) => inHeart(...x.at)).map((x) => x.pennants))).toBe(3);
-    expect(Math.max(...B.BUOYS.filter((x) => !inHeart(...x.at)).map((x) => x.pennants))).toBeLessThan(3);
+  it('the heart worth eight, each lagoon five, each gate\'s buoy two: the heart and one lagoon contested beat the other lagoon; both lagoons beat the heart (15 Nov: "centre\'s worth 8, a lagoon is worth 5")', () => {
+    const sum = (f: (x: (typeof B.BUOYS)[number]) => boolean) => B.BUOYS.filter(f).reduce((t, x) => t + x.pennants, 0);
+    const heart = sum((x) => inHeart(...x.at)), lagoon = B.REEFS.map((r) => sum((x) => Math.max(Math.abs(x.at[0] - r.at[0]), Math.abs(x.at[1] - r.at[1])) <= 2));
+    expect([heart, ...lagoon]).toEqual([8, 5, 5]);
+    expect(heart).toBeGreaterThan(lagoon[0]);
+    expect(lagoon[0] + lagoon[1]).toBeGreaterThan(heart);
+    expect(sum(() => true) - heart - lagoon[0] - lagoon[1]).toBe(4);
     const b = new Blockade();
     for (const x of B.BUOYS) expect(b.rocks.has(`${x.at[0]},${x.at[1]}`)).toBe(false);
   });
@@ -283,7 +287,7 @@ describe('admiral mode: an order for each ship (15 Nov: "you need to be able to 
     const camp = orderAt(b, f, 18, 18)!;
     expect(camp.kind).toBe('camp');
     if (camp.kind === 'camp') expect(b.rocks.has(`${camp.at[0]},${camp.at[1]}`)).toBe(false);
-    expect(orderText(b, { kind: 'hold', buoy: 0 })).toBe('hold the three-pennant buoy in the heart');
+    expect(orderText(b, { kind: 'hold', buoy: 0 })).toBe('hold the four-pennant buoy in the heart');
   });
 
   it('the bots carry their orders out: a frigate to the far gate, not her nearest; a sloop to camp where she\'s told and stay; a sloop to hold a far buoy', () => {

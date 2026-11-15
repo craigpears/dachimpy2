@@ -20,7 +20,7 @@ import { Blockade, BLOCKADE } from './blockade.js';
 import { Bots } from './blockade-bots.js';
 export const SKIRMISH = {
     /** What each kind of ship costs. */
-    POINTS: { sloop: 1, brig: 3, frigate: 3 },
+    POINTS: { sloop: 1, brig: 2, frigate: 3 },
     /** Each side's points, and the longest a skirmish runs (seconds). */
     BUDGET: 6, SECS: 300,
 };
@@ -61,4 +61,36 @@ export function skirmish(gold, crimson, random, opts = {}) {
     }
     const g = strength(b, 'gold'), c = strength(b, 'crimson');
     return { winner: Math.abs(g - c) < 1e-9 ? null : g > c ? 'gold' : 'crimson', gold: g, crimson: c, secs: Math.round(t) };
+}
+/** A side's fleet of a make-up, placed as a blockade's: Dachimpy's frigates along the south facing the south gate, its
+    brigs and sloops down the west edge facing in; Dalnoth's the same turned round the board's middle. */
+export function blockadeFleet(makeup, team) {
+    const south = team === 'gold', turn = (c, r) => (south ? [c, r] : [BLOCKADE.COLS - 1 - c, BLOCKADE.ROWS - 1 - r]);
+    const ships = [];
+    const nf = makeup.frigate ?? 0;
+    // (spread along the edge, clear of the rock off the gate)
+    for (let i = 0; i < nf; i++) {
+        const c0 = Math.round(10 + (i + 0.5) * 24 / nf), [c, r] = turn(c0 >= 20 && c0 <= 23 ? 25 : c0, 3);
+        ships.push({ name: `${team} frigate ${i + 1}`, kind: 'frigate', at: { c, r, d: south ? 0 : 2 } });
+    }
+    // (the brigs and sloops down the side, a square in from the edge, spread either side of the wind)
+    const small = [...Array(makeup.brig ?? 0).fill('brig'), ...Array(makeup.sloop ?? 0).fill('sloop')], n = small.length;
+    small.forEach((kind, i) => {
+        const row = Math.round(5 + (i + 0.5) * 26 / n), r0 = row === 18 ? 17 : row, [c, r] = turn(kind === 'brig' ? 2 : 1, r0);
+        ships.push({ name: `${team} ${kind} ${i + 1}`, kind, at: { c, r, d: south ? 1 : 3 }, ...(kind === 'brig' ? { craft: south ? 'ram' : 'ghost' } : {}) });
+    });
+    return { id: team, name: team, ships };
+}
+/** A whole blockade round between two make-ups, the dice seeded: its score. */
+export function blockadeGame(gold, crimson, random, secs = BLOCKADE.ROUND) {
+    const b = new Blockade({ teams: [blockadeFleet(gold, 'gold'), blockadeFleet(crimson, 'crimson')] });
+    const bots = new Bots(b, [], random), dt = 0.1;
+    for (let t = 0; t < secs && !b.over; t += dt) {
+        bots.tick(b, dt);
+        b.tick(dt);
+        b.fired.length = 0;
+        b.launches.length = 0;
+    }
+    const { gold: g, crimson: c } = b.score;
+    return { winner: g === c ? null : g > c ? 'gold' : 'crimson', gold: g, crimson: c };
 }

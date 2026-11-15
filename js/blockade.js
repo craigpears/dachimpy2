@@ -61,12 +61,15 @@ export const BLOCKADE = {
         [12, 7], [13, 7], [30, 7], [31, 7], [12, 28], [13, 28], [30, 28], [31, 28], [21, 4], [22, 31],
         [18, 20], [25, 15],
     ],
-    /** The buoys: in the heart two, and its prize three; off each gate two; in each lagoon two (where the wind out of the
-        heart brings a sloop). */
+    /** The buoys: in the heart, its prize four and two of two, eight in all; in each lagoon five; off each gate two, the
+        sloops' quick spots (a frigate sniping at whoever sits on them). Holding the heart and contesting a lagoon beats
+        holding the other lagoon (8 to 5); both lagoons beat the heart (10 to 8): the user, 15 Nov, "if you're controlling
+        the centre and then you're at least contesting one of the lagoons, you should win ... the two lagoons together
+        should beat the centre ... centre's worth 8, a lagoon is worth 5". */
     BUOYS: [
-        { at: [21, 17], pennants: 3 }, { at: [18, 15], pennants: 2 }, { at: [25, 20], pennants: 2 },
+        { at: [21, 17], pennants: 4 }, { at: [18, 15], pennants: 2 }, { at: [25, 20], pennants: 2 },
         { at: [21, 8], pennants: 2 }, { at: [22, 27], pennants: 2 },
-        { at: [6, 19], pennants: 2 }, { at: [37, 16], pennants: 2 },
+        { at: [6, 19], pennants: 5 }, { at: [37, 16], pennants: 5 },
     ],
     /** Squares from any of her squares a ship's influence reaches, by her size (YPPedia: "different sized ships
         have different sized influence circles"). */

@@ -257,6 +257,23 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     can follow, a stand-off by design (in a blockade the buoys bring them out). Points: at a brig's two, three brigs
     crushed the sloops; at three, the triangle holds.
 
+- **Buoy values, a brig's hull, and whole blockades** (15 Nov: "if you're controlling the centre and then you're at
+  least contesting one of the lagoons, you should win ... the two lagoons together should beat the centre ... centre's
+  worth 8, a lagoon is worth 5"; "I like the Brig balance ... consistent with Puzzle Pirates"; "Sloops are just cheaper
+  so they can be so much more numerous ... That still works as an alternate way of fulfilling the triangle ... As long as
+  it happens different ways in each circumstance"):
+  - the heart's buoys 4, 2 and 2 (eight), each lagoon's 5, each gate's 2 (a sloop's quick spot, a frigate sniping at
+    whoever sits there);
+  - a brig's full damage 15 (between the sloop's 6 and the frigate's 30), priced 2 points;
+  - head-on (fight to the last ship, four fights a pairing): frigates beat sloops 4 of 4, brigs beat frigates 4 of 4,
+    and now brigs beat sloops 4 of 4, on open sea and on the board alike;
+  - whole blockades (`blockadeGame`: two make-ups placed as a blockade has them, buoys, scoring, sunk ships coming
+    back; four games each, six points a side): brigs beat frigates 4 of 4; six sloops beat three brigs 3 of 4, and two
+    frigates 4 of 4 by a mile (both lagoons theirs, ten to the heart's eight, no frigate able to get in); a frigate and
+    three sloops against three brigs even; one of each against three brigs even, against six sloops 1 of 4, against two
+    frigates 4 of 4. So in a blockade the cheap sloops, everywhere at once, a buoy contested by any one of them, are the
+    strongest fleet: to shape with the user (their price, how a contest is decided, or the lagoons' worth).
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of
