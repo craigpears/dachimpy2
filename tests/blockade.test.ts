@@ -6,7 +6,7 @@
    ... you should see sloops hiding out, sometimes coming out ... while [war frigs] are having a fight to land a few pot
    shots". */
 import { describe, expect, it } from 'vitest';
-import { BLOCKADE, Blockade, inHeart, islandLand, reefSquares } from '../src/blockade';
+import { BLOCKADE, Blockade, inHeart, reefSquares, laneSquares } from '../src/blockade';
 import { Bot, Bots, bombardBerths } from '../src/blockade-bots';
 import { orderAt, orderText, FREE, STRATEGIES } from '../src/blockade-orders';
 import { squares, alongs, SLOOP_HANDLING, BRIG_HANDLING, FRIGATE_HANDLING } from '../src/ship-handling';
@@ -38,10 +38,11 @@ describe('the board, as a blockade board is, and more epic (15 Nov: "three or fo
       for (const s of mine) for (const [c, r] of squares(s.h, s.helm.pose)) expect(b.rocks.has(`${c},${r}`), s.name).toBe(false);
     }
   });
-  it('the heart\'s a walled fort: its only ways in the two gates\' and the two side ways, one square each', () => {
+  it('the heart\'s a walled fort: its only ways through the two gates\', the two side ways and the four ways out, one square each', () => {
     const b = new Blockade(), open: string[] = [];
     for (const w of B.WALLS) for (let c = w.c0; c <= w.c1; c++) for (let r = w.r0; r <= w.r1; r++) if (!b.rocks.has(`${c},${r}`)) open.push(`${c},${r}`);
-    const ways = [...B.GATES.flatMap((g) => [`${g.way},${g.r0}`, `${g.way},${g.r1}`]), ...B.SIDEWAYS.map(([c, r]) => `${c},${r}`)];
+    const inWall = ([c, r]: [number, number]) => B.WALLS.some((w) => c >= w.c0 && c <= w.c1 && r >= w.r0 && r <= w.r1);
+    const ways = [...B.GATES.flatMap((g) => [`${g.way},${g.r0}`, `${g.way},${g.r1}`]), ...B.SIDEWAYS.map(([c, r]) => `${c},${r}`), ...B.EXITS.flat().flatMap(laneSquares).filter(inWall).map(([c, r]) => `${c},${r}`)];
     expect(open.sort()).toEqual([...new Set(ways)].sort());
   });
   it('the sloops can get into the heart from the start, and a brig, one square wide, through a gate under its guns; the frigates can\'t till a tower\'s down (15 Nov: "a way of naturally delaying the war [frigs]")', () => {
@@ -61,21 +62,56 @@ describe('the board, as a blockade board is, and more epic (15 Nov: "three or fo
     expect(inHeart(got.ride[got.ride.length - 1].c, got.ride[got.ride.length - 1].r)).toBe(true);
     expect(frigate(b).sea.windy).toBe(false);
   });
-  it('islands out on the open sea, each with a cove a sloop can hide in and a frigate can\'t get into, its rocks between her and the guns', () => {
-    const b = new Blockade(), s = sloop(b), f = frigate(b);
-    expect(B.ISLANDS.length).toBeGreaterThanOrEqual(4);
-    for (const isle of B.ISLANDS) {
-      expect(islandLand(isle).every(([c, r]) => b.rocks.has(`${c},${r}`))).toBe(true);
-      expect(b.rocks.has(`${isle.cove[0]},${isle.cove[1]}`)).toBe(false);
-      expect(s.sea.plotPast(s.helm.pose, ...isle.cove), `sloop to ${isle.cove}`).not.toBeNull();
-      for (let d = 0; d < 4; d++) expect(squares(f.h, { c: isle.cove[0], r: isle.cove[1], d }).some(([c, r]) => b.rocks.has(`${c},${r}`))).toBe(true);
-      // (sideways onto the cove from the open sea, a shot comes down on the island's rocks)
-      for (const dc of [-1, 1]) {
-        const shooter = { c: isle.cove[0] + dc * 3, r: isle.cove[1] };
-        if (b.rocks.has(`${shooter.c},${shooter.r}`)) continue;
-        for (let k = 1; k < 3; k++) expect(b.rocks.has(`${isle.cove[0] + dc * k},${isle.cove[1]}`)).toBe(true);
+  it('a sloop hides in a lagoon\'s far corner, by its tiny island: no frigate can get to her or shoot her there (15 Nov: "a tiny little island with a buoy in the middle")', () => {
+    const b = new Blockade(), s = sloop(b), f = frigate(b), fsea = f.sea.bare();
+    for (const reef of B.REEFS) {
+      expect(b.rocks.has(`${reef.islet[0]},${reef.islet[1]}`)).toBe(true);
+      expect(Math.max(Math.abs(reef.islet[0] - reef.at[0]), Math.abs(reef.islet[1] - reef.at[1]))).toBe(1);
+      expect(b.rocks.has(`${reef.hide[0]},${reef.hide[1]}`)).toBe(false);
+      expect(b.coves()).toContainEqual(reef.hide);
+      expect(s.sea.plotPast(s.helm.pose, ...reef.hide), `sloop to ${reef.hide}`).not.toBeNull();
+      expect(f.sea.plotPast(f.helm.pose, ...reef.hide), `frigate to ${reef.hide}`).toBeNull();
+      // (a frigate anywhere outside the reef: none of her broadsides reaches the hiding place, the reef in the way)
+      for (let c = 0; c < B.COLS; c++) for (let r = 0; r < B.ROWS; r++) for (const d of [0, 1, 2, 3]) {
+        const p = { c, r, d };
+        if (!fsea.fits(p) || Math.max(Math.abs(c - reef.at[0]), Math.abs(r - reef.at[1])) <= 3) continue;
+        for (const side of ['L', 'R'] as const) expect(b.aim(f.id, side, p, false).some((x) => x.cells.some(([u, v]) => u === reef.hide[0] && v === reef.hide[1]))).toBe(false);
       }
     }
+  });
+  it('a way out of the heart to each lagoon, a wind through a gap in the wall between two guns, carrying a sloop to its buoy in one move; a frigate can\'t get through (15 Nov: "an exit from the middle ... a wind heading towards each of the reefed areas, so they can get out quickly")', () => {
+    const b = new Blockade(), s = sloop(b), f = frigate(b);
+    expect(B.EXITS).toHaveLength(4);
+    for (const [i, [a]] of B.EXITS.entries()) {
+      const reef = B.REEFS[i], start = { c: a.at[0] - [0, 1, 0, -1][a.d], r: a.at[1] - [1, 0, -1, 0][a.d], d: a.d };
+      expect(inHeart(start.c, start.r)).toBe(true);
+      const got = s.sea.bare().move(start, 'F'), end = got.ride[got.ride.length - 1];
+      expect([end.c, end.r]).toEqual(reef.at);
+      // (through the wall, between two of its gate's guns, which aren't hurt by it)
+      const through = B.EXITS[i].flatMap(laneSquares).filter(([c, r]) => B.WALLS.some((w) => c >= w.c0 && c <= w.c1 && r >= w.r0 && r <= w.r1));
+      expect(through.length).toBeGreaterThan(0);
+      for (const [c, r] of through) {
+        expect(b.rocks.has(`${c},${r}`)).toBe(false);
+        expect(b.battery.some((g) => g.at[0] === c && g.at[1] === r)).toBe(false);
+        expect(b.battery.filter((g) => Math.abs(g.at[0] - c) === 1 && Math.abs(g.at[1] - r) <= 1)).toHaveLength(2);
+      }
+    }
+    // (a frigate's still shut out of the heart till a gate's down: the ways out are a square wide)
+    expect(f.sea.plotPast(f.helm.pose, ...prize)).toBeNull();
+  });
+  it('a sloop in the heart leaves it for a lagoon once the enemy\'s frigates are in', () => {
+    const b = new Blockade(), s = sloop(b), foe = frigate(b, 'crimson');
+    clearAway(b, [s, foe]);
+    s.helm.moor({ c: 21, r: 16, d: 0 }); b.notice();
+    const bot = new Bot(s.id, dice(1)), goalAt = () => { bot.tick(b, 0.1); const g = bot.goal; return g?.kind === 'buoy' ? B.BUOYS[g.i].at : null; };
+    for (let i = 0; i < 40; i++) goalAt();
+    expect(inHeart(...goalAt()!)).toBe(true);
+    foe.helm.moor({ c: 22, r: 19, d: 1 }); b.notice();
+    const fresh = new Bot(s.id, dice(1));
+    for (let i = 0; i < 40; i++) fresh.tick(b, 0.1);
+    const g = fresh.goal;
+    expect(g).not.toBeNull();
+    expect(g!.kind === 'buoy' && inHeart(...B.BUOYS[g!.i].at)).toBe(false);
   });
   it('buoys of one to three pennants, the best, the three, in the heart', () => {
     expect(Math.max(...B.BUOYS.filter((x) => inHeart(...x.at)).map((x) => x.pennants))).toBe(3);
@@ -476,16 +512,15 @@ describe('war brigs, the middle class (15 Nov: "a middle ship class, so it\'s no
 });
 
 describe('reefs round the island buoys, the brigs\' and the sloops\' middle ground (15 Nov: "Maybe need like some middle ground somewhere"; "Yeah, do it")', () => {
-  it('a ring three squares out round each, a gap or two a square wide, a lagoon inside', () => {
+  it('a ring three squares out round each, gaps a square wide, a lagoon inside', () => {
     const b = new Blockade();
     expect(B.REEFS).toHaveLength(4);
     for (const reef of B.REEFS) {
       expect(B.BUOYS.some((x) => x.at[0] === reef.at[0] && x.at[1] === reef.at[1])).toBe(true);
       for (const [c, r] of reefSquares(reef)) expect(b.rocks.has(`${c},${r}`)).toBe(true);
       for (const [c, r] of reef.gaps) expect(b.rocks.has(`${c},${r}`), `gap ${c},${r}`).toBe(false);
-      // (open water inside, but a corner of the island's own land where it comes in)
-      const land = new Set(B.ISLANDS.flatMap((i) => islandLand(i).map(([c, r]) => `${c},${r}`)));
-      for (let c = reef.at[0] - 2; c <= reef.at[0] + 2; c++) for (let r = reef.at[1] - 2; r <= reef.at[1] + 2; r++) if (!land.has(`${c},${r}`)) expect(b.rocks.has(`${c},${r}`), `lagoon ${c},${r}`).toBe(false);
+      // (open water inside, but its tiny island)
+      for (let c = reef.at[0] - 2; c <= reef.at[0] + 2; c++) for (let r = reef.at[1] - 2; r <= reef.at[1] + 2; r++) if (c !== reef.islet[0] || r !== reef.islet[1]) expect(b.rocks.has(`${c},${r}`), `lagoon ${c},${r}`).toBe(false);
     }
   });
   it('a sloop and a brig get in to the buoy; a frigate can\'t, and her influence doesn\'t reach it from outside the reef', () => {

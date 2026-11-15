@@ -27,9 +27,15 @@
      islands are the brigs' and the sloops' to fight over, the middle ground between the open sea's frigates and the
      heart (the user, 15 Nov, of the brig: "she can get into the middle faster than a frig because she doesn't have to
      break down the door ... maybe 2 tiles long ... but they can still get in the areas"; "Maybe need like some middle
-     ground somewhere"; and of the reefs, "Yeah, do it");
-   - islands out on the open sea, each with a cove in it a sloop can hide in, one square in by a narrow way no
-     frigate fits, its rocks between her and anyone's guns;
+     ground somewhere"; and of the reefs, "Yeah, do it"). A tiny island by each lagoon's buoy, and in its far corner
+     the sloops' hiding place, out of every frigate's reach (they were big islands with coves in them; the user, 15
+     Nov: "Those big ones ... with the cove inside them are not really doing anything ... maybe you just have a tiny
+     little island with a buoy in the middle ... that becomes a battleground for sloops and war brigs");
+   - four ways out of the heart, one towards each lagoon: a gap through the fort's wall between two of its gate's
+     guns, a wind blowing out through it and round into the lagoon, so when the frigates get into the heart the
+     sloops can scatter to the reefs fast (the user, 15 Nov: "the only thing they really need is maybe an exit from
+     the middle ... as the war [frigs] start approaching ... the sloops can kind of disperse quickly ... a wind
+     heading towards each of the reefed areas, so they can get out quickly");
    - a war brig a side between them (src/den-brig.ts; the user, 15 Nov: "a middle ship class, so it's not a big
      [brawling] fighter ... medium cannonballs ... but it can spawn ... haunted sloops that ... hang around for a set
      number of turns"; "the Atlantean ... sends out little [tritons] and turtles to go and ram the enemy ships"): medium
@@ -62,10 +68,9 @@ export type TeamId = 'gold' | 'crimson';
 export interface Lane { at: [number, number]; d: number; n: number }
 export interface Buoy { at: [number, number]; pennants: 1 | 2 | 3 }
 export interface Rect { c0: number; c1: number; r0: number; r1: number }
-/** An island: its land, and the cove in it (`cove`, the square a sloop hides on, open to the sea by `way`). */
-export interface Island extends Rect { cove: [number, number]; way: [number, number][] }
-/** A reef round a buoy: the buoy's square, how far out the ring is (squares, any way), and its gaps. */
-export interface Reef { at: [number, number]; ring: number; gaps: [number, number][] }
+/** A reef round a buoy: the buoy's square, how far out the ring is (squares, any way), its gaps, the tiny island by
+    the buoy (`islet`), and the square a sloop hides on in the lagoon (`hide`). */
+export interface Reef { at: [number, number]; ring: number; gaps: [number, number][]; islet: [number, number]; hide: [number, number] }
 /** A ship of a side's fleet: her name, kind, where she comes in, (a sloop) whether her bot's a raider, and (a brig)
     what she launches. */
 export interface FleetShip { name: string; kind: Kind; at: Pose; raider?: boolean; craft?: CraftKind }
@@ -97,27 +102,30 @@ export const BLOCKADE = {
   /** The winds (the way each blows: 0 up the board, 1 right, 2 down, 3 left; n squares from `at`): one in through
       each side way from the open sea into the heart. A sloop on one is carried along it; a frigate rides them out. */
   WINDS: [{ at: [5, 18], d: 1, n: 13 }, { at: [38, 17], d: 3, n: 13 }] as Lane[],
-  /** The islands, each with its cove. */
-  ISLANDS: [
-    { c0: 5, c1: 9, r0: 4, r1: 8, cove: [7, 6], way: [[7, 7], [7, 8]] },
-    { c0: 34, c1: 38, r0: 4, r1: 8, cove: [36, 6], way: [[36, 7], [36, 8]] },
-    { c0: 5, c1: 9, r0: 27, r1: 31, cove: [7, 29], way: [[7, 28], [7, 27]] },
-    { c0: 34, c1: 38, r0: 27, r1: 31, cove: [36, 29], way: [[36, 28], [36, 27]] },
-  ] as Island[],
-  /** Each side's corner of the sea, where her sloops can lie out of the fighting too when the coves are full. */
+  /** The ways out of the heart, one towards each lagoon: a wind blowing out through a gap in the fort's wall (between
+      two of its gate's guns), then round into the lagoon by a gap in its reef, carrying a sloop from the heart to the
+      lagoon's buoy in a couple of seconds. Each two lanes, the second starting where the first leaves off. */
+  EXITS: [
+    [{ at: [17, 15], d: 2, n: 5 }, { at: [17, 10], d: 3, n: 6 }],
+    [{ at: [25, 14], d: 2, n: 4 }, { at: [25, 10], d: 1, n: 7 }],
+    [{ at: [18, 21], d: 0, n: 4 }, { at: [18, 25], d: 3, n: 7 }],
+    [{ at: [26, 21], d: 0, n: 4 }, { at: [26, 25], d: 1, n: 6 }],
+  ] as Lane[][],
+  /** Each side's corner of the sea, where her sloops can lie out of the fighting too when the lagoons are full. */
   HOMES: { gold: [[0, 0], [3, 0], [0, 3]], crimson: [[43, 35], [40, 35], [43, 32]] } as Record<TeamId, [number, number][]>,
-  /** The reefs round the buoys by the islands, each a ring three squares out (any way) with a gap or two in it a
-      square wide, facing the open sea and the fort: a lagoon inside, five squares across. */
+  /** The reefs round the four buoys out by the fort's corners, each a ring three squares out (any way) with gaps in it
+      a square wide (to the open sea, to the fort, and the way out of the heart's wind): a lagoon inside, five squares
+      across, a tiny island by its buoy and the sloops' hiding place in its far corner. */
   REEFS: [
-    { at: [11, 10], ring: 3, gaps: [[8, 10], [11, 13]] },
-    { at: [32, 10], ring: 3, gaps: [[35, 10], [32, 13]] },
-    { at: [11, 25], ring: 3, gaps: [[8, 25], [11, 22]] },
-    { at: [32, 25], ring: 3, gaps: [[35, 25], [32, 22]] },
+    { at: [11, 10], ring: 3, gaps: [[8, 10], [11, 13], [14, 10]], islet: [10, 9], hide: [9, 8] },
+    { at: [32, 10], ring: 3, gaps: [[35, 10], [32, 13], [29, 10]], islet: [33, 9], hide: [34, 8] },
+    { at: [11, 25], ring: 3, gaps: [[8, 25], [11, 22], [14, 25]], islet: [10, 26], hide: [9, 27] },
+    { at: [32, 25], ring: 3, gaps: [[35, 25], [32, 22], [29, 25]], islet: [33, 26], hide: [34, 27] },
   ] as Reef[],
   /** Rocks about the open sea and the heart. */
   ROCKS: [
-    // (none along the west and east edges: with the reefs, the way round past the islands is the frigates' only one
-    // from the south to the north, and two squares either side of a rock is too narrow for her, at her every other square)
+    // (none along the west and east edges: with the reefs, the way round past them is the frigates' only one from the
+    // south to the north, and two squares either side of a rock is too narrow for her, at her every other square)
     [12, 7], [13, 7], [30, 7], [31, 7], [12, 28], [13, 28], [30, 28], [31, 28], [21, 4], [22, 31],
     [18, 20], [25, 15],
   ] as [number, number][],
@@ -202,11 +210,9 @@ export function reefSquares(x: Reef): [number, number][] {
   }
   return out;
 }
-/** Every island's land squares (not its cove nor the way into it). */
-export function islandLand(i: Island): [number, number][] {
-  const out: [number, number][] = [], open = new Set([i.cove, ...i.way].map(([c, r]) => key(c, r)));
-  for (let c = i.c0; c <= i.c1; c++) for (let r = i.r0; r <= i.r1; r++) if (!open.has(key(c, r))) out.push([c, r]);
-  return out;
+/** Every square of a wind lane, in order, and the way it blows. */
+export function laneSquares({ at: [c, r], d, n }: Lane): [number, number][] {
+  return Array.from({ length: n }, (_, i) => [c + [0, 1, 0, -1][d] * i, r + [1, 0, -1, 0][d] * i] as [number, number]);
 }
 
 /** One ship in the blockade: her side, her handling, her own sea (her size, the winds if she's small enough,
@@ -263,12 +269,11 @@ export class Blockade {
   charts = {} as Record<Kind, HullChart>;
 
   constructor() {
-    const B = BLOCKADE, side = new Set(B.SIDEWAYS.map(([c, r]) => key(c, r))), ways = new Set(B.GATES.flatMap((x) => [key(x.way, x.r0), key(x.way, x.r1)]));
+    const B = BLOCKADE, side = new Set([...B.SIDEWAYS, ...B.EXITS.flat().flatMap(laneSquares)].map(([c, r]) => key(c, r))), ways = new Set(B.GATES.flatMap((x) => [key(x.way, x.r0), key(x.way, x.r1)]));
     for (const w of B.WALLS) for (let c = w.c0; c <= w.c1; c++) for (let r = w.r0; r <= w.r1; r++) if (!side.has(key(c, r)) && !ways.has(key(c, r))) this.rocks.add(key(c, r));
-    for (const isle of B.ISLANDS) for (const [c, r] of islandLand(isle)) this.rocks.add(key(c, r));
     for (const [c, r] of B.ROCKS) this.rocks.add(key(c, r));
-    for (const reef of B.REEFS) for (const [c, r] of reefSquares(reef)) this.rocks.add(key(c, r));
-    for (const { at: [c, r], d, n } of B.WINDS) for (let i = 0; i < n; i++) this.wind.set(key(c + [0, 1, 0, -1][d] * i, r + [1, 0, -1, 0][d] * i), d);
+    for (const reef of B.REEFS) for (const [c, r] of [...reefSquares(reef), reef.islet]) this.rocks.add(key(c, r));
+    for (const lane of [...B.WINDS, ...B.EXITS.flat()]) for (const [c, r] of laneSquares(lane)) this.wind.set(key(c, r), lane.d);
     let id = 0;
     for (const team of B.TEAMS) for (const s of team.ships) {
       const h = HANDLINGS[s.kind], me = id++;
@@ -536,6 +541,7 @@ export class Blockade {
   }
   /** In the heart of the board, inside the fort. */
   inHeart(s: Ship): boolean { return inHeart(s.helm.pose.c, s.helm.pose.r); }
-  /** Where a sloop of that side hides: the islands' coves, and her side's corner of the sea, far from the fighting. */
-  coves(team?: TeamId): [number, number][] { return [...BLOCKADE.ISLANDS.map((i) => i.cove), ...(team ? BLOCKADE.HOMES[team] : [])]; }
+  /** Where a sloop of that side hides: each lagoon's far corner, and her side's corner of the sea, far from the
+      fighting. */
+  coves(team?: TeamId): [number, number][] { return [...BLOCKADE.REEFS.map((x) => x.hide), ...(team ? BLOCKADE.HOMES[team] : [])]; }
 }

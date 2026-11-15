@@ -49,8 +49,8 @@ export const FREE = { kind: 'free' };
 /** A buoy in plain words: its pennants, and where. */
 export function buoyName(i) {
     const b = BLOCKADE.BUOYS[i], [c, r] = b.at, H = BLOCKADE.HEART;
-    const where = c >= H.c0 && c <= H.c1 && r >= H.r0 && r <= H.r1 ? 'in the heart' : r < H.r0 ? (c < 16 ? 'by the south-west isles' : c > 27 ? 'by the south-east isles' : 'off the south gate')
-        : r > H.r1 ? (c < 16 ? 'by the north-west isles' : c > 27 ? 'by the north-east isles' : 'off the north gate') : 'out at sea';
+    const where = c >= H.c0 && c <= H.c1 && r >= H.r0 && r <= H.r1 ? 'in the heart' : r < H.r0 ? (c < 16 ? 'in the south-west lagoon' : c > 27 ? 'in the south-east lagoon' : 'off the south gate')
+        : r > H.r1 ? (c < 16 ? 'in the north-west lagoon' : c > 27 ? 'in the north-east lagoon' : 'off the north gate') : 'out at sea';
     return `the ${['', 'one', 'two', 'three'][b.pennants]}-pennant buoy ${where}`;
 }
 /** A gate in plain words. */

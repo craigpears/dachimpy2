@@ -46,8 +46,8 @@ export const BOTS = {
   NOWAY: 8,
   /** How much better something has to look before she changes her mind. */
   STICK: 1.3,
-  /** How much more the heart's buoys are worth to a frigate. */
-  HEART: 1.6,
+  /** How much more the heart's buoys are worth to a frigate; and to a sloop, once the enemy's frigates are in it. */
+  HEART: 1.6, FLEE: 0.3,
   /** A sloop hurt this badly runs to hide and be patched; and comes out again patched to this. */
   HIDE: 0.5, HEALED: 0.1,
   /** Seconds a raider lies hidden before she darts out again, and the longest a raid lasts. */
@@ -85,6 +85,8 @@ function worth(b: Blockade, s: Ship, buoy: Buoy, i: number, mates: Goal[]): numb
   let w = buoy.pennants * (hold === s.team ? (friend ? 0.15 : 1) : hold === 'contested' ? 1.4 : hold ? 1.5 : 1.2);
   if (mates.some((g) => g.kind === 'buoy' && g.i === i)) w *= 0.35;
   if (s.kind === 'frigate' && inHeart(...buoy.at)) w *= BOTS.HEART;
+  // (a sloop in the heart once the enemy's frigates are in it: out by the winds to the lagoons, before they're caught)
+  if (s.kind === 'sloop' && inHeart(...buoy.at) && b.ships.some((o) => o.team !== s.team && o.kind === 'frigate' && o.away <= 0 && !o.dmg.out && b.inHeart(o))) w *= BOTS.FLEE;
   // (a brig, and her ghost sloops with her: the islands' buoys before the heart's)
   if (s.kind === 'brig' || s.craft?.kind === 'ghost') w *= inHeart(...buoy.at) ? BOTS.BRIG.HEART : BOTS.BRIG.OUT;
   return w;
@@ -550,7 +552,7 @@ export class Bots {
     if (!g) return 'looking round';
     if (g.kind === 'gate') return `shooting down the ${BLOCKADE.GATES[g.g].r0 < BLOCKADE.HEART.r0 ? 'south' : 'north'} gate's tower`;
     if (g.kind === 'guns') return `wrecking the ${BLOCKADE.GATES[g.g].r0 < BLOCKADE.HEART.r0 ? 'south' : 'north'} gate's guns`;
-    if (g.kind === 'hide') return s.helm.pose.c === g.cove[0] && s.helm.pose.r === g.cove[1] ? 'hiding in a cove' + (s.dmg.share() > 0.05 ? ', being patched' : '') : 'running for a cove to hide';
+    if (g.kind === 'hide') return s.helm.pose.c === g.cove[0] && s.helm.pose.r === g.cove[1] ? 'hiding in a lagoon' + (s.dmg.share() > 0.05 ? ', being patched' : '') : 'running for a lagoon to hide';
     if (g.kind === 'raid') return `darting out at ${b.ship(g.on).name}`;
     if (g.kind === 'camp') return squares(s.h, s.helm.pose).some(([c, r]) => c === g.at[0] && r === g.at[1]) ? 'camped, firing on what comes by' : 'making for her camp';
     if (g.kind === 'escort') return `escorting ${b.ship(g.on).name}`;

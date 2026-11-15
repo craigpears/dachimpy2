@@ -7,7 +7,8 @@
 <!-- A blockade, a proof of concept, unlinked like frigate-test.html (BLOCKADE.md): two sides, three war frigates, a
      war brig launching her little craft and five sloops each, coming in from two edges each, fighting for the buoys of a blockade board, the best of them in
      a walled fort in its heart with imperial gates the frigates shoot their way through and side ways the sloops'
-     winds carry them through, islands with coves for the sloops to hide in. You spectate (the camera following the
+     winds carry them through, lagoons inside reefs for the sloops to hide in and the brigs to fight them for, and
+     winds out of the heart to each. You spectate (the camera following the
      action, or any ship you click), or sail any of them (its Sail button; ?ship= its number); bots sail the rest. Rules src/blockade.ts, bots src/blockade-bots.ts, damage src/ship-damage.ts; its 3D
      js/den/blockade.js. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -73,7 +74,7 @@
 <body>
 <div class="ui">
   <h1>Blockade</h1>
-  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants. The best are in the fort in the middle: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. Sloops hide in the islands' coves and dart out. Each side's war brig fights round the islands, launching her craft: Tidecaller's turtles ram, Grave Lantern's ghost sloops hold buoys a while. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops.</p>
+  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants. The best are in the fort in the middle: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. Sloops hide in the lagoons, inside their reefs where no frigate can follow, and dart out; when the frigates get into the heart, the winds out of it carry the sloops away to the lagoons. Each side's war brig fights round the islands, launching her craft: Tidecaller's turtles ram, Grave Lantern's ghost sloops hold buoys a while. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops.</p>
   <div class="score"><span class="gold" id="sg">0</span><span id="clock">5:00</span><span class="crimson" id="sc">0</span></div>
   <div class="bar" title="This blockade turn: scored when it fills"><i id="turn"></i></div>
   <div class="buoys" id="buoys"></div>

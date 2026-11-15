@@ -58,9 +58,11 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     damage); any ship's hits quieten one, three wreck it;
   - **a side way** through its west wall and its east: a one-square gap with a wind blowing in through it from the
     open sea. A sloop on it is carried through, fast; a frigate rides the winds out (and wouldn't fit anyway).
-- **Islands**: four out on the open sea, sand and grass and palms, each with a cove a sloop hides in, one square in
-  by a narrow way no frigate fits, the island's rocks between her and anyone's guns. Each side's corner of the sea is
-  somewhere to lie out of the fighting too, when the coves are full.
+- **Islands** (as first built): four out on the open sea, sand and grass and palms, each with a cove a sloop hid in.
+  Gone (15 Nov: "Those big ones ... with the cove inside them are not really doing anything ... maybe you just have a
+  tiny little island with a buoy in the middle"): the reef lagoons below took their place, each with a tiny island by
+  its buoy and the sloops' hiding place in its far corner. Each side's corner of the sea is somewhere to lie out of the
+  fighting too, when the lagoons are full.
 - **Buoys**: in the heart two two-pennant and the prize, three; out on the open sea a two off each gate and a one by
   each island. Influence 2 squares from any of a sloop's squares, 3.5 of a frigate's. Scored every 10 s; a round is
   six minutes.
@@ -184,6 +186,13 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     (two rocks there taken out so she fits); drawn as a lagoon (15 Nov, of coloured coral heads: "they look incredibly
     weird and colourful, not very lagoon reef like"): the sea paling to turquoise round it, a sandbar ring just under
     the water with surf along its outside and its gaps open, a grey rock here and there;
+  - **the ways out of the heart** (15 Nov: "the only thing they really need is maybe an exit from the middle ... as
+    the war [frigs] start approaching ... the sloops can kind of disperse quickly ... a wind heading towards each of
+    the reefed areas, so they can get out quickly"): `EXITS`, four winds blowing out of the heart through a gap in the
+    fort's wall between two of its gate's guns and round into a lagoon by a gap in its reef, one move carrying a sloop
+    from the heart to its buoy. A sloop weighs the heart's buoys at 0.3 once an enemy frigate's in it (`FLEE`), so
+    they leave. So a round has phases: the sloops in first (9 to 12 s), the brigs (53 to 150 s), the frigates (76 to
+    244 s), and the sloops scattering to the lagoons;
   - drawn from a war frigate's parts on her own plan (two masts, one row of ports, her stern's few sizes her own:
     `Plan.stern`), the turtles and ghost sloops by `js/den/sea-craft.js`; the admiral picks a strategy for her too
     (her own choice, hold the outside, run for the middle, hunt their frigates).
@@ -239,6 +248,9 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
 
 ## 5. To shape with the user
 
+- With the islands gone and the ways out of the heart, three seeded rounds: sloops ride out of the heart 12 to 18
+  times a round, 5 to 8 of them after the enemy's frigates are in; the lagoons held two thirds of the round and
+  contested 30 to 64 s of it; hiding and raids from them all round; 13 to 20 rams; 1.8 to 2 s of computing a round.
 - The reef lagoons as played: whether the brigs fight the sloops in them enough, and the frigates' long way round.
 - Whether the frigate's handling feels right: as quick as the sloop over open water, clumsy (her turns of moves half
   as long again), the sloop's speed the winds'.

@@ -40,8 +40,9 @@ describe('a chart a kind of ship, shared (15 Nov: "a couple of pre-computed maps
     const b = new Blockade();
     for (const k of ['sloop', 'frigate'] as const) {
       const chart = b.charts[k], old = plain(b, k), s = kind(b, k);
-      // (the buoy off the south gate, open water west of the fort, a cove, a far corner: places both kinds can reach or not)
-      const goals: [number, number][] = [B.BUOYS[3].at, [6, 20], B.ISLANDS[0].cove, [2, 33]];
+      // (the buoy off the south gate, open water west of the fort, a lagoon's hiding place, a far corner: places both
+      // kinds can reach or not)
+      const goals: [number, number][] = [B.BUOYS[3].at, [6, 20], B.REEFS[0].hide, [2, 33]];
       let compared = 0;
       for (const from of poses(b, k, 7)) for (const [c, r] of goals) {
         const mine = s.sea.plotPast(from, c, r), theirs = old.plot(from, c, r);

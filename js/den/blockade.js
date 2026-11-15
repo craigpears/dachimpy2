@@ -9,7 +9,7 @@
 // course of the ship you sail. Everything else is the rules'.
 import * as THREE from 'three';
 import { SAIL } from '../den-sail.js';
-import { Blockade, BLOCKADE, islandLand, reefSquares } from '../blockade.js';
+import { Blockade, BLOCKADE, reefSquares } from '../blockade.js';
 import { Bots } from '../blockade-bots.js';
 import { FREE, STRATEGIES, orderAt, orderText, orderTarget } from '../blockade-orders.js';
 import { drawnAt } from '../ship-handling.js';
@@ -68,7 +68,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
 
   // ----- the rocks, the fort's walls among them (its towers and bastions their own) -----
   const stoneM = mat('#6b6158', { flatShading: true, roughness: 0.95 }), stoneGeo = new THREE.DodecahedronGeometry(1, 0);
-  const isleSq = new Set(BLOCKADE.ISLANDS.flatMap((i) => islandLand(i).map(([c, r]) => `${c},${r}`)));
+  const isleSq = new Set(BLOCKADE.REEFS.map((x) => `${x.islet[0]},${x.islet[1]}`));
   // (the reefs round the island buoys, drawn as a lagoon is (15 Nov: "they look incredibly weird and colourful, not very
   // lagoon reef like"): the sea paling to turquoise round each, the reef a ring of pale sand just under the water with
   // a few dark rocks breaking it and white surf along it, the lagoon inside clear turquoise)
@@ -142,18 +142,17 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
       g.add(m);
     }
   }
-  // ----- the islands: sand and grass, a palm or two, a rock or two, their coves open water -----
-  const sandM = mat('#d9c48e', { roughness: 1 }), grassM = mat('#6f9a46', { roughness: 1, flatShading: true }), trunkM = mat('#8a6a44', { roughness: 1 }), leafM = mat('#4f8a3a', { roughness: 1, side: THREE.DoubleSide });
-  for (const isle of BLOCKADE.ISLANDS) for (const [c, r] of islandLand(isle)) {
+  // ----- a tiny island by each lagoon's buoy: a round of sand, a tuft of grass, a palm or two -----
+  const sandM = mat('#e2cf98', { roughness: 1 }), grassM = mat('#6f9a46', { roughness: 1, flatShading: true }), trunkM = mat('#8a6a44', { roughness: 1 }), leafM = mat('#4f8a3a', { roughness: 1, side: THREE.DoubleSide });
+  for (const { islet: [c, r] } of BLOCKADE.REEFS) {
     const at = v3(c, r), roll = dice(c, r);
-    const sand = mesh(new THREE.BoxGeometry(CELL * 1.02, 0.9, CELL * 1.02), sandM); sand.position.set(at.x, 0.2, at.z); g.add(sand);
-    const edge = c === isle.c0 || c === isle.c1 || r === isle.r0 || r === isle.r1;
-    if (!edge) { const hill = mesh(new THREE.DodecahedronGeometry(CELL * 0.62, 0), grassM); hill.scale.set(1, 0.45 + roll() * 0.3, 1); hill.position.set(at.x, 0.7, at.z); g.add(hill); }
-    if (roll() < 0.35) {
-      const palm = new THREE.Group(), h = 3 + roll() * 1.5, lean = (roll() - 0.5) * 0.4;
-      const trunk = mesh(new THREE.CylinderGeometry(0.13, 0.2, h, 6), trunkM); trunk.position.y = h / 2; palm.add(trunk);
-      for (let i = 0; i < 6; i++) { const leaf = mesh(new THREE.PlaneGeometry(0.5, 2.2), leafM, false); leaf.position.set(0, h, 0); leaf.rotation.set(-1.1, i / 6 * Math.PI * 2, 0); leaf.translateY(1); palm.add(leaf); }
-      palm.position.set(at.x + (roll() - 0.5) * 2, 0.6, at.z + (roll() - 0.5) * 2); palm.rotation.z = lean; g.add(palm);
+    const sand = mesh(new THREE.CylinderGeometry(CELL * 0.55, CELL * 0.68, 0.7, 14), sandM); sand.position.set(at.x, 0.1, at.z); g.add(sand);
+    const hill = mesh(new THREE.DodecahedronGeometry(CELL * 0.3, 0), grassM); hill.scale.set(1, 0.5, 1); hill.position.set(at.x + (roll() - 0.5) * 0.6, 0.5, at.z + (roll() - 0.5) * 0.6); g.add(hill);
+    for (let k = 0, n = 1 + Math.floor(roll() * 2); k < n; k++) {
+      const palm = new THREE.Group(), h = 2.6 + roll() * 1.4, lean = (roll() - 0.5) * 0.5;
+      const trunk = mesh(new THREE.CylinderGeometry(0.12, 0.18, h, 6), trunkM); trunk.position.y = h / 2; palm.add(trunk);
+      for (let i = 0; i < 6; i++) { const leaf = mesh(new THREE.PlaneGeometry(0.5, 2.0), leafM, false); leaf.position.set(0, h, 0); leaf.rotation.set(-1.1, i / 6 * Math.PI * 2, 0); leaf.translateY(0.9); palm.add(leaf); }
+      palm.position.set(at.x + (roll() - 0.5) * 1.6, 0.4, at.z + (roll() - 0.5) * 1.6); palm.rotation.z = lean; palm.rotation.y = roll() * 6; g.add(palm);
     }
   }
   // ----- the imperial gates and their bastion guns -----
@@ -166,7 +165,8 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     c.beginPath(); c.moveTo(12, 44); c.lineTo(32, 22); c.lineTo(52, 44); c.stroke();
   });
   chevron.wrapS = chevron.wrapT = THREE.RepeatWrapping;
-  const lanes = B.WINDS.map(({ at: [c, r], d, n }) => {
+  // (the side ways' winds in, and the ways out of the heart to the lagoons)
+  const lanes = [...B.WINDS, ...B.EXITS.flat()].map(({ at: [c, r], d, n }) => {
     const tex = chevron.clone(); tex.needsUpdate = true; tex.repeat.set(1, n);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(CELL * 0.8, CELL * n).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.55, depthWrite: false, color: '#bfe6f5' }));
     const DC = [0, 1, 0, -1][d], DR = [1, 0, -1, 0][d], mid = v3(c + DC * (n - 1) / 2, r + DR * (n - 1) / 2, 0.06);
