@@ -16,3 +16,4 @@ branch: claude/dreamy-einstein-6b1aaa
 - 15 Nov: added.
 - 15 Nov: for you to review: straight into step one, Show me something else (T) beside it, every trick: what's wrong, the move, what it did; on its branch, not merged
 - 15 Nov: merged into main, to try locally at den.html?at=helium&as=dachimpy (not pushed)
+- 15 Nov: the user, playing the wolf den (15 Nov): 'that why I was struggling with where to bring the Helium's lessons ... I love how she's got the lessons at the bottom, and it's a much better kind of looking menu there ... how do we get that kind of structure into the 3D in a quick, accessible way?' Multibella's lessons menu along the bottom is the model (mechanics-lesson)

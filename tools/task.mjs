@@ -7,9 +7,9 @@
 //   node tools/task.mjs show <id>                         one card in full (its brief, to start a session from)
 //   node tools/task.mjs add <stream> "<title>" [--status st] [--asked "the user's words"] [--done "what done looks like"]
 //   node tools/task.mjs set <id> <status> [--note "a line for its log"] [--link ?at=..] [--shot path] [--session id] [--branch b]
-//   node tools/task.mjs note <id> "<a line for its log>"
+//   node tools/task.mjs note <id> "<a line for its log>" [--link ?at=..]
 //   node tools/task.mjs tidy <id> "<its new text>"           its text rewritten (made concise), its log kept
-//   node tools/task.mjs stream <stream> "<where it got to>" [--name "Its name"] [--hue 0-360]
+//   node tools/task.mjs stream <stream> ["<where it got to>"] [--name "Its name"] [--hue 0-360] [--link ?at=..]
 //   node tools/task.mjs move <id> <stream>                into another stream
 //   node tools/task.mjs board                             draws tasks/board.html (add, set, note and stream draw it too)
 //   node tools/task.mjs serve [--port n] [--pick-up no]   the board at http://localhost:8643/, cards dragged between
@@ -63,7 +63,7 @@ export function load(dir = TASKS) {
     if (!statSync(sd).isDirectory()) continue;
     const sf = join(sd, '_stream.md');
     const { meta, body } = existsSync(sf) ? parse(readFileSync(sf, 'utf8')) : { meta: {}, body: '' };
-    streams.push({ id: s, name: meta.name || s, hue: Number(meta.hue ?? 30), where: body.trim(), file: sf });
+    streams.push({ id: s, name: meta.name || s, hue: Number(meta.hue ?? 30), link: meta.link, where: body.trim(), file: sf });
     for (const f of readdirSync(sd).sort()) {
       if (!f.endsWith('.md') || f.startsWith('_')) continue;
       const file = join(sd, f), { meta: m, body: b } = parse(readFileSync(file, 'utf8'));
@@ -106,12 +106,22 @@ function md(text) {
   return out.join('');
 }
 
+/** A card's Local and Live links, each in a new tab (the user, 15 Nov: "link to, like, live or local to test something?
+ *  Open in a new tab"): the card's own link, or its stream's place when it has none; a whole address as it is. */
+export function goLinks(own, streams) {
+  const to = own || streams;
+  if (!to) return '';
+  const a = (label, href, key) => `<a class="go${own ? '' : ' stream'}" data-go="${key}" href="${esc(href)}" target="_blank" rel="noopener" title="${label}, in a new tab (${key === 'local' ? 'L' : 'Shift+L'})${own ? '' : ": the stream's place"}">${label}</a>`;
+  if (/^https?:/.test(to)) return a(to.startsWith(LOCAL) ? 'Local' : 'Open', to, to.startsWith(LOCAL) ? 'local' : 'live');
+  return a('Local', LOCAL + to, 'local') + a('Live', LIVE + to, 'live');
+}
+
 /** One card on the board: its stream, title, dates and links; everything else (what was asked, its log) kept in
  *  `.full`, read in the card's panel when it's opened. */
 export function cardHtml(c, streams) {
   const s = streams.find((x) => x.id === c.stream);
-  const m = c.meta, link = m.link ? `<a class="go" href="${esc(LOCAL + m.link)}">Local</a><a class="go" href="${esc(LIVE + m.link)}">Live</a>` : '';
-  const shot = m.shot ? `<a class="shot" href="${esc('../' + m.shot)}"><img src="${esc('../' + m.shot)}" alt="" loading="lazy"></a>` : '';
+  const m = c.meta, link = goLinks(m.link, s?.link);
+  const shot = m.shot ? `<a class="shot" href="${esc('../' + m.shot)}" target="_blank" rel="noopener"><img src="${esc('../' + m.shot)}" alt="" loading="lazy"></a>` : '';
   const who = [m.session ? `session <code>${esc(m.session)}</code>` : '', m.branch ? `branch <code>${esc(m.branch)}</code>` : ''].filter(Boolean).join(' · ');
   return `<article class="card" draggable="true" tabindex="0" data-id="${esc(c.id)}" data-stream="${esc(c.stream)}" data-status="${esc(m.status || 'asked')}" style="--h:${s?.hue ?? 30}">
   ${shot}<div class="tag">${esc(s?.name ?? c.stream)}</div>
@@ -169,6 +179,7 @@ export function board({ streams, cards }, when = new Date()) {
   .tag { font-size: 11.5px; color: hsl(var(--h) 60% 72%); }
   .when { font-size: 12px; color: var(--faint); }
   .links { display: flex; gap: 6px; margin-top: 6px; }
+  .go.stream { opacity: .75; }
   .go { background: var(--accent); color: var(--on-accent); text-decoration: none; border-radius: 4px; padding: 2px 8px; font-size: 12.5px; font-weight: 600; }
   .shot img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; display: block; margin-bottom: 6px; }
   .card.busy::after { content: 'Updating...'; display: block; margin-top: 4px; font-size: 12px; color: var(--accent-text); }
@@ -244,7 +255,7 @@ export function board({ streams, cards }, when = new Date()) {
   <form class="update"><textarea name="text" placeholder="Say or type what's changed: &quot;that works now&quot;, &quot;still slow when you turn&quot;, &quot;split the guns off into their own card&quot;..."></textarea>
     <canvas class="wave" data-for="card" width="240" height="36" hidden></canvas><span class="heard" data-for="card" hidden></span><button type="button" class="mic" data-for="card" hidden title="Dictate, on M (say &quot;next&quot; to send and go on)">Mic (M)</button><button type="button" class="toinbox" title="Not about this card: what's in the box to the inbox instead (say &quot;inbox&quot;)">To the inbox</button><span class="gap"></span>
     <button type="submit" class="send" name="stay">Send</button><button type="submit" class="send" name="on">Send and next</button>
-    <span class="hint">Keys, working while the mic's on: M the mic, N send and next, &larr; &rarr; go through, 1-${Object.keys(STATUSES).length} move it, I to the inbox, Esc close. To type instead, click in the box (Esc to leave it; Ctrl+Enter sends). What you send is logged on the card and a headless Claude acts on it (moves it, splits it, notes it).</span></form>
+    <span class="hint">Keys, working while the mic's on: M the mic, N send and next, &larr; &rarr; go through, 1-${Object.keys(STATUSES).length} move it, I to the inbox, L try it locally (Shift+L live), Esc close. To type instead, click in the box (Esc to leave it; Ctrl+Enter sends). What you send is logged on the card and a headless Claude acts on it (moves it, splits it, notes it).</span></form>
 </aside>
 <script src="../tools/board-client.js"></script>
 </body></html>
@@ -532,8 +543,9 @@ function main(argv) {
     const { meta } = existsSync(s.file) ? parse(readFileSync(s.file, 'utf8')) : { meta: { name: s.id, hue: 30 } };
     if (opt.name) meta.name = opt.name;
     if (opt.hue) meta.hue = Number(opt.hue);
-    writeFileSync(s.file, format(meta, `\n${pos[1]} (${today()})\n`));
-    console.log(`${s.id}: ${pos[1]}`);
+    if (opt.link) meta.link = opt.link;
+    writeFileSync(s.file, format(meta, pos[1] ? `\n${pos[1]} (${today()})\n` : `\n${s.where}\n`));
+    console.log(`${s.id}: ${pos[1] ?? s.where}${opt.link ? ` (its place: ${opt.link})` : ''}`);
   } else throw new Error(`Unknown command "${cmd}" (list, show, add, set, note, tidy, move, stream, board, serve)`);
   drawBoard();
 }
