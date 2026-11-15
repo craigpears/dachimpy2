@@ -1,6 +1,6 @@
 ---
 title: Tzz's huge Vegas, on an island of her own
-status: idea
+status: done
 asked: 10 Nov
 updated: 15 Nov
 ---
@@ -89,3 +89,5 @@ exactly; the real game's own seed can't be had, so her board is rebuilt in our d
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "is there actually anything for action on this or we'd done this like this is your giant wall of text I think that's a that's just looks like early thinking what which has largely been actioned"
+- 15 Nov: done: built: Tzz's island, balloon lesson, her board (balloon-isle.js, den-tzz.ts, balloons.ts); early thinking, nothing left to do

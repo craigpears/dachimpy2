@@ -1,6 +1,6 @@
 ---
 title: A sloop race: an S-shaped course, a puzzle shortcut at every bend
-status: idea
+status: done
 asked: 11 Nov
 updated: 15 Nov
 ---
@@ -193,3 +193,7 @@ the den already has, before the Navigation puzzle and the door.)
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "is this in a different category of thing than ideas is this more notes than I I don't know what ideas are left"
+- 15 Nov: done: split up: the course, shortcuts, rivals and shooting are built (RACE.md); live ideas now their own cards: a-rigging-passage-trimming-her-through-shifting-, the-evil-constellation-dealt-somewhere-in-the-wo, balancing-from-what-real-players-do-and-replays-; more shortcut kinds are in RACE.md; answer: it was mostly notes
+- 15 Nov: you said: "is there any is this more notes really than ideas at this point is there anything in here that hasn't been actioned or isn't captured somewhere else"
+- 15 Nov: answer to 'anything not captured?': no. Course, shortcuts, rivals, shooting and the shot budget are built and in RACE.md; the three live ideas (rigging passage, evil constellation, balancing from real players/replays) are their own cards. Nothing left here but notes; stays done.
