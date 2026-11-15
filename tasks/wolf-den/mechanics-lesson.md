@@ -1,6 +1,6 @@
 ---
 title: Multibella demonstrating the mechanics
-status: doing
+status: playtest
 asked: 15 Nov
 updated: 15 Nov
 link: den.html?at=wolfden&as=dachimpy
@@ -22,3 +22,5 @@ branch: claude/confident-morse-f1ac9a
 - 15 Nov: asked: played by you: 'when it says next, like, surely that should be a space, or there's nothing really inviting'. Her lessons menu at the bottom 'a much better kind of looking menu ... that menu at the bottom that pops up quickly would be brilliant'; 'Multibella should be less controls'. No introductory cutscene: 'I thought she was supposed to be ... turning the table and doing all of the things, like just like spinning it ... stop the werewolves coming' (asked 14 Nov, idea-dignitys-tutorial-four-tier-duty-navigation-in-t: her spinning the wheel frantically as the moon wanes)
 - 15 Nov: not what was meant: the tutorial was to walk through Umami's replay (the screenshots of 14 Nov, notes/wolf-den/): Single +3, a Double +6 turning the top target multicoloured, then Triple Constellation +213 with four multicoloured targets. Umami's evil constellation isn't the lesson: 'They did keep the umami thing just as like a fun one ... I'd love for him to go after try and figure out how to solve that. But ... that's not the tutorial thing I was intending'
 - 15 Nov: being done: being reworked in its own session: Umami's replay as How it works, Space for Next, the bottom menu the way in, her opening cutscene
+- 15 Nov: reworked (session 5c782c03, branch claude/confident-morse-f1ac9a): How it works walks Umami's replay, Single +3, Double +6 (top target wild), Triple Constellation +213, four wild targets, a beat at a time on Space; Next is Space; her menu pops up as you sit; in a lesson only Next, Lessons, Stop; her opening cutscene spinning the wheel as the moon wanes; the evil constellation kept as 'A fun one'. Tests and smoke pass; not looked at in 3D with screenshots
+- 15 Nov: for you to playtest
