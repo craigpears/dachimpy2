@@ -213,13 +213,14 @@ export function board({ streams, cards }, when = new Date()) {
   /* A card open: the board moves over beside it, still scrolled and used, the inbox's box too. */
   @media (min-width: 900px) { .panel { width: min(560px, 45vw); } body.reading { padding-right: min(560px, 45vw); } }
   .update .hint { flex-basis: 100%; color: var(--faint); font-size: 12px; }
+  .heard { flex-basis: 100%; color: var(--accent-text); font-size: 13px; font-style: italic; }
   .update .send { padding: 4px 12px; font-size: 13px; }
   .update .gap { flex: 1; }
   @media (max-width: 640px) { .cols { flex-direction: column; } .col { flex: none; width: 100%; box-sizing: border-box; } }
 </style></head>
 <body data-port="${PORT}">
 <header><h1>Task board</h1><span class="made">Drawn ${esc(today(when))}, ${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')} from tasks/ by tools/task.mjs. Click a card to open it.</span></header>
-<form class="drop"><textarea name="text" rows="2" placeholder="Drop something in: a fix, an idea, a thought. Sorted onto the board for you."></textarea><button type="button" class="mic" data-for="inbox" hidden title="Dictate into the inbox, on M (say &quot;drop it in&quot; to send it)">Mic (M)</button><button>Drop it in</button><span class="sorting" hidden></span></form>
+<form class="drop"><textarea name="text" rows="2" placeholder="Drop something in: a fix, an idea, a thought. Sorted onto the board for you."></textarea><button type="button" class="mic" data-for="inbox" hidden title="Dictate into the inbox, on M (say &quot;drop it in&quot; to send it)">Mic (M)</button><button>Drop it in</button><span class="heard" data-for="inbox" hidden></span><span class="sorting" hidden></span></form>
 <div class="chips"><button class="chip on" data-stream="" style="--h:30">Every stream</button>${chips}</div>
 <details class="where"><summary>Where each stream's got to</summary><div class="streams">${notes}</div></details>
 <main class="cols">${cols}</main>
@@ -228,7 +229,7 @@ export function board({ streams, cards }, when = new Date()) {
   <div class="sts">${keys}</div>
   <div class="read"></div>
   <form class="update"><textarea name="text" placeholder="Say or type what's changed: &quot;that works now&quot;, &quot;still slow when you turn&quot;, &quot;split the guns off into their own card&quot;..."></textarea>
-    <button type="button" class="mic" data-for="card" hidden title="Dictate, on M (say &quot;next&quot; to send and go on)">Mic (M)</button><button type="button" class="toinbox" title="Not about this card: what's in the box to the inbox instead (say &quot;inbox&quot;)">To the inbox</button><span class="gap"></span>
+    <span class="heard" data-for="card" hidden></span><button type="button" class="mic" data-for="card" hidden title="Dictate, on M (say &quot;next&quot; to send and go on)">Mic (M)</button><button type="button" class="toinbox" title="Not about this card: what's in the box to the inbox instead (say &quot;inbox&quot;)">To the inbox</button><span class="gap"></span>
     <button type="submit" class="send" name="stay">Send</button><button type="submit" class="send" name="on">Send and next</button>
     <span class="hint">Keys, working while the mic's on: M the mic, N send and next, &larr; &rarr; go through, 1-${Object.keys(STATUSES).length} move it, I to the inbox, Esc close. To type instead, click in the box (Esc to leave it; Ctrl+Enter sends). What you send is logged on the card and a headless Claude acts on it (moves it, splits it, notes it).</span></form>
 </aside>

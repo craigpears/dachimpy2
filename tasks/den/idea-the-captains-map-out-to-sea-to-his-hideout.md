@@ -112,3 +112,4 @@ barracks, say) lets you build "a little army up later".
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "just really old and outdated now I can't see anything here that's really too relevant with just moved on from all of this"

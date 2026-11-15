@@ -37,3 +37,4 @@ The user's brain-dump (7 Nov 2026), for much later:
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "I think we've really moved on from most of this I don't know if there's anything left in here other than that the rumble as boxes maybe as a separate one as well filling out some of the den maybe but most of this is obsolete or dead. Houses seems relevant, bilging is well covered already, building puzzle yes on the wishlist, quests for looks could be interesting as an adventure idea (special category that needs adding so we can see all the adventure ideas)"

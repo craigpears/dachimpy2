@@ -196,24 +196,44 @@
     const on = !!rec && m.dataset.for === (into === box ? 'card' : 'inbox');
     m.classList.toggle('on', on); m.textContent = on ? 'Mic on (M)' : 'Mic (M)';
   });
-  const micOff = () => { if (rec) { rec.onend = null; rec.stop(); } rec = null; into = null; showMic(); };
+  // The browser's listening stops by itself after a pause (Edge's after every phrase), and what it had half heard was
+  // lost with it (the user, 15 Nov: "it cuts off insanely quickly"). So what it's hearing is shown as it's said, kept
+  // if it stops before it's sure, and it's started again at once.
+  let heard = ''; // said, not yet settled
+  const showHeard = () => $$('.heard').forEach((h) => {
+    const mine = !!rec && h.dataset.for === (into === box ? 'card' : 'inbox');
+    h.hidden = !mine; h.textContent = heard ? heard + ' ...' : 'Listening...';
+  });
+  function said(text) {
+    const words = text.trim(), word = words.toLowerCase().replace(/[.!?]$/, '');
+    if (!words || !into) return;
+    if (into === box && (word === 'next' || word === 'next card')) return send(true);
+    if (into === box && (word === 'back' || word === 'previous')) return step(-1);
+    if (into === box && word === 'inbox') return box.value.trim() && dropIt(box);
+    if (into === drop.text && (word === 'drop it in' || word === 'send')) return dropIt();
+    into.value = (into.value ? into.value.replace(/\s*$/, ' ') : '') + words;
+    into.scrollTop = into.scrollHeight;
+  }
+  const keepHeard = () => { if (heard) { said(heard); heard = ''; } };
+  const micOff = () => {
+    keepHeard();
+    if (rec) { rec.onend = null; rec.onresult = null; rec.abort(); }
+    rec = null; into = null; showMic(); showHeard();
+  };
   function toggleMic(target) {
     if (rec && into === target) return micOff();
+    keepHeard(); // anything half heard goes in the box it was said for
     into = target; showMic();
     if (document.activeElement?.matches?.('textarea')) document.activeElement.blur(); // the mic writes; the keys stay keys
-    if (rec) return; // already listening: now into the other box
-    rec = new Speech(); rec.continuous = true; rec.interimResults = false; rec.lang = 'en-GB';
+    if (rec) return showHeard(); // already listening: now into the other box
+    rec = new Speech(); rec.continuous = true; rec.interimResults = true; rec.lang = 'en-GB';
     rec.onresult = (e) => {
+      let half = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (!e.results[i].isFinal) continue;
-        const said = e.results[i][0].transcript.trim(), word = said.toLowerCase().replace(/[.!?]$/, '');
-        if (into === box && (word === 'next' || word === 'next card')) { send(true); continue; }
-        if (into === box && (word === 'back' || word === 'previous')) { step(-1); continue; }
-        if (into === box && word === 'inbox') { if (box.value.trim()) dropIt(box); continue; }
-        if (into === drop.text && (word === 'drop it in' || word === 'send')) { dropIt(); continue; }
-        into.value = (into.value ? into.value.replace(/\s*$/, ' ') : '') + said;
-        into.scrollTop = into.scrollHeight;
+        if (e.results[i].isFinal) said(e.results[i][0].transcript);
+        else half += e.results[i][0].transcript;
       }
+      heard = half.trim(); showHeard();
     };
     rec.onerror = (e) => {
       if (e.error === 'no-speech' || e.error === 'aborted') return; // a quiet spell: it carries on
@@ -221,8 +241,9 @@
       tell(e.error === 'not-allowed' || e.error === 'service-not-allowed'
         ? "The mic isn't allowed here: allow it in the browser's address bar, or use Win+H." : 'The mic stopped: ' + e.error);
     };
-    rec.onend = () => { try { rec?.start(); } catch (e) {} }; // it stops by itself after a pause; keep it on
-    rec.start(); showMic();
+    const again = () => { try { rec?.start(); } catch (e) { setTimeout(() => { try { rec?.start(); } catch (e2) {} }, 250); } };
+    rec.onend = () => { keepHeard(); showHeard(); again(); }; // it stopped by itself: keep what it heard, listen again
+    rec.start(); showMic(); showHeard();
   }
   if (Speech) mics.forEach((m) => {
     m.hidden = false;
