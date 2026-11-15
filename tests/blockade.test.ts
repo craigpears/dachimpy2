@@ -701,3 +701,24 @@ describe('playing for the points (15 Nov: "people aren\'t really paying attentio
     expect(bot.goal?.kind === 'ram' && bot.goal.on).toBe(f.id);
   });
 });
+
+describe('playing a brig (15 Nov: "Are they expected to go on autopilot and you control one of them? ... you can choose which one you\'re controlling, and the others go on autopilot")', () => {
+  it('a brig\'s helm moves between her and each of her craft out on the sea, her first; anyone else\'s is hers alone', () => {
+    const b = new Blockade(), br = brig(b), f = frigate(b);
+    expect(b.fleet(br.id)).toEqual([br.id]);
+    expect(b.fleet(f.id)).toEqual([f.id]);
+    const ids = b.launch(br.id);
+    expect(ids.length).toBeGreaterThan(1);
+    expect(b.fleet(br.id)).toEqual([br.id, ...ids]);
+    // (from one of her craft, the same: her brig first)
+    expect(b.fleet(ids[1])).toEqual([br.id, ...ids]);
+  });
+  it('a craft gone home is off the list', () => {
+    const b = new Blockade(), br = brig(b);
+    const ids = b.launch(br.id);
+    expect(b.weighAnchor(br.id)).toBeTruthy();
+    for (let t = 0; t < B.LAUNCH.WEIGH + 1; t += 0.1) b.tick(0.1);
+    expect(b.fleet(br.id)).toEqual([br.id]);
+    expect(ids.every((id) => b.ship(id).away > 0)).toBe(true);
+  });
+});

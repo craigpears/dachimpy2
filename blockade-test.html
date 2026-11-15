@@ -74,7 +74,7 @@
 <body>
 <div class="ui">
   <h1>Blockade</h1>
-  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants. The best are in the fort in the middle: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. Sloops hide in the lagoons, inside their reefs where no frigate can follow, and dart out; when the frigates get into the heart, the winds out of it carry the sloops away to the lagoons. Each side's war brig launches her craft at the frigates: Tidecaller's turtles come at them from astern and ram, Grave Lantern's phantom sloops, slow but never to be hit, dart at anything slow or sat still. Shoals round the lagoons scrape a frigate's bottom. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops.</p>
+  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants. The best are in the fort in the middle: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. Sloops hide in the lagoons, inside their reefs where no frigate can follow, and dart out; when the frigates get into the heart, the winds out of it carry the sloops away to the lagoons. Each side's war brig launches her craft at the frigates: Tidecaller's turtles come at them from astern and ram, Grave Lantern's phantom sloops, slow but never to be hit, dart at anything slow or sat still. Shoals round the lagoons scrape a frigate's bottom. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops; in a brig, L launches her craft, Tab takes the helm of one of them (the rest on autopilot) and G calls them home.</p>
   <div class="score"><span class="gold" id="sg">0</span><span id="clock">5:00</span><span class="crimson" id="sc">0</span></div>
   <div class="bar" title="This blockade turn: scored when it fills"><i id="turn"></i></div>
   <div class="buoys" id="buoys"></div>
@@ -87,6 +87,11 @@
       <button data-key="x" title="Stop (X)">Stop</button>
       <button data-key="q" class="gun" id="gunL" title="Port broadside (Q)">◀ Fire<i></i></button>
       <button data-key="e" class="gun" id="gunR" title="Starboard broadside (E)">Fire ▶<i></i></button>
+    </div>
+    <div class="row pad" id="brigKeys" hidden>
+      <button data-key="l" title="Drop anchor and launch her craft (L)">Launch</button>
+      <button data-key="tab" title="Take the helm of the next of her craft out, or her own (Tab)">Next helm</button>
+      <button data-key="g" title="Weigh anchor, calling her craft home (G)">Weigh anchor</button>
     </div>
   </div>
   <div class="row"><button id="watch">Spectate</button><button id="director" title="The camera follows the action">Director</button><button id="whole">Whole board</button><button id="again">New round</button></div>
@@ -139,7 +144,7 @@ const brawling = start < 0 && params.get('watch') === 'brawl';
 // you need to be able to give each ship a target or directive ... drawing up those sorts of plans, and then you watch
 // the things unfold and can ... update and tweak things or take over"). The round waits for your plan.
 const admiral = start < 0 && !brawling && params.has('admiral');
-const bk = blockadeSea({ you: start, say, brawl: brawling, admiral: admiral ? 'gold' : null });
+const bk = blockadeSea({ you: start, say, brawl: brawling, admiral: admiral ? 'gold' : null, sailed: (id) => sail(id) });
 
 const FOLLOW = { yaw: 0.35, pitch: 0.55, dist: 46 }, WHOLE = { yaw: 0, pitch: 1.05, dist: 205 };
 const cam = { yaw: 0.35, pitch: 0, dist: 0, at: new THREE.Vector3(), follow: true, director: start < 0 && !brawling && !admiral, watching: 0, cut: 0, cinema: brawling };
@@ -178,7 +183,8 @@ const sail = (id) => {
   $('watch').classList.toggle('on', id < 0);
   if (id >= 0) { cam.director = false; cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on'); say(`You're sailing ${bk.b.ship(id).name}`); }
   $('director').classList.toggle('on', cam.director);
-  params.delete('ship'); if (id >= 0) params.set('ship', id);
+  // (one of a brig's craft: the brig in the address, since her craft start aboard her)
+  params.delete('ship'); if (id >= 0) params.set('ship', bk.b.ship(id).craft?.by ?? id);
   history.replaceState(null, '', params.toString() ? '?' + params : location.pathname);
 };
 sail(start);
@@ -204,6 +210,8 @@ const hud = () => {
   $('clock').textContent = s.over ? (s.leader ? `${s.leader === 'gold' ? 'Dachimpy\'s' : 'Dalnoth\'s'} win` : 'A draw') : `${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`;
   $('turn').style.width = `${(s.turn / 10) * 100}%`;
   if (s.me) {
+    // (a brig's, or one of her craft's: launching, the next helm, weighing anchor)
+    $('brigKeys').hidden = !s.me.brig;
     for (const side of ['L', 'R']) { const b = $('gun' + side); b.classList.toggle('loading', s.me.load[side] > 0); b.querySelector('i').style.width = `${(1 - s.me.load[side]) * 100}%`; }
     $('toks').innerHTML = Array.from({ length: s.me.h.tokens }, (_, i) => `<div class="tok${i === s.me.lit ? ' lit' : ''}${s.me.lit < 0 && i < s.me.mine ? ' mine' : ''}">${s.me.moves[i] ? TOK[s.me.moves[i]] : '·'}</div>`).join('');
   }

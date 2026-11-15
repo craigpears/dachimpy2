@@ -53,9 +53,11 @@ const label = (text, col) => {
     `admiral`, a side ('gold' or 'crimson') you command (src/blockade-orders.ts): the round waits while you plan
     (`start()` sets it going), each of her ships given an order (`order`, `orderAt` a click on the board), a line drawn
     from each to what she's to do.
+    `sailed(id)`, told when your helm moves to another ship of yours by itself (a craft you were steering gone home:
+    back to her brig).
     Returns { b (the rules), bots, g, duel (the brawl's two ids, or null), you(), sail(id), tick(dt), click(point),
     key(k), focus(), hud() }. */
-export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = null } = {}) {
+export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = null, sailed = () => {} } = {}) {
   const b = new Blockade(), duel = brawl ? b.brawl() : null, bots = new Bots(b, [], Math.random, duel), g = new THREE.Group();
   scene.add(g);
   let me = you, clock = 0, planning = !!admiral, picked = -1;
@@ -300,6 +302,8 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
       // (planning: the round waits, everything drawn where it is)
       if (planning) dt = 0;
       clock += dt;
+      // (a craft you were steering gone home, faded or sunk: back at her brig's helm)
+      if (me >= 0 && b.ship(me).craft && b.ship(me).away > 0) { const was = b.ship(me); me = was.craft.by; say(`${was.name}'s gone home: you're back at ${b.ship(me).name}'s helm`); sailed(me); }
       if (!planning) bots.tick(b, dt, me >= 0 ? [me] : []);
       // (the bots' broadsides: fired through the rules, seen here as they fly)
       const ev = b.tick(dt);
@@ -451,6 +455,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
       if (me < 0) return false;
       const s = b.ship(me), m = { w: 'F', arrowup: 'F', a: 'L', arrowleft: 'L', d: 'R', arrowright: 'R' }[k];
       if (m) { if (!b.put(me, m)) say(b.anchored(s) ? 'She\'s at anchor while her craft are out: G to weigh it' : 'That\'s a turn\'s worth put in already', true); return true; }
+      if ((k === 'q' || k === 'e') && s.craft?.kind === 'ram') { say('A turtle has no guns: steer her beside a ship lying still and she rams it', true); return true; }
       if (k === 'q' || k === 'e') {
         const side = k === 'q' ? 'L' : 'R';
         if (s.dmg.out) say('She\'s dead in the water: her crew are rebuilding her', true);
@@ -458,8 +463,25 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         return true;
       }
       if (k === 's' || k === 'backspace') { s.helm.unput(); return true; }
+      // (a brig's: L launches her craft, dropping anchor; Tab moves your helm between her and each of them out, the
+      // rest on autopilot (their bots); the user, 15 Nov)
+      const brig = s.craft ? b.ship(s.craft.by) : s;
+      if (k === 'l' && brig.kind === 'brig') {
+        if (b.canLaunch(brig)) { b.launch(brig.id); say(`${brig.name} drops anchor and launches her craft: Tab to take one's helm, G to call them home`); }
+        else if (b.craftOf(brig).some((x) => x.away <= 0)) say('Her craft are out already: Tab to take the helm of one', true);
+        else if (brig.dmg.out) say('Dead in the water: her crew are rebuilding her', true);
+        else say(`Her craft are being readied: ready in ${Math.ceil(B.LAUNCH.EVERY - (b.clock - brig.launched))}s`, true);
+        return true;
+      }
+      if (k === 'tab' && brig.kind === 'brig') {
+        const f = b.fleet(me);
+        if (f.length < 2) { say('No craft out to steer: L launches them', true); return true; }
+        me = f[(f.indexOf(me) + 1) % f.length];
+        sailed(me);
+        return true;
+      }
       // (a brig at anchor, her craft out: G weighs it, calling them home)
-      if (k === 'g' && s.kind === 'brig') { say(b.weighAnchor(me) ? `Weighing anchor: ${s.name}'s craft called home` : b.anchored(s) ? 'She\'s weighing anchor already' : 'She\'s not at anchor', !b.anchored(s)); return true; }
+      if (k === 'g' && brig.kind === 'brig') { say(b.weighAnchor(brig.id) ? `Weighing anchor: ${brig.name}'s craft called home` : b.anchored(brig) ? 'She\'s weighing anchor already' : 'She\'s not at anchor', !b.anchored(brig)); return true; }
       if (k === 'x') { s.helm.stop(); return true; }
       return false;
     },
@@ -505,7 +527,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         buoys: B.BUOYS.map((x) => ({ pennants: x.pennants, hold: b.hold(x), heart: x.at[0] >= B.HEART.c0 && x.at[0] <= B.HEART.c1 && x.at[1] >= B.HEART.r0 && x.at[1] <= B.HEART.r1 })),
         gates: b.gates.map((x) => ({ towers: x.towers.map((t) => t.hp), open: x.open() })),
         ships: b.ships.map((x) => ({ id: x.id, name: x.name, team: x.team, kind: x.kind, craft: x.craft?.kind ?? null, order: admiral === x.team ? orderText(b, bots.orderOf(x.id)) : null, share: x.away > 0 ? 0 : x.dmg.share(), water: x.away > 0 ? 0 : x.dmg.water, out: x.dmg.out || x.away > 0, away: x.away > 0, doing: x.id === me ? (x.away > 0 ? `yours, sunk: back in ${Math.ceil(x.away)}s` : 'yours') : bots.doing(b, x.id) })),
-        me: s && { name: s.name, team: s.team, h: s.h, moves: h.slot >= 0 ? h.turn : h.next(), lit: h.lit(), mine: h.mine.length, load: { L: s.guns.wait.L / s.h.reload, R: s.guns.wait.R / s.h.reload }, out: s.dmg.out },
+        me: s && { name: s.name, team: s.team, h: s.h, brig: (s.craft ? b.ship(s.craft.by) : s).kind === 'brig', craft: s.craft?.kind ?? null, fleet: b.fleet(me).length, moves: h.slot >= 0 ? h.turn : h.next(), lit: h.lit(), mine: h.mine.length, load: { L: s.guns.wait.L / s.h.reload, R: s.guns.wait.R / s.h.reload }, out: s.dmg.out },
       };
     },
   };

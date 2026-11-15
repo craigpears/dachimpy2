@@ -326,6 +326,13 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   - Shelter: the lagoons are the brigs' sheltered place beside the heart, its winds their way in; no rocks added at
     the fort's corners (the user wondered; the lagoons already do it).
 
+- **Playing a brig** (15 Nov: "How are the controls going to work for launching 3 turtles and controlling 3 turtles?
+  Are they expected to go on autopilot and you control one of them? ... you can choose which one you're controlling,
+  and the others go on autopilot"): at a brig's helm, L launches her craft (she anchors), each on autopilot (its bot);
+  Tab moves your helm round her and each craft out (`Blockade.fleet`), the rest on autopilot; G weighs anchor, calling
+  them home; a craft you're steering gone home puts you back at her helm. Steering a turtle leaves the brig at anchor
+  undefended: the triangle's weakness, felt.
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of

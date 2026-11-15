@@ -536,6 +536,14 @@ export class Blockade {
 
   /** A brig's craft still aboard her. */
   craftOf(brig: Ship): Ship[] { return this.ships.filter((x) => x.craft?.by === brig.id); }
+  /** The ships whose helm you can move between (Tab), sailing ship `id`: a brig and her craft out on the sea, the brig
+      first; anyone else, herself alone (the user, 15 Nov: "Are they expected to go on autopilot and you control one of
+      them? ... you can choose which one you're controlling, and the others go on autopilot"). */
+  fleet(id: number): number[] {
+    const s = this.ship(id), brig = s.craft ? this.ship(s.craft.by) : s;
+    if (brig.kind !== 'brig') return [id];
+    return [brig.id, ...this.craftOf(brig).filter((x) => x.away <= 0).map((x) => x.id)];
+  }
   /** A brig at anchor: her craft out, or her anchor still coming up. She can't move; her guns still bear as she lies. */
   anchored(s: Ship): boolean { return s.kind === 'brig' && ((s.weigh ?? 0) > 0 || this.craftOf(s).some((x) => x.away <= 0)); }
   /** A brig weighs anchor: her craft called home at once (back aboard), and WEIGH seconds before she can move. */
