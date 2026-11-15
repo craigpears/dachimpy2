@@ -21,7 +21,10 @@ One `Tutorial` (src/tutorial.ts) for each puzzle, in a file of the puzzle's own 
 Every part has an `id`, a `title` (the guide's heading), a `line` (what it is, one line, plain words) and `shows`:
 what shows it, a board to look at (`board`) or moves played on a board (`moves`), as a key only the puzzle reads (one
 of its boards, a routine, a position a bot reached). Optional: `anchor` (its place on the read guide, if not its id),
-`tag` (the first target that needs it), `todo` (written ahead, not ready: left out everywhere till it's done).
+`tag` (the first target that needs it), `todo` (written ahead, not ready: left out everywhere till it's done), and
+`point` (15 Nov): what it's for on the board that shows it, in the teacher's voice, `before` (what's wrong or wanted
+there) and `after` (what the move achieved). The lesson says them round the move; the read guide shows the same two
+beside the part (RULES.md, "Every trick shown says what it's for").
 
 And the teacher's **opening choice**: a few `choices`, each a `label` (the button, in the player's words), `asks` (the
 teacher's question, in their voice), `then` (their line once it's picked) and `covers` (a section, a phase's id,
@@ -38,21 +41,32 @@ you can't get to.
   section; each opens its links, the tricks and scenarios in runs under their phases (those met any time first), the
   first target that needs one as a tag. The part you're reading is lit as you scroll (`spy`); jumps land below the
   bar. The page's own links (the lesson, how it's designed) at the bar's end.
-- **The animated lesson's opening choice** (`TutorialMenu`, drawn by `js/tutorial-choice.js`, a panel any teacher can
-  show, over a scene or a page): their question in their voice, an answer a button. Not a chatbot. Pick one, and they
-  say their line over that part's list: its phases, its scenarios, its single tricks, in tabs when there's more than
-  one (scenarios before tricks: "here are the scenario[s] ... Are you wanting the individual tricks?"). Pick one, and
-  the teacher's lesson plays it on a real board, from its `shows`. Keys: arrows (or W A S D) to move, Enter or Space
-  to pick, a digit for its row, Esc back a level, then shut; every other key goes through to the game. Touch: tap.
-  A link can open it on a choice's list (`open`) or straight on a part (`play`), so the read guide's "show me this"
-  can land in the lesson at that part.
+- **The animated lesson starts showing straight away** (15 Nov; RULES.md, "The lesson is the quick way in"): the
+  lesson is "the get into it quick version", the read guide the one with the structure and the links. So no
+  question stands between arriving and a board moving ("I don't want to have to ask 3 questions to see something
+  happen"): the teacher plays their first part (Helium's step one) as soon as their opening's done.
+- **The choice, beside the lesson, never in front of it** (`TutorialMenu`, drawn by `js/tutorial-choice.js`, a panel
+  any teacher can show, over a scene or a page): a small "Show me something else (T)", a button and the key, all
+  through the lesson and at the puzzle after it, the teacher mentioning it once. Up, it's their question in their
+  voice, an answer a button. Not a chatbot. Pick one, and they say their line over that part's list: its phases, its
+  scenarios, its single tricks, in tabs when there's more than one (scenarios before tricks: "here are the
+  scenario[s] ... Are you wanting the individual tricks?"). Pick one, and the teacher plays it on a real board, from
+  its `shows`, in place of the rest of what they were showing; Esc, and the lesson goes on where it was. Keys:
+  arrows (or W A S D) to move, Enter or Space to pick, a digit for its row, Esc back a level, then shut; every other
+  key goes through to the game. Touch: tap. A link can open it on a choice's list (`open`) or straight on a part
+  (`play`), and the read guide's "show me this" lands in the lesson playing that part, no question.
+- **Every part played says what it's for** (15 Nov; RULES.md, "Every trick shown says what it's for"; "It just kind
+  of jumped into it without any context of what it was doing, what it was achieving, what the point was"): three
+  beats, the board laid and its `point.before` said, the pieces it's about ringed; the move; then `point.after`, the
+  pieces ringed again where the move left them. The read guide shows the same two lines beside the part.
 - One look at both on their own: the unlinked `tutorial-test.html` (Distilling's description, stand-in sections).
 
 ## 3. Distilling (Helium)
 
 The description is `src/distill-tutorial.ts` (14 Nov), drawn from what's there, so it can't drift
 (tests/tutorial.test.ts). Wired the same day: distilling-guide.html's sticky nav is drawn from it, Helium's lesson
-opens with its choice, and every part it links to on the guide has a "Show me this" into the lesson on that part.
+offers its choice (beside the lesson since 15 Nov, on T), and every part it links to on the guide has a "Show me
+this" into the lesson on that part.
 
 - **Basics:** the guide's rules (the pieces, the swap rule, the furnace, Crystal Clears and chains), setting a
   target, and "At Helium's still: a goal, and a plan for it".
@@ -67,6 +81,10 @@ opens with its choice, and every part it links to on the guide has a "Show me th
   the state and tactic the planner reads there; and the end game's gamble, `todo`.
 - **What shows each:** the guide's own picture of it (`distillShows`), so the lesson plays the board the read version
   draws.
+- **What each is for** (15 Nov): its point in Helium's words, src/lines/helium.ts's `POINT` by the part's id, about
+  the board the guide draws for it; where a line of theirs already says it, it's that line (a phase's `PHASE.first`,
+  a drag trick's `TEACH.why`, step one's `STEP_ONE`). The fill's board rings its gaps, the whites left in the column
+  being filled, on the guide and in the lesson alike.
 - **The choice**, in Helium's voice (src/lines/helium.ts, `TUTOR`): "Right. What are you after? The basics? Help with the early or mid
   game? Trying to get your CC higher?", and "The end game?" once it's ready. The basics (with the drag tricks); the
   early or mid game (the first three phases); a higher Crystal Clear (setting a target, storing, the leapfrog, the
@@ -77,19 +95,27 @@ opens with its choice, and every part it links to on the guide has a "Show me th
 - **The read guide:** `tutorialNav(DISTILL_TUTORIAL, ...)` in js/distill-guide-view.js, in place of the old table of
   contents; the rules' four articles have their ids (`b-pieces` ...), each trick tile its own (`d-climb` ...); a
   "Show me this" on each part's place, `den.html?at=helium&learn=<id>`.
-- **The lesson:** after Helium's opening, the choice (`tutorialChoice`, loaded when it's first asked); at the still,
-  "Teach me" (T) puts it again. What's picked is played by src/den-helium-tutor.ts's `tutorBeats`: the part's own
-  board laid (`distillShows`), Helium's line (`TUTOR.show`), the pieces it's about ringed, its drags played at
-  PACE_LESSON (or its column burned), then a fresh board yours. Step one is the scenario `stepOne`, played as their
-  lesson always was (`lessonPlan`). A link's `learn=` plays that part straight away instead of the opening.
+- **The lesson** (15 Nov): Helium's opening, then straight into step one (`lessonBeats`: the opening and
+  `lessonPlan`), no question. "Show me something else (T)" beside it (`TUTOR.button`, a button and T in the bar,
+  `TUTOR.barKey`), and Helium says so once as step one's done (`TUTOR.else`, its beat `else`); T opens the choice
+  (`tutorialChoice`, loaded when it's first asked) over the lesson, which holds while it's up; at the still, the same
+  button and key put it again. What's picked is played by src/den-helium-tutor.ts's `tutorBeats`, three beats: the
+  part's own board laid (`distillShows`) and its `point.before`, the pieces it's about ringed (the picture's rings,
+  else the pieces about to be dragged); its drags played at PACE_LESSON (or its column burned); its `point.after`,
+  the same pieces ringed where the move left them (`ringedAfter`, by src/den-helium.ts's `follow`); then a fresh
+  board yours (`TUTOR.after`). The bar says the part's title and line throughout (`noteFor`). Step one is the scenario
+  `stepOne`, played as their lesson always was (`lessonPlan`), its whites ringed again as they say why. A link's
+  `learn=` plays that part straight away instead of the opening (a part not there: step one).
+- **The read guide** shows each part's point beside its "Show me this" (js/distill-guide-view.js, `pointFor`), a line
+  the place already shows (a phase's quote, a trick's rule) not twice.
 
 ### What's left (after the late-game work merges)
 
 1. **src/distill-tutorial.ts:** the end game's phase, its tricks and the gamble's board from the late-game work (drop
    their `todo`s); any trick or technique it added (the test fails until each is in); check the scenario phases
    (P7 and P27 put in the fire's side).
-2. **STEPS grows a step a phase** (src/den-helium.ts): each phase's own beats in Helium's words, as step one has, in
-   place of the plain "{title}. Here, on a real board." the other parts get now.
+2. **STEPS grows a step a phase** (src/den-helium.ts): each phase's own beats in Helium's words, as step one has,
+   more than the one point before and after each part has now.
 
 ## 4. Sailing (Tzz), next, in the same shape
 
@@ -116,7 +142,7 @@ Like, how does it work? What are the differences to main [Duty Nav]? That should
 we'll probably do something more broadly at some point for the werewolves and how those work."
 
 So a variant's tutorial keeps the same shape but its **basics aren't left to the game's own tutorial**: they're
-taught, as what's different from the plain puzzle (here: the fourth, outer ring; wild slots and how a chain makes
+taught, as what's different from the plain puzzle (here: the fourth, outer ring; wild targets and how a chain makes
 them; the moon and turning werewolves back; why every constellation should end a chain), with plain Duty
 Navigation's rules taken as known. Probably a `differs` part (or the basics marked as a variant's) in
 `src/tutorial.ts`, and a choice for it ("What's different here?"). The werewolves themselves (the expedition, the
@@ -133,7 +159,7 @@ Sailing lesson shows its chain: the build and its plan marked on the board as it
 ### Built, a first version (14 Nov)
 
 `src/wolf-den-tutorial.ts`, in the one shape: its basics are what's different (four rings, the den's constellations,
-why chains pay, wild places, the moon), a phase (between the rumbles; the rumbles themselves `todo`), the tricks (the
+why chains pay, wild targets, the moon), a phase (between the rumbles; the rumbles themselves `todo`), the tricks (the
 Trapdoor, the Echo, a combo beside the wrong star, don't reset the board) and the scenario (the run in the
 screenshots). Every part's shown on one of the lesson's boards, `src/den-wolfden.ts`'s BOARDS, each tested to do
 what its part says. Multibella's opening choice (she teaches it on her island, 14 Nov; it was Dignity at first): what's different, the chains, a run. Her lesson lays the part's board
@@ -146,7 +172,7 @@ quick way as a choice beside the combo way.
 After the user played the basics: the deeper mechanics as steps of her lesson, each on a real board of its own and
 tested to do what it says (tests/den-wolfden.test.ts). A choice, "How it works" (her "Or how it all works underneath,
 a step at a time?"), covering `MECHANICS` in order: Cascades (board `cascade`: +3, +6, +9, lines only, its combo
-clears leaving wild slots), Four rings (`outer`: a star waiting in the fourth ring, carried round, dropped into its
+clears leaving wild targets), Four rings (`outer`: a star waiting in the fourth ring, carried round, dropped into its
 slot by a clear under it, then the next constellation going up), Why chains pay (`lastClear`: the cascade's third
 clear charts it, 375), and the scenario Umami's evil constellation (`evilTry`, then `evil`: a board's `then` lays the
 next). After each step N or Next plays the next (`nextStep`).

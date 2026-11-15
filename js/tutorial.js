@@ -93,6 +93,8 @@ export function problems(t) {
             out.push(`${part.id}: only tricks and scenarios have a phase`);
         if (part.phase !== undefined && !t.phases.some((p) => p.id === part.phase))
             out.push(`${part.id}: no phase ${part.phase}`);
+        if (part.point && (!part.point.before.trim() || !part.point.after.trim()))
+            out.push(`${part.id}: its point wants a line before the move and one after`);
     }
     const anchors = new Map();
     for (const { part } of all) {

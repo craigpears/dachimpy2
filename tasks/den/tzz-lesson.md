@@ -8,6 +8,10 @@ link: den.html?at=tzz&as=dachimpy
 
 On her island.
 
+## From TODO.md
+
+**Tzz's balloon lesson (11 Nov):** on her island (RULES.md, "Tzz's balloon lesson").
+
 ## Log
 
 - 15 Nov: put on the board.

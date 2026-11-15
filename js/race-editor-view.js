@@ -38,7 +38,7 @@ function chart(lay, problems) {
   add(`<rect x="-6" y="-6" width="${VW + 12}" height="${VH + 12}" rx="10" fill="url(#paper)"/>`);
 
   // Winds: a tinted square and an arrow the way each blows; snakes red, the rest blue.
-  const snake = new Set([...lay.SNAKES.LEFT, ...lay.SNAKES.TIGHT, ...lay.SNAKES.MID].map(([c, r]) => key(c, r)));
+  const snake = new Set(Object.values(lay.SNAKES).flat().map(([c, r]) => key(c, r))); // every snake the course has, whatever its name
   let blue = '', red = '';
   for (const [c, r, d] of [...lay.WINDS, ...lay.WHIRLS.WINDS]) {
     if (r <= R0) continue;

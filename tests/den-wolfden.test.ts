@@ -50,7 +50,7 @@ describe('the lesson\'s boards each do what their part says', () => {
 });
 
 // The deeper mechanics, each a step of her lesson on a real board (the user, 15 Nov, after playing the basics: the
-// cascade and the wild slot it makes, constellations and the new ring, filling one with a cascade's last clear, and
+// cascade and the wild target it makes, constellations and the new ring, filling one with a cascade's last clear, and
 // Umami's evil constellation).
 const kinds = (m: ReturnType<typeof playStep>) => m.stages.filter((s) => s.kind === 'line' || s.kind === 'constellation').map((s) => s.kind);
 describe('15 Nov: Multibella demonstrates the deeper mechanics, each on a real board', () => {
@@ -82,7 +82,7 @@ describe('15 Nov: Multibella demonstrates the deeper mechanics, each on a real b
     expect(next.filter((k) => k.ring === 0).every((k) => k.wild)).toBe(true);
   });
 
-  it('the last clear of a cascade charts it: Single, Double (its slot gone wild), Triple Constellation, 125 times three where a line is 3; two clears before it, so the next centre has a fourth wild slot', () => {
+  it('the last clear of a cascade charts it: Single, Double (its slot gone wild), Triple Constellation, 125 times three where a line is 3; two clears before it, so the next centre has a fourth wild target', () => {
     const { results: [m], game } = played('lastClear');
     expect(kinds(m)).toEqual(['line', 'line', 'constellation']);
     expect(m.stages.find((s) => s.kind === 'line' && s.wilded?.some((w) => w.ring === 2))).toBeTruthy();

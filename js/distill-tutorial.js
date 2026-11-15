@@ -18,7 +18,7 @@ import { BASIC_MOVES, PLAN, READ_EXAMPLES, RULES_OF_THUMB, firstLevel, phaseExam
 import { ROUTINES } from './distill-routines.js';
 import { PATH_LABEL, SWEEP_LABEL } from './distill-bots.js';
 import { DRAG_TRICKS } from './distill-teach.js';
-import { TEACH, TUTOR } from './lines/helium.js';
+import { POINT, TEACH, TUTOR } from './lines/helium.js';
 import { afterOpening } from './den-helium.js';
 // ---------------------------------------------------------------- the basics
 /* The basics are the rules of thumb and the basic moves, below (THUMB_PARTS, DRAG_PARTS, the leapfrog): no rules of
@@ -117,10 +117,19 @@ const CHOICES = [
     { id: 'higher', label: 'A higher Crystal Clear', ...L.higher, covers: ['block', 'chain'] },
     { id: 'end', label: 'The end game', ...L.end, covers: ['end'] },
 ];
+// ---------------------------------------------------------------- what each is for
+/** Each part with its point, in Helium's words (src/lines/helium.ts, POINT, by its id; RULES.md, "Every trick shown
+    says what it's for", 15 Nov): what's wrong or wanted on its board, and what its move did. Their lesson says them
+    round the move (src/den-helium-tutor.ts), and the read guide shows them beside the part (js/distill-guide-view.js),
+    so the two say the same. Every ready part has one (tests/den-helium-tutor.test.ts). */
+const pointed = (parts) => parts.map((p) => {
+    const point = POINT[p.id];
+    return point ? { ...p, point: { before: point.before, after: point.after } } : p;
+});
 /** Distilling's tutorial (see the top of this file). */
 export const DISTILL_TUTORIAL = {
     puzzle: 'Distilling', teacher: 'Helium',
-    basics: [...THUMB_PARTS, ...DRAG_PARTS, ...BASIC_PARTS], phases: PHASE_PARTS, tricks: TRICK_PARTS, scenarios: SCENARIO_PARTS, choices: CHOICES,
+    basics: pointed([...THUMB_PARTS, ...DRAG_PARTS, ...BASIC_PARTS]), phases: pointed(PHASE_PARTS), tricks: pointed(TRICK_PARTS), scenarios: pointed(SCENARIO_PARTS), choices: CHOICES,
     hello: L.opening,
     anchors: { basics: 'thumb', phases: 'phases', tricks: 'phases', scenarios: 'reading' },
 };

@@ -27,7 +27,7 @@ import { ROUTINES, clear, isJunk, junkTarget, playDrags } from './distill-routin
 import { routesInto } from './distill-path.js';
 import { PHASES, type Phase } from './distill-phase.js';
 import { teach, type Aim, type Shown, type TeachMove, type Trick } from './distill-teach.js';
-import { AFTER, BEST, GOAL, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, MAKE_WAY, PLAN, PRAISE, SPOT, STEP_ONE, TEACH, TELL, WATCH } from './lines/helium.js';
+import { AFTER, BEST, GOAL, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, MAKE_WAY, PLAN, PRAISE, SPOT, STEP_ONE, TEACH, TELL, TUTOR, WATCH } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 
 const H = LAY.HELIUM;
@@ -95,8 +95,8 @@ export const lessonGame = (seed = LESSON_SEED): Distilling => new Distilling(see
     (they talk). */
 export type LessonAct = { kind: 'drag'; x: number; y: number; ways: number[] } | { kind: 'drags'; drags: { x: number; y: number; ways: number[] }[] } | { kind: 'burn' } | { kind: 'bang' } | { kind: 'none' }
   /** A fresh board laid on their stand, these columns, as the beat begins (a part of their tutorial's own board:
-      src/den-helium-tutor.ts); their opening choice put to you, the lesson waiting on your answer. */
-  | { kind: 'lay'; cols: Board } | { kind: 'choose' };
+      src/den-helium-tutor.ts); a read guide's "show me this" (`learn=`), its part's beats played next. */
+  | { kind: 'lay'; cols: Board } | { kind: 'learn' };
 /** A beat of their lesson: their line (`says`, in their bubble; none, a moment with no words), what it shows
     in plain words (`note`, in the bar), and what they do. `mishap`: the column they burn has a white in it (the
     still goes bang as it goes into the furnace), `bang` how big. `marks`: the whites (and burnt whites) in
@@ -189,6 +189,30 @@ function clearFireSide(b: Board, most = 16): Drag[] {
   return drags;
 }
 
+/** Where pieces end up once some drags are played on board `cols`: each place in `at` followed swap by swap (a
+    dragged piece along its way, a piece it swaps with a place back). For ringing them again once a move's done. */
+export function follow(cols: Board, drags: readonly Drag[], at: readonly [number, number][]): [number, number][] {
+  const b = copy(cols);
+  let out = at.map(([x, y]) => [x, y] as [number, number]);
+  for (const d of drags) {
+    let here: [number, number] = [d.x, d.y];
+    for (const w of d.ways) {
+      const n = neighbourOn(b, here[0], here[1], w);
+      if (!n) break;
+      out = out.map(([x, y]) => (x === here[0] && y === here[1] ? [n[0], n[1]] : x === n[0] && y === n[1] ? [here[0], here[1]] : [x, y]));
+      [b[here[0]][here[1]], b[n[0]][n[1]]] = [b[n[0]][n[1]], b[here[0]][here[1]]];
+      here = n;
+    }
+  }
+  return out;
+}
+/** Step one's whites (those on the fire's side of `cols`) where its drags leave them: ringed again as they say why. */
+const whitesMoved = (cols: Board, drags: readonly Drag[]): [number, number][] => {
+  const ws: [number, number][] = [];
+  cols.forEach((col, x) => { if (fireSide(x)) col.forEach((p, y) => { if (p === WHITE || p === BURNT) ws.push([x, y]); }); });
+  return follow(cols, drags, ws);
+};
+
 /** The lesson's board just before their opening's bang: its first column, all junk, burned, the next (a white in
     it) at the fire. The read version (distilling-guide.html) draws it. */
 export const beforeBang = (): Distilling => { const g = lessonGame(); if (g.cols[COLS - 1].every(isJunk)) burnOn(g); return g; };
@@ -204,13 +228,15 @@ export const afterOpening = (): Distilling => { const g = lessonGame(); opening(
     bang, and they've no eyebrows left); then it's yours, step one the goal. */
 export function lessonPlan(game: Distilling = afterOpening()): Beat[] {
   const g = game, S = STEPS[0], marks = COLS - S.cols, beats: Beat[] = [];
-  const drags = clearFireSide(copy(g.cols));
+  const before = copy(g.cols), drags = clearFireSide(copy(g.cols));
   beats.push({ name: 'step', says: S.says, note: S.note, act: { kind: 'none' }, step: S.n, marks });
   if (drags.length) {
     for (const d of drags) { g.dragWays(d.x, d.y, d.ways); g.settle(1000); }
     beats.push({ name: 'clear', says: S.clear, note: S.note, act: { kind: 'drags', drags }, step: S.n, marks });
   }
-  beats.push({ name: 'why', says: S.why, note: S.note, act: { kind: 'none' }, step: S.n });
+  beats.push({ name: 'why', says: S.why, note: S.note, act: { kind: 'none' }, step: S.n, ...(drags.length ? { rings: whitesMoved(before, drags) } : {}) });
+  // (what else they can show you, said once, beside the lesson, never a question in front of it: the user, 15 Nov)
+  beats.push({ name: 'else', says: TUTOR.else, note: S.note, act: { kind: 'none' }, step: S.n });
   beats.push({ name: 'burner', ...LESSON.burner, act: { kind: 'none' }, step: S.n });
   beats.push({ name: 'yours', ...LESSON.yours, act: { kind: 'none' }, step: S.n });
   return beats;

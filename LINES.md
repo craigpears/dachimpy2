@@ -1030,7 +1030,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 
 - *says:* "Right. First things first. See all these whites on the right? Next in the fire, every one."
 - *clear:* "So out of the way they go. Left, away from the fire, swap by swap."
-- *why:* "Otherwise, silly mishaps. Bang. And I've already got no eyebrows."
+- *why:* "There: not a white left in those three. Otherwise, silly mishaps. Bang. And I've already got no eyebrows."
 - *note:* "Step 1: get every white (ringed) out of the three right-hand columns, the next to burn."
 
 ### Your first batch at the still done, the goal met, after their "done": the rest is from other pirates
@@ -1041,7 +1041,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 
 - "Any questions, send me a tell on Emerald. Any time."
 
-### Their opening choice, after their opening or on T at the still: their question (opening, then each choice's asks), their line over its list once it's picked (then); the part picked played on a real board (show as it's laid, after once it's played, afterNote in the bar), or not now
+### Their choice of what to show you, on T (or its button) during their lesson or at the still: their question (opening, then each choice's asks), their line over its list once it's picked (then); said once in their lesson as step one's done (else), the button and the bar's word for T (button, barKey); the part picked played on a real board (its point, below), then your go (after, afterNote in the bar), or not now
 
 - *opening:* "Right. What are you after?"
 - *basics:*
@@ -1057,10 +1057,93 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
   - *asks:* "The end game?"
   - *then:* "The end game. A gamble, that. Pick one."
 - *chooseNote:* "Helium's island. Pick what to see: arrows and Enter, a number, or tap. Esc: back."
-- *show:* "{title}. Here, on a real board."
-- *after:* "That's the one. Your go now. T if you want another."
+- *else:* "Something else you're after? T, any time, and I'll show you."
+- *button:* "Show me something else (T)"
+- *barKey:* "T: something else"
+- *after:* "Your go now. T if you want another."
 - *afterNote:* "Your still: a fresh board. T: Helium shows you something else. H: Help, Helium. G: a hint. W: watch Helium play."
 - *notNow:* "Suit yourself. The still's yours. T if you change your mind."
+
+### A part of their tutorial played on a board of its own, by its id: as it's laid, what's wrong or wanted there (before), and once the move's played, what it did (after)
+
+- *white:*
+  - *before:* "That white, ringed, is in the column at the fire. Watch."
+  - *after:* "Bang. A white burned is a white lost, and every second one comes back burnt. So: never."
+- *danger:*
+  - *before:* "These two, low in the column next to burn. Can't get out on their own. Hardest to reach, so first."
+  - *after:* "One drag, and there's a white fewer in it to lose. Easy work elsewhere can wait."
+- *edge:*
+  - *before:* "Whites on the edges by the fire. Few ways out, and they close as the board slides."
+  - *after:* "Junk raced in from far off, into a white's place. Fewer walled in now."
+- *climb:*
+  - *before:* "This white's got blacks just above it."
+  - *after:* "A white climbs past a black. Any black just above a white is a step up."
+- *sink:*
+  - *before:* "This white's got browns just below it."
+  - *after:* "A white sinks past a brown. Any brown just below a white is a step down."
+- *lift:*
+  - *before:* "This brown's got whites just above it."
+  - *after:* "A brown rises past a white. So any brown under a white can lift it along."
+- *drop:*
+  - *before:* "This black's got whites just below it."
+  - *after:* "A black sinks past a white. Drop one through, and each white steps up round it."
+- *weave:*
+  - *before:* "This white's in among junk: a brown below, a black above."
+  - *after:* "Up over a black, down under a brown. A white weaves through junk like that."
+- *ladder:*
+  - *before:* "This black's got browns just above it. Junk the wrong way up."
+  - *after:* "A black climbs past a brown. Sort the junk that way: blacks over browns, a ladder."
+- *makeWay:*
+  - *before:* "Nothing plain gets this white out yet. So first, a move to make way."
+  - *after:* "Stuck? Move a piece beside it first. Then it's got a way through."
+- *leapfrog:*
+  - *before:* "This brown wants to go along the row, through junk and whites alike."
+  - *after:* "Down past a black, up past a white, down past a black. Along the row, one drag."
+- *fire:*
+  - *before:* "First things first: the whites out of these three. Away from the fire."
+  - *after:* "Not a white left in the three by the fire. Nothing there can burn now."
+- *fill:*
+  - *before:* "Fire's side is clear. Now fill the right-hand columns with junk. Long drags."
+  - *after:* "Ringed, the gaps in the column being filled. Junk into each, then the next column in."
+- *block:*
+  - *before:* "Whites mostly left now. So blocks: big drags, the junk round them in a V."
+  - *after:* "One long drag, carried on till it joins the junk. Big drags now, no fiddling."
+- *chain:*
+  - *before:* "Plenty of whites banked. Now the chain: Crystal Clears, one after another."
+  - *after:* "A white from the far left, woven right, towards the columns going up next."
+- *sweep:*
+  - *before:* "Early on: plenty of junk, plenty of time. Grab a brown, drag it right."
+  - *after:* "Right across to the fire in one drag. Rough's fine this early. Next."
+- *diamond:*
+  - *before:* "This black's on the left, among whites. It belongs over on the right, with the blacks."
+  - *after:* "Down across the whites, then up past a brown to the blacks. Junk right, whites left."
+- *turnOver:*
+  - *before:* "The end column's the wrong way up: browns on top, blacks under."
+  - *after:* "A black zigzagged up through the browns. Turn it all over, and the whites can hook in."
+- *linePull:*
+  - *before:* "A line of browns to shift, and a black beside them. One drag pulls the lot."
+  - *after:* "Round it looped, and every brown it climbed past dropped a place. The line moved."
+- *hook:*
+  - *before:* "Not many pieces left about, and junk to get in past the whites."
+  - *after:* "The brown nudged first, then the black down and round the corner past it. Together."
+- *stepOne:*
+  - *before:* "Right. First things first. See all these whites on the right? Next in the fire, every one."
+  - *after:* "There: not a white left in those three. Otherwise, silly mishaps. Bang. And I've already got no eyebrows."
+- *p2:*
+  - *before:* "Two whites walled in at the top, by the fire. Free them first, the worst first."
+  - *after:* "The worst one's got a way out now, left, up over a black. Then the other."
+- *p8:*
+  - *before:* "The two by the fire are the wrong way up, and the end one goes in a second."
+  - *after:* "A brown sunk down through the blacks. The pair's a step nearer blacks over browns."
+- *p10:*
+  - *before:* "Junk stranded among the whites, ringed. Cracks. Stop filling and fix them."
+  - *after:* "A first crack worked on. The browns in the middle stay put: tools for the rest."
+- *p7:*
+  - *before:* "Five whites by the fire, and no time to save them all. Fill the gaps, quickest first."
+  - *after:* "A brown raced into a white's place, the quickest there was. Then the next gap."
+- *p27:*
+  - *before:* "Same trouble by the fire, and the junk's the wrong way up: browns high, blacks low."
+  - *after:* "A brown sunk through the blacks, lifting them. Swept off top right, it'd have split them."
 
 ### The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)
 
@@ -1339,7 +1422,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 
 She teaches the wolf den's four-ring Duty Navigation at the star table in her hut, on an island of her own off to the right of the den. A real Puzzle Pirates pirate (Multibella of Emerald), drawn from her portrait: smiling, wavy blonde hair, a magenta tricorne edged in gold, a magenta vest with gold buttons over a rose shirt, magenta trousers and boots, and Divergent, her parrot, light blue and pink, on her shoulder.
 
-Kind and practical, and encouraging ("You got this!"): the one who explained the wolf den's wild places. She helps you set a chain up, then munches chocolate chip cookies while you finish it.
+Kind and practical, and encouraging ("You got this!"): the one who explained the wolf den's wild targets. She helps you set a chain up, then munches chocolate chip cookies while you finish it.
 
 > "Multibella is very sweet as well" (the user, 11 Nov)
 >
@@ -1383,11 +1466,11 @@ Kind and practical, and encouraging ("You got this!"): the one who explained the
 
 ### Her lesson, as she plays each board at the star table: as it's laid, before a move, as each clear or chart of a cascade shows, as slots go wild, as the next constellation goes up, and at the end
 
-- *A cascade, lines only, making wild slots:*
+- *A cascade, lines only, making wild targets:*
   - *set:* "Cascades first. See the two reds round the third ring, and the stars waiting up top? One red dropped, and watch what it sets off."
   - *step1:* "Single! Three reds. And the blue that was waiting over them falls in..."
   - *step2:* "...right between two blues. Double!"
-  - *wild:* "And see those slots go every colour? A clear in a combo turns the slots on it and beside it wild. Any star fills a wild slot."
+  - *wild:* "And see those slots go every colour? A clear in a combo turns the slots on it and beside it wild. Any star fills a wild target."
   - *step3:* "Triple! The yellow fell onto two yellows."
   - *end:* "Three, six, nine. That's all lines are worth, even in a cascade. What pays is the constellation at the end of one."
 - *The fourth ring: a star waiting up there, carried round, dropped in by a clear under it:*
@@ -1404,7 +1487,7 @@ Kind and practical, and encouraging ("You got this!"): the one who explained the
   - *step2:* "Double! The blue's gone with them..."
   - *wild:* "...and its slot went wild. The yellow will do."
   - *chart:* "Triple! Constellation! 125, times three."
-  - *deal:* "Two clears before it, so the next one gets a fourth wild slot in the centre."
+  - *deal:* "Two clears before it, so the next one gets a fourth wild target in the centre."
   - *end:* "375 for one red dropped. A line's 3. So every cascade you build, end it on the constellation."
 - *Umami's evil constellation, a star at a time:*
   - *set:* "Now, an evil one. Made with Umami in mind: six reds side by side, round the centre. Let's fill it a star at a time."

@@ -1,6 +1,6 @@
 /* The wolf den's hut, a first version (14 Nov): its scene in the house shell (house.js), a place of its own, not in
    the housing district's list (den.html?at=wolfden). Its rules (the hut, the table, the moon, the lesson's boards) are
-   src/den-wolfden.ts's; the puzzle src/navigation.ts's on a wolf den's board (four rings, wild places), drawn by
+   src/den-wolfden.ts's; the puzzle src/navigation.ts's on a wolf den's board (four rings, wild targets), drawn by
    nav-board.js lying on the round star table; the tutorial src/wolf-den-tutorial.ts's, its opening choice drawn by
    js/tutorial-choice.js; Multibella's lines src/lines/multibella.ts's WOLF_DEN and TUTOR. You come ashore here off her
    island (multibella-isle.js), and leave back aboard.

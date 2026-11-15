@@ -1,6 +1,6 @@
 ---
 title: Training the Sailing bots
-status: asked
+status: done
 asked: 14 Nov
 updated: 15 Nov
 ---
@@ -10,3 +10,6 @@ updated: 15 Nov
 ## Log
 
 - 15 Nov: put on the board.
+- 15 Nov: you said: "Seems similar/duplicate to the teaching sailing bots to build vegases"
+- 15 Nov: same as teach-the-sailing-bots-to-build-vegases
+- 15 Nov: done: same as teach-the-sailing-bots-to-build-vegases

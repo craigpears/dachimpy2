@@ -34,13 +34,13 @@ export const TUTOR = {
 /** What she says as she plays a lesson's board, by the board (src/den-wolfden.ts's BOARDS) and her cue on it (its
     CUES: 'set' as it's laid, `move<n>` before its nth move, `step<n>` as the cascade's nth clear or chart shows, 'wild'
     as slots go wild, 'chart', 'deal' as the next constellation goes up, 'end'). The places she talks of at 'set' are
-    ringed on the board. "Wild slot": the Wolf Dens Guide's word, and the players'. */
+    ringed on the board. "Wild target": YPPedia's word (the user, 15 Nov). */
 export const LESSON = {
   cascade: {
     set: 'Cascades first. See the two reds round the third ring, and the stars waiting up top? One red dropped, and watch what it sets off.',
     step1: 'Single! Three reds. And the blue that was waiting over them falls in...',
     step2: '...right between two blues. Double!',
-    wild: 'And see those slots go every colour? A clear in a combo turns the slots on it and beside it wild. Any star fills a wild slot.',
+    wild: 'And see those slots go every colour? A clear in a combo turns the slots on it and beside it wild. Any star fills a wild target.',
     step3: 'Triple! The yellow fell onto two yellows.',
     end: 'Three, six, nine. That\'s all lines are worth, even in a cascade. What pays is the constellation at the end of one.',
   },
@@ -59,7 +59,7 @@ export const LESSON = {
     step2: 'Double! The blue\'s gone with them...',
     wild: '...and its slot went wild. The yellow will do.',
     chart: 'Triple! Constellation! 125, times three.',
-    deal: 'Two clears before it, so the next one gets a fourth wild slot in the centre.',
+    deal: 'Two clears before it, so the next one gets a fourth wild target in the centre.',
     end: '375 for one red dropped. A line\'s 3. So every cascade you build, end it on the constellation.',
   },
   evilTry: {
@@ -95,7 +95,7 @@ export const CHARACTER: Character = {
     + 'off to the right of the den. A real Puzzle Pirates pirate (Multibella of Emerald), drawn from her portrait: '
     + 'smiling, wavy blonde hair, a magenta tricorne edged in gold, a magenta vest with gold buttons over a rose '
     + 'shirt, magenta trousers and boots, and Divergent, her parrot, light blue and pink, on her shoulder.\n\n'
-    + 'Kind and practical, and encouraging ("You got this!"): the one who explained the wolf den\'s wild places. She '
+    + 'Kind and practical, and encouraging ("You got this!"): the one who explained the wolf den\'s wild targets. She '
     + 'helps you set a chain up, then munches chocolate chip cookies while you finish it.',
   theUser: [
     { on: '11 Nov', said: 'Multibella is very sweet as well' },
@@ -126,7 +126,7 @@ export const CHARACTER: Character = {
       when: 'Her lesson, as she plays each board at the star table: as it\'s laid, before a move, as each clear or chart of a cascade shows, as slots go wild, as the next constellation goes up, and at the end',
       says: LESSON,
       each: {
-        cascade: 'A cascade, lines only, making wild slots',
+        cascade: 'A cascade, lines only, making wild targets',
         outer: 'The fourth ring: a star waiting up there, carried round, dropped in by a clear under it',
         lastClear: 'A constellation charted by a cascade\'s last clear',
         evilTry: 'Umami\'s evil constellation, a star at a time',

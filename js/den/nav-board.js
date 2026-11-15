@@ -249,7 +249,7 @@ function medallion(g, c, x, y, filled, glow, k = 1) {
   }
   g.restore();
 }
-/* A wolf den's wild place (14 Nov; the screenshots the user shared, "it looked multicoloured"; the guide's "a paw
+/* A wolf den's wild target (14 Nov; the screenshots the user shared, "it looked multicoloured"; the guide's "a paw
    print ringed in every colour"): its ring in every colour, a pale paw print in its dark middle; a star sitting in it
    is drawn on top by the caller, and holding one it glows. */
 function wildMedallion(g, x, y, held, glow, k = 1) {

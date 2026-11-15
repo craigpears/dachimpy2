@@ -8,6 +8,11 @@ link: den.html?at=race-watch&as=dachimpy
 
 Four racers, the free camera, following one, their boards.
 
+## From TODO.md
+
+**Watching the race (12 Nov):** the replay / spectator mode, `?at=race-watch`: four racers, the
+free camera, following one, their boards.
+
 ## Log
 
 - 15 Nov: put on the board.

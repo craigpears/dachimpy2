@@ -1,0 +1,12 @@
+---
+title: Helium's lesson as goals: CC^1 first, a plan shown, the batch done when it's met
+status: playtest
+asked: 13 Nov
+updated: 15 Nov
+---
+
+"in the tutorial mode, obviously, if we're aiming for crystal clear one, the whole thing should obviously just finish and then restart the next puzzle once you've hit that goal. I guess maybe you could say, no, you should do it again"; then "Might be a bit tedious if you have to go through every single CC level one by one. So maybe you can say, you're aiming for at least one, but do a few more if you can." And the structure after the goal: "she says starts with a goal, one crystal clear, but then it's just kind of like it's just a message. Nothing. There's no structure after it. It's not like, oh ... what I will do is maybe ... try and get those three columns of blacks out of the way and start getting all the white pieces over here and like highlighting some column ... and arrows of where they think the white pieces should go." So at your still: the goal (at least a CC^1, more if you can), then Helium's plan step by step on the board (the junk columns to clear, the column the Crystal Clear will be built in shaded, arrows for where the whites go), and once the goal's met the batch is done: well done, go again or on to a bigger goal. **Done 13 Nov, to be played:** at the still each batch has a goal, at least your best plus one (a Crystal Clear 1 to start), more if you can, said as you sit down and in the bar. Their plan for it is the planner's own (`advise` with the goal as its target; one more than the chain once it's met), shown a step at a time as the board changes: 1, the junk columns to burn shaded red, the whites in them ringed; 2, whites banked left (only when the board hasn't enough for the goal yet); 3, the Crystal Clear's column shaded gold, the junk in it ringed; 4, send it up (X burns the junk ahead). The planner's next drags drawn as numbered arrows throughout, Helium's line as each step starts, the step in the bar. Once the goal's met and the chain ends (or the flask fills), the batch is done: the board stops, their well done (the first time, the other pirates and the tell on Emerald), your best kept, then R the same goal again or N a bigger one (past your best), on buttons too, a fresh board. src/den-helium.ts (goalFor, Batch, planFor, PlanLines), tests/helium-goal.test.ts. Still to do: the read version (distilling-guide.html) to show the goal and the plan's steps.
+
+## Log
+
+- 15 Nov: moved over from TODO.md, its column a first guess.

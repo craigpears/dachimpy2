@@ -1,8 +1,8 @@
 # Pirate Den: the story, and why
 
 The big picture of the game: what happens, in what order, what opens up as you go, and the
-principles behind it. [RULES.md](RULES.md) holds the exact rules as built, [TODO.md](TODO.md) the
-agreed fixes, [IDEAS.md](IDEAS.md) the ideas still being shaped. This is the thread that ties them
+principles behind it. [RULES.md](RULES.md) holds the exact rules as built, the task board ([tasks/](tasks/README.md)) the
+agreed fixes and, in its Ideas column, the ideas still being shaped. This is the thread that ties them
 together, so a new feature can be checked against where the game is going. Not published with the
 site (`.assetsignore` skips `*.md`).
 
@@ -83,8 +83,11 @@ know with a description and some kind of reference, and I'm sure it can be added
   explore, roam, and do different puzzles".
 - **Unlocked by doing, not handed out.** Each new part arrives as the result of something you did
   (beat a wave and the timber comes; beat the siege and they leave a map). Nothing appears by
-  magic: everything you build is the pieces you fitted. The same goes for prizes: familiars are
-  won, as in Puzzle Pirates, not picked from a list.
+  magic: everything you build is the pieces you fitted. But looks aren't earned: clothes, dyes,
+  familiars and things to put up are all free to try, never won or saved up for (the user, 15 Nov: "we
+  decided against things like earning things for later. It just does not fit with the proof of concept,
+  quick, fun nature of this"; this replaces an earlier line here that familiars are won). A rare look
+  as a keepsake of a story beat (Umami's, once he's rescued) is the most it goes to.
 - **A few mechanics, used many ways.** New things build on what's already there (the wind, the
   rocks, the lock, being dazed, the duty puzzles) rather than each bringing a mechanic of its own:
   "they do need to have some kind of cohesion to them. Not just let's create a new mechanic for
@@ -146,9 +149,43 @@ know with a description and some kind of reference, and I'm sure it can be added
   leads to the next (the penguin in the balaclava to Helium's island: IDEAS.md). In the code that stays a
   line in `src/lines/`, never a tangle between islands.
 
+### From the ideas notes (moved here 15 Nov, when IDEAS.md became cards)
+
+The thread through all of them: each Puzzle Pirates puzzle should feel like *that puzzle* played
+in the 3D den, the way the rampart frames feel like carpentry. Nothing should magically appear or
+transform; things are made from pieces you can see, and stay as those pieces.
+
+**Biggest principle: democratised, team effort.** One plague of Puzzle Pirates is that it gets
+elitist: everyone wants to drive the ship and fire the guns, and a few get to. Here every pirate
+should have agency and a real say in how things go, and no job should belong to one person. It's
+already a team game in Puzzle Pirates; this should be even more so.
+
+**Second principle: true to the 2D puzzles, with a 2D mode.** Every job in the den should stay as
+true to the original 2D puzzle as it can, the way a wall hole is still a carpentry hole you can see
+whole. That means any job could have a **2D mode**: a pirate switches into the classic flat
+puzzle (old-school carpentry on a hole, old-school gunning on a gun deck), while crewmates still
+see their work happening in 3D. You can dial the complexity up there too, for someone who just
+wants to do the carpentry properly. The 3D version is the fun extra; it loses some depth because
+of its mechanics and the quick pace (gunning especially), so both should work together on the
+same job. Build later, but design every new job so it maps cleanly onto its 2D puzzle.
+The user sees the 2D mode as the place for a quicker pace, too: pieces turning themselves to fit
+was tried in 3D and dropped as cheapening the puzzle ("that is probably where the 2D mode comes
+in... that will really help just speed it up a bit").
+
+**The puzzle itself comes over as it is.** Every puzzle should be high fidelity to the
+original, small tweaks aside: the 3D decides only where the board stands and who's on the other
+end, never the rules (RULES.md has the user's words).
+
+**Third principle: fun and obvious from the first minute.** One of the user's main goals: make it
+more fun and intuitive straight off than Puzzle Pirates ever was. Keep the crew and group vibes,
+but it must be quick and easy to get into. Every new job should be playable within seconds of
+seeing it, with the depth coming after.
+
+**Always more piratey.** Keep looking for ways to give it a more piratey feel.
+
 ## The story so far, and where it goes
 
-Built (✓), being built (▶) and to come (·). Details of each are in RULES.md or IDEAS.md.
+Built (✓), being built (▶) and to come (·). Details of each are in RULES.md or on the task board's idea cards.
 
 1. ✓ **The wall's broken and they're coming.** Mend the holes in the wall by Carpentry before the
    first wave. The first wave's pieces are dealt to be fair, so a new player can always finish.

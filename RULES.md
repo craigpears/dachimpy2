@@ -169,6 +169,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   ... should be a standard generic thing ... jump to this, let me show you this trick. Let me show you this phase
   ... general concepts that we'll cover across all puzzles.") How it's built: TUTORIALS.md, one description a
   puzzle (src/tutorial.ts), the nav and the choice drawn from it.
+- **The lesson is the quick way in: something happens first, questions never in the way (15 Nov).** The animated
+  lesson is "supposed to be the get into it quick version"; the read guide is the one for "having the structure and
+  the links". So no question stands between arriving and a board moving ("I don't want to have to ask 3 questions to
+  see something happen"): the teacher starts showing straight away, and what else they can show is on offer beside
+  it, never a menu you must get through first.
+- **Every trick shown says what it's for (15 Nov).** A trick or scenario played in a lesson never just starts ("It
+  just kind of jumped into it without any context of what it was doing, what it was achieving, what the point
+  was"): first what's wrong or wanted on this board, then the move, then what it achieved, the pieces it's about
+  ringed. Its words come from the read guide's own text for that trick, so the two say the same.
 
 - **Every adventure ends with something to keep (14 Nov).** "If you ... complete [any little adventure], there should
   be some meaningful reward, even if it's a small token thing like a visible persistent change to the map, a creature
@@ -1002,7 +1011,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   quickly, because I'm conscious we haven't play tested any of the [Tzz] stuff yet. So we need to
   finish things really one at a time", and "I want to reveal things one at a time." A feature is
   built, played by the user, fixed and finished before the next is started; the next ones wait in
-  TODO.md, ready to start, not started.
+  on the task board, ready to start, not started.
 - **No hidden gems in the proof of concept: show everything (12 Nov, replacing the rule below).** "make
   the [starlit] door public. Yeah, no hidden. I think we get rid of the hidden gem idea ... I just want to
   show stuff ... maybe in a full game, some of these things will be hidden gems, but not for a proof of
@@ -2624,8 +2633,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - Constellations of 3 places in the centre, 2 in the middle, 1 in the third; a fresh board's first 3 and 1.
   - Points: each ring's weight (3, 5, 9) times (1.5 times its places) squared, rounded down (71 the first, 125 the
     usual), times the chart's step in the move's cascade; lines a point a star times their step. No par.
-  - Wild places (ringed in every colour, a paw print), filled by any star: a chart in a chain (a clear before or
-    after it in the same move) deals the next with its centre all wild, two or more clears a fourth wild place in it;
+  - Wild targets (ringed in every colour, a paw print), filled by any star: a chart in a chain (a clear before or
+    after it in the same move) deals the next with its centre all wild, two or more clears a fourth wild target in it;
     a combo's clear (the move's second step or later) turns wild the constellation's places on and beside what it
     cleared. A plain chart deals plain.
   - The cascade named over the stars as it goes: "Single! +3", "Double! +6", "Triple! Constellation! +18".
@@ -2637,12 +2646,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     going up), the board waiting while she talks (Space moves her on). Her words are src/lines/multibella.ts's
     `LESSON`, by board and cue; a slot turned wild by a clear is drawn wild only once that clear's shown. "How it
     works" is four steps in order (`MECHANICS`), N or Next for the next one: a cascade, lines only, +3, +6, +9, its
-    combo clears leaving wild slots; the fourth ring, a star waiting up there, carried round, dropped in by a clear
+    combo clears leaving wild targets; the fourth ring, a star waiting up there, carried round, dropped in by a clear
     under it (250), then the next constellation going up; the same cascade charting the last slot on its third clear
     (375, a line's 3); and Umami's evil constellation (below), first a star at a time (the fifth red makes a line and
     they go), then by her combo, both reds landing together (486).
-  - **"Wild slot"** in her words and the guide's: the Wolf Dens Guide's word, and the players' (the user's too). The
-    code still says wild places.
+  - **"Wild target"** in her words, the guide's and the code's: YPPedia's word (the user, 15 Nov: "Go with yppedia and
+    wild targets"), over "wild slot", the Wolf Dens Guide's and the players'.
   - **Umami's evil constellation at the wolf den (15 Nov):** the user's combo-only constellation (11 Nov, "The
     starlit door"; IDEAS.md), made with Umami in mind, at last somewhere in the world: shown in her lesson, credited
     to Umami in the changelog. Not yet dealt in play.
@@ -3993,5 +4002,5 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   bit personal"); a test holds it.
 - Our own take: Aladdin's a folk tale, but the film's look and songs aren't ours. Our colours for the outfit, an
   original tune if it ever gets music, no lyrics.
-- Still to come (TODO.md): the second leg to the blockade; Gravee painting her portrait ("Naturally [Gravee] taking
+- Still to come (the task board, tasks/carpet-ride/): the second leg to the blockade; Gravee painting her portrait ("Naturally [Gravee] taking
   a portrait").

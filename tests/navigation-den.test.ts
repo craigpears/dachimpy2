@@ -80,7 +80,7 @@ describe('the den\'s wilds and chains (14 Nov, Multibella: "a constellation char
     expect(lines[1].wilded).toEqual([{ ring: 0, spoke: 4, colour: Y, wild: true }]);
   });
 
-  it('charted in a chain of two clears, the next is dealt with four wild places in its centre ring', () => {
+  it('charted in a chain of two clears, the next is dealt with four wild targets in its centre ring', () => {
     const g = run();
     g.next = { id: 99, c: R, spoke: 4 };
     g.drop();

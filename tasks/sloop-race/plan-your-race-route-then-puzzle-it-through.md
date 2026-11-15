@@ -1,0 +1,12 @@
+---
+title: Plan your race route, then puzzle it through
+status: playtest
+asked: 12 Nov
+updated: 15 Nov
+---
+
+you can't steer and puzzle at once, so the race gets a plan: one choice for each leg (the long way or one of its shortcuts), hidden from the others, changed any time from a strip along the screen's edge with one click and no time lost from the board. The pilot sails it move by move, stops by itself at each obstacle's spot (a hop, each of the zigzag's headwinds, a lock, the crane, the barrier, the whirlpools, the door) with the board it needs up, and goes on once it's done. "That's really simple and easy." The design is in RACE.md §5. (After the course pass and the racers' moves and gusts, which use the same files.) Once it's live, design.html gets a section on it (the user, 12 Nov: "where you've got the design page to have this, the planning feature, so how that fixes the problem of wanting as a player to be able to plot your course in advance, but make those choices, but also be able to focus on puzzling at the same [time]"): the problem (you can't steer and puzzle at once), and how choosing a leg at a time while the pilot sails and stops for you lets you plan ahead and still keep your hands on the boards. With a picture from its `?at=` link, and the changelog entry. Then (13 Nov): "it should all be in the same thing. So if you're watching the race, you should I'm guessing be able to see what people's plans are ... online, local should all be the same." **Done (13 Nov), to be played:** src/race-plan.ts and js/den/race-plan.js; the strip down the right, the pilot on your helm and its stops; every bot races by a plan (the balance unchanged, race for race); the race watched shows plans and changes; online the plan goes to the room and its record, never to the other racers (no watchers in rooms yet). The zigzag's hops are leg 4's own choice, not stops on the long way (as stops they saved nothing: RACE.md §5). design.html and the changelog have it. And (13 Nov): "it should all be in the same thing. So if you're watching the race, you should I'm guessing be able to see what people's plans are, because that keeps it interesting ... online, local should all be the same." So one plan system for every racer and mode (you, the rivals' bots, the simulation, the race watched, online), the plans shown to whoever's watching, hidden from rival racers, and kept in the race's record.
+
+## Log
+
+- 15 Nov: moved over from TODO.md, its column a first guess.

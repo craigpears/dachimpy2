@@ -8,25 +8,33 @@
 //   node tools/task.mjs add <stream> "<title>" [--status st] [--asked "the user's words"] [--done "what done looks like"]
 //   node tools/task.mjs set <id> <status> [--note "a line for its log"] [--link ?at=..] [--shot path] [--session id] [--branch b]
 //   node tools/task.mjs note <id> "<a line for its log>"
-//   node tools/task.mjs stream <stream> "<where it got to>"
+//   node tools/task.mjs tidy <id> "<its new text>"           its text rewritten (made concise), its log kept
+//   node tools/task.mjs stream <stream> "<where it got to>" [--name "Its name"] [--hue 0-360]
+//   node tools/task.mjs move <id> <stream>                into another stream
 //   node tools/task.mjs board                             draws tasks/board.html (add, set, note and stream draw it too)
+//   node tools/task.mjs serve [--port n] [--pick-up no]   the board at http://localhost:8643/, cards dragged between
+//                                                         columns there (each drop is a `set`, by this script)
 //
 // npm run task -- <the same>. Ids are the card's file name, without .md; any unique part of one will do.
-import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSync } from 'node:fs';
-import { join, dirname, relative } from 'node:path';
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSync, renameSync } from 'node:fs';
+import { join, dirname, relative, resolve, extname, sep } from 'node:path';
+import { createServer } from 'node:http';
+import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const TASKS = join(ROOT, 'tasks');
 export const STATUSES = {
+  inbox: 'Inbox',
+  idea: 'Ideas',
   asked: 'Asked',
   ready: 'Ready to start',
   doing: 'Being done',
   review: 'For you to review',
   playtest: 'For you to playtest',
   done: 'Done',
-  parked: 'Parked',
 };
+export const PORT = 8643;
 const LOCAL = 'http://localhost:8642/', LIVE = 'https://dachimpy2.dachimpy.workers.dev/';
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 export const today = (d = new Date()) => `${d.getDate()} ${MONTHS[d.getMonth()]}`;
@@ -76,7 +84,7 @@ function find(cards, id) {
 const slug = (t) => t.toLowerCase().replace(/[’']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48);
 /** A card's log: its `## Log` list, a line added. */
 function logged(body, line) {
-  const entry = `- ${today()}: ${line}`;
+  const entry = `- ${today()}: ${String(line).replace(/\s+/g, ' ').trim()}`; // one line, always: the log's read an entry a line
   return /^## Log/m.test(body) ? body.replace(/\s*$/, `\n${entry}\n`) : `${body.replace(/\s*$/, '')}\n\n## Log\n\n${entry}\n`;
 }
 
@@ -98,28 +106,33 @@ function md(text) {
   return out.join('');
 }
 
-/** The board: a column a status, a card a task, coloured by stream, filtered by stream, its streams' notes above. */
-export function board({ streams, cards }, when = new Date()) {
-  const hue = Object.fromEntries(streams.map((s) => [s.id, s.hue]));
-  const name = Object.fromEntries(streams.map((s) => [s.id, s.name]));
-  const card = (c) => {
-    const m = c.meta, link = m.link ? `<a class="go" href="${esc(LOCAL + m.link)}">Local</a><a class="go" href="${esc(LIVE + m.link)}">Live</a>` : '';
-    const shot = m.shot ? `<a class="shot" href="${esc('../' + m.shot)}"><img src="${esc('../' + m.shot)}" alt="" loading="lazy"></a>` : '';
-    const who = [m.session ? `session <code>${esc(m.session)}</code>` : '', m.branch ? `branch <code>${esc(m.branch)}</code>` : ''].filter(Boolean).join(' · ');
-    return `<article class="card" data-stream="${esc(c.stream)}" style="--h:${hue[c.stream] ?? 30}">
-  ${shot}<div class="tag">${esc(name[c.stream] ?? c.stream)}</div>
+/** One card on the board: its stream, title, dates and links; everything else (what was asked, its log) kept in
+ *  `.full`, read in the card's panel when it's opened. */
+export function cardHtml(c, streams) {
+  const s = streams.find((x) => x.id === c.stream);
+  const m = c.meta, link = m.link ? `<a class="go" href="${esc(LOCAL + m.link)}">Local</a><a class="go" href="${esc(LIVE + m.link)}">Live</a>` : '';
+  const shot = m.shot ? `<a class="shot" href="${esc('../' + m.shot)}"><img src="${esc('../' + m.shot)}" alt="" loading="lazy"></a>` : '';
+  const who = [m.session ? `session <code>${esc(m.session)}</code>` : '', m.branch ? `branch <code>${esc(m.branch)}</code>` : ''].filter(Boolean).join(' · ');
+  return `<article class="card" draggable="true" tabindex="0" data-id="${esc(c.id)}" data-stream="${esc(c.stream)}" data-status="${esc(m.status || 'asked')}" style="--h:${s?.hue ?? 30}">
+  ${shot}<div class="tag">${esc(s?.name ?? c.stream)}</div>
   <h3>${esc(m.title || c.id)}</h3>
   <div class="when">${m.asked ? `asked ${esc(m.asked)}` : ''}${m.updated ? ` · updated ${esc(m.updated)}` : ''}</div>
   ${link ? `<div class="links">${link}</div>` : ''}
-  <details><summary>More</summary>${md(c.body)}${who ? `<p class="who">${who}</p>` : ''}<p class="id"><code>${esc(c.id)}</code></p></details>
+  <div class="full" hidden>${md(c.body)}${who ? `<p class="who">${who}</p>` : ''}<p class="id"><code>${esc(c.id)}</code></p></div>
 </article>`;
-  };
+}
+
+/** The board: a column a status, a card a task, coloured by stream, filtered by stream, its streams' notes above; a
+ *  card opened in a panel beside it, gone through one after another (tools/board-client.js does the clicking). */
+export function board({ streams, cards }, when = new Date()) {
   const cols = Object.entries(STATUSES).map(([st, label]) => {
     const here = cards.filter((c) => (c.meta.status || 'asked') === st);
-    return `<section class="col" data-status="${st}"><h2>${esc(label)} <span>${here.length}</span></h2>${here.map(card).join('\n')}</section>`;
+    const fold = st === 'done' ? `<button class="fold">Show them</button>` : '';
+    return `<section class="col${st === 'done' ? ' folded' : ''}" data-status="${st}"><h2>${esc(label)} <span>${here.length}</span><button class="through" title="Open the first card and go through them one by one">Go through</button></h2>${fold}<div class="list">${here.map((c) => cardHtml(c, streams)).join('\n')}</div></section>`;
   }).join('\n');
-  const chips = streams.map((s) => `<button class="chip" data-stream="${esc(s.id)}" style="--h:${s.hue}">${esc(s.name)} <span>${cards.filter((c) => c.stream === s.id && !['done', 'parked'].includes(c.meta.status)).length}</span></button>`).join('');
+  const chips = streams.map((s) => `<button class="chip" data-stream="${esc(s.id)}" style="--h:${s.hue}">${esc(s.name)} <span>${cards.filter((c) => c.stream === s.id && !['done', 'idea'].includes(c.meta.status)).length}</span></button>`).join('');
   const notes = streams.filter((s) => s.where).map((s) => `<div class="stream" data-stream="${esc(s.id)}" style="--h:${s.hue}"><b>${esc(s.name)}</b>${md(s.where)}</div>`).join('');
+  const keys = Object.entries(STATUSES).map(([k, l], i) => `<button class="st" data-status="${k}"><kbd>${i + 1}</kbd>${esc(l)}</button>`).join('');
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Task board</title>
@@ -135,48 +148,105 @@ export function board({ streams, cards }, when = new Date()) {
   .chip span { color: var(--dim); }
   .chip.on { background: hsl(var(--h) 45% 40%); }
   .where { margin: 0 16px 10px; }
-  .where > summary { color: var(--dim); font-size: 13px; margin-bottom: 8px; }
+  .where > summary { color: var(--dim); font-size: 13px; margin-bottom: 8px; cursor: pointer; }
   .streams { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
   .stream { border-left: 3px solid hsl(var(--h) 55% 55%); background: var(--tile); padding: 6px 10px; border-radius: 4px; font-size: 13px; color: var(--dim); }
   .stream b { color: var(--text); }
   .stream p { margin: 4px 0 0; }
   .cols { display: flex; gap: 10px; overflow-x: auto; padding: 0 16px 24px; align-items: flex-start; }
   .col { flex: 0 0 270px; background: var(--well); border: 1px solid var(--edge); border-radius: 8px; padding: 8px; }
-  .col h2 { margin: 2px 4px 8px; font-size: 14px; color: var(--dim); }
+  .col h2 { margin: 2px 4px 8px; font-size: 14px; color: var(--dim); display: flex; align-items: baseline; gap: 6px; }
   .col h2 span { color: var(--faint); font-weight: 400; }
-  .col[data-status="playtest"] { border-color: var(--accent); }
+  .through { margin-left: auto; background: none; border: 1px solid var(--edge); color: var(--faint); border-radius: 4px; font: inherit; font-size: 11.5px; padding: 1px 6px; cursor: pointer; }
+  .through:hover { color: var(--text); border-color: var(--accent); }
+  .col[data-status="playtest"], .col[data-status="inbox"] { border-color: var(--accent); }
+  .col[data-status="idea"] { border-style: dashed; }
   .col[data-status="playtest"] h2, .col[data-status="review"] h2 { color: var(--accent-text); }
-  .card { background: var(--bg); border: 1px solid var(--edge); border-left: 4px solid hsl(var(--h) 55% 55%); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; }
+  .card { background: var(--bg); border: 1px solid var(--edge); border-left: 4px solid hsl(var(--h) 55% 55%); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; cursor: pointer; }
+  .card:hover { border-color: hsl(var(--h) 55% 55%); }
+  .card.open { outline: 2px solid var(--accent); outline-offset: 1px; }
   .card h3 { margin: 2px 0; font-size: 14.5px; color: var(--title); }
   .tag { font-size: 11.5px; color: hsl(var(--h) 60% 72%); }
   .when { font-size: 12px; color: var(--faint); }
   .links { display: flex; gap: 6px; margin-top: 6px; }
   .go { background: var(--accent); color: var(--on-accent); text-decoration: none; border-radius: 4px; padding: 2px 8px; font-size: 12.5px; font-weight: 600; }
   .shot img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; display: block; margin-bottom: 6px; }
-  details { margin-top: 6px; font-size: 13px; color: var(--dim); }
-  summary { cursor: pointer; color: var(--faint); }
-  details p, details ul { margin: 6px 0; }
-  details ul { padding-left: 18px; }
-  details h4 { margin: 8px 0 2px; font-size: 12.5px; color: var(--text); }
+  .card.busy::after { content: 'Updating...'; display: block; margin-top: 4px; font-size: 12px; color: var(--accent-text); }
   code { font-size: 12px; color: var(--accent-text); }
   a { color: var(--accent-text); }
   .who, .id { color: var(--faint); font-size: 12px; }
+  .drop { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; padding: 0 16px 10px; }
+  .drop textarea, .update textarea { flex: 1 1 320px; min-height: 2.6em; background: var(--tile); color: var(--text); border: 1px solid var(--edge); border-radius: 6px; padding: 6px 8px; font: inherit; resize: vertical; box-sizing: border-box; }
+  .drop button, .update .send { background: var(--accent); color: var(--on-accent); border: 0; border-radius: 6px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; }
+  .sorting { flex-basis: 100%; color: var(--dim); font-size: 13px; }
+  .card.dragging { opacity: .45; }
+  .col.over { outline: 2px dashed var(--accent); outline-offset: -2px; }
+  .list { min-height: 40px; }
+  .col.folded .list { display: none; }
+  .fold { display: block; width: 100%; margin-bottom: 8px; background: var(--tile); color: var(--dim); border: 1px solid var(--edge); border-radius: 4px; padding: 4px; font: inherit; font-size: 13px; cursor: pointer; }
+  .say { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); background: var(--tile); color: var(--text); border: 1px solid var(--edge); border-radius: 6px; padding: 8px 12px; font-size: 13.5px; max-width: calc(100% - 32px); box-sizing: border-box; z-index: 20; }
+  /* A card opened: a panel down the right, the board still there beside it. */
+  .panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100%); background: var(--bg); border-left: 1px solid var(--edge); box-shadow: -8px 0 24px rgb(0 0 0 / .35); display: flex; flex-direction: column; z-index: 10; box-sizing: border-box; }
+  .panel[hidden] { display: none; }
+  .panel .bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--edge); }
+  .panel .bar .at { flex: 1; color: var(--faint); font-size: 13px; }
+  .panel .bar button, .update button { background: var(--tile); color: var(--text); border: 1px solid var(--edge); border-radius: 4px; font: inherit; font-size: 13px; padding: 4px 10px; cursor: pointer; }
+  .panel .read { flex: 1; overflow-y: auto; padding: 12px 16px; }
+  .panel .read .card { border: 0; padding: 0; margin: 0; cursor: auto; background: none; outline: 0; }
+  .panel .read .card::after { display: none; }
+  .panel .read h3 { font-size: 19px; margin: 4px 0; }
+  .panel .read .full { font-size: 14px; color: var(--text); }
+  .panel .read .full p, .panel .read .full ul { margin: 8px 0; }
+  .panel .read .full ul { padding-left: 20px; }
+  .panel .read .full h4 { margin: 14px 0 4px; font-size: 13px; color: var(--dim); text-transform: uppercase; letter-spacing: .04em; }
+  .panel .read .full h4 ~ ul { font-size: 13px; color: var(--dim); }
+  .panel .read .shot img { aspect-ratio: auto; max-height: 300px; object-fit: contain; }
+  .sts { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 14px; border-bottom: 1px solid var(--edge); }
+  .st { background: var(--tile); color: var(--dim); border: 1px solid var(--edge); border-radius: 99px; font: inherit; font-size: 12.5px; padding: 3px 10px 3px 4px; cursor: pointer; }
+  .st kbd { display: inline-block; min-width: 1.4em; margin-right: 5px; border-radius: 99px; background: var(--well); color: var(--faint); font: 11px/1.6 system-ui, sans-serif; text-align: center; }
+  .st.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .st.on kbd { background: rgb(0 0 0 / .2); color: inherit; }
+  .update { border-top: 1px solid var(--edge); padding: 10px 14px 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .update textarea { flex-basis: 100%; min-height: 4.2em; }
+  .drop .mic { background: var(--tile); color: var(--text); border: 1px solid var(--edge); font-weight: 400; }
+  .mic.on, .drop .mic.on { background: #b3261e; color: #fff; border-color: #b3261e; }
+  /* A card open: the board moves over beside it, still scrolled and used, the inbox's box too. */
+  @media (min-width: 900px) { .panel { width: min(560px, 45vw); } body.reading { padding-right: min(560px, 45vw); } }
+  .update .hint { flex-basis: 100%; color: var(--faint); font-size: 12px; }
+  .heard { flex: 1 1 200px; align-self: center; color: var(--accent-text); font-size: 13px; font-style: italic; }
+  .feed { position: fixed; left: 16px; bottom: 16px; width: min(380px, calc(100% - 32px)); margin: 0; padding: 0; list-style: none; z-index: 15; display: flex; flex-direction: column; gap: 4px; }
+  .feed li { background: var(--tile); border: 1px solid var(--edge); border-left: 3px solid var(--faint); border-radius: 6px; padding: 5px 9px; font-size: 12.5px; color: var(--dim); cursor: pointer; box-shadow: 0 2px 8px rgb(0 0 0 / .25); }
+  .feed li b { color: var(--text); font-weight: 600; }
+  .feed li .said { font-style: italic; }
+  .feed li .what { display: block; margin-top: 2px; color: var(--text); }
+  .feed li.saved { border-left-color: var(--accent); }
+  .feed li.done { border-left-color: #3fa66b; }
+  .feed li.bad { border-left-color: #e5484d; }
+  .feed li:nth-child(n+4) { opacity: .65; }
+  .feed:empty { display: none; }
+  .wave { width: 120px; height: 18px; align-self: center; color: #e5484d; }
+  .update textarea { min-height: 9em; max-height: 45vh; }
+  .drop textarea { min-height: 3.2em; max-height: 40vh; }
+  .update .send { padding: 4px 12px; font-size: 13px; }
+  .update .gap { flex: 1; }
   @media (max-width: 640px) { .cols { flex-direction: column; } .col { flex: none; width: 100%; box-sizing: border-box; } }
 </style></head>
-<body>
-<header><h1>Task board</h1><span class="made">Drawn ${esc(today(when))}, ${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')} from tasks/ by tools/task.mjs</span></header>
+<body data-port="${PORT}">
+<header><h1>Task board</h1><span class="made">Drawn ${esc(today(when))}, ${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')} from tasks/ by tools/task.mjs. Click a card to open it.</span></header>
+<form class="drop"><textarea name="text" rows="2" placeholder="Drop something in: a fix, an idea, a thought. Sorted onto the board for you."></textarea><button type="button" class="mic" data-for="inbox" hidden title="Dictate into the inbox, on M (say &quot;drop it in&quot; to send it)">Mic (M)</button><button>Drop it in</button><canvas class="wave" data-for="inbox" width="240" height="36" hidden></canvas><span class="heard" data-for="inbox" hidden></span><span class="sorting" hidden></span></form>
 <div class="chips"><button class="chip on" data-stream="" style="--h:30">Every stream</button>${chips}</div>
 <details class="where"><summary>Where each stream's got to</summary><div class="streams">${notes}</div></details>
 <main class="cols">${cols}</main>
-<script>
-  const pick = (s) => {
-    document.querySelectorAll('.chip').forEach((b) => b.classList.toggle('on', b.dataset.stream === s));
-    document.querySelectorAll('.card, .stream').forEach((c) => { c.hidden = !!s && c.dataset.stream !== s; });
-    try { localStorage.setItem('board.stream', s); } catch (e) {}
-  };
-  document.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => pick(b.dataset.stream)));
-  try { const s = localStorage.getItem('board.stream'); if (s) pick(s); } catch (e) {}
-</script>
+<aside class="panel" hidden aria-label="The card opened">
+  <div class="bar"><button class="prev" title="The card before (left arrow)">&larr;</button><button class="next" title="The next card (right arrow)">&rarr;</button><span class="at"></span><button class="shut" title="Close (Esc)">Close</button></div>
+  <div class="sts">${keys}</div>
+  <div class="read"></div>
+  <form class="update"><textarea name="text" placeholder="Say or type what's changed: &quot;that works now&quot;, &quot;still slow when you turn&quot;, &quot;split the guns off into their own card&quot;..."></textarea>
+    <canvas class="wave" data-for="card" width="240" height="36" hidden></canvas><span class="heard" data-for="card" hidden></span><button type="button" class="mic" data-for="card" hidden title="Dictate, on M (say &quot;next&quot; to send and go on)">Mic (M)</button><button type="button" class="toinbox" title="Not about this card: what's in the box to the inbox instead (say &quot;inbox&quot;)">To the inbox</button><span class="gap"></span>
+    <button type="submit" class="send" name="stay">Send</button><button type="submit" class="send" name="on">Send and next</button>
+    <span class="hint">Keys, working while the mic's on: M the mic, N send and next, &larr; &rarr; go through, 1-${Object.keys(STATUSES).length} move it, I to the inbox, Esc close. To type instead, click in the box (Esc to leave it; Ctrl+Enter sends). What you send is logged on the card and a headless Claude acts on it (moves it, splits it, notes it).</span></form>
+</aside>
+<script src="../tools/board-client.js"></script>
 </body></html>
 `;
 }
@@ -184,6 +254,234 @@ export function drawBoard(dir = TASKS) {
   const out = join(dir, 'board.html');
   writeFileSync(out, board(load(dir)));
   return out;
+}
+
+/** A new card: in its stream (made if new), its id from its title, what was asked and what done looks like. */
+export function addCard(stream, title, opt = {}, dir = TASKS) {
+  const st = opt.status || 'asked';
+  if (!(st in STATUSES)) throw new Error(`Status is one of: ${Object.keys(STATUSES).join(', ')}`);
+  if (!/^[a-z0-9-]+$/.test(stream)) throw new Error(`A stream is a folder name: "${stream}"`);
+  const sd = join(dir, stream);
+  if (!existsSync(sd)) { mkdirSync(sd); writeFileSync(join(sd, '_stream.md'), format({ name: stream, hue: 30 }, '\n')); }
+  let id = opt.id || slug(title) || 'card', n = 2;
+  const base = id;
+  while (existsSync(join(sd, id + '.md'))) id = `${base}-${n++}`;
+  const body = [opt.asked ? `**Asked:** ${opt.asked}` : '', opt.done ? `**Done looks like:** ${opt.done}` : ''].filter(Boolean).join('\n\n');
+  const meta = { title, status: st, asked: today(), updated: today() };
+  writeFileSync(join(sd, id + '.md'), format(meta, `\n${body}\n\n## Log\n\n- ${today()}: added.\n`));
+  return { id, stream, file: join(sd, id + '.md'), meta };
+}
+
+/** A card changed: its status (logged), any of its fields, a line for its log. The one way a card's changed. */
+export function change(cards, id, status, opt = {}) {
+  const c = find(cards, id);
+  const meta = { ...c.meta, updated: today() };
+  const what = [];
+  if (status !== undefined) {
+    if (!(status in STATUSES)) throw new Error(`Status is one of: ${Object.keys(STATUSES).join(', ')}`);
+    meta.status = status; what.push(STATUSES[status].toLowerCase());
+  }
+  for (const k of ['link', 'shot', 'session', 'branch', 'title']) if (k in opt) meta[k] = opt[k];
+  if (opt.note) what.push(opt.note);
+  const body = what.length ? logged(c.body, what.join(': ')) : c.body;
+  writeFileSync(c.file, format(meta, body));
+  return { ...c, meta, body };
+}
+
+/** A card's text rewritten (tidied, made concise), its log kept and the tidy logged; the old text is in git history. */
+export function tidy(cards, id, text) {
+  const c = find(cards, id);
+  const body = String(text ?? '').trim();
+  if (!body) throw new Error('tidy <id> "<the card\'s new text>"');
+  const log = c.body.match(/\n## Log\n[^]*$/)?.[0] ?? '\n## Log\n';
+  writeFileSync(c.file, format({ ...c.meta, updated: today() }, logged(`\n${body}\n${log}`, 'tidied up (the old text is in git history)')));
+  return c;
+}
+
+/** Something dropped in the inbox: a card of its own in tasks/inbox/, what was written its Asked. */
+export function dropIn(text, dir = TASKS, when = new Date()) {
+  const words = String(text ?? '').trim();
+  if (!words) throw new Error('Nothing to drop in');
+  const title = words.replace(/\s+/g, ' ').slice(0, 70).replace(/\s\S*$/, (m) => (words.length > 70 ? '...' : m));
+  const stamp = `${when.getFullYear()}${String(when.getMonth() + 1).padStart(2, '0')}${String(when.getDate()).padStart(2, '0')}-${String(when.getHours()).padStart(2, '0')}${String(when.getMinutes()).padStart(2, '0')}${String(when.getSeconds()).padStart(2, '0')}`;
+  if (!existsSync(join(dir, 'inbox'))) { mkdirSync(join(dir, 'inbox')); writeFileSync(join(dir, 'inbox', '_stream.md'), format({ name: 'Inbox', hue: 0 }, '\nWhat you drop in, before it\'s sorted.\n')); }
+  return addCard('inbox', title, { status: 'inbox', asked: words.replace(/\r?\n/g, ' '), id: `inbox-${stamp}` }, dir);
+}
+
+export const TRIAGE = join(ROOT, 'tools', 'inbox-triage.md');
+export const UPDATE = join(ROOT, 'tools', 'card-update.md');
+const TOOLS = ['Read', 'Grep', 'Glob', 'Edit', 'Bash(node tools/task.mjs:*)'].join(',');
+/** The cards a headless Claude is working on right now (the board shows them as updating). */
+export const busy = new Set();
+/** A headless Claude (Sonnet) given a prompt, allowed only the task script, reading and editing documents; done(why)
+ *  when it's finished, why saying what went wrong, if anything did. Three at a time at most, the rest waiting their
+ *  turn (going through the board quickly sends many). */
+/** The server's environment without node_modules/.bin on the path. `npm run board:serve` puts it first, and the local
+ *  Node 22 kept there for Wrangler (CLAUDE.md) answers to `node` with a shim, so the headless Claude's `node
+ *  tools/task.mjs` never ran and it stopped to ask for approval nobody could give (15 Nov). */
+export function plainEnv(env = process.env) {
+  const out = { ...env };
+  for (const k of Object.keys(out)) {
+    if (k.toLowerCase() !== 'path') continue;
+    out[k] = out[k].split(process.platform === 'win32' ? ';' : ':').filter((p) => !/node_modules[\\/]\.bin/.test(p)).join(process.platform === 'win32' ? ';' : ':');
+  }
+  return out;
+}
+const MAX_RUNS = 3, waiting = [];
+let running = 0;
+function headless(id, prompt, done, run) {
+  busy.add(id);
+  const go = () => {
+    running++;
+    let out = '', ended = false;
+    const end = (why) => { if (ended) return; ended = true; running--; busy.delete(id); done(why, out); waiting.shift()?.(); };
+    const child = run('claude', ['-p', '--model', 'sonnet', '--allowedTools', TOOLS], { cwd: ROOT, env: plainEnv(), stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
+    child.on('error', (e) => end(`couldn't start Claude: ${e.message}`));
+    child.stdout?.on('data', (d) => { out += d; });
+    child.stderr?.on('data', (d) => { out += d; });
+    child.on('close', (code) => end(code ? `it failed (${code}): ${out.trim().slice(-300)}` : ''));
+    child.stdin?.end(prompt);
+    return child;
+  };
+  if (running < MAX_RUNS) return go();
+  waiting.push(go);
+  return null;
+}
+const fill = (file, card, words = '') => readFileSync(file, 'utf8').replaceAll('{{card}}', `${card.stream}/${card.id}`)
+  .replaceAll('{{id}}', card.id).replaceAll('{{words}}', words);
+
+/** An inbox card sorted by a headless Claude (tools/inbox-triage.md says how): into a card, an idea or a document,
+ *  the inbox card then done. If it couldn't, the inbox card says why and stays in the inbox. */
+export function triage(card, run = spawn) {
+  console.log(`sorting ${card.id}`);
+  return headless(card.id, fill(TRIAGE, card), (why, out) => {
+    const now = load().cards.find((x) => x.id === card.id);
+    if (now && now.meta.status === 'inbox') change(load().cards, card.id, undefined, { note: why ? `sorting ${why}` : `left in the inbox: ${out.trim().slice(-300)}` });
+    drawBoard();
+    did.set(card.id, why ? `couldn't: ${why}` : summary(out));
+    console.log(`sorted ${card.id}: ${did.get(card.id)}`);
+  }, run);
+}
+
+/** What each run said it did, in a line, kept for the board to show beside the card (the user, 15 Nov: "it would be
+ *  good to just have some one-liner short confirmation of like, what's it done with it?"). */
+export const did = new Map();
+/** A run's last words, in a line: all of them if they're short, else their first line. */
+export function summary(out) {
+  const all = String(out ?? '').replace(/\s+/g, ' ').trim();
+  if (all.length <= 200) return all || 'done';
+  const first = String(out).trim().split('\n').find((l) => l.trim()) ?? '';
+  return first.replace(/\s+/g, ' ').trim().slice(0, 200);
+}
+
+/** What the user said about a card as they went through the board: logged on it straight away, in their words, then
+ *  acted on by a headless Claude (tools/card-update.md: its status, its title, new cards split off, a document). */
+export function update(cards, id, text, run = spawn) {
+  const words = String(text ?? '').replace(/\s+/g, ' ').trim();
+  if (!words) throw new Error('Nothing said');
+  const c = change(cards, id, undefined, { note: `you said: "${words}"` });
+  act(c, words, run);
+  return c;
+}
+function act(c, words, run) {
+  console.log(`updating ${c.id}`);
+  headless(c.id, fill(UPDATE, c, words), (why, out) => {
+    // Done nothing to it? Say so, with what it said, rather than leave the card looking forgotten.
+    const now = load().cards.find((x) => x.id === c.id);
+    if (!why && now && now.body.trim().endsWith(`you said: "${words}"`)) why = `did nothing: ${out.trim().slice(-300)}`;
+    if (why && now) change(load().cards, c.id, undefined, { note: `acting on it ${why}` }); // (gone? moved while it ran)
+    drawBoard();
+    did.set(c.id, why || summary(out));
+    console.log(`updated ${c.id}: ${did.get(c.id)}`);
+  }, run);
+}
+
+/** Anything left unanswered when the server stopped mid-run (restarted, closed), picked up again when it starts: a card
+ *  whose last line is still what you said, an inbox card not yet sorted. */
+export function resume(run = spawn, dir = TASKS) {
+  const picked = [];
+  for (const c of load(dir).cards) {
+    // its log an entry each (older failure notes ran over several lines)
+    const log = (c.body.split(/^## Log\s*$/m)[1] ?? '').trim().split(/\n(?=- )/).filter(Boolean);
+    // what you said last, with nothing after it but one failed try (the runs that failed before 15 Nov's fix, retried once)
+    const at = log.findLastIndex((l) => /^- [^:]+: you said: "/.test(l)), after = at < 0 ? [] : log.slice(at + 1);
+    const said = at >= 0 && after.length <= 1 && after.every((l) => /^- [^:]+: acting on it /.test(l)) ? log[at].match(/^- [^:]+: you said: "([^]*)"\s*$/)?.[1] : undefined;
+    if (said) { act(c, said, run); picked.push(c.id); }
+    else if (c.meta.status === 'inbox' && /^- [^:]+: added\.$/.test(log[0] ?? '')
+      // not yet sorted; or sorted once and failed (the runs before 15 Nov's fix), retried once
+      && (log.length === 1 || (log.length === 2 && /^- [^:]+: (left in the inbox|sorting )/.test(log[1])))) { triage(c, run); picked.push(c.id); }
+  }
+  return picked;
+}
+
+const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.woff2': 'font/woff2' };
+/** The board served from this machine only, drawn fresh on every look: a card moved by POST /api/move {id, status},
+ *  something dropped in by POST /api/inbox {text}, what's said about a card by POST /api/update {id, text}. */
+export function serve(port = PORT, { pickUp = true } = {}) {
+  const server = createServer((req, res) => {
+    const url = new URL(req.url, 'http://localhost');
+    if (req.method === 'POST' && url.pathname === '/api/move') {
+      let data = '';
+      req.on('data', (d) => { data += d; if (data.length > 4096) req.destroy(); });
+      req.on('end', () => {
+        try {
+          const { id, status } = JSON.parse(data);
+          const c = change(load().cards, String(id), String(status), { note: 'moved on the board' });
+          drawBoard();
+          res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ id: c.id, status: c.meta.status }));
+          console.log(`moved ${c.stream}/${c.id} to ${c.meta.status}`);
+        } catch (e) { res.writeHead(400, { 'content-type': 'text/plain' }).end(e.message); }
+      });
+      return;
+    }
+    if (req.method === 'POST' && url.pathname === '/api/inbox') {
+      let data = '';
+      req.on('data', (d) => { data += d; if (data.length > 64 * 1024) req.destroy(); });
+      req.on('end', () => {
+        try {
+          const c = dropIn(JSON.parse(data).text);
+          triage(c);
+          res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ id: c.id }));
+        } catch (e) { res.writeHead(400, { 'content-type': 'text/plain' }).end(e.message); }
+      });
+      return;
+    }
+    if (req.method === 'POST' && url.pathname === '/api/update') {
+      let data = '';
+      req.on('data', (d) => { data += d; if (data.length > 64 * 1024) req.destroy(); });
+      req.on('end', () => {
+        try {
+          const { id, text } = JSON.parse(data);
+          const c = update(load().cards, String(id), text);
+          res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ id: c.id, status: c.meta.status, html: cardHtml(c, load().streams) })); // the card as it is now, what you said on it
+        } catch (e) { res.writeHead(400, { 'content-type': 'text/plain' }).end(e.message); }
+      });
+      return;
+    }
+    if (req.method === 'GET' && url.pathname === '/api/card') {
+      const all = load(), c = all.cards.find((x) => x.id === url.searchParams.get('id'));
+      res.writeHead(c ? 200 : 404, { 'content-type': 'application/json', 'cache-control': 'no-store' })
+        .end(JSON.stringify(c ? { id: c.id, status: c.meta.status, log: c.body.split('## Log')[1]?.trim() ?? '', busy: busy.has(c.id), did: did.get(c.id) ?? '', html: cardHtml(c, all.streams) } : {}));
+      return;
+    }
+    if (req.method !== 'GET') { res.writeHead(405).end(); return; }
+    if (url.pathname === '/' || url.pathname === '/tasks/board.html') {
+      if (url.pathname === '/') { res.writeHead(302, { location: '/tasks/board.html' }).end(); return; }
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' }).end(board(load()));
+      return;
+    }
+    // The board's stylesheet, theme and screenshots, from the repo; nothing outside it.
+    const file = resolve(ROOT, '.' + decodeURIComponent(url.pathname));
+    if (!file.startsWith(ROOT + sep) || !existsSync(file) || !statSync(file).isFile()) { res.writeHead(404).end(); return; }
+    res.writeHead(200, { 'content-type': TYPES[extname(file).toLowerCase()] || 'application/octet-stream' }).end(readFileSync(file));
+  });
+  server.listen(port, '127.0.0.1', () => {
+    console.log(`The board: http://localhost:${port}/ (Ctrl+C to stop)`);
+    const picked = pickUp ? resume() : [];
+    if (picked.length) console.log(`picked up again, left unanswered when it last stopped: ${picked.join(', ')}`);
+  });
+  return server;
 }
 
 function args(argv) {
@@ -208,31 +506,35 @@ function main(argv) {
   if (cmd === 'add') {
     const [stream, title] = pos;
     if (!stream || !title) throw new Error('add <stream> "<title>"');
-    const sd = join(TASKS, stream);
-    if (!existsSync(sd)) { mkdirSync(sd); writeFileSync(join(sd, '_stream.md'), format({ name: stream, hue: 30 }, '\n')); }
-    let id = slug(title), n = 2;
-    while (existsSync(join(sd, id + '.md'))) id = `${slug(title)}-${n++}`;
-    const body = [opt.asked ? `**Asked:** ${opt.asked}` : '', opt.done ? `**Done looks like:** ${opt.done}` : ''].filter(Boolean).join('\n\n');
-    writeFileSync(join(sd, id + '.md'), format({ title, status: status(opt.status || 'asked'), asked: today(), updated: today() }, `\n${body}\n\n## Log\n\n- ${today()}: added.\n`));
-    console.log(`added ${stream}/${id}`);
+    const c = addCard(stream, title, opt);
+    console.log(`added ${c.stream}/${c.id}`);
   } else if (cmd === 'set' || cmd === 'note') {
+    const c = change(all.cards, pos[0], cmd === 'set' ? pos[1] : undefined, { ...opt, note: cmd === 'note' ? pos[1] : opt.note });
+    console.log(line(c));
+  } else if (cmd === 'tidy') {
+    const c = tidy(all.cards, pos[0], pos[1]);
+    console.log(`tidied ${c.stream}/${c.id}`);
+  } else if (cmd === 'move') {
     const c = find(all.cards, pos[0]);
-    const meta = { ...c.meta, updated: today() };
-    let body = c.body, what = [];
-    if (cmd === 'set') { meta.status = status(pos[1]); what.push(STATUSES[meta.status].toLowerCase()); }
-    for (const k of ['link', 'shot', 'session', 'branch', 'title']) if (k in opt) meta[k] = opt[k];
-    const note = cmd === 'note' ? pos[1] : opt.note;
-    if (note) what.push(note);
-    if (what.length) body = logged(body, what.join(': '));
-    writeFileSync(c.file, format(meta, body));
-    console.log(line({ ...c, meta }));
+    // (a stream that isn't there yet is made, as add makes one: named and described with `stream` after)
+    if (!/^[a-z0-9-]+$/.test(pos[1] ?? '')) throw new Error(`A stream is a folder name: "${pos[1]}"`);
+    if (!existsSync(join(TASKS, pos[1]))) { mkdirSync(join(TASKS, pos[1])); writeFileSync(join(TASKS, pos[1], '_stream.md'), format({ name: pos[1], hue: 30 }, '\n')); }
+    let id = c.id, n = 2;
+    while (existsSync(join(TASKS, pos[1], id + '.md'))) id = `${c.id}-${n++}`;
+    renameSync(c.file, join(TASKS, pos[1], id + '.md'));
+    console.log(`${c.stream}/${c.id} -> ${pos[1]}/${id}`);
+  } else if (cmd === 'serve') {
+    serve(Number(opt.port) || PORT, { pickUp: opt['pick-up'] !== 'no' });
+    return;
   } else if (cmd === 'stream') {
     const s = all.streams.find((x) => x.id === pos[0]);
     if (!s) throw new Error(`No stream "${pos[0]}": ${all.streams.map((x) => x.id).join(', ')}`);
     const { meta } = existsSync(s.file) ? parse(readFileSync(s.file, 'utf8')) : { meta: { name: s.id, hue: 30 } };
+    if (opt.name) meta.name = opt.name;
+    if (opt.hue) meta.hue = Number(opt.hue);
     writeFileSync(s.file, format(meta, `\n${pos[1]} (${today()})\n`));
     console.log(`${s.id}: ${pos[1]}`);
-  } else throw new Error(`Unknown command "${cmd}" (list, show, add, set, note, stream, board)`);
+  } else throw new Error(`Unknown command "${cmd}" (list, show, add, set, note, tidy, move, stream, board, serve)`);
   drawBoard();
 }
 

@@ -36,9 +36,9 @@
    turns with its ring); constellations of 3 places in the centre ring, 2 in the middle and 1 in the third (a fresh
    board's first, 3 and 1); points by the guide's sums, each ring's weight times (1.5 times its places) squared,
    rounded down (DEN.WEIGHT: 71 the first, 125 one after), times its step in the move's cascade, as a line's are; and
-   wild places, filled by a star of any colour:
+   wild targets, filled by a star of any colour:
    - a constellation charted in a chain (a clear before it or after it, in the same move) deals the next with its
-     centre ring all wild, and two or more clears add a fourth wild place to it; a plain chart deals plain;
+     centre ring all wild, and two or more clears add a fourth wild target to it; a plain chart deals plain;
    - a clear in a combo (the move's second step or later) turns wild the constellation's places on and beside what
      it cleared (beside: a place either side round the ring, or either side along the spoke).
    No par in a den: the points are the sums, however many moves. A line along a spoke is three or more of a colour in
@@ -104,7 +104,7 @@ export function needsCombo(marks) {
 export function denPoints(marks) {
     return DEN.WEIGHT.reduce((sum, w, ring) => sum + Math.floor(w * (1.5 * marks.filter((m) => m.ring === ring).length) ** 2), 0);
 }
-/** Do a star's colour and a place agree (a wild place takes any)? */
+/** Do a star's colour and a place agree (a wild target takes any)? */
 export const fits = (m, c) => c !== undefined && (!!m.wild || c === m.colour);
 /** A constellation's par of moves. */
 export const parFor = (stars) => PAR.BASE + PAR.PER_STAR * stars;

@@ -19,7 +19,7 @@
 // point (menus.js).
 import * as THREE from 'three';
 import {
-  HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, opening, lessonSecs, mishapLine, askHelium,
+  HELIUM_CAST, HELIUM, HELIUM_STANDS, HELIUM_MOOR, HELIUM_ARRIVE, Visit, lessonGame, lessonBeats, opening, lessonSecs, mishapLine, askHelium,
   onHeliumLanding, inHeliumEarshot, heliumShore, worksFor, praiseFor, Cellar, OPENING_BANG, lineSpot, PACE_LESSON,
   actAfter, holdSecs, ringed, Nerves, NERVE, whitesInFurnace, onScreen, hintFor, hintLeft, routesToFire, Watch, PACE_WATCH,
   BEST_STORE, cleanBestChain, beatBest, SEEN_STORE,
@@ -43,7 +43,7 @@ import { distillery } from './distillery.js';
 import { distillBoard } from './distill-board.js';
 import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
 
-/* Their opening choice, the one every tutorial has (TUTORIALS.md; js/tutorial-choice.js), and the parts it plays
+/* The choice every tutorial has (TUTORIALS.md; js/tutorial-choice.js), beside their lesson on T, and the parts it plays
    (src/den-helium-tutor.ts, from src/distill-tutorial.ts): set going only when it's first asked, so the den starts up
    without working out the read guide's pictures. */
 const tutor = () => import('../den-helium-tutor.js');
@@ -230,11 +230,14 @@ function handTick(dt) {
    the furnace the still goes bang; they shrug it off; your own lines in it (`who: 'you'`) over your head on
    the sloop, kept on the screen. It's only ever seen once: their lesson plays the first time you come up
    off their island, never again till the page is loaded afresh.
-   Then their opening choice (14 Nov; TUTORIALS.md, src/tutorial.ts): what are you after, the basics, the early or
-   mid game, a higher Crystal Clear; and that part's list, its phases, scenarios and tricks; the one picked played
-   next on a board of its own (src/den-helium-tutor.ts), step one their lesson as it was. `beats`: the lesson's
-   beats (by default the opening and the choice); `wide`: the opening's wide shot first, else in on the board. */
-function lessonPlay(beats = [...opening(), CHOOSE], { wide: opening = true } = {}) {
+   Then straight into step one, no question first (the user, 15 Nov: "I don't want to have to ask 3 questions to see
+   something happen"; RULES.md, "The lesson is the quick way in"). What else they can show is beside it, not in front
+   of it: T, or the small button, any time, and the choice (TUTORIALS.md, src/tutorial.ts) comes up, the lesson
+   holding while it's up; the part picked is played next on a board of its own (src/den-helium-tutor.ts), in place
+   of the rest; Esc, and the lesson goes on. They say so once, as step one's done. `beats`: the lesson's beats (by
+   default the opening and step one); `wide` (`wideFirst`, not `opening`, which is their opening): the opening's
+   wide shot first, else in on the board. */
+function lessonPlay(beats = lessonBeats(), { wide: wideFirst = true } = {}) {
   const W = helium.W, P = PACE_LESSON;
   sail.helm.moor(HELIUM_MOOR);
   sail.riding = false;
@@ -246,37 +249,70 @@ function lessonPlay(beats = [...opening(), CHOOSE], { wide: opening = true } = {
   // side behind; then in on the board for the lesson, boardView)
   const still = W.distillery.g.getWorldPosition(V3(0, 0, 0)).add(V3(0, 1.8, 0));
   const wide = { look: at.clone().lerp(still, 0.45), dist: Math.max(dist * 1.25, at.distanceTo(still) * 2.1), tilt: 0.16, yaw: W.yaw + 0.22 };
-  let i = -1, t = 0, need = 0, acted = true, gap = 0, on = false, burned = false, zoom = !opening, waiting = false, panel = null;
+  let i = -1, t = 0, need = 0, acted = true, gap = 0, on = false, burned = false, zoom = !wideFirst, waiting = false, panel = null;
   W.them.lookAt = { x: look.x + Math.sin(W.yaw) * dist, z: look.z + Math.cos(W.yaw) * dist };   // (to the camera, their audience)
   const goOn = () => { if (i >= 0 && t >= P.READ_FIRST && !waiting) on = true; };
   const click = (e) => { if (e.button === 0) goOn(); };
   addEventListener('pointerdown', click);
-  /* Their opening choice (src/tutorial.ts): the lesson waits on it; the part picked is played next, on a board of its
-     own (src/den-helium-tutor.ts); "Not now", and the still's yours. A "show me this" link's part instead, straight. */
-  const choose = (b) => {
+  /* A "show me this" link's part (src/den-helium-tutor.ts, learnBeats), played straight away; a part not there,
+     and their step one, as on a first visit: never a question. */
+  const learn = (b) => {
     waiting = c.choosing = true;
-    const go = (more) => { beats.splice(i + 1, 0, ...more); waiting = c.choosing = false; panel = null; };
-    Promise.all([tutor(), chooser()]).then(([T, C]) => {
+    const go = (more) => { beats.splice(i + 1, 0, ...more); waiting = c.choosing = false; };
+    tutor().then((T) => {
       if (helium.play !== c) return;
-      const learnt = b.learn ? T.learnBeats(b.learn) : [];
-      if (learnt.length) { go(learnt); return; }
-      panel = C.tutorialChoice(T.DISTILL_TUTORIAL, {
-        onPlay: (e) => go(T.tutorBeats(e.part)),
-        onClose: () => go([{ name: 'notNow', says: TUTOR.notNow, note: TUTOR.afterNote, act: { kind: 'none' } }]),
-      });
+      const learnt = T.learnBeats(b.learn);
+      go(learnt.length ? learnt : T.learnBeats('stepOne'));
     }, (e) => { console.error(e); go([]); });
   };
+  /* What else they can show you, beside the lesson (T, or the button): the choice comes up, the lesson holding once
+     the beat it's on is done; the part picked played next, in place of the rest; Esc or "Not now", and on it goes. */
+  const showElse = () => {
+    if (waiting || panel) return;
+    waiting = c.choosing = true;
+    elseBtn.style.display = 'none';
+    noteFor(TUTOR.chooseNote, 99);
+    const back = () => { panel = null; waiting = c.choosing = false; elseBtn.style.display = ''; };
+    Promise.all([tutor(), chooser()]).then(([T, C]) => {
+      if (helium.play !== c) return;
+      panel = C.tutorialChoice(T.DISTILL_TUTORIAL, {
+        at: 'bottom',
+        onPlay: (e) => {
+          const more = T.tutorBeats(e.part);
+          back();
+          if (!more.length) return;
+          // (the rest of this lesson dropped; what's on the board now stops, the part's own board laid next)
+          beats.splice(i + 1, beats.length, ...more);
+          helium.hand = []; helium.board?.letGo?.();
+          acted = true; need = 0; on = true;
+        },
+        onClose: () => { back(); noteFor(beats[i]?.note ?? '', 99); },
+      });
+    }, (e) => { console.error(e); back(); });
+  };
+  // (the button beside the lesson, for a phone; T on a keyboard)
+  const elseBtn = document.createElement('button');
+  elseBtn.id = 'helium-else';
+  elseBtn.textContent = TUTOR.button;
+  elseBtn.style.cssText = `${BTN};position:fixed;right:16px;bottom:64px;z-index:30`;
+  elseBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); showElse(); });
+  document.body.append(elseBtn);
   const c = {
-    cam: opening ? wide : boardView(),
+    cam: wideFirst ? wide : boardView(),
     started: performance.now(),
-    /** Space or Enter: on to the next line, once this one's been up a moment (Esc still skips: cine.js). */
-    key(k) { if (k === ' ' || k === 'enter') { goOn(); return true; } return false; },
+    /** Space or Enter: on to the next line, once this one's been up a moment (Esc still skips: cine.js); T: what
+        else they can show you. */
+    key(k) {
+      if (k === ' ' || k === 'enter') { goOn(); return true; }
+      if (k === 't') { showElse(); return true; }
+      return false;
+    },
     tick(dt) {
       t += dt;
       if (zoom) c.cam = boardView();
       if (waiting) return;
       // (not till the camera's flown out to their island: the bang's the first thing to see)
-      if (i < 0 && opening && t < 12 && camera.position.distanceTo(c.cam.look) > c.cam.dist * 1.6) return;
+      if (i < 0 && wideFirst && t < 12 && camera.position.distanceTo(c.cam.look) > c.cam.dist * 1.6) return;
       const B = helium.board, b = beats[i];
       if (b && !acted && (t >= actAfter(b) || on)) {
         acted = true;
@@ -308,11 +344,12 @@ function lessonPlay(beats = [...opening(), CHOOSE], { wide: opening = true } = {
       if (n.step) zoom = true;
       noteFor(n.step ? `Step ${n.step}: ${n.note.replace(/^Step \d+: /, '')}` : n.note, 99);
       t = 0; gap = 0; on = false; need = holdSecs(n); acted = n.act.kind !== 'drag' && n.act.kind !== 'drags' && n.act.kind !== 'burn';
-      if (n.act.kind === 'choose') choose(n);
+      if (n.act.kind === 'learn') learn(n);
     },
     end() {
       removeEventListener('pointerdown', click);
       panel?.close(); panel = null;
+      elseBtn.remove();
       helium.lessonSecs = (performance.now() - c.started) / 1000;   // (how long it ran, for a check)
       helium.play = null; helium.hand = []; helium.bigBang = 0; W.them.lookAt = null; atStill(true);
     },
@@ -320,11 +357,12 @@ function lessonPlay(beats = [...opening(), CHOOSE], { wide: opening = true } = {
   helium.play = c;
   cinePlay(c);
 }
-/** Their opening choice as a beat of their lesson (`learn`: a part to play instead, from a link). */
-const CHOOSE = { name: 'choose', says: '', note: TUTOR.chooseNote, act: { kind: 'choose' } };
+/** A read guide's "show me this" as a beat of their lesson: its part (`learn`) played straight away. */
+const LEARN = { name: 'learn', says: '', note: 'Helium\'s island.', act: { kind: 'learn' } };
 
-/* "Teach me" at the still (T, or its button): their opening choice again, over your board; the part picked played as
-   their lesson is, on a board of its own, then a fresh board yours. "Not now", and your board's as it was. */
+/* "Show me something else" at the still (T, or its button): the choice of what they can show you, over your board;
+   the part picked played as their lesson is, on a board of its own, then a fresh board yours. "Not now", and your
+   board's as it was. */
 export function heliumTeach() {
   const B = helium.board;
   if (!helium.on || !B || helium.hand.length || helium.choice) return;
@@ -609,7 +647,7 @@ function helpButton(on) {
       btn.append(b);
       return b;
     };
-    add('helium-teach', 'Teach me (T)', heliumTeach);
+    add('helium-teach', TUTOR.button, heliumTeach);
     add('helium-hint', 'Hint (G)', heliumHint);
     watchBtn = add('helium-watch', 'Watch Helium (W)', heliumWatch);
     add('helium-help', 'Help, Helium (H)', heliumHelp);
@@ -770,12 +808,12 @@ export function heliumTick(dt) {
     // board: their lesson.
     if (helium.visit.arrive(onHeliumLanding(p.c, p.r), free() && sail.helm.slot < 0 && !station.on)) {
       keepSeen();
-      // (a read guide's "show me this": that part straight away; else their opening, then their choice)
+      // (a read guide's "show me this": that part straight away; else their opening, then step one)
       const learn = helium.learn; helium.learn = null;
-      if (learn) lessonPlay([{ ...CHOOSE, learn }], { wide: false }); else lessonPlay();
+      if (learn) lessonPlay([{ ...LEARN, learn }], { wide: false }); else lessonPlay();
     }
   }
-  if (helium.play) bar(helium.play.choosing ? helium.note : `${helium.note} · Space: go on · Esc: skip`);
+  if (helium.play) bar(helium.play.choosing ? helium.note : `${helium.note} · Space: go on · ${TUTOR.barKey} · Esc: skip`);
   watchTick(dt);
   handTick(dt);
   you.tick(dt);
