@@ -307,6 +307,25 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   - the balance as before: the dodge measured head-on and in whole blockades with no change, and the balance tests
     passing with the two rocks in.
 
+- **Playing for the points: frigates camp the heart, brigs send turtles in from the lagoons** (15 Nov: "people aren't
+  really paying attention to the points. They're just going off and starting a few fights ... I'm not seeing the kind of
+  desired war frigs camping in the middle, war brigs sending turtles in through the gaps ... I just want to see the war
+  brigs camping out there more and sending in the turtles"). Watched first (one whole blockade): frigates spent 55% of
+  their time fighting and 16% in the heart, chasing turtles 188 s; a lone frigate with the gate shot open lay on the
+  2-pennant buoy in front of it rather than going in; the brigs anchored by their lagoon buoys, 15 squares from the
+  prize, just out of launching reach, their turtles ramming frigates brawling at sea. Now, the bots only:
+  - the heart's worth 2.5 times to a frigate (was 1.6): through a gate shot open to the prize, ~20 s alone;
+  - a frigate holding a heart buoy fights only what comes within 5 squares (`HOLD`); a frigate or brig never chases a
+    brig's craft of her own choosing (too quick, only a while: she shoots them as they bear);
+  - with an enemy frigate in the heart, a brig makes for the square in a lagoon nearest the prize (its corner by the
+    gap the wind runs through into the fort) and launches only there (`station`), from 17 squares (was 14);
+  - a turtle goes for a ship lying still first (8 squares' worth): she can only ram one that's still, so a frigate
+    camped on a buoy is hers before a sloop darting about nearer;
+  - after, two games: brigs at anchor, craft out, three quarters of the time, at (8,17), (8,18), (35,17); turtles
+    ramming frigates 36 to 60 times a game (was 16 to 38); frigates holding the prize longer, and paying for it.
+  - Shelter: the lagoons are the brigs' sheltered place beside the heart, its winds their way in; no rocks added at
+    the fort's corners (the user wondered; the lagoons already do it).
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of

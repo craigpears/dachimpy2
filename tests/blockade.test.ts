@@ -565,7 +565,7 @@ describe('war brigs, the middle class (15 Nov: "a middle ship class, so it\'s no
   it('a brig\'s bot won\'t anchor to launch with an enemy sloop close enough to catch her at it', () => {
     const b = new Blockade(), t = brig(b, 'gold'), f = frigate(b, 'crimson'), sl = sloop(b, 'crimson');
     clearAway(b, [t, f, sl]);
-    t.helm.moor({ c: 20, r: 6, d: 1 }); f.helm.moor({ c: 26, r: 14, d: 1 }); sl.helm.moor({ c: 23, r: 8, d: 1 }); b.notice();
+    t.helm.moor({ c: 20, r: 6, d: 1 }); f.helm.moor({ c: 26, r: 10, d: 1 }); sl.helm.moor({ c: 23, r: 8, d: 1 }); b.notice();
     const bots = new Bots(b, b.ships.filter((s) => s !== t && !s.craft).map((s) => s.id), dice(3));
     for (let i = 0; i < 30; i++) { bots.tick(b, 0.1); b.tick(0.1); }
     expect(b.anchored(t)).toBe(false);
@@ -646,5 +646,58 @@ describe('dip, duck and dodge (15 Nov: "in the open water, it would be suicide, 
     let safe = false;
     for (let i = 0; i < 30 && !safe; i++) { bot.tick(b, 0.1); b.tick(0.1); safe = !reach(b, f).has(`${sl.helm.pose.c},${sl.helm.pose.r}`); }
     expect(safe).toBe(true);
+  });
+});
+
+describe('playing for the points (15 Nov: "people aren\'t really paying attention to the points. They\'re just going off and starting a few fights ... I just want to see the war brigs camping out there more and sending in the turtles")', () => {
+  /** A gate's tower shot down, as a frigate's broadsides leave it: its squares open water. */
+  const crumble = (b: Blockade, g: number, i: number) => {
+    const t = b.gates[g].towers[i];
+    while (t.hp > 0) t.hit('large');
+    for (const [c, r] of t.squares) b.rocks.delete(`${c},${r}`);
+    for (const o of b.ships) o.sea.touch();
+  };
+  it('a frigate goes in through a gate shot open to the prize, not lying on the buoy in front of it', () => {
+    const b = new Blockade(), f = frigate(b);
+    clearAway(b, [f]);
+    crumble(b, 0, 1);
+    b.battery.forEach((x) => { x.wrecked = true; });
+    const bot = new Bot(f.id, dice(3));
+    let t = 0;
+    for (; t < 60 && !b.reaches(f, B.BUOYS[0]); t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
+    expect(b.reaches(f, B.BUOYS[0])).toBe(true);
+  });
+  it('a frigate holding the prize keeps it: a sloop out of her reach is left be', () => {
+    const b = new Blockade(), f = frigate(b), sl = sloop(b, 'crimson');
+    clearAway(b, [f, sl]);
+    f.helm.moor({ c: 21, r: 17, d: 1 });
+    sl.helm.moor({ c: 21, r: 25, d: 1 }); b.notice();
+    expect(b.reaches(f, B.BUOYS[0])).toBe(true);
+    const bot = new Bot(f.id, dice(5));
+    for (let t = 0; t < 15; t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
+    expect(b.reaches(f, B.BUOYS[0])).toBe(true);
+  });
+  it('a brig, with an enemy frigate camped in the heart, makes for her lagoon\'s corner by the wind\'s gap into it, anchors there and launches', () => {
+    const b = new Blockade(), br = brig(b), f = frigate(b, 'crimson');
+    clearAway(b, [br, f]);
+    f.helm.moor({ c: 21, r: 17, d: 1 }); b.notice();
+    const bot = new Bot(br.id, dice(7));
+    for (let t = 0; t < 90 && !b.anchored(br); t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
+    expect(b.anchored(br)).toBe(true);
+    // (inside the west lagoon, its side nearest the fort)
+    const reef = B.REEFS[0], p = br.helm.pose;
+    expect(Math.max(Math.abs(p.c - reef.at[0]), Math.abs(p.r - reef.at[1]))).toBeLessThan(reef.ring);
+    expect(p.c).toBeGreaterThan(reef.at[0]);
+  });
+  it('a turtle goes for a frigate lying still before a sloop on the move nearer her', () => {
+    const b = new Blockade(), br = brig(b), f = frigate(b, 'crimson'), sl = sloop(b, 'crimson');
+    clearAway(b, [br, f, sl]);
+    br.helm.moor({ c: 8, r: 18, d: 1 }); f.helm.moor({ c: 18, r: 18, d: 0 }); sl.helm.moor({ c: 12, r: 18, d: 0 }); b.notice();
+    expect(b.launch(br.id)).toBeTruthy();
+    const turtle = b.ships.find((s) => s.craft?.kind === 'ram' && s.team === 'gold' && s.away <= 0)!;
+    const bot = new Bot(turtle.id, dice(9));
+    b.still.set(f.id, 5); b.still.set(sl.id, 0);
+    bot.tick(b, 5);
+    expect(bot.goal?.kind === 'ram' && bot.goal.on).toBe(f.id);
   });
 });
