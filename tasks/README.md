@@ -10,7 +10,7 @@ and rendering it").
 - **A file a card** in it: its title, status, when it was asked and last updated, its `?at=` link, a screenshot
   (a path from the repo's root), the session or branch doing it; then what was asked, in the user's words, what done
   looks like, and its log.
-- **Statuses:** idea (the Ideas column, the left-most: what was IDEAS.md), asked, ready (to start), doing (being done), review (for the user to review), playtest (for the user to
+- **Statuses:** inbox (what you drop in, before it's sorted), idea (the Ideas column, the left-most: what was IDEAS.md), asked, ready (to start), doing (being done), review (for the user to review), playtest (for the user to
   playtest), done. Nothing's parked (the user, 15 Nov: "if things are parked, that means they're done,
   really"): a maybe-later is asked.
 - **The board:** `tasks/board.html`, drawn from the files by `tools/task.mjs` (not committed, not published). Open it
@@ -44,3 +44,14 @@ Each draws the board again. `board:serve` shows it at http://localhost:8643/, wh
 3. Sessions don't touch tasks/. When one reports back, the main session checks its work, merges it, and moves its card
    on: `review` or `playtest` with its link and a screenshot, the stream's note if it moved on.
 4. Once the user's played it: `done` (or back to `ready` with what they said).
+
+## The inbox: drop it in, it's sorted for you
+
+On the served board (`npm run board:serve`), the box at the top takes anything: a fix, an idea, a thought, dictated
+as it comes (the user, 15 Nov: "an agent that processes that column whenever I drop something in it ... it puts it
+either into a to-do item or an idea, updates an ideas list or a document"). It's an inbox card at once
+(`tasks/inbox/`), and the server starts a headless Claude (Sonnet, `claude -p`) with `tools/inbox-triage.md`: it may
+only run the task script, read, and edit the design documents. It splits what you wrote into its parts and puts each
+where it goes: a card (asked), an idea card, a note on a card it adds to, or RACE.md, STORY.md, RULES.md or
+DISTILLING.md; then the inbox card's done, its log saying where each part went. Anything it can't place stays in the
+inbox with a note, for the main session. It doesn't commit: the main session does.

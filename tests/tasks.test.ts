@@ -2,7 +2,7 @@
 // column for; the board drawn from them, a script's work and no one else's (the user, 15 Nov: "more deterministic").
 import { describe, it, expect } from 'vitest';
 // @ts-expect-error: a plain .mjs tool, untyped
-import { load, board, parse, format, change, STATUSES } from '../tools/task.mjs';
+import { load, board, parse, format, change, dropIn, triage, STATUSES } from '../tools/task.mjs';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -47,6 +47,30 @@ describe('the task board (the user, 14 Nov: "a clear list of things and what the
       expect(body).toMatch(/: done: moved on the board/);
       expect(() => change(load(dir).cards, 'raids', 'parked')).toThrow();
     } finally { rmSync(dir, { recursive: true, force: true }); }
+  });
+  it('what\'s dropped in the inbox is a card at once, its words kept (the user, 15 Nov: "whenever I drop something in it")', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'tasks-'));
+    try {
+      const c = dropIn('The rowing feels slow when you turn. Also an idea: a lighthouse.', dir, new Date(2026, 10, 15, 9, 30, 5));
+      expect(c.id).toBe('inbox-20261115-093005');
+      const { meta, body } = parse(readFileSync(c.file, 'utf8'));
+      expect(meta.status).toBe('inbox');
+      expect(body).toContain('a lighthouse');
+      expect(() => dropIn('   ', dir)).toThrow();
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  });
+  it('sorting it is a headless Claude allowed only the task script, reading, and editing documents', () => {
+    let args: string[] = [], prompt = '';
+    const fake = (_cmd: string, a: string[]) => {
+      args = a;
+      return { on() {}, stdout: { on() {} }, stderr: { on() {} }, stdin: { end: (p: string) => { prompt = p; } } };
+    };
+    triage({ id: 'inbox-20261115-093005', stream: 'inbox' }, fake);
+    expect(args).toContain('-p');
+    expect(args[args.indexOf('--allowedTools') + 1]).toBe('Read,Grep,Glob,Edit,Bash(node tools/task.mjs:*)');
+    expect(prompt).toContain('tasks/inbox/inbox-20261115-093005.md');
+    expect(prompt).toContain('set inbox-20261115-093005 done');
+    expect(prompt).not.toContain('{{');
   });
   it('the board lets a card be dragged, or moved from its menu', () => {
     const html: string = board(all);

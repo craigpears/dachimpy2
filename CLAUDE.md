@@ -108,12 +108,14 @@ card, or a `note` on the idea it adds to. There is no TODO.md or IDEAS.md any mo
 basically be no to-do thing anymore. It should just be all these little files"); older notes citing "TODO.md, ..."
 or "IDEAS.md, ..." mean the card of that name (an idea's id starts `idea-`), or git history. The principles that
 opened IDEAS.md are in STORY.md.
-The task board (15 Nov; [tasks/README.md](tasks/README.md)): a card a file in `tasks/<stream>/`, by status (idea,
-asked, ready, doing, review, playtest, done; nothing parked: "if things are parked, that means they're done, really"),
+The task board (15 Nov; [tasks/README.md](tasks/README.md)): a card a file in `tasks/<stream>/`, by status (inbox,
+idea, asked, ready, doing, review, playtest, done; nothing parked: "if things are parked, that means they're done, really"),
 drawn into `tasks/board.html` by `tools/task.mjs`. Only the script changes a card (`npm run task -- add | set | note |
 move | stream`), never a hand edit or a hand-drawn page (the user: "more deterministic ... I don't have to worry about
 how many tokens are being spent"); the user drags cards between columns on `npm run board:serve`
-(http://localhost:8643/), each drop a `set` by the same script. A session started for a card is put on it (`set <id>
+(http://localhost:8643/), each drop a `set` by the same script, and drops brain-dumps into its inbox, each sorted
+straight away by a headless Claude (`tools/inbox-triage.md`) into a card, an idea or a design document (README, "The
+inbox"); what it sorted is committed by the main session. A session started for a card is put on it (`set <id>
 doing --session <id>`); sessions themselves never touch `tasks/`; when one reports back, the main session moves its
 card on (`review` or `playtest`, its link and a screenshot). "Pick up tasks" means offer each `ready` card as a
 session, its brief from `show <id>`.

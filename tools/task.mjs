@@ -18,11 +18,13 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSync, renameSync } from 'node:fs';
 import { join, dirname, relative, resolve, extname, sep } from 'node:path';
 import { createServer } from 'node:http';
+import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const TASKS = join(ROOT, 'tasks');
 export const STATUSES = {
+  inbox: 'Inbox',
   idea: 'Ideas',
   asked: 'Asked',
   ready: 'Ready to start',
@@ -170,6 +172,11 @@ export function board({ streams, cards }, when = new Date()) {
   code { font-size: 12px; color: var(--accent-text); }
   a { color: var(--accent-text); }
   .who, .id { color: var(--faint); font-size: 12px; }
+  .drop { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; padding: 0 16px 10px; }
+  .drop textarea { flex: 1 1 320px; min-height: 2.6em; background: var(--tile); color: var(--text); border: 1px solid var(--edge); border-radius: 6px; padding: 6px 8px; font: inherit; resize: vertical; }
+  .drop button { background: var(--accent); color: var(--on-accent); border: 0; border-radius: 6px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; }
+  .sorting { flex-basis: 100%; color: var(--dim); font-size: 13px; }
+  .col[data-status="inbox"] { border-color: var(--accent); }
   .card[draggable="true"] { cursor: grab; }
   .card.dragging { opacity: .45; }
   .col.over { outline: 2px dashed var(--accent); outline-offset: -2px; }
@@ -183,6 +190,7 @@ export function board({ streams, cards }, when = new Date()) {
 </style></head>
 <body>
 <header><h1>Task board</h1><span class="made">Drawn ${esc(today(when))}, ${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')} from tasks/ by tools/task.mjs</span></header>
+<form class="drop"><textarea name="text" rows="2" placeholder="Drop something in: a fix, an idea, a thought. Sorted onto the board for you."></textarea><button>Drop it in</button><span class="sorting" hidden></span></form>
 <div class="chips"><button class="chip on" data-stream="" style="--h:30">Every stream</button>${chips}</div>
 <details class="where"><summary>Where each stream's got to</summary><div class="streams">${notes}</div></details>
 <main class="cols">${cols}</main>
@@ -228,6 +236,34 @@ export function board({ streams, cards }, when = new Date()) {
       if (dragged && dragged.closest('.col') !== col) moveTo(dragged.dataset.id, col.dataset.status);
     });
   });
+  // The inbox: what's dropped in is a card at once, then sorted by a headless Claude (tools/inbox-triage.md); the
+  // board watches it and draws itself again once it's been put where it goes.
+  const form = document.querySelector('.drop'), sorting = form.querySelector('.sorting');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = form.text.value.trim();
+    if (!text) return;
+    let id;
+    try {
+      const r = await fetch('/api/inbox', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text }) });
+      if (!r.ok) throw new Error(await r.text());
+      id = (await r.json()).id;
+    } catch (err) {
+      tell(location.port === '${PORT}' ? 'Not dropped in: ' + err.message : 'To drop things in, run npm run board:serve and open http://localhost:${PORT}/');
+      return;
+    }
+    form.text.value = '';
+    sorting.hidden = false; sorting.textContent = 'In the inbox. Sorting it...';
+    const started = Date.now();
+    const watch = setInterval(async () => {
+      try {
+        const c = await (await fetch('/api/card?id=' + encodeURIComponent(id))).json();
+        const last = (c.log || '').split('\\n').pop();
+        if (c.status !== 'inbox' || /left in the inbox|failed|couldn't start/.test(last)) { clearInterval(watch); sorting.textContent = last.replace(/^- /, ''); setTimeout(() => location.reload(), 2500); }
+        else if (Date.now() - started > 10 * 60e3) { clearInterval(watch); sorting.textContent = 'Still sorting; it will be on the board when you reload.'; }
+      } catch (err) {}
+    }, 3000);
+  });
   document.querySelectorAll('.move select').forEach((s) => s.addEventListener('change', async () => {
     const was = s.closest('.col').dataset.status;
     if (!(await moveTo(s.dataset.id, s.value))) s.value = was;
@@ -240,6 +276,22 @@ export function drawBoard(dir = TASKS) {
   const out = join(dir, 'board.html');
   writeFileSync(out, board(load(dir)));
   return out;
+}
+
+/** A new card: in its stream (made if new), its id from its title, what was asked and what done looks like. */
+export function addCard(stream, title, opt = {}, dir = TASKS) {
+  const st = opt.status || 'asked';
+  if (!(st in STATUSES)) throw new Error(`Status is one of: ${Object.keys(STATUSES).join(', ')}`);
+  if (!/^[a-z0-9-]+$/.test(stream)) throw new Error(`A stream is a folder name: "${stream}"`);
+  const sd = join(dir, stream);
+  if (!existsSync(sd)) { mkdirSync(sd); writeFileSync(join(sd, '_stream.md'), format({ name: stream, hue: 30 }, '\n')); }
+  let id = opt.id || slug(title) || 'card', n = 2;
+  const base = id;
+  while (existsSync(join(sd, id + '.md'))) id = `${base}-${n++}`;
+  const body = [opt.asked ? `**Asked:** ${opt.asked}` : '', opt.done ? `**Done looks like:** ${opt.done}` : ''].filter(Boolean).join('\n\n');
+  const meta = { title, status: st, asked: today(), updated: today() };
+  writeFileSync(join(sd, id + '.md'), format(meta, `\n${body}\n\n## Log\n\n- ${today()}: added.\n`));
+  return { id, stream, file: join(sd, id + '.md'), meta };
 }
 
 /** A card changed: its status (logged), any of its fields, a line for its log. The one way a card's changed. */
@@ -256,6 +308,40 @@ export function change(cards, id, status, opt = {}) {
   const body = what.length ? logged(c.body, what.join(': ')) : c.body;
   writeFileSync(c.file, format(meta, body));
   return { ...c, meta, body };
+}
+
+/** Something dropped in the inbox: a card of its own in tasks/inbox/, what was written its Asked. */
+export function dropIn(text, dir = TASKS, when = new Date()) {
+  const words = String(text ?? '').trim();
+  if (!words) throw new Error('Nothing to drop in');
+  const title = words.replace(/\s+/g, ' ').slice(0, 70).replace(/\s\S*$/, (m) => (words.length > 70 ? '...' : m));
+  const stamp = `${when.getFullYear()}${String(when.getMonth() + 1).padStart(2, '0')}${String(when.getDate()).padStart(2, '0')}-${String(when.getHours()).padStart(2, '0')}${String(when.getMinutes()).padStart(2, '0')}${String(when.getSeconds()).padStart(2, '0')}`;
+  if (!existsSync(join(dir, 'inbox'))) { mkdirSync(join(dir, 'inbox')); writeFileSync(join(dir, 'inbox', '_stream.md'), format({ name: 'Inbox', hue: 0 }, '\nWhat you drop in, before it\'s sorted.\n')); }
+  return addCard('inbox', title, { status: 'inbox', asked: words.replace(/\r?\n/g, ' '), id: `inbox-${stamp}` }, dir);
+}
+
+export const TRIAGE = join(ROOT, 'tools', 'inbox-triage.md');
+/** An inbox card sorted by a headless Claude (tools/inbox-triage.md says how): into a card, an idea or a document,
+ *  the inbox card then done. Only the task script, reading and editing documents are allowed it. If it couldn't, the
+ *  inbox card says why and stays in the inbox. */
+export function triage(card, run = spawn) {
+  const prompt = readFileSync(TRIAGE, 'utf8').replaceAll('{{card}}', `${card.stream}/${card.id}`).replaceAll('{{id}}', card.id);
+  const tools = ['Read', 'Grep', 'Glob', 'Edit', 'Bash(node tools/task.mjs:*)'].join(',');
+  let out = '';
+  const finish = (why) => {
+    const now = load().cards.find((x) => x.id === card.id);
+    if (now && now.meta.status === 'inbox' && why) change(load().cards, card.id, undefined, { note: why });
+    drawBoard();
+    console.log(`sorted ${card.id}: ${(now?.meta.status === 'inbox' ? why : 'done') ?? ''}`);
+  };
+  const child = run('claude', ['-p', '--model', 'sonnet', '--allowedTools', tools], { cwd: ROOT, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
+  child.on('error', (e) => finish(`couldn't start Claude to sort it: ${e.message}`));
+  child.stdout?.on('data', (d) => { out += d; });
+  child.stderr?.on('data', (d) => { out += d; });
+  child.on('close', (code) => finish(code ? `sorting it failed (${code}): ${out.trim().slice(-300)}` : `left in the inbox: ${out.trim().slice(-300)}`));
+  child.stdin?.end(prompt);
+  console.log(`sorting ${card.id}`);
+  return child;
 }
 
 const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
@@ -276,6 +362,24 @@ export function serve(port = PORT) {
           console.log(`moved ${c.stream}/${c.id} to ${c.meta.status}`);
         } catch (e) { res.writeHead(400, { 'content-type': 'text/plain' }).end(e.message); }
       });
+      return;
+    }
+    if (req.method === 'POST' && url.pathname === '/api/inbox') {
+      let data = '';
+      req.on('data', (d) => { data += d; if (data.length > 64 * 1024) req.destroy(); });
+      req.on('end', () => {
+        try {
+          const c = dropIn(JSON.parse(data).text);
+          triage(c);
+          res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ id: c.id }));
+        } catch (e) { res.writeHead(400, { 'content-type': 'text/plain' }).end(e.message); }
+      });
+      return;
+    }
+    if (req.method === 'GET' && url.pathname === '/api/card') {
+      const c = load().cards.find((x) => x.id === url.searchParams.get('id'));
+      res.writeHead(c ? 200 : 404, { 'content-type': 'application/json', 'cache-control': 'no-store' })
+        .end(JSON.stringify(c ? { id: c.id, status: c.meta.status, log: c.body.split('## Log')[1]?.trim() ?? '' } : {}));
       return;
     }
     if (req.method !== 'GET') { res.writeHead(405).end(); return; }
@@ -315,13 +419,8 @@ function main(argv) {
   if (cmd === 'add') {
     const [stream, title] = pos;
     if (!stream || !title) throw new Error('add <stream> "<title>"');
-    const sd = join(TASKS, stream);
-    if (!existsSync(sd)) { mkdirSync(sd); writeFileSync(join(sd, '_stream.md'), format({ name: stream, hue: 30 }, '\n')); }
-    let id = slug(title), n = 2;
-    while (existsSync(join(sd, id + '.md'))) id = `${slug(title)}-${n++}`;
-    const body = [opt.asked ? `**Asked:** ${opt.asked}` : '', opt.done ? `**Done looks like:** ${opt.done}` : ''].filter(Boolean).join('\n\n');
-    writeFileSync(join(sd, id + '.md'), format({ title, status: status(opt.status || 'asked'), asked: today(), updated: today() }, `\n${body}\n\n## Log\n\n- ${today()}: added.\n`));
-    console.log(`added ${stream}/${id}`);
+    const c = addCard(stream, title, opt);
+    console.log(`added ${c.stream}/${c.id}`);
   } else if (cmd === 'set' || cmd === 'note') {
     const c = change(all.cards, pos[0], cmd === 'set' ? pos[1] : undefined, { ...opt, note: cmd === 'note' ? pos[1] : opt.note });
     console.log(line(c));

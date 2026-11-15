@@ -1,10 +1,11 @@
 ---
 title: Her full controls, guns, turn and pilot
-status: doing
+status: review
 asked: 15 Nov
 updated: 15 Nov
 link: frigate-test.html
 session: local_1c668cf5-51c6-4f28-851f-a2174855ed7a
+branch: claude/primates-rule-controls-1119f7
 ---
 
 **Asked:** the full controls "so I can shoot ... at the sloop"; her turn "making it cover a lot more space than you would in a sloop, so that actually is making it faster"; her guns a broadside, not aimed gun by gun; "a destructible ... Imperial Gate thing" to shoot at; the pilot turning toward a plotted point when going forward would do, "within the silhouette of the whole ship".
@@ -37,3 +38,4 @@ session: local_1c668cf5-51c6-4f28-851f-a2174855ed7a
 - 15 Nov: ready to start: back to ready until its session can start
 - 15 Nov: being done: restarted in its own session and worktree, the repository trusted
 - 15 Nov: being done: the original session restarted by you; the duplicate stopped
+- 15 Nov: for you to review: done on its branch (e14baa7): shooting with Q and E, the imperial gate, her wide turn sailed forward and never quicker than the sloop, the pilot there once the point's under her; not merged yet
