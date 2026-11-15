@@ -54,8 +54,11 @@ tests, add a test for it, named after what they saw, with the date.
 Smoke tests (15 Nov, after `?at=helium` crashed on arrival, live, for a day): `npm run smoke` (`tools/smoke.mjs`,
 Playwright's Chromium on the real GPU) opens every `den.html?at=` link on the front page, as the plain modules and
 as the bundle, played a few seconds with Space pressed, and every other page, failing on any uncaught or console
-error; about a minute and a half, one line when it passes. Run it before every push to main, after `npm run build`;
-`npm run smoke -- helium` for just the pages with that in their address. A link added to the front page is covered.
+error; about a minute and a half, one line when it passes. `npm run smoke -- helium` for just the pages with that in
+their address. A link added to the front page is covered. Git's pre-push hook runs it (`tools/hooks/pre-push`,
+`tools/pre-push.mjs`; `npm run hooks` installs it, once a clone): a push to main changing `js/`, `css/` or a page in the
+root waits on it and is stopped if a page fails; cards, notes and docs go straight up (the user, 15 Nov: "at least
+occasionally"). Run `npm run build` before pushing, so the bundle it tests is the one going live.
 
 Modular, no technical debt (the user, 10 Nov: "we need to make sure I'm not creating spaghetti or just mess"):
 - Each puzzle (Carpentry, Gunnery, Bilge, Swordfight, Treasure Haul, rowing...) is one module with one
