@@ -18,3 +18,4 @@ idle animation (js/den/props-people.js). For when places are decorated and dress
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: goes with familiars-that-run-about-and-react-to-the-den, familiars running about and reacting on their own

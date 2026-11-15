@@ -68,3 +68,13 @@ Edge; "next" said on its own sends it and goes on, "back" goes back), or Windows
 Ctrl+Enter, or "Send and next", sends it: it's logged on the card at once in your words, and a headless Claude
 (`tools/card-update.md`; the same limits as the inbox's) acts on it, its status, its title, a new card split off, a
 duplicate closed, a decision into its document. The card says it's updating, and redraws itself when that's done.
+
+## An idea card is one idea
+
+A card in the Ideas column is one idea, focused enough to pick up on its own. A brain-dump that grew into several
+(much of what came over from IDEAS.md) is split (the user, 15 Nov: "a few things to split into more focused cards
+with a lot of rambling that can be removed"): each live idea its own card, in the user's words; what's already built
+and what was dropped said in the old card's last note; the old card then `done`, its log saying where each part
+went, so nothing's lost. A decision made on the way (dropped for good, not just not yet) goes into the document it
+belongs in. The inbox's sorter and the card updates (`tools/inbox-triage.md`, `tools/card-update.md`) split the same
+way.

@@ -18,6 +18,9 @@ on and dictating into here about what the updated status of each thing is.")
    - **Something else they mention** (a new fix, a new idea, a part to split off): a card of its own, `node
      tools/task.mjs add <stream> "<title>" --asked "<their words>"` (`--status idea` for an idea), in the stream it
      belongs to, then `note {{id}} "split off: <new id>"`. Already a card for it? `note` that card instead.
+   - **Split it up** (a brain-dump grown into several ideas; tasks/README.md, "An idea card is one idea"): each
+     live part its own card in their words, then `set {{id}} done --note "split up: <what's built>, <new ids>,
+     <what's dropped>"`.
    - **The same as another card**: `note` both with the other's id, and set the one that's the duplicate `done`
      ("same as <id>").
    - **A design decision or a rule**: written into the document it belongs in (RACE.md, STORY.md, RULES.md,

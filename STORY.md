@@ -83,8 +83,11 @@ know with a description and some kind of reference, and I'm sure it can be added
   explore, roam, and do different puzzles".
 - **Unlocked by doing, not handed out.** Each new part arrives as the result of something you did
   (beat a wave and the timber comes; beat the siege and they leave a map). Nothing appears by
-  magic: everything you build is the pieces you fitted. The same goes for prizes: familiars are
-  won, as in Puzzle Pirates, not picked from a list.
+  magic: everything you build is the pieces you fitted. But looks aren't earned: clothes, dyes,
+  familiars and things to put up are all free to try, never won or saved up for (the user, 15 Nov: "we
+  decided against things like earning things for later. It just does not fit with the proof of concept,
+  quick, fun nature of this"; this replaces an earlier line here that familiars are won). A rare look
+  as a keepsake of a story beat (Umami's, once he's rescued) is the most it goes to.
 - **A few mechanics, used many ways.** New things build on what's already there (the wind, the
   rocks, the lock, being dazed, the duty puzzles) rather than each bringing a mechanic of its own:
   "they do need to have some kind of cohesion to them. Not just let's create a new mechanic for

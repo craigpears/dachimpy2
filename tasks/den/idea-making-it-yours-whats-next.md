@@ -1,6 +1,6 @@
 ---
 title: Making it yours: what's next
-status: idea
+status: done
 updated: 15 Nov
 ---
 
@@ -46,3 +46,4 @@ Ideas to carry on with:
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: done: split up, 15 Nov. Done 7 Nov: male and female pirates in Puzzle Pirates clothes and dyes, familiars, the flag designer, Decorate mode, a house built from pieces and painted. Still ideas, each its own card: familiars-that-run-about-and-react-to-the-den, more-landscapes-weather-and-time-of-day, decorating-furniture-and-pieces-placed-in-your-h, more-clothes-and-familiars-to-wear. Dropped: earning looks with quests (the user, 15 Nov: "we decided against things like earning things for later. It just does not fit with the proof of concept, quick, fun nature of this"; STORY.md); the main puzzle's slow solver on long strips (the primer's, not the den's: the den's copy already turns them on their side).

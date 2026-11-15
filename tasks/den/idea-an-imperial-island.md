@@ -1,6 +1,6 @@
 ---
 title: An imperial island
-status: idea
+status: done
 asked: 11 Nov
 updated: 15 Nov
 ---
@@ -26,3 +26,4 @@ flag's name, Imperial Coalition, to confirm on YPPedia.
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: done: split up, 15 Nov. Built: Port Decorum, empty (its town, fort, quay, jetty and guards; nothing to do there yet), the smugglers' beach behind it, and Helium's rum run turned away at its jetty. Still ideas, each its own card: Monlizzy as its queen (monlizzy-queen-of-port-decorum), trading (idea-trading-at-port-decorum-unlocked-by-getting-dign), looting (idea-raiding-port-decorums-treasury-round-the-back), smuggling (idea-smuggling-taxes-embargoes-and-the-back-beaches). Dignity met there again: dropped (the user, 11 Nov, no tie needed).
