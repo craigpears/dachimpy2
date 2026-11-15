@@ -18,3 +18,6 @@ everything you make your own is. Goes with the decorating competition (above).
 
 - 15 Nov: moved over from IDEAS.md.
 - 15 Nov: you said: "just needs kind of tagging an organizing along with underneath like the housing ideas"
+- 15 Nov: acting on it did nothing: he PowerShell attempt were refused for needing approval. I never read the card or the list of other cards.
+
+If you approve one of those commands, I'll read the card and add a note that it needs tagging and organizing, alongside the housing ideas. I won't change its status, since you didn't give one.

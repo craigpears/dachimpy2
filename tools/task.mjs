@@ -9,7 +9,7 @@
 //   node tools/task.mjs set <id> <status> [--note "a line for its log"] [--link ?at=..] [--shot path] [--session id] [--branch b]
 //   node tools/task.mjs note <id> "<a line for its log>"
 //   node tools/task.mjs tidy <id> "<its new text>"           its text rewritten (made concise), its log kept
-//   node tools/task.mjs stream <stream> "<where it got to>"
+//   node tools/task.mjs stream <stream> "<where it got to>" [--name "Its name"] [--hue 0-360]
 //   node tools/task.mjs move <id> <stream>                into another stream
 //   node tools/task.mjs board                             draws tasks/board.html (add, set, note and stream draw it too)
 //   node tools/task.mjs serve [--port n] [--pick-up no]   the board at http://localhost:8643/, cards dragged between
@@ -500,6 +500,8 @@ function main(argv) {
     const s = all.streams.find((x) => x.id === pos[0]);
     if (!s) throw new Error(`No stream "${pos[0]}": ${all.streams.map((x) => x.id).join(', ')}`);
     const { meta } = existsSync(s.file) ? parse(readFileSync(s.file, 'utf8')) : { meta: { name: s.id, hue: 30 } };
+    if (opt.name) meta.name = opt.name;
+    if (opt.hue) meta.hue = Number(opt.hue);
     writeFileSync(s.file, format(meta, `\n${pos[1]} (${today()})\n`));
     console.log(`${s.id}: ${pos[1]}`);
   } else throw new Error(`Unknown command "${cmd}" (list, show, add, set, note, tidy, move, stream, board, serve)`);
