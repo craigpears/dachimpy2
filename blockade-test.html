@@ -62,6 +62,9 @@
   #admiral b { display: block; }
   #admiral p { display: block; font-size: 13px; margin: 4px 0; }
   .ship .order { display: block; font-style: normal; font-size: 12px; opacity: .9; }
+  #admiral .strat { margin: 6px 0; }
+  #admiral .strat > span { display: block; font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  #admiral .strat .row { flex-wrap: wrap; gap: 4px; }
   .ship.picked { outline: 2px solid var(--accent, #d9a441); }
   #cinema b { display: block; font-size: 16px; }
   #cinema span { display: block; font-size: 13px; opacity: .85; margin: 2px 0 6px; }
@@ -88,8 +91,11 @@
   <div class="row"><button id="watch">Spectate</button><button id="director" title="The camera follows the action">Director</button><button id="whole">Whole board</button><button id="again">New round</button></div>
   <div id="admiral">
     <b>Admiral of Dachimpy's flag</b>
-    <p id="plan">Your plan: pick one of your ships below, then click on the board what she's to do. A buoy: hold it. Open water: camp there. A gate (a war frigate): shoot it down. A friend: escort her. An enemy: hunt her. Click one of your ships on the board to pick her, and her again when you're done with her.</p>
-    <div class="row"><button id="startRound">Start the round</button><button id="snipe" title="Hide in a cove, dart out at an enemy frigate's end, and back">Snipe</button><button id="own">Her own choice</button></div>
+    <p id="plan">Your plan: a strategy for your sloops and one for your war frigates, then start the round.</p>
+    <div class="strat"><span>Your sloops</span><div class="row" id="stratSloop"></div></div>
+    <div class="strat"><span>Your war frigates</span><div class="row" id="stratFrigate"></div></div>
+    <div class="row"><button id="startRound">Start the round</button></div>
+    <p>Or give one ship an order of her own: click her on the board, then what she's to do there (a buoy to hold, open water to camp on, a gate to shoot down, a friend to escort, an enemy to hunt); click her again when you're done.</p>
   </div>
   <div class="ships" id="ships"></div>
 </div>
@@ -144,12 +150,23 @@ $('cineAll').onclick = () => cinema(false);
 if (admiral) {
   document.body.classList.add('admiral');
   Object.assign(cam, WHOLE); cam.follow = false; cam.at.set(0, 0, 0); $('whole').classList.add('on');
-  say('Your plan: pick a ship, then click on the board what she\'s to do');
+  say('Your plan: a strategy for your sloops and one for your war frigates, then start');
 }
 const pickShip = (id) => { bk.pick(id); sig = ''; };
-$('startRound').onclick = () => { bk.start(); $('startRound').hidden = true; $('plan').textContent = 'Under way: pick a ship and click the board to change her orders, or Sail to take her helm.'; say('The round\'s begun: your orders are being carried out'); };
-$('snipe').onclick = () => { const id = bk.picked(); if (id < 0) return say('Pick one of your ships first', true); bk.order(id, { kind: 'snipe' }); say(`${bk.b.ship(id).name}: snipe at frigates from a cove`); sig = ''; };
-$('own').onclick = () => { const id = bk.picked(); if (id < 0) return say('Pick one of your ships first', true); bk.order(id, bk.free()); say(`${bk.b.ship(id).name}: her own choice`); sig = ''; };
+$('startRound').onclick = () => { bk.start(); $('startRound').hidden = true; $('plan').textContent = 'Under way: change a strategy as it plays, give one ship an order of her own, or Sail to take her helm.'; say('The round\'s begun: your orders are being carried out'); };
+// (a strategy for each kind of ship: a button each, the one picked lit; 15 Nov: "keep the Admiral mode relatively
+// simple ... like choosing just a strategy ... a handful of ... choices of each")
+for (const [kind, el] of [['sloop', $('stratSloop')], ['frigate', $('stratFrigate')]]) {
+  el.innerHTML = bk.strategies[kind].map((st, i) => `<button data-i="${i}" title="${st.says}" class="${i ? '' : 'on'}">${st.name}</button>`).join('');
+  el.onclick = (e) => {
+    const btn = e.target.closest('[data-i]');
+    if (!btn) return;
+    const st = bk.strategy(kind, Number(btn.dataset.i));
+    el.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === btn));
+    say(`Your ${kind === 'sloop' ? 'sloops' : 'war frigates'}: ${st.name.toLowerCase()}, ${st.says}`);
+    sig = '';
+  };
+}
 if (brawling) { const [a, z] = bk.duel.map((id) => bk.b.ship(id).name); $('cineTitle').textContent = `${a} and ${z}: a brawl`; cinema(true); Object.assign(cam, { yaw: -0.9, pitch: 0.38, dist: 34 }); }
 const sail = (id) => {
   bk.sail(id);

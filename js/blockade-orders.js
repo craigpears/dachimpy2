@@ -15,8 +15,30 @@
    - shoot a gate down (a war frigate's: her large guns are the only ones that hurt its towers);
    - escort a friend: keep off her side, fighting whoever comes at her;
    - hunt an enemy: after her wherever she goes, broadside on (a sloop at a frigate, off her end).
-   A plan is drawn on the board: a ship picked, then a click on what she's to do (orderAt). */
+   A plan is drawn on the board: a ship picked, then a click on what she's to do (orderAt).
+   Kept simple to start (the user, 15 Nov: "keep the Admiral mode relatively simple ... like choosing just a strategy,
+   just because this is a demo really ... a few tactics, like going for a cove, running for the middle. Same with the
+   frigs ... rush the middle, systematically attack the middle, control the outside, attack the enemy frigates ... go
+   for sinks ... a handful of ... choices of each"): a strategy for the sloops and one for the frigates (STRATEGIES),
+   each an order every ship of the kind is given; one ship's own order on the board as well, if you like. */
 import { BLOCKADE } from './blockade.js';
+/** The admiral's strategies, a handful for each kind of ship: what each is called, and the order it gives her. */
+export const STRATEGIES = {
+    sloop: [
+        { name: 'Their own choice', order: { kind: 'free' }, says: 'each picks for herself' },
+        { name: 'Hide and snipe', order: { kind: 'snipe' }, says: 'hide in the coves, dart out at the enemy frigates\' ends' },
+        { name: 'Run for the middle', order: { kind: 'middle' }, says: 'in by the side ways\' winds, to hold the heart\'s buoys' },
+        { name: 'Hold the outside', order: { kind: 'outside' }, says: 'hold the buoys out on the open sea' },
+    ],
+    frigate: [
+        { name: 'Their own choice', order: { kind: 'free' }, says: 'each picks for herself' },
+        { name: 'Rush the middle', order: { kind: 'rush' }, says: 'shoot a tower down and charge in under the guns' },
+        { name: 'Take the middle step by step', order: { kind: 'siege' }, says: 'wreck a gate\'s guns, then its tower, then in' },
+        { name: 'Control the outside', order: { kind: 'outside' }, says: 'hold the open sea\'s buoys and keep the enemy off them' },
+        { name: 'Hunt their frigates', order: { kind: 'frigates' }, says: 'after the enemy frigates, broadside to broadside' },
+        { name: 'Go for sinks', order: { kind: 'sinks' }, says: 'after whoever\'s most hurt, to sink her' },
+    ],
+};
 export const FREE = { kind: 'free' };
 /** A buoy in plain words: its pennants, and where. */
 export function buoyName(i) {
@@ -37,6 +59,12 @@ export function orderText(b, o) {
         case 'gate': return `shoot ${gateName(o.g)} down`;
         case 'escort': return `escort ${b.ship(o.ship).name}`;
         case 'hunt': return `hunt ${b.ship(o.ship).name}`;
+        case 'middle': return 'run for the middle';
+        case 'outside': return 'hold the outside';
+        case 'rush': return 'rush the middle';
+        case 'siege': return 'take the middle step by step';
+        case 'frigates': return 'hunt their frigates';
+        case 'sinks': return 'go for sinks';
     }
 }
 /** Where an order points on the board (a square to draw a line to), if anywhere. */

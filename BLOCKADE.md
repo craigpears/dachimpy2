@@ -121,7 +121,15 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   to the route planning thing ... you need to be able to give each ship a target or directive, where it's going, what
   it's doing"; "you could give sloops orders like ... camping somewhere, sniping ... drawing up those sorts of plans,
   and then you watch the things unfold and can ... update and tweak things or take over specific [ships]"). You're
-  Dachimpy's admiral; the round waits while you plan. An order a ship (src/blockade-orders.ts), carried out by her bot
+  Dachimpy's admiral; the round waits while you plan. Kept simple to start (15 Nov: "like choosing just a strategy,
+  just because this is a demo ... a few tactics, like going for a cove, running for the middle. Same with the frigs ...
+  rush the middle, systematically attack the middle, control the outside, attack the enemy frigates ... go for sinks"):
+  a strategy for your sloops (their own choice, hide and snipe, run for the middle, hold the outside) and one for your
+  war frigates (their own choice, rush the middle, take the middle step by step: a gate's guns wrecked, then its tower,
+  then in; control the outside, hunt their frigates, go for sinks), `STRATEGIES`, each an order every ship of the kind
+  is given, bending how her bot picks. Two minutes of each, seeded, plays plainly differently (rushing in 60 to 29,
+  step by step still wrecking guns, the outside held). And, as an extra, one ship's own order
+  (src/blockade-orders.ts), carried out by her bot
   before anything she'd choose herself: her own choice; hold a buoy; camp on a square, firing on what comes by; snipe
   (a raider's way); shoot a gate down (a war frigate's); escort a friend, off her side, fighting whoever comes at her;
   hunt an enemy, broadside on (a sloop after a frigate, off her end). Drawn on the board: pick a ship (on the board or

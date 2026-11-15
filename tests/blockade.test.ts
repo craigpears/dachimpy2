@@ -8,7 +8,7 @@
 import { describe, expect, it } from 'vitest';
 import { BLOCKADE, Blockade, inHeart, islandLand } from '../src/blockade';
 import { Bot, Bots, bombardBerths } from '../src/blockade-bots';
-import { orderAt, orderText, FREE } from '../src/blockade-orders';
+import { orderAt, orderText, FREE, STRATEGIES } from '../src/blockade-orders';
 import { squares, alongs } from '../src/ship-handling';
 
 const B = BLOCKADE, prize: [number, number] = [21, 17];
@@ -254,6 +254,36 @@ describe('admiral mode: an order for each ship (15 Nov: "you need to be able to 
     expect(goal(raider.id)).toMatchObject({ kind: 'raid', on: foe.id });
     expect(goal(sl.id)?.kind === 'escort' || goal(sl.id)?.kind === 'fight').toBe(true);
   });
+});
+
+describe('the admiral's strategies, a handful each (15 Nov: "keep the Admiral mode relatively simple ... like choosing just a strategy")', () => {
+  const round = (kind: 'sloop' | 'frigate', name: string, secs: number) => {
+    const b = new Blockade(), bots = new Bots(b, [], dice(5)), st = STRATEGIES[kind].find((x) => x.name === name)!;
+    const mine = b.ships.filter((x) => x.team === 'gold' && x.kind === kind);
+    for (const s of mine) bots.order(s.id, st.order);
+    const goals: string[] = [];
+    for (let i = 0; i < secs * 10; i++) { bots.tick(b, 0.1); b.tick(0.1); if (i % 10 === 0) for (const s of mine) { const g = bots.bots.find((x) => x.id === s.id)!.goal; if (g) goals.push(g.kind === 'buoy' ? (inHeart(...B.BUOYS[g.i].at) ? 'heart' : 'outside') : g.kind); } }
+    return { b, goals };
+  };
+  it('the sloops and the frigates have a handful each, their own choice first', () => {
+    expect(STRATEGIES.sloop.length).toBeGreaterThanOrEqual(3);
+    expect(STRATEGIES.frigate.length).toBeGreaterThanOrEqual(5);
+    for (const k of ['sloop', 'frigate'] as const) expect(STRATEGIES[k][0].order).toEqual(FREE);
+  });
+  it('sloops running for the middle go for the heart's buoys only; holding the outside, never', () => {
+    expect(round('sloop', 'Run for the middle', 40).goals).not.toContain('outside');
+    expect(round('sloop', 'Hold the outside', 40).goals).not.toContain('heart');
+  });
+  it('frigates taking the middle step by step wreck a gate's guns; hunting their frigates fight them; controlling the outside keep off the gates', () => {
+    const siege = round('frigate', 'Take the middle step by step', 60);
+    expect(siege.goals).toContain('guns');
+    expect(siege.b.battery.some((x) => x.wrecked || x.hits > 0)).toBe(true);
+    const hunt = round('frigate', 'Hunt their frigates', 40);
+    expect(hunt.goals.filter((x) => x === 'fight').length).toBeGreaterThan(hunt.goals.length / 2);
+    const out = round('frigate', 'Control the outside', 40);
+    expect(out.goals).not.toContain('gate');
+    expect(out.goals).not.toContain('heart');
+  }, 60000);
 });
 
 describe('a raider snipes from off a frigate\'s bow or stern (15 Nov: "they snipe at the back or the front of the ship where they\'re safe, then they can\'t return a broadside")', () => {

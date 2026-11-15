@@ -127,7 +127,7 @@ small little rooms that get added should be relatively small on the page"); the 
 most to the den as a whole, like the front page.
 Beside it, `design.html` ("How the Pirate Den is designed", 12 Nov), in the changelog's look and linked from its
 header: the thinking behind the den, high level and in plain words, a picture for each section (from
-`changelog/`), the sloop race first, then the den's wider principles. Keep it up to date with design thinking
+`changelog/`), in three tabs (15 Nov): the den's wider principles, the sloop race, and blockading (BLOCKADE.md the detail); a section's link opens its tab. Keep it up to date with design thinking
 as it's decided (RACE.md, STORY.md, RULES.md hold the detail). No hidden gems in the proof of concept (the user,
 12 Nov: "I just want to show stuff"): the starlit door, the penguins and the smugglers' beach are shown on the
 public pages like everything else. But no behind-the-scenes rules on them (the user, 12 Nov): how the characters are

@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import { SAIL } from '../den-sail.js';
 import { Blockade, BLOCKADE, islandLand } from '../blockade.js';
 import { Bots } from '../blockade-bots.js';
-import { FREE, orderAt, orderText, orderTarget } from '../blockade-orders.js';
+import { FREE, STRATEGIES, orderAt, orderText, orderTarget } from '../blockade-orders.js';
 import { drawnAt } from '../ship-handling.js';
 import { FRIGATES, WAR_FRIGATE_PLAN, deckY } from '../den-frigate.js';
 import { SLOOP_HULL } from '../ships.js';
@@ -330,6 +330,13 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
       return o && orderText(b, o);
     },
     free: () => FREE,
+    /** The strategies (src/blockade-orders.ts), and one picked for every ship of a kind on your side: what it is. */
+    strategies: STRATEGIES,
+    strategy(kind, i) {
+      const st = STRATEGIES[kind][i];
+      for (const s of b.ships) if (s.team === admiral && s.kind === kind) bots.order(s.id, st.order);
+      return st;
+    },
     /** The ship on the square a point on the sea is over (-1: none). */
     shipAt(point) { const [c, r] = seaCR(point.x, point.z).map(Math.round), s = b.under(c, r); return s ? s.id : -1; },
     focus(id = me) { if (id < 0) return v3(B.COLS / 2 - 0.5, B.ROWS / 2 - 0.5); const s = b.ship(id), at = drawnAt(s.h, s.helm.now()); return v3(at.c, at.r); },

@@ -6,7 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pirate Den: how it's designed</title>
 <!-- The thinking behind the Pirate Den (CLAUDE.md, "The changelog"): high level, plain words, a picture for
-     each section from changelog/, in the changelog's own look. Kept up to date as the design grows; the
+     each section from changelog/, in the changelog's own look; three tabs (15 Nov): the den, the sloop race,
+     blockading (BLOCKADE.md the detail). Kept up to date as the design grows; the
      detail lives in RACE.md, STORY.md and RULES.md. Pirate names only. Nothing's kept secret here: no hidden
      gems in the proof of concept (RULES.md, 12 Nov), so the starlit door is shown like the rest. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,6 +54,14 @@
   article.tall .shots img { aspect-ratio: auto; }
   article.tall h3 { margin-top: 4px; }
   footer { margin-top: 40px; color: var(--faint); font-size: 13px; text-align: center; }
+  /* The three parts as tabs (15 Nov: "a few tabs about the general den, the [sloop] races and the blockading"); with no
+     script, all three show, one after another. */
+  nav.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; border-bottom: 1px solid var(--edge); }
+  nav.tabs a { font: 700 18px 'Alegreya', serif; color: var(--dim); text-decoration: none; padding: 8px 16px; border: 1px solid transparent; border-bottom: none; border-radius: 9px 9px 0 0; margin-bottom: -1px; }
+  nav.tabs a:hover { color: var(--title); }
+  nav.tabs a.on { color: var(--title); background: var(--bg, transparent); border-color: var(--edge); }
+  .tabbed section.tab { display: none; }
+  .tabbed section.tab.on { display: block; }
   @media (max-width: 640px) {
     body { font-size: 16px; }
     .shots.two, .shots.three { grid-template-columns: 1fr; }
@@ -69,10 +78,108 @@
   <header>
     <div>
       <h1>How the Pirate Den is designed</h1>
-      <p class="lede">The thinking behind the den's places and puzzles, in plain words and pictures. It starts with the sloop race, where most of the thinking has gone lately.</p>
+      <p class="lede">The thinking behind the den's places and puzzles, in plain words and pictures, in three parts: the den as a whole, the sloop race, and blockading.</p>
     </div>
   </header>
-  <nav class="toc">The race: <a href="#race" target="_self">snakes and ladders</a> · <a href="#fair" target="_self">every way can win</a> · <a href="#gates" target="_self">the gates</a> · <a href="#start" target="_self">the start</a> · <a href="#door" target="_self">the starlit door</a> · <a href="#plan" target="_self">planning your route</a> · <a href="#tactics" target="_self">racing each other</a> · <a href="#watch" target="_self">watching</a>. The den: <a href="#who" target="_self">who it's for</a> · <a href="#everywhere" target="_self">one puzzle everywhere</a> · <a href="#islands" target="_self">little islands</a> · <a href="#world" target="_self">in the world</a> · <a href="#host" target="_self">the host</a> · <a href="#read" target="_self">read versions</a> · <a href="#pirates" target="_self">real pirates</a>.</nav>
+  <nav class="tabs"><a href="#den" target="_self">The den</a><a href="#sloop-race" target="_self">The sloop race</a><a href="#blockading" target="_self">Blockading</a></nav>
+
+  <section class="tab" id="den">
+  <nav class="toc"><a href="#who" target="_self">who it's for</a> · <a href="#everywhere" target="_self">one puzzle everywhere</a> · <a href="#islands" target="_self">little islands</a> · <a href="#world" target="_self">in the world</a> · <a href="#host" target="_self">the host</a> · <a href="#read" target="_self">read versions</a> · <a href="#pirates" target="_self">real pirates</a></nav>
+
+  <h2>The den's wider thinking</h2>
+
+  <article id="who">
+    <div class="shots two">
+      <a href="changelog/helium-lesson.jpg"><img src="changelog/helium-lesson.jpg" width="800" height="600" loading="lazy" alt="Helium beside a Distilling board on a wooden stand, teaching: whites go left, away from the fire; their distillery behind them"></a>
+      <a href="changelog/dachimpy-hall.jpg"><img src="changelog/dachimpy-hall.jpg" width="1280" height="720" loading="lazy" alt="In Dachimpy's hall, Dachimpy in a tall pink beehive wig and a pink tartan kilt beside you, the plate of cookies on a little table"></a>
+    </div>
+    <h3>Who it's for: the middle</h3>
+    <p>There are three kinds of puzzler. New to a puzzle? The game's own tutorials teach the basics, and that's the place to start. Know the basics, but want to build up your technique and see what the techniques even are? That's who this site is for: the building blocks and techniques, a puzzle at a time, in a lesson played alongside a pirate or a page to read.</p>
+    <p>It isn't here to get anyone to number one. Real mastery, the top-class puzzling, comes from playing the game and the people in it: the Trophy Hunters' Discord, and the top puzzlers' videos and streams on YouTube and Twitch. Puzzle Pirates is a sociable game. The den is a bit of fun and a bit of stuff on the side; everything is really about the people and playing puzzles together. So every teacher in the den, sooner or later, sends you on to them.</p>
+    <p class="try">Start here: <a href="./" target="_self"><code>the front page</code></a></p>
+  </article>
+
+  <!-- Phone-friendly as a key principle (the user, 14 Nov: "Make the kind of mobile first stuff like a key feature
+       ... it's hard to make things mobile first, but trying to make things as mobile friendly that we can"). -->
+  <article id="phone">
+    <div class="shots">
+      <a href="changelog/on-a-phone.jpg"><img src="changelog/on-a-phone.jpg" width="1280" height="720" loading="lazy" alt="Two phones side by side: the front page, its banner, a bar with a big Play the den button and its pictures one under another; and the Distilling guide, its rules in short cards"></a>
+    </div>
+    <h3>As friendly on a phone as we can make it</h3>
+    <p>Lots of people will find the den on their phone, so it should work there as well as on a computer. On a narrow screen the pages show one thing at a time, with buttons big enough for a thumb, short words and nothing scrolling sideways. In the den, the sea and the puzzle get the screen, not the menus.</p>
+    <p>A 3D puzzle game doesn't fit a phone easily, so the den can't truly be built phone first. But every change is checked on a phone too, both ways round, and made as phone-friendly as it can be.</p>
+    <p class="try">Try it: <a href="./" target="_self"><code>the front page</code></a>, on your phone</p>
+  </article>
+
+  <article id="everywhere">
+    <div class="shots three">
+      <a href="changelog/carpentry-wall.jpg"><img src="changelog/carpentry-wall.jpg" width="1280" height="720" loading="lazy" alt="Fitting a piece into a hole in the den's wall in the Carpentry view"></a>
+      <a href="changelog/gun-tower.jpg"><img src="changelog/gun-tower.jpg" width="1280" height="720" loading="lazy" alt="The gun tower's deck as a Gunnery board: four cannons, crates of stores, a powder barrel and buckets"></a>
+      <a href="changelog/capybara-crane.jpg"><img src="changelog/capybara-crane.jpg" width="1280" height="720" loading="lazy" alt="The crane built by Carpentry swinging the sloop down off the cliff into the lagoon"></a>
+    </div>
+    <h3>One puzzle, played everywhere</h3>
+    <p>The puzzles are Puzzle Pirates' own, played by their real rules and keys. What's new is where they happen and what they do in the world. And each puzzle is one piece of code, used everywhere it's played: Carpentry mends the den's wall, builds your shack, patches the sloop's deck and builds the cranes; Gunnery loads the gun tower and the sloop's guns; Bilge is the tide on the beach and the water in the locks; Foraging frees Umami and clears the race's driftwood.</p>
+    <p>So whatever's in your way, more than one puzzle can get you past it. Players love some puzzles and hate others, and nobody should be forced through one they hate.</p>
+    <p class="try">Try it: <a href="den.html?at=walk"><code>den.html?at=walk</code></a></p>
+  </article>
+
+  <article id="islands">
+    <div class="shots three">
+      <a href="changelog/wedding.jpg"><img src="changelog/wedding.jpg" width="1280" height="720" loading="lazy" alt="A beach wedding: guests on wooden benches, a flower arch, heart banners and a cake"></a>
+      <a href="changelog/tzz-lesson.jpg"><img src="changelog/tzz-lesson.jpg" width="1280" height="720" loading="lazy" alt="Tzz blowing up a balloon beside her Sailing board, the plan marked on the board"></a>
+      <a href="changelog/port-decorum.jpg"><img src="changelog/port-decorum.jpg" width="1280" height="720" loading="lazy" alt="Port Decorum's sandstone fort towering over the sloop beside its jetty"></a>
+    </div>
+    <h3>Places as little islands</h3>
+    <p>Each new place or event is a little island of its own: Mischievious's wedding, Tzz's balloon lesson, Port Decorum, the race. Each is built on its own and touches the rest of the den only in a few small places: a spot on the sea, a line in the story, something that comes home with you.</p>
+    <p>That way the den can keep growing without each new thing tangling with the last, and getting harder to change. A few mechanics are used many ways (the wind, the rocks, a lock, the duty puzzles) rather than each place bringing a mechanic of its own.</p>
+    <p class="try">Try it: <a href="den.html?at=wedding"><code>den.html?at=wedding</code></a></p>
+  </article>
+
+  <article id="world">
+    <div class="shots two">
+      <a href="changelog/bilge-raid.jpg"><img src="changelog/bilge-raid.jpg" width="1280" height="720" loading="lazy" alt="Vikings rowing in past a Bilge board in the shallows, soldiers meeting them on the beach, powder barrels on the sand"></a>
+      <a href="changelog/sloop.jpg"><img src="changelog/sloop.jpg" width="1280" height="720" loading="lazy" alt="The old sloop at the den's jetty, the Bilge board in the shallows beside her"></a>
+    </div>
+    <h3>In the world, with a reason to be there</h3>
+    <p>A puzzle is a thing in the world, never a separate screen: the hole in the wall, a frame on the floor, the tide on the beach, the deck of the gun tower. What you do in it shows in the den. The Bilge board is the tide, and good moves draw it back so rocks cut off the raiders rowing in.</p>
+    <p>Every puzzle needs a believable reason to be where it is: you dig where the X is, pump where the water is, shoot from a gun deck. If a puzzle can't be made to fit a place, it isn't used there. And it's a puzzle game, not an action game: the raiders bring a bit of pressure, but the pull is always the puzzle in front of you.</p>
+    <p class="try">Try it: <a href="den.html?at=built"><code>den.html?at=built</code></a>, then out through the gate to the beach</p>
+  </article>
+
+  <article id="host">
+    <div class="shots">
+      <a href="changelog/gravee.jpg"><img src="changelog/gravee.jpg" width="1280" height="720" loading="lazy" alt="Gravee, in a green dress and a polar bear pelt, showing you round her portraits by candlelight"></a>
+    </div>
+    <h3>The host, not the show</h3>
+    <p>The den's characters host its places and teach its puzzles: Mischievious runs the weddings, Gravee shows you round her house, Tzz teaches a Sailing chain with balloons, Kikkit explains whirlpools (taken literally). They need fun and personality, Puzzle Pirates personality most of all, but the place and the puzzle are the point, not them.</p>
+    <p class="try">Try it: <a href="den.html?at=lodgings"><code>den.html?at=lodgings</code></a>, then Gravee's house</p>
+  </article>
+
+  <article id="read">
+    <div class="shots">
+      <a href="distilling-guide.html"><img src="changelog/distilling-guide.jpg" width="540" height="302" loading="lazy" alt="A flat Distilling board from its read version, the whites by the fire ringed and numbered arrows walking them out"></a>
+    </div>
+    <h3>Every lesson has a read version</h3>
+    <p>Each teacher's lesson in the den has a page beside it to read at your own pace, or to point a friend to: the rules, the phases, the techniques and the tricks in plain words, with flat pictures of the board. The pictures come from the same game as the lesson and the teacher's own play, real boards and the moves they'd really make, so the page and the lesson can't drift apart. When one changes, the other does.</p>
+    <p>Distilling's is the first; Tzz's balloon animals and the others will follow.</p>
+    <p class="try">Read it: <a href="distilling-guide.html"><code>distilling-guide.html</code></a></p>
+  </article>
+
+  <article id="pirates">
+    <div class="shots two">
+      <a href="changelog/wardrobe.jpg"><img src="changelog/wardrobe.jpg" width="1280" height="720" loading="lazy" alt="A line-up of pirates in their outfits: Tzz, Gravee, Dalnoth, a pirate in a bear hat, Dignity, Mischievious and Kikkit"></a>
+      <a href="changelog/dignity.jpg"><img src="changelog/dignity.jpg" width="1280" height="720" loading="lazy" alt="Dignity, with long blonde hair and her monkey Bella on her shoulder, peering through a spyglass"></a>
+    </div>
+    <h3>Real pirates, drawn from their portraits</h3>
+    <p>The characters are real Puzzle Pirates pirates, by their pirate names, drawn with affection from their pirate pages. Each one is checked against the portrait before being drawn, because a first guess is always far off.</p>
+    <p>Each is dressed from the same wardrobe as you, so you can wear anything they wear. Their familiars are characters too and do things in the scenes: Dignity's monkey Bella fires the checkpoint's warning shot.</p>
+    <p class="try">Try it: <a href="den.html"><code>den.html</code></a>, then "Your pirate"</p>
+  </article>
+
+  </section>
+
+  <section class="tab" id="sloop-race">
+  <nav class="toc"><a href="#race" target="_self">snakes and ladders</a> · <a href="#fair" target="_self">every way can win</a> · <a href="#gates" target="_self">the gates</a> · <a href="#start" target="_self">the start</a> · <a href="#door" target="_self">the starlit door</a> · <a href="#plan" target="_self">planning your route</a> · <a href="#tactics" target="_self">racing each other</a> · <a href="#watch" target="_self">watching</a></nav>
 
   <h2>The sloop race</h2>
 
@@ -195,99 +302,122 @@
     <p class="try">Try it: <a href="den.html?at=race-watch"><code>den.html?at=race-watch</code></a></p>
   </article>
 
-  <h2>The den's wider thinking</h2>
+  </section>
 
-  <article id="who">
+  <section class="tab" id="blockading">
+  <nav class="toc"><a href="#whole-sea" target="_self">a fight for the sea</a> · <a href="#roles" target="_self">every ship a role</a> · <a href="#bgates" target="_self">gates, guns and no camping</a> · <a href="#damage" target="_self">damage you can see</a> · <a href="#sink" target="_self">sinking, and fighting back in</a> · <a href="#admiral" target="_self">watch it, or command it</a> · <a href="#know" target="_self">ships that know the sea</a> · <a href="#next" target="_self">where it's heading</a></nav>
+
+  <h2>Blockading</h2>
+
+  <article id="whole-sea">
     <div class="shots two">
-      <a href="changelog/helium-lesson.jpg"><img src="changelog/helium-lesson.jpg" width="800" height="600" loading="lazy" alt="Helium beside a Distilling board on a wooden stand, teaching: whites go left, away from the fire; their distillery behind them"></a>
-      <a href="changelog/dachimpy-hall.jpg"><img src="changelog/dachimpy-hall.jpg" width="1280" height="720" loading="lazy" alt="In Dachimpy's hall, Dachimpy in a tall pink beehive wig and a pink tartan kilt beside you, the plate of cookies on a little table"></a>
+      <a href="changelog/blockade.jpg"><img src="changelog/blockade.jpg" width="800" height="450" loading="lazy" alt="A blockade board from above: the walled fort in the middle with an imperial gate, war frigates and sloops round the buoys, influence circles on the water"></a>
+      <a href="changelog/blockade-epic.jpg"><img src="changelog/blockade-epic.jpg" width="491" height="276" loading="lazy" alt="War frigates fighting off a palm-covered island, a sloop between them"></a>
     </div>
-    <h3>Who it's for: the middle</h3>
-    <p>There are three kinds of puzzler. New to a puzzle? The game's own tutorials teach the basics, and that's the place to start. Know the basics, but want to build up your technique and see what the techniques even are? That's who this site is for: the building blocks and techniques, a puzzle at a time, in a lesson played alongside a pirate or a page to read.</p>
-    <p>It isn't here to get anyone to number one. Real mastery, the top-class puzzling, comes from playing the game and the people in it: the Trophy Hunters' Discord, and the top puzzlers' videos and streams on YouTube and Twitch. Puzzle Pirates is a sociable game. The den is a bit of fun and a bit of stuff on the side; everything is really about the people and playing puzzles together. So every teacher in the den, sooner or later, sends you on to them.</p>
-    <p class="try">Start here: <a href="./" target="_self"><code>the front page</code></a></p>
+    <h3>A fight for the whole sea</h3>
+    <p>A blockade is kept close to Puzzle Pirates': a big sea board with buoys of one, two or three pennants. Every blockade turn, a buoy that only one side's ships reach scores that side its pennants; a buoy both sides reach is contested and scores nobody. So it's a dance round the buoys, pushing the other side's ships out of reach of them, and the side with the most points when the round's out wins it.</p>
+    <p>Each side comes in from two edges of its own, three war frigates and five sloops, a little pirate crew on every ship. The best buoys are in the heart, a walled fort in the middle; the rest are out on the open sea, off the gates and by the islands. Each island has a cove a sloop can hide in, one square in by a way too narrow for anything bigger. It's a fight over the whole ocean, not just one spot.</p>
+    <p class="try">Try it: <a href="blockade-test.html"><code>blockade-test.html</code></a></p>
   </article>
 
-  <!-- Phone-friendly as a key principle (the user, 14 Nov: "Make the kind of mobile first stuff like a key feature
-       ... it's hard to make things mobile first, but trying to make things as mobile friendly that we can"). -->
-  <article id="phone">
+  <article id="roles">
+    <div class="shots two">
+      <a href="changelog/primates-rule-reef.jpg"><img src="changelog/primates-rule-reef.jpg" width="800" height="450" loading="lazy" alt="Primates Rule, Dachimpy's war frigate, out on the sea past the reef"></a>
+      <a href="changelog/frigate-styles.jpg"><img src="changelog/frigate-styles.jpg" width="491" height="276" loading="lazy" alt="Coral Throne, an Atlantean war frigate, sea green and gold, clams and coral on her deck, a mermaid at her bow"></a>
+    </div>
+    <h3>Every ship a role</h3>
+    <p><b>The big ships are powerful but clumsy.</b> A war frigate's moves are as big as her turn, two squares at a time, so over open water she's as quick as a sloop. But she plays fewer moves a turn and each takes longer, so she's slower to react: a sloop can dart in, fire and be gone before she can answer. She turns wide, needs room, and can't fit through a one-square gap.</p>
+    <p><b>The sloop's speed comes from the sea, not her moves.</b> She's small enough for the winds to carry her, and a frigate rides them out. Fast little winds blow in through the fort's side ways, so the sloops are into the heart within seconds. The quickest way about the board for her is knowing where the winds are.</p>
+    <p><b>Each has her job.</b> Sloops cover ground: holding the buoys a frigate can't reach, hiding in coves, and sniping. A sniper lies across a frigate's line, off her stern, where none of her broadsides can bear, rakes her and runs. The frigates hold the big open water, protect their sloops, and are the only ships whose guns can bring a gate's towers down.</p>
+    <p><b>Every war frigate is a set of choices, not a new ship.</b> Her paints, her figurehead, her guns and the furniture on her deck are a config: Primates Rule, Coral Throne the Atlantean all clams and coral, Eldritch Wail the ghost ship you can see through. Later each style may get a trick of its own, and a middle size of ship between the two may carry little craft to launch.</p>
+    <p class="try">Try it: <a href="blockade-test.html"><code>blockade-test.html</code></a>, then any ship's Sail button</p>
+  </article>
+
+  <article id="bgates">
     <div class="shots">
-      <a href="changelog/on-a-phone.jpg"><img src="changelog/on-a-phone.jpg" width="1280" height="720" loading="lazy" alt="Two phones side by side: the front page, its banner, a bar with a big Play the den button and its pictures one under another; and the Distilling guide, its rules in short cards"></a>
+      <a href="changelog/blockade-guns.jpg"><img src="changelog/blockade-guns.jpg" width="800" height="643" loading="lazy" alt="An imperial gate in the fort's wall, one tower shot down, round bastion guns along the wall, war frigates and sloops fighting at its mouth"></a>
     </div>
-    <h3>As friendly on a phone as we can make it</h3>
-    <p>Lots of people will find the den on their phone, so it should work there as well as on a computer. On a narrow screen the pages show one thing at a time, with buttons big enough for a thumb, short words and nothing scrolling sideways. In the den, the sea and the puzzle get the screen, not the menus.</p>
-    <p>A 3D puzzle game doesn't fit a phone easily, so the den can't truly be built phone first. But every change is checked on a phone too, both ways round, and made as phone-friendly as it can be.</p>
-    <p class="try">Try it: <a href="./" target="_self"><code>the front page</code></a>, on your phone</p>
+    <h3>Gates that delay the big ships, and guns that punish camping</h3>
+    <p><b>An imperial gate is one square wide.</b> A sloop sails straight through. A war frigate can't, so she has to lie broadside to one of its towers and shoot it down before the way's wide enough for her. It naturally delays the big ships: the sloops are in the heart first, and the frigates fight their way in after.</p>
+    <p><b>Four guns on every gate, and they hate campers.</b> Each gate's guns fire on any ship that lingers in their reach, whichever side she's on. Slipping past is mostly fine; sitting still by a gate, on the buoy off it or broadside to a tower, gets you shot. Once anyone's fired on the gate, its guns fire on everyone in reach. A ship knocked out in a gate's mouth is camping too, and the guns sink her and clear the way.</p>
+    <p><b>So a frigate has a real choice.</b> Charge the gate under its guns and take the damage to get into the middle fast, or wreck its guns first, three hits each, and go in slower but whole. The sloops' way in, the side ways' winds, is out of every gun's reach. And nowhere on the board is a good place to sit still.</p>
+    <p class="try">Try it: <a href="blockade-test.html"><code>blockade-test.html</code></a></p>
   </article>
 
-  <article id="everywhere">
+  <article id="damage">
     <div class="shots three">
-      <a href="changelog/carpentry-wall.jpg"><img src="changelog/carpentry-wall.jpg" width="1280" height="720" loading="lazy" alt="Fitting a piece into a hole in the den's wall in the Carpentry view"></a>
-      <a href="changelog/gun-tower.jpg"><img src="changelog/gun-tower.jpg" width="1280" height="720" loading="lazy" alt="The gun tower's deck as a Gunnery board: four cannons, crates of stores, a powder barrel and buckets"></a>
-      <a href="changelog/capybara-crane.jpg"><img src="changelog/capybara-crane.jpg" width="1280" height="720" loading="lazy" alt="The crane built by Carpentry swinging the sloop down off the cliff into the lagoon"></a>
+      <a href="changelog/blockade-hole.jpg"><img src="changelog/blockade-hole.jpg" width="800" height="450" loading="lazy" alt="Primates Rule close up with a splintered hole shot in her side"></a>
+      <a href="changelog/blockade-brawl.jpg"><img src="changelog/blockade-brawl.jpg" width="800" height="505" loading="lazy" alt="Iron Pride holed along her side in a brawl with Primates Rule"></a>
+      <a href="changelog/blockade-smoke.jpg"><img src="changelog/blockade-smoke.jpg" width="800" height="505" loading="lazy" alt="Iron Pride knocked out, a thick black column of smoke rising off her"></a>
     </div>
-    <h3>One puzzle, played everywhere</h3>
-    <p>The puzzles are Puzzle Pirates' own, played by their real rules and keys. What's new is where they happen and what they do in the world. And each puzzle is one piece of code, used everywhere it's played: Carpentry mends the den's wall, builds your shack, patches the sloop's deck and builds the cranes; Gunnery loads the gun tower and the sloop's guns; Bilge is the tide on the beach and the water in the locks; Foraging frees Umami and clears the race's driftwood.</p>
-    <p>So whatever's in your way, more than one puzzle can get you past it. Players love some puzzles and hate others, and nobody should be forced through one they hate.</p>
-    <p class="try">Try it: <a href="den.html?at=walk"><code>den.html?at=walk</code></a></p>
+    <h3>Damage you can see, and ships full of people</h3>
+    <p>Every hit leaves a hole where it struck: a bang, then a dark hole ringed with splintered wood, on the side the shot came in. Her little carpenters hammer the oldest hole shut with a fresh plank; her bilgers pump, water spouting over her side. The more she's hurt, the faster water comes in, and the lower and slower she sits. Damage is in Puzzle Pirates' proportions: a war frigate takes fifteen large shots, twenty medium or thirty small.</p>
+    <p>At full damage she's knocked out: dead in the water, listing, turning slowly where she lies, a thick black column of smoke so everyone across the board can see it, till her crew have her back in action.</p>
+    <p class="try">Watch two frigates fight it out: <a href="blockade-test.html?watch=brawl"><code>blockade-test.html?watch=brawl</code></a></p>
   </article>
 
-  <article id="islands">
-    <div class="shots three">
-      <a href="changelog/wedding.jpg"><img src="changelog/wedding.jpg" width="1280" height="720" loading="lazy" alt="A beach wedding: guests on wooden benches, a flower arch, heart banners and a cake"></a>
-      <a href="changelog/tzz-lesson.jpg"><img src="changelog/tzz-lesson.jpg" width="1280" height="720" loading="lazy" alt="Tzz blowing up a balloon beside her Sailing board, the plan marked on the board"></a>
-      <a href="changelog/port-decorum.jpg"><img src="changelog/port-decorum.jpg" width="1280" height="720" loading="lazy" alt="Port Decorum's sandstone fort towering over the sloop beside its jetty"></a>
-    </div>
-    <h3>Places as little islands</h3>
-    <p>Each new place or event is a little island of its own: Mischievious's wedding, Tzz's balloon lesson, Port Decorum, the race. Each is built on its own and touches the rest of the den only in a few small places: a spot on the sea, a line in the story, something that comes home with you.</p>
-    <p>That way the den can keep growing without each new thing tangling with the last, and getting harder to change. A few mechanics are used many ways (the wind, the rocks, a lock, the duty puzzles) rather than each place bringing a mechanic of its own.</p>
-    <p class="try">Try it: <a href="den.html?at=wedding"><code>den.html?at=wedding</code></a></p>
-  </article>
-
-  <article id="world">
-    <div class="shots two">
-      <a href="changelog/bilge-raid.jpg"><img src="changelog/bilge-raid.jpg" width="1280" height="720" loading="lazy" alt="Vikings rowing in past a Bilge board in the shallows, soldiers meeting them on the beach, powder barrels on the sand"></a>
-      <a href="changelog/sloop.jpg"><img src="changelog/sloop.jpg" width="1280" height="720" loading="lazy" alt="The old sloop at the den's jetty, the Bilge board in the shallows beside her"></a>
-    </div>
-    <h3>In the world, with a reason to be there</h3>
-    <p>A puzzle is a thing in the world, never a separate screen: the hole in the wall, a frame on the floor, the tide on the beach, the deck of the gun tower. What you do in it shows in the den. The Bilge board is the tide, and good moves draw it back so rocks cut off the raiders rowing in.</p>
-    <p>Every puzzle needs a believable reason to be where it is: you dig where the X is, pump where the water is, shoot from a gun deck. If a puzzle can't be made to fit a place, it isn't used there. And it's a puzzle game, not an action game: the raiders bring a bit of pressure, but the pull is always the puzzle in front of you.</p>
-    <p class="try">Try it: <a href="den.html?at=built"><code>den.html?at=built</code></a>, then out through the gate to the beach</p>
-  </article>
-
-  <article id="host">
+  <article id="sink">
     <div class="shots">
-      <a href="changelog/gravee.jpg"><img src="changelog/gravee.jpg" width="1280" height="720" loading="lazy" alt="Gravee, in a green dress and a polar bear pelt, showing you round her portraits by candlelight"></a>
+      <a href="changelog/blockade-sinking.jpg"><img src="changelog/blockade-sinking.jpg" width="800" height="643" loading="lazy" alt="Iron Pride going down by the stern in a cloud of smoke behind Primates Rule"></a>
     </div>
-    <h3>The host, not the show</h3>
-    <p>The den's characters host its places and teach its puzzles: Mischievious runs the weddings, Gravee shows you round her house, Tzz teaches a Sailing chain with balloons, Kikkit explains whirlpools (taken literally). They need fun and personality, Puzzle Pirates personality most of all, but the place and the puzzle are the point, not them.</p>
-    <p class="try">Try it: <a href="den.html?at=lodgings"><code>den.html?at=lodgings</code></a>, then Gravee's house</p>
+    <h3>Sinking, and fighting your way back in</h3>
+    <p>A quick hit needs only a bit of patching. But a ship that's knocked out and still being shot sinks, and that matters: part of the joy of a blockade is losing control of the middle and having to fight your way back in. Sunk, she goes down by the stern and is gone a while, then comes back refitted from her own side's edge of the board.</p>
+    <p>Her carpenters keep working while she's out, so she only goes down if she's shot faster than they patch. That gives her side a reason to come to her rescue: drive off whoever's finishing her and she lives. Ships go for the kill on a knocked-out enemy, and fight harder near a friend who's down.</p>
+    <p class="try">Try it: <a href="blockade-test.html"><code>blockade-test.html</code></a></p>
   </article>
 
-  <article id="read">
+  <article id="admiral">
     <div class="shots">
-      <a href="distilling-guide.html"><img src="changelog/distilling-guide.jpg" width="540" height="302" loading="lazy" alt="A flat Distilling board from its read version, the whites by the fire ringed and numbered arrows walking them out"></a>
+      <a href="changelog/blockade-admiral.jpg"><img src="changelog/blockade-admiral.jpg" width="800" height="643" loading="lazy" alt="The blockade from above while planning, dashed lines from each of Dachimpy's ships to her orders, the admiral's panel listing them"></a>
     </div>
-    <h3>Every lesson has a read version</h3>
-    <p>Each teacher's lesson in the den has a page beside it to read at your own pace, or to point a friend to: the rules, the phases, the techniques and the tricks in plain words, with flat pictures of the board. The pictures come from the same game as the lesson and the teacher's own play, real boards and the moves they'd really make, so the page and the lesson can't drift apart. When one changes, the other does.</p>
-    <p>Distilling's is the first; Tzz's balloon animals and the others will follow.</p>
-    <p class="try">Read it: <a href="distilling-guide.html"><code>distilling-guide.html</code></a></p>
+    <h3>Watch it, or command it</h3>
+    <p><b>Spectating</b> is the start: the camera's director moves to whatever's happening, a knockout, a tower coming down, a raid, and drifts slowly round it. Click any ship to follow her, or take her helm. <b>The brawl</b> is a cinematic: two war frigates broadside to broadside, coming about for each other's side till one lies smoking.</p>
+    <p><b>Admiral mode</b> is like planning your race route, for a whole fleet, and kept simple to start with. Before the round you pick a strategy for your sloops (hide and snipe, run for the middle, hold the outside) and one for your war frigates (rush the middle, take it step by step, wrecking a gate's guns before its tower, control the outside, hunt their frigates, go for sinks). Then you watch it unfold, change strategy as it goes, give one ship an order of her own on the board, or take over any ship yourself.</p>
+    <p class="try">Be the admiral: <a href="blockade-test.html?admiral"><code>blockade-test.html?admiral</code></a></p>
   </article>
 
-  <article id="pirates">
-    <div class="shots two">
-      <a href="changelog/wardrobe.jpg"><img src="changelog/wardrobe.jpg" width="1280" height="720" loading="lazy" alt="A line-up of pirates in their outfits: Tzz, Gravee, Dalnoth, a pirate in a bear hat, Dignity, Mischievious and Kikkit"></a>
-      <a href="changelog/dignity.jpg"><img src="changelog/dignity.jpg" width="1280" height="720" loading="lazy" alt="Dignity, with long blonde hair and her monkey Bella on her shoulder, peering through a spyglass"></a>
+  <article id="know">
+    <div class="shots">
+      <a href="changelog/blockade-epic.jpg"><img src="changelog/blockade-epic.jpg" width="491" height="276" loading="lazy" alt="War frigates fighting off a palm-covered island, a sloop between them"></a>
     </div>
-    <h3>Real pirates, drawn from their portraits</h3>
-    <p>The characters are real Puzzle Pirates pirates, by their pirate names, drawn with affection from their pirate pages. Each one is checked against the portrait before being drawn, because a first guess is always far off.</p>
-    <p>Each is dressed from the same wardrobe as you, so you can wear anything they wear. Their familiars are characters too and do things in the scenes: Dignity's monkey Bella fires the checkpoint's warning shot.</p>
-    <p class="try">Try it: <a href="den.html"><code>den.html</code></a>, then "Your pirate"</p>
+    <h3>Ships that know the sea by heart</h3>
+    <p>There aren't that many ways a ship can move about one board, so each kind of ship's are worked out once, when the board's laid out: every square she could be on, every way she could face, and where each of her moves would take her. All the sloops share one map, all the frigates another. Only the things that can be destroyed change it, and when a tower falls, only the bit of map around it is worked out again.</p>
+    <p>From that, how far it is to anywhere is a quick look-up, so every ship weighs every buoy, cove and gate by how long it really takes to get there. Planning round the other ships happens on top, and only for the ones close by, since anyone further off will have moved by the time she gets there. Sixteen ships think about the whole board many times a second, cheaply.</p>
   </article>
 
+  <article id="next">
+    <div class="shots">
+      <a href="changelog/frigate-styles.jpg"><img src="changelog/frigate-styles.jpg" width="491" height="276" loading="lazy" alt="Coral Throne, an Atlantean war frigate"></a>
+    </div>
+    <h3>Where it's heading</h3>
+    <ul>
+      <li><b>Islands as the prizes.</b> Instead of one fort in the middle, many islands to hold across a big sea, the blockade a fight for the whole ocean.</li>
+      <li><b>A third kind of ship.</b> Nimble sloops, frigates that brawl, and between them carriers with medium guns that launch little craft to hang about for a few turns: a haunted brig's ghost sloops, an Atlantean's sea creatures. Perhaps a ramming specialist.</li>
+      <li><b>Shortcuts that cost.</b> Shallows a frigate can scrape through, taking damage every move she's in them, so never a place to sit.</li>
+      <li><b>Buoys that mean something.</b> Something there to hold, a gun or a gate, flying the colours of whoever has it.</li>
+      <li><b>Playing as a team.</b> Frigates holding the open water near their sloops, sloops spreading out to the buoys round them, and more admiral's orders: where each ship comes in, and orders in sequence.</li>
+    </ul>
+  </article>
+  </section>
   <p class="note" style="text-align:center">See what's landed lately in <a href="changelog.html" target="_self" style="color:var(--gold)">What's new in the Pirate Den</a>, or <a href="den.html" style="color:var(--gold)">play the den</a>.</p>
 
   <footer>Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</footer>
 </div>
+<script>
+// The tabs: the one the address names (a tab, or a section in one) shown, the den's by default.
+(() => {
+  const tabs = [...document.querySelectorAll('section.tab')], links = [...document.querySelectorAll('nav.tabs a')];
+  document.body.classList.add('tabbed');
+  const show = () => {
+    const id = location.hash.slice(1), at = id && document.getElementById(id);
+    const tab = (at && at.closest('section.tab')) || tabs[0];
+    for (const t of tabs) t.classList.toggle('on', t === tab);
+    for (const a of links) a.classList.toggle('on', a.getAttribute('href') === '#' + tab.id);
+    if (at && at !== tab) at.scrollIntoView();
+  };
+  addEventListener('hashchange', show);
+  show();
+})();
+</script>
 </body>
 </html>

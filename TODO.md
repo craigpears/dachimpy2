@@ -180,7 +180,14 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     knocked-out enemy and fight harder near a knocked-out friend (BLOCKADE.md §3). To playtest.
   - Admiral mode (15 Nov): "give each ship a target or directive, where it's going, what it's doing ... then you watch
     the things unfold and can ... update and tweak things or take over". Done, a first pass: blockade-test.html?admiral
-    (src/blockade-orders.ts; BLOCKADE.md §3). To playtest.
+    (src/blockade-orders.ts; BLOCKADE.md §3). Then "keep the Admiral mode relatively simple ... like choosing just a
+    strategy": done, a handful of strategies for the sloops and the frigates, the per-ship orders an extra. To playtest.
+  - A fallen tower's base (15 Nov): "where the gates get destroyed, the base of them still is there, and it looks really
+    weird with the sloops ... going through what looks like a concrete platform." Done: its plinth sinks with it, the
+    rubble just under the water (js/den/gate-look.js).
+  - The design page in tabs (15 Nov): "a few tabs about the general den, the [sloop] races and the blockading ... put
+    a lot of ... these design thinking in there ... discouraging camping, making the ship types more interesting and
+    each having a role." Done: design.html, three tabs, blockading's thinking in its own.
   - The gates' guns (15 Nov): "I do love watching the imperial [cannons] ... training on people's positions, especially
     punishing people camping ... double up on the [cannons] ... stop people camping. And provide more of a barrier to
     the war frigates." Done: four a gate, firing on anyone lingering in reach (BLOCKADE.md §3). To playtest.
