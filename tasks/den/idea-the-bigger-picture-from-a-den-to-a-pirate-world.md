@@ -1,40 +1,19 @@
 ---
 title: The bigger picture: from a den to a pirate world
-status: idea
+status: done
 updated: 15 Nov
 ---
 
-*The bigger picture: from a den to a pirate world (long term)*
-
-The user's brain-dump (7 Nov 2026), for much later:
-
-- **Raids are a mini-game you start,** not something happening all the time. In a bigger
-  multiplayer world the den would be a place you live and build, and a raid is something you
-  trigger (or that comes now and then), a little mini-game.
-- **Houses:** build houses, or work out how building on land would go.
-- **Mines, flooded, with Bilging:** a way to bring puzzles onto land. A flooded mine with a big
-  pool of water by a pump, where you play the bilging puzzle to keep it pumped out and keep building
-  further in. Down there you dig resources, like iron for cannonballs.
-  - (The user said "building puzzle"; by the pump and the water, that's Bilging, from
-    https://yppedia.puzzlepirates.com/Bilging. Bilging: swap two side-by-side pieces to make lines
-    of three or more of a kind, which clear and pump the water down. Bigger clears have names
-    (Good, Great, Arrr!, Har!, Yarrr!, Bingo!, Sea Donkey!, Vegas!). Water rises if it's ignored.
-  - Crabs clear when they reach the waterline. A pufferfish clears the 3x3 round it. A jellyfish
-    clears every piece of one colour.)
-- **Quests for looks:** personalised clothing and dyes, found by hunting ingredients out in the
-  forest, with rarer ones for better things.
-- **Stronger opponents** further on.
-- **Rumble, as boxers:** Rumble could spawn troops of your own, but boxers: big brawlers in
-  boxing mode, like the heavies in Team Fortress 2. How the puzzle maps onto them is still to work
-  out. Since the Swordfight clay soldiers were dropped for being too far from the puzzle, Rumble
-  probably wants the same treatment as the Swordfight golem: the real puzzle, with the fight
-  around it shown in 3D.
-- **Fill out the place:** trees, and water behind the den, so it feels like a pirate den on the
-  coast. They attack from land now, but the sea is right there.
-- **Ships and voyages:** later, build ships and sail off on voyages for resources: the full Puzzle
-  Pirates kind of thing.
+Long-term brain-dump (7 Nov), now mostly obsolete. Split up: rumble as boxers, filling out the den and quests for looks have cards of their own; houses are carded under houses; bilging is well covered; the building puzzle is on the wishlist. Raids as a mini-game, stronger opponents and ships and voyages have been overtaken.
 
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
 - 15 Nov: you said: "I think we've really moved on from most of this I don't know if there's anything left in here other than that the rumble as boxes maybe as a separate one as well filling out some of the den maybe but most of this is obsolete or dead. Houses seems relevant, bilging is well covered already, building puzzle yes on the wishlist, quests for looks could be interesting as an adventure idea (special category that needs adding so we can see all the adventure ideas)"
+- 15 Nov: acting on it did nothing: uilding puzzle yes on the wishlist").
+3. Set this card to `done` with the note "split up: houses and the building puzzle already carded, bilging well covered, rest obsolete; new cards: <the four ids>".
+
+Can you approve running `node tools/task.mjs`, or fix the Bash node shim? Then I'll do the above.
+- 15 Nov: tidied up (the old text is in git history)
+- 15 Nov: done: split up: houses, bilging, building puzzle already covered; new cards: quests-for-looks (adventures), rumble-as-boxers, fill-out-the-den; rest obsolete
+- 15 Nov: split off: quests-for-looks-hunting-ingredients-for-persona, rumble-as-boxers-big-brawlers-in-boxing-mode, fill-out-the-den-trees-and-water-behind-it

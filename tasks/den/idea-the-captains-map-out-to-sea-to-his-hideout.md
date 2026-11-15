@@ -1,6 +1,6 @@
 ---
 title: The captain's map, out to sea to his hideout
-status: idea
+status: done
 asked: 9 Nov
 updated: 15 Nov
 ---
@@ -113,3 +113,7 @@ barracks, say) lets you build "a little army up later".
 
 - 15 Nov: moved over from IDEAS.md.
 - 15 Nov: you said: "just really old and outdated now I can't see anything here that's really too relevant with just moved on from all of this"
+- 15 Nov: acting on it did nothing: ules/.bin/node`). The PowerShell and `npm run task` attempts were then stopped at the approval prompt.
+
+The command I meant to run is `npm run task -- set idea-the-captains-map-out-to-sea-to-his-hideout done --note "old and outdated; the user has moved on from it"`. Once it's approved, I can run it.
+- 15 Nov: done: old and outdated; the user has moved on from it

@@ -2,7 +2,7 @@
 // column for; the board drawn from them, a script's work and no one else's (the user, 15 Nov: "more deterministic").
 import { describe, it, expect } from 'vitest';
 // @ts-expect-error: a plain .mjs tool, untyped
-import { load, board, parse, format, change, dropIn, triage, update, tidy, resume, busy, STATUSES } from '../tools/task.mjs';
+import { load, board, parse, format, change, dropIn, triage, update, tidy, resume, plainEnv, busy, STATUSES } from '../tools/task.mjs';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -89,6 +89,14 @@ describe('the task board (the user, 14 Nov: "a clear list of things and what the
     expect(html).toContain('class="through"');
     expect(client).toMatch(/ArrowRight/);
     expect(client).toContain('/api/update');
+  });
+  it('its headless Claude runs the real node, not npm\'s shim (15 Nov: every update "did nothing", stopped at an approval prompt)', () => {
+    const sep = process.platform === 'win32' ? ';' : ':';
+    const env = plainEnv({ Path: ['/repo/node_modules/.bin', '/usr/local/bin'].join(sep), OTHER: 'x' });
+    expect(env.Path).toBe('/usr/local/bin');
+    expect(env.OTHER).toBe('x');
+    const script = readFileSync(join(__dirname, '..', 'tools', 'task.mjs'), 'utf8');
+    expect(script).toMatch(/run\('claude', \[[^\]]*\], \{[^}]*env: plainEnv\(\)/);
   });
   it('what was left unanswered when the server stopped is picked up when it starts again', () => {
     const dir = mkdtempSync(join(tmpdir(), 'tasks-'));

@@ -17,3 +17,4 @@ everything you make your own is. Goes with the decorating competition (above).
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "just needs kind of tagging an organizing along with underneath like the housing ideas"

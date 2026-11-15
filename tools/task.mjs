@@ -306,6 +306,17 @@ export const busy = new Set();
 /** A headless Claude (Sonnet) given a prompt, allowed only the task script, reading and editing documents; done(why)
  *  when it's finished, why saying what went wrong, if anything did. Three at a time at most, the rest waiting their
  *  turn (going through the board quickly sends many). */
+/** The server's environment without node_modules/.bin on the path. `npm run board:serve` puts it first, and the local
+ *  Node 22 kept there for Wrangler (CLAUDE.md) answers to `node` with a shim, so the headless Claude's `node
+ *  tools/task.mjs` never ran and it stopped to ask for approval nobody could give (15 Nov). */
+export function plainEnv(env = process.env) {
+  const out = { ...env };
+  for (const k of Object.keys(out)) {
+    if (k.toLowerCase() !== 'path') continue;
+    out[k] = out[k].split(process.platform === 'win32' ? ';' : ':').filter((p) => !/node_modules[\\/]\.bin/.test(p)).join(process.platform === 'win32' ? ';' : ':');
+  }
+  return out;
+}
 const MAX_RUNS = 3, waiting = [];
 let running = 0;
 function headless(id, prompt, done, run) {
@@ -314,7 +325,7 @@ function headless(id, prompt, done, run) {
     running++;
     let out = '', ended = false;
     const end = (why) => { if (ended) return; ended = true; running--; busy.delete(id); done(why, out); waiting.shift()?.(); };
-    const child = run('claude', ['-p', '--model', 'sonnet', '--allowedTools', TOOLS], { cwd: ROOT, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
+    const child = run('claude', ['-p', '--model', 'sonnet', '--allowedTools', TOOLS], { cwd: ROOT, env: plainEnv(), stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
     child.on('error', (e) => end(`couldn't start Claude: ${e.message}`));
     child.stdout?.on('data', (d) => { out += d; });
     child.stderr?.on('data', (d) => { out += d; });

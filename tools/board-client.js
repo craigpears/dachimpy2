@@ -132,6 +132,7 @@
     if (e.ctrlKey || e.metaKey || (e.altKey && !alt)) return;
     if (inBox) e.target.blur(); // a key while the mic's on: the box lets go, so the next one's a key too
     const n = Number(/^Digit(\d)$/.exec(e.code)?.[1] ?? NaN);
+    if (e.key === 'Enter' && rec) { e.preventDefault(); if (into === drop.text) dropIt(); else send(true); return; } // dictating: Enter sends it (and goes on)
     if (e.code === 'KeyM') { // the mic on or off: into the open card's box, or the inbox's when no card's open
       if (!Speech) tell("This browser can't listen: open the board in Chrome or Edge, or use Win+H.");
       else toggleMic(e.target === drop.text || panel.hidden ? drop.text : box);
@@ -153,6 +154,7 @@
   // What's said about a card: logged on it at once, then acted on by a headless Claude; the card's redrawn when it's
   // finished (watched every few seconds).
   async function send(goOn) {
+    if (into === box) keepHeard(); // the end of what's being said goes with it, not onto the next card
     const id = open, text = box.value.trim();
     if (!text) { if (goOn) step(1); return; }
     if (!served) { notServed('send updates'); return; }
@@ -296,6 +298,7 @@
   [box, drop.text].forEach((t) => t.addEventListener('input', () => fit(t)));
   const busyHere = () => !panel.hidden || !!rec || !!drop.text.value.trim();
   async function dropIt(from = drop.text) {
+    if (into === from) keepHeard();
     const text = from.value.trim();
     if (!text) return;
     if (!served) { notServed('drop things in'); return; }

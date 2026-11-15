@@ -24,3 +24,9 @@ The sloop race is something else: "more of a full-on fun feature", not an advent
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "I mean yes I feel this is just a brain dunk thing can be removed there's nothing ever to really action here"
+- 15 Nov: acting on it did nothing: nd the local Node 22 copy:** each was refused as needing approval.
+
+Per your note ("a brain dump… can be removed"), I'd run this once approved:
+
+`node tools/task.mjs set idea-what-puzzle-pirates-adventures-should-have-been done --note "brain-dump, nothing to action; the user says it can be removed"`
