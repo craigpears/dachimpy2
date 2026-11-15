@@ -169,6 +169,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   ... should be a standard generic thing ... jump to this, let me show you this trick. Let me show you this phase
   ... general concepts that we'll cover across all puzzles.") How it's built: TUTORIALS.md, one description a
   puzzle (src/tutorial.ts), the nav and the choice drawn from it.
+- **The lesson is the quick way in: something happens first, questions never in the way (15 Nov).** The animated
+  lesson is "supposed to be the get into it quick version"; the read guide is the one for "having the structure and
+  the links". So no question stands between arriving and a board moving ("I don't want to have to ask 3 questions to
+  see something happen"): the teacher starts showing straight away, and what else they can show is on offer beside
+  it, never a menu you must get through first.
+- **Every trick shown says what it's for (15 Nov).** A trick or scenario played in a lesson never just starts ("It
+  just kind of jumped into it without any context of what it was doing, what it was achieving, what the point
+  was"): first what's wrong or wanted on this board, then the move, then what it achieved, the pieces it's about
+  ringed. Its words come from the read guide's own text for that trick, so the two say the same.
 
 - **Every adventure ends with something to keep (14 Nov).** "If you ... complete [any little adventure], there should
   be some meaningful reward, even if it's a small token thing like a visible persistent change to the map, a creature
