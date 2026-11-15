@@ -77,12 +77,17 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
   const reefSq = new Set(BLOCKADE.REEFS.flatMap((x) => reefSquares(x).filter(([c, r]) => !wall(c, r)).map(([c, r]) => `${c},${r}`)));
   // (each reef painted as one picture over the sea: a soft paling round it, the lagoon, a sandbar ring with a wobbly
   // edge and its gaps open, surf along its outside; the few rocks on it in 3D)
-  const reefTex = (reef) => canvasTex(512, 512, (x, w) => {
-    const n = reef.ring * 2 + 3, px = w / n, mid = w / 2, roll = dice(reef.at[0], reef.at[1]);
+  const reefTex = (reef) => canvasTex(1024, 1024, (x, w) => {
+    const n = (reef.ring + reef.shoal) * 2 + 3, px = w / n, mid = w / 2, roll = dice(reef.at[0], reef.at[1]);
     const toPx = (c, r) => [mid + (c - reef.at[0]) * px, mid - (r - reef.at[1]) * px];
     x.clearRect(0, 0, w, w);
-    const halo = x.createRadialGradient(mid, mid, px * 1.5, mid, mid, mid);
-    halo.addColorStop(0, 'rgba(74, 185, 178, 0.75)'); halo.addColorStop(0.6, 'rgba(58, 160, 165, 0.45)'); halo.addColorStop(1, 'rgba(47, 143, 154, 0)');
+    // (the shoals: the sea paling over sand, out to their edge, soft)
+    const S = (reef.ring + reef.shoal + 0.5) * px;
+    x.filter = `blur(${px * 0.9}px)`; x.fillStyle = 'rgba(96, 178, 176, 0.5)';
+    x.beginPath(); x.roundRect(mid - S + px * 0.4, mid - S + px * 0.4, S * 2 - px * 0.8, S * 2 - px * 0.8, px * 3.2); x.fill();
+    x.filter = 'none';
+    const halo = x.createRadialGradient(mid, mid, px * 1.5, mid, mid, (reef.ring + 1.5) * px);
+    halo.addColorStop(0, 'rgba(74, 185, 178, 0.75)'); halo.addColorStop(0.7, 'rgba(66, 176, 172, 0.55)'); halo.addColorStop(1, 'rgba(60, 168, 168, 0)');
     x.fillStyle = halo; x.fillRect(0, 0, w, w);
     // (along the ring: its middle line, a rounded square reef.ring squares out)
     const R = reef.ring * px, corner = px * 1.1, along = [];
@@ -115,7 +120,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
   const reefRockM = ['#6d6f68', '#7a776c', '#5d6660'].map((col) => mat(col, { flatShading: true, roughness: 0.95 }));
   const rockGeo = new THREE.DodecahedronGeometry(1, 0), reefSheets = [];
   for (const reef of BLOCKADE.REEFS) {
-    const at = v3(...reef.at), size = (reef.ring * 2 + 3) * CELL;
+    const at = v3(...reef.at), size = ((reef.ring + reef.shoal) * 2 + 3) * CELL;
     const q = new THREE.Mesh(new THREE.PlaneGeometry(size, size).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: reefTex(reef), transparent: true, depthWrite: false }));
     q.position.set(at.x, 0.02, at.z); q.renderOrder = 1; g.add(q); reefSheets.push(q);
   }
@@ -257,7 +262,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
 
   /** She's gone down (the rules sank her as the shot was fired; seen as it lands): said, a great splash. */
   function sank(V, z) {
-    if (V.craft) say(`${V.s.name}, ${b.ship(V.s.craft.by).name}'s ${V.craft === 'ram' ? 'turtle' : 'ghost sloop'}, has gone down`);
+    if (V.craft) say(`${V.s.name}, ${b.ship(V.s.craft.by).name}'s ${V.craft === 'ram' ? 'turtle' : 'phantom sloop'}, has gone down`);
     else say(`${V.s.name} has gone down! She'll be back from her side's edge in ${B.RETURN} seconds`, V.s.id === me);
     saw(V.s.id, 'sunk', 8);
     burst(z.clone().setY(0.2), '#e8f4fa', 30, 6); burst(z.clone().setY(0.2), '#9cc8d4', 18, 4);
@@ -297,9 +302,16 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
           const at = drawnAt(V.s.h, V.s.helm.now()), p = v3(at.c, at.r, 0.3);
           burst(p, V.craft === 'ghost' ? '#9fffd0' : '#e8f4fa', 18, 4);
         }
-        const brig = b.ship(by), what = ships[ids[0]].craft === 'ram' ? 'her turtles' : 'her ghost sloops';
+        const brig = b.ship(by), what = ships[ids[0]].craft === 'ram' ? 'her turtles' : 'her phantom sloops';
         saw(by, 'launch', 5);
         if (b.ship(by).team === (me >= 0 ? b.ship(me).team : admiral)) say(`${brig.name} launches ${what}`);
+      }
+      // (a frigate scraping her bottom in the shoals: sand and spray where she's aground)
+      for (const sc of ev.scrapes) {
+        const p = v3(...sc.at, 0.4);
+        burst(p, '#d9c48e', 10, 3); burst(p, '#e8f4fa', 8, 2.5);
+        if (sc.ship === me) say(`${b.ship(sc.ship).name} is scraping her bottom in the shoals!`, true);
+        if (sc.sunk) sank(ships[sc.ship], p);
       }
       for (const r of ev.rams) {
         const V = ships[r.ram], O = ships[r.on], p = v3(...r.at, 0.6);
@@ -340,7 +352,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         V.look?.tick(dt);
         V.name.position.set(x, V.big ? 16 : V.brig ? 10 : V.craft === 'ram' ? 4 : 7.5, z);
         V.name.material.opacity = s.dmg.out ? 0.5 : 1;
-        V.ring.position.set(x, 0.05, z); V.ring.visible = !s.dmg.out && V.craft !== 'ram';   // (a turtle holds no buoy)
+        V.ring.position.set(x, 0.05, z); V.ring.visible = !s.dmg.out && !V.craft;   // (a brig's craft hold no buoy)
         V.ring.material.opacity = s.id === me || s.id === picked ? 0.6 : 0.28;
         // (her order's line, the admiral's side's ships)
         const tgt = admiral && s.team === admiral && s.away <= 0 ? orderTarget(b, bots.orderOf(s.id)) : null;

@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import { BLOCKADE, Blockade } from '../src/blockade';
 import { HullChart } from '../src/hull-chart';
+import { bombardBerths } from '../src/blockade-bots';
 import { ShipSea, squares } from '../src/ship-handling';
 import type { Pose } from '../src/den-sail';
 
@@ -48,7 +49,8 @@ describe('a chart a kind of ship, shared (15 Nov: "a couple of pre-computed maps
         const mine = s.sea.plotPast(from, c, r), theirs = old.plot(from, c, r);
         expect(!!mine, `${k} from ${JSON.stringify(from)} to ${c},${r}`).toBe(!!theirs);
         if (!mine || !theirs) continue;
-        expect(chart.costOf(from, mine)).toBeCloseTo(chart.costOf(from, theirs), 6);
+        // (as quick, or quicker: the den's own pilot knows nothing of a frigate's shoals' toll)
+        expect(chart.costOf(from, mine)).toBeLessThanOrEqual(chart.costOf(from, theirs) + 1e-6);
         // (and how far it is, a look-up, is what that way costs)
         expect(s.sea.eta(from, c, r)).toBeCloseTo(chart.costOf(from, mine), 6);
         compared++;
@@ -75,7 +77,9 @@ describe('a tower falling: only what\'s near it worked out again (15 Nov: "the o
     expect(chart.builds).toBe(2);
     expect(chart.rebuilt).toBeGreaterThan(0);
     expect(chart.rebuilt).toBeLessThan(chart.N / 3);
-    const afresh = new HullChart(new ShipSea(chart.sea.ship, B.COLS, B.ROWS, b.rocks));
+    const fresh = new ShipSea(chart.sea.ship, B.COLS, B.ROWS, b.rocks);
+    fresh.toll = chart.sea.toll;
+    const afresh = new HullChart(fresh);
     afresh.fresh();
     expect(afresh.rebuilt).toBe(chart.N);
     expect([...chart.end]).toEqual([...afresh.end]);
@@ -88,32 +92,34 @@ describe('round the other ships, near her only (15 Nov: "the adversarial plannin
   it('a ship lying across her way close by: her pilot goes round her; the same ship far off: straight through, she\'ll have moved', () => {
     const b = new Blockade(), s = kind(b, 'sloop');
     const others = b.ships.filter((o) => o !== s);
-    // (the sloop on open water at the west edge, heading out along it; everyone else well away, but one)
-    others.forEach((o, i) => o.helm.moor({ c: 30 + (i % 8), r: 4 + Math.floor(i / 8) * 4, d: 1 }));
-    s.helm.moor({ c: 1, r: 14, d: 0 });
+    // (the sloop on open water along the south edge, heading east along it; everyone else well away, but one)
+    others.forEach((o, i) => o.helm.moor({ c: 30 + (i % 8), r: 26 + Math.floor(i / 8) * 4, d: 1 }));
+    s.helm.moor({ c: 2, r: 3, d: 1 });
     b.notice();
     const block = kind(b, 'frigate', 'crimson');
-    const straight = s.sea.plot(s.helm.pose, 1, 24)!;
+    const straight = s.sea.plot(s.helm.pose, 12, 3)!;
     expect(straight.every((m) => m === 'F')).toBe(true);
     // (a frigate lying across her way, three squares ahead: round her)
-    block.helm.moor({ c: 1, r: 17, d: 1 });
+    block.helm.moor({ c: 6, r: 3, d: 0 });
     b.notice(); s.sea.touch();
-    expect(squares(block.h, block.helm.pose).some(([c, r]) => c === 1 && r === 17)).toBe(true);
-    const round = s.sea.plot(s.helm.pose, 1, 24)!;
+    expect(squares(block.h, block.helm.pose).some(([c, r]) => c === 5 && r === 3)).toBe(true);
+    const round = s.sea.plot(s.helm.pose, 12, 3)!;
     expect(round).not.toBeNull();
     expect(round.some((m) => m !== 'F')).toBe(true);
     let p = s.helm.pose;
     for (const m of round) { p = s.sea.sail(p, m).to; expect(b.under(p.c, p.r)?.id ?? s.id, JSON.stringify(p)).toBe(s.id); }
     // (the same frigate further along, beyond her pilot's reckoning: straight on, for now)
-    block.helm.moor({ c: 1, r: 22, d: 1 });
+    block.helm.moor({ c: 11, r: 3, d: 0 });
     b.notice(); s.sea.touch();
     expect(s.sea.near).toBeLessThan(8);
-    expect(s.sea.plot(s.helm.pose, 1, 30)!.slice(0, 4).every((m) => m === 'F')).toBe(true);
+    expect(s.sea.plot(s.helm.pose, 18, 3)!.slice(0, 4).every((m) => m === 'F')).toBe(true);
   });
 
   it('a frigate bound for a gate goes to the nearest of its berths, and lies just so', () => {
     const b = new Blockade(), s = kind(b, 'frigate'), rows = s.sea.rows;
-    const berths: Pose[] = [{ c: 17, r: 9, d: 1 }, { c: 26, r: 9, d: 3 }];
+    // (two of a gate's real berths, broadside to its towers)
+    const berths: Pose[] = bombardBerths(b, s).map((x) => x.pose).filter((x) => s.sea.eta(s.helm.pose, x.c, x.r, x) < Infinity).slice(0, 2);
+    expect(berths).toHaveLength(2);
     const way = s.sea.plotAny(s.helm.pose, 'test-berths', () => berths.map((x) => (x.c * rows + x.r) * 4 + x.d))!;
     expect(way).not.toBeNull();
     const etas = berths.map((x) => s.sea.eta(s.helm.pose, x.c, x.r, x));

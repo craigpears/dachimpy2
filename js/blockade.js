@@ -29,29 +29,30 @@ export const BLOCKADE = {
     CAMP: 4,
     /** The side ways: a one-square gap through the west wall and the east. */
     SIDEWAYS: [[14, 18], [15, 18], [28, 17], [29, 17]],
-    /** The winds (the way each blows: 0 up the board, 1 right, 2 down, 3 left; n squares from `at`): one in through
-        each side way from the open sea into the heart. A sloop on one is carried along it; a frigate rides them out. */
-    WINDS: [{ at: [5, 18], d: 1, n: 13 }, { at: [38, 17], d: 3, n: 13 }],
-    /** The ways out of the heart, one towards each lagoon: a wind blowing out through a gap in the fort's wall (between
-        two of its gate's guns), then round into the lagoon by a gap in its reef, carrying a sloop from the heart to the
-        lagoon's buoy in a couple of seconds. Each two lanes, the second starting where the first leaves off. */
+    /** The winds (the way each blows: 0 up the board, 1 right, 2 down, 3 left; n squares from `at`): one a side, from its
+        own edge in through its lagoon and its side way into the heart. A sloop on one is carried along it; a frigate rides
+        them out. */
+    WINDS: [{ at: [0, 18], d: 1, n: 18 }, { at: [43, 17], d: 3, n: 18 }],
+    /** The ways out of the heart, one to each lagoon: a wind blowing out through a gap in the fort's wall and on into the
+        lagoon by a gap in its reef, carrying a sloop from the heart to its buoy in one move. */
     EXITS: [
-        [{ at: [17, 15], d: 2, n: 5 }, { at: [17, 10], d: 3, n: 6 }],
-        [{ at: [25, 14], d: 2, n: 4 }, { at: [25, 10], d: 1, n: 7 }],
-        [{ at: [18, 21], d: 0, n: 4 }, { at: [18, 25], d: 3, n: 7 }],
-        [{ at: [26, 21], d: 0, n: 4 }, { at: [26, 25], d: 1, n: 6 }],
+        [{ at: [16, 20], d: 3, n: 10 }],
+        [{ at: [27, 15], d: 1, n: 10 }],
     ],
     /** Each side's corner of the sea, where her sloops can lie out of the fighting too when the lagoons are full. */
     HOMES: { gold: [[0, 0], [3, 0], [0, 3]], crimson: [[43, 35], [40, 35], [43, 32]] },
-    /** The reefs round the four buoys out by the fort's corners, each a ring three squares out (any way) with gaps in it
-        a square wide (to the open sea, to the fort, and the way out of the heart's wind): a lagoon inside, five squares
-        across, a tiny island by its buoy and the sloops' hiding place in its far corner. */
+    /** The lagoons, one on each side's wind: a reef round each, a ring three squares out (any way) from its middle with
+        gaps a square wide (the side's wind in and on, the wind out of the heart, one to the north and one to the south),
+        a lagoon five across inside, its buoy in the middle (so no frigate, even in the shoals, reaches it), a tiny island
+        by it and the sloops' hiding place in a corner; and shoals `shoal` squares wide round the reef. The east's the
+        west's turned round the board's middle. */
     REEFS: [
-        { at: [11, 10], ring: 3, gaps: [[8, 10], [11, 13], [14, 10]], islet: [10, 9], hide: [9, 8] },
-        { at: [32, 10], ring: 3, gaps: [[35, 10], [32, 13], [29, 10]], islet: [33, 9], hide: [34, 8] },
-        { at: [11, 25], ring: 3, gaps: [[8, 25], [11, 22], [14, 25]], islet: [10, 26], hide: [9, 27] },
-        { at: [32, 25], ring: 3, gaps: [[35, 25], [32, 22], [29, 25]], islet: [33, 26], hide: [34, 27] },
+        { at: [6, 19], ring: 3, gaps: [[3, 18], [9, 18], [9, 20], [6, 22], [6, 16]], islet: [7, 17], hide: [4, 21], shoal: 3 },
+        { at: [37, 16], ring: 3, gaps: [[40, 17], [34, 17], [34, 15], [37, 13], [37, 19]], islet: [36, 18], hide: [39, 14], shoal: 3 },
     ],
+    /** A frigate in the shoals: every SCRAPE seconds she's in them she scrapes her bottom (a hole, as a shot of that size
+        on the square she's in them), and her pilot's toll, the seconds a move through them is reckoned to cost her more. */
+    SHOALS: { SCRAPE: 1.5, GUN: 'small', TOLL: 8 },
     /** Rocks about the open sea and the heart. */
     ROCKS: [
         // (none along the west and east edges: with the reefs, the way round past them is the frigates' only one from the
@@ -59,11 +60,12 @@ export const BLOCKADE = {
         [12, 7], [13, 7], [30, 7], [31, 7], [12, 28], [13, 28], [30, 28], [31, 28], [21, 4], [22, 31],
         [18, 20], [25, 15],
     ],
-    /** The buoys: in the heart two, and its prize three; out on the open sea, two off each gate and one by each island. */
+    /** The buoys: in the heart two, and its prize three; off each gate two; in each lagoon two (where the wind out of the
+        heart brings a sloop). */
     BUOYS: [
         { at: [21, 17], pennants: 3 }, { at: [18, 15], pennants: 2 }, { at: [25, 20], pennants: 2 },
         { at: [21, 8], pennants: 2 }, { at: [22, 27], pennants: 2 },
-        { at: [11, 10], pennants: 2 }, { at: [32, 10], pennants: 2 }, { at: [11, 25], pennants: 2 }, { at: [32, 25], pennants: 2 },
+        { at: [6, 19], pennants: 2 }, { at: [37, 16], pennants: 2 },
     ],
     /** Squares from any of her squares a ship's influence reaches, by her size (YPPedia: "different sized ships
         have different sized influence circles"). */
@@ -75,7 +77,11 @@ export const BLOCKADE = {
         EVERY: 30,
         CRAFT: { ghost: ['Wisp', 'Shade'], ram: ['Snapper', 'Old Shell', 'Barnacle'] },
         LIFE: { ghost: 40, ram: 30 },
-        RAM: { gun: 'large', hits: 2 },
+        // (a turtle rams again and again, every COOL seconds, for as long as she's out: the user, 15 Nov, rock, paper,
+        // scissors: "War brigs, can they be good at beating war frigates with how they deploy the turtles?"; "if you go for
+        // too many frigs ... the other team having Atlantean war frigs. They'll just send in the turtles and crush your war
+        // frigs")
+        RAM: { gun: 'large', hits: 1, COOL: 4 },
     },
     /** Seconds a blockade turn, scored at its end, and a round. */
     TURN: 10,
@@ -83,26 +89,26 @@ export const BLOCKADE = {
     /** The sides, and their fleets: where each ship comes in (a frigate's config by her name: src/den-frigate.ts). */
     TEAMS: [
         { id: 'gold', name: 'Dachimpy\'s flag', ships: [
-                { name: 'Primates Rule', kind: 'frigate', at: { c: 13, r: 2, d: 0 } },
-                { name: 'Coral Throne', kind: 'frigate', at: { c: 29, r: 2, d: 0 } },
-                { name: 'Golden Grin', kind: 'frigate', at: { c: 2, r: 14, d: 1 } },
-                { name: 'Lucky Banana', kind: 'sloop', at: { c: 4, r: 1, d: 0 }, raider: true },
-                { name: 'Grin and Bear It', kind: 'sloop', at: { c: 20, r: 1, d: 0 } },
-                { name: 'Cheeky Monkey', kind: 'sloop', at: { c: 24, r: 1, d: 0 } },
-                { name: 'Bananarama', kind: 'sloop', at: { c: 1, r: 21, d: 1 }, raider: true },
-                { name: 'Coconut Shy', kind: 'sloop', at: { c: 1, r: 10, d: 1 } },
-                { name: 'Tidecaller', kind: 'brig', at: { c: 9, r: 1, d: 0 }, craft: 'ram' },
+                { name: 'Primates Rule', kind: 'frigate', at: { c: 22, r: 2, d: 0 } },
+                { name: 'Coral Throne', kind: 'frigate', at: { c: 30, r: 2, d: 0 } },
+                { name: 'Golden Grin', kind: 'frigate', at: { c: 14, r: 2, d: 0 } },
+                { name: 'Lucky Banana', kind: 'sloop', at: { c: 1, r: 10, d: 1 }, raider: true },
+                { name: 'Grin and Bear It', kind: 'sloop', at: { c: 1, r: 16, d: 1 } },
+                { name: 'Cheeky Monkey', kind: 'sloop', at: { c: 1, r: 20, d: 1 } },
+                { name: 'Bananarama', kind: 'sloop', at: { c: 1, r: 26, d: 1 }, raider: true },
+                { name: 'Coconut Shy', kind: 'sloop', at: { c: 1, r: 13, d: 1 } },
+                { name: 'Tidecaller', kind: 'brig', at: { c: 2, r: 23, d: 1 }, craft: 'ram' },
             ] },
         { id: 'crimson', name: 'Dalnoth\'s flag', ships: [
-                { name: 'Iron Pride', kind: 'frigate', at: { c: 14, r: 33, d: 2 } },
-                { name: 'Eldritch Wail', kind: 'frigate', at: { c: 30, r: 33, d: 2 } },
-                { name: 'Crimson Tide', kind: 'frigate', at: { c: 41, r: 21, d: 3 } },
-                { name: 'Red Wake', kind: 'sloop', at: { c: 39, r: 34, d: 2 }, raider: true },
-                { name: 'Smoke and Mirrors', kind: 'sloop', at: { c: 19, r: 34, d: 2 } },
-                { name: 'Scarlet Fever', kind: 'sloop', at: { c: 23, r: 34, d: 2 } },
-                { name: 'Blood Orange', kind: 'sloop', at: { c: 42, r: 14, d: 3 }, raider: true },
-                { name: 'Rust Bucket', kind: 'sloop', at: { c: 42, r: 26, d: 3 } },
-                { name: 'Grave Lantern', kind: 'brig', at: { c: 35, r: 34, d: 2 }, craft: 'ghost' },
+                { name: 'Iron Pride', kind: 'frigate', at: { c: 21, r: 33, d: 2 } },
+                { name: 'Eldritch Wail', kind: 'frigate', at: { c: 13, r: 33, d: 2 } },
+                { name: 'Crimson Tide', kind: 'frigate', at: { c: 29, r: 33, d: 2 } },
+                { name: 'Red Wake', kind: 'sloop', at: { c: 42, r: 25, d: 3 }, raider: true },
+                { name: 'Smoke and Mirrors', kind: 'sloop', at: { c: 42, r: 19, d: 3 } },
+                { name: 'Scarlet Fever', kind: 'sloop', at: { c: 42, r: 15, d: 3 } },
+                { name: 'Blood Orange', kind: 'sloop', at: { c: 42, r: 9, d: 3 }, raider: true },
+                { name: 'Rust Bucket', kind: 'sloop', at: { c: 42, r: 22, d: 3 } },
+                { name: 'Grave Lantern', kind: 'brig', at: { c: 41, r: 12, d: 3 }, craft: 'ghost' },
             ] },
     ],
     /** How near (squares) a ship has to be to another for her moving to make the other's pilot think again. */
@@ -129,6 +135,10 @@ const CLASSES = { sloop: SLOOP, brig: WAR_BRIG, frigate: WAR_FRIGATE };
 export const SEA_TURTLE = { ...SLOOP, name: 'Sea turtle', crew: 1, minCrew: 1, guns: 0, mainDeckGuns: 0, stations: { nav: 1, sailing: 0, carpentry: 0, bilge: 0, gunnery: 0 } };
 /** A sea turtle swims: quicker than a sloop sails (a move in 0.7 of her time), or she'd never catch anything. */
 export const TURTLE_HANDLING = { ...SLOOP_HANDLING, name: 'Sea turtle', pace: SLOOP_HANDLING.pace * 0.7, move: SLOOP_HANDLING.move * 0.7, turn: SLOOP_HANDLING.turn * 0.7 };
+/** A phantom sloop: the sloop's size, sluggish as a frigate (her moves taking as long as a frigate's square does). */
+export const PHANTOM_HANDLING = { ...SLOOP_HANDLING, name: 'Phantom sloop', pace: SLOOP_HANDLING.pace * 1.3, move: SLOOP_HANDLING.move * 1.3, turn: SLOOP_HANDLING.turn * 1.3 };
+/** A phantom: shots go through her, she holds no buoy, nothing can hurt her (she fades when her time's up). */
+export const phantom = (s) => s.craft?.kind === 'ghost';
 const inRect = (x, c, r) => c >= x.c0 && c <= x.c1 && r >= x.r0 && r <= x.r1;
 /** A square in the heart. */
 export const inHeart = (c, r) => inRect(BLOCKADE.HEART, c, r);
@@ -143,12 +153,28 @@ export function reefSquares(x) {
     return out;
 }
 /** Every square of a wind lane, in order, and the way it blows. */
+/** A reef's shoals: the band `shoal` squares wide outside its ring, on the board and not rock. */
+export function shoalSquares(x) {
+    const out = [], [bc, br] = x.at, R = x.ring + x.shoal;
+    for (let c = Math.max(0, bc - R); c <= Math.min(BLOCKADE.COLS - 1, bc + R); c++)
+        for (let r = Math.max(0, br - R); r <= Math.min(BLOCKADE.ROWS - 1, br + R); r++) {
+            if (Math.max(Math.abs(c - bc), Math.abs(r - br)) > x.ring)
+                out.push([c, r]);
+        }
+    return out;
+}
 export function laneSquares({ at: [c, r], d, n }) {
     return Array.from({ length: n }, (_, i) => [c + [0, 1, 0, -1][d] * i, r + [1, 0, -1, 0][d] * i]);
 }
 export class Blockade {
     rocks = new Set();
     wind = new Map();
+    /** How long each ship's lain still (on the same square, the same way), seconds: a phantom's for the taking. */
+    still = new Map();
+    stillAt = new Map();
+    /** The shoals round the lagoons (rock's not shoal); a frigate's seconds in them towards her next scrape. */
+    shoals = new Set();
+    scrape = new Map();
     gates = BLOCKADE.GATES.map((x) => new Gate(x.way, x.r0, x.r1));
     /** Every gate's bastion guns, and whose gate each is. */
     battery = BLOCKADE.GATES.flatMap((x) => x.guns.map((at) => new Turret({ at, alert: false })));
@@ -187,6 +213,10 @@ export class Blockade {
         for (const lane of [...B.WINDS, ...B.EXITS.flat()])
             for (const [c, r] of laneSquares(lane))
                 this.wind.set(key(c, r), lane.d);
+        for (const reef of B.REEFS)
+            for (const [c, r] of shoalSquares(reef))
+                if (!this.rocks.has(key(c, r)))
+                    this.shoals.add(key(c, r));
         let id = 0;
         for (const team of B.TEAMS)
             for (const s of team.ships) {
@@ -194,6 +224,9 @@ export class Blockade {
                 const sea = new ShipSea(h, B.COLS, B.ROWS, this.rocks, (c, r) => { const o = this.taken.get(key(c, r)); return o !== undefined && o !== me; });
                 if (s.kind === 'sloop')
                     sea.carriedBy(this.wind);
+                // (a frigate's pilot reckons the shoals' toll: her kind's chart is worked out with it)
+                if (s.kind === 'frigate')
+                    sea.toll = { squares: this.shoals, secs: B.SHOALS.TOLL };
                 sea.chart = this.charts[s.kind] ??= new HullChart(sea.bare());
                 sea.near = B.IN_WAY;
                 this.ships.push({ id: me, name: s.name, team: team.id, kind: s.kind, h, cls: CLASSES[s.kind], raider: !!s.raider, sea, helm: new ShipHelm(sea, { ...s.at }), guns: new Guns(h.reload), dmg: new Damage(CLASSES[s.kind]), start: { ...s.at }, away: 0, launched: -Infinity });
@@ -205,7 +238,7 @@ export class Blockade {
                     continue;
                 const by = this.ships.find((x) => x.name === f.name);
                 for (const name of B.LAUNCH.CRAFT[f.craft]) {
-                    const me = id++, cls = f.craft === 'ram' ? SEA_TURTLE : SLOOP, h = f.craft === 'ram' ? TURTLE_HANDLING : SLOOP_HANDLING;
+                    const me = id++, cls = f.craft === 'ram' ? SEA_TURTLE : SLOOP, h = f.craft === 'ram' ? TURTLE_HANDLING : PHANTOM_HANDLING;
                     const sea = new ShipSea(h, B.COLS, B.ROWS, this.rocks, (c, r) => { const o = this.taken.get(key(c, r)); return o !== undefined && o !== me; });
                     sea.carriedBy(this.wind);
                     sea.chart = this.charts.sloop ??= new HullChart(sea.bare());
@@ -227,7 +260,7 @@ export class Blockade {
     gateOpen() { return this.gates.some((g) => g.open()); }
     /** Everything a tick on: each ship's helm and crew, the gates' guns, the blockade turn's scoring. */
     tick(dt) {
-        const out = { sail: new Map(), damage: new Map(), guns: [], scored: false, returned: [], faded: [], rams: [] };
+        const out = { sail: new Map(), damage: new Map(), guns: [], scored: false, returned: [], faded: [], rams: [], scrapes: [] };
         if (this.over)
             return out;
         for (const s of this.ships) {
@@ -250,15 +283,37 @@ export class Blockade {
             const ev = s.dmg.tick(dt);
             if (ev.some((e) => e.kind === 'back'))
                 s.helm.hole = null;
+            {
+                const p = s.helm.pose, k = `${p.c},${p.r},${p.d}`;
+                this.still.set(s.id, this.stillAt.get(s.id) === k ? (this.still.get(s.id) ?? 0) + dt : 0);
+                this.stillAt.set(s.id, k);
+            }
+            // (a frigate in the shoals scraping her bottom, every so often while she's in them)
+            if (s.kind === 'frigate') {
+                const shoal = squares(s.h, s.helm.pose).find(([c, r]) => this.shoals.has(key(c, r)));
+                const t = shoal ? (this.scrape.get(s.id) ?? 0) + dt : 0;
+                if (shoal && t >= BLOCKADE.SHOALS.SCRAPE) {
+                    this.scrape.set(s.id, 0);
+                    const got = this.hurt(s, BLOCKADE.SHOALS.GUN, shoal, shoal);
+                    out.scrapes.push({ ship: s.id, at: shoal, hole: got.hole, sunk: got.sunk });
+                    if (got.sunk)
+                        continue;
+                }
+                else
+                    this.scrape.set(s.id, t);
+            }
             s.sea.drag = s.dmg.drag();
             out.damage.set(s.id, ev);
             out.sail.set(s.id, s.helm.tick(dt));
             s.guns.tick(dt);
             this.notice();
         }
-        // (a turtle beside an enemy rams her: her holes where she struck, and the turtle's gone)
+        // (a turtle beside an enemy frigate or brig rams her: her holes where she struck; the turtle backs off a moment and
+        // comes again)
         for (const s of this.ships) {
             if (s.craft?.kind !== 'ram' || s.away > 0 || s.dmg.out)
+                continue;
+            if ((s.craft.cool = Math.max(0, (s.craft.cool ?? 0) - dt)) > 0)
                 continue;
             const hit = this.besideFoe(s);
             if (!hit)
@@ -270,7 +325,7 @@ export class Blockade {
                 holes.push(got.hole);
                 sunk = got.sunk;
             }
-            this.aboard(s);
+            s.craft.cool = BLOCKADE.LAUNCH.RAM.COOL;
             out.rams.push({ ram: s.id, on: o.id, at, holes, sunk });
         }
         // (every square a ship's on, read once for all the guns)
@@ -309,7 +364,7 @@ export class Blockade {
         let best = null, far = Infinity;
         for (const x of on) {
             const s = this.ships[x.id];
-            if ((s.dmg.out && !BLOCKADE.SINKING) || (only && !only(s.id)))
+            if ((s.dmg.out && !BLOCKADE.SINKING) || (only && !only(s.id)) || phantom(s))
                 continue;
             const d = Math.max(Math.abs(x.c - g.at[0]), Math.abs(x.r - g.at[1]));
             if (g.reaches(x.c, x.r) && d < far) {
@@ -345,8 +400,8 @@ export class Blockade {
     }
     /** A ship's influence reaches this buoy: within her circle of any square of hers, and she's not knocked out. */
     reaches(s, b) {
-        if (s.dmg.out || s.away > 0 || s.craft?.kind === 'ram')
-            return false;
+        if (s.dmg.out || s.away > 0 || s.craft)
+            return false; // (a brig's craft hold no buoy)
         const R = BLOCKADE.INFLUENCE[s.kind];
         return squares(s.h, s.helm.pose).some(([c, r]) => Math.hypot(c - b.at[0], r - b.at[1]) <= R + 1e-9);
     }
@@ -380,7 +435,8 @@ export class Blockade {
         if (!ships)
             return null;
         const s = this.under(c, r);
-        return s && s !== from ? { what: 'ship', id: s.id } : null;
+        // (a phantom: the shot goes through her)
+        return s && s !== from && !phantom(s) ? { what: 'ship', id: s.id } : null;
     }
     /** Her broadside out of that side as it would fly now (or lying at `at`), without firing it (a bot's look
         before it fires; `ships` false, as if no ship were in the way). */
@@ -466,13 +522,14 @@ export class Blockade {
         }
         return out;
     }
-    /** An enemy beside a turtle (on a square next to hers, diagonals too), and the square of hers it's on. */
+    /** An enemy frigate or brig beside a turtle (on a square next to hers, diagonals too), and the square of hers it's
+        on: a sloop's too quick for her. */
     besideFoe(s) {
         const { c, r } = s.helm.pose;
         for (let dc = -1; dc <= 1; dc++)
             for (let dr = -1; dr <= 1; dr++) {
                 const o = this.under(c + dc, r + dr);
-                if (o && o !== s && o.team !== s.team && o.away <= 0)
+                if (o && o !== s && o.team !== s.team && o.away <= 0 && (o.kind === 'frigate' || o.kind === 'brig'))
                     return { o, at: [c + dc, r + dr] };
             }
         return null;

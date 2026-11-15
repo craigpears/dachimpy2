@@ -159,8 +159,10 @@ export class HullChart {
                 const secs = sea.moveSecs(false, p, MOVES[m]);
                 this.end[k] = e;
                 this.bump[k] = got.bump ? 1 : 0;
-                this.cost[k] = secs + pauseFor(secs) + PILOT_COST.TURN + got.ride.length * PILOT_COST.PUSH;
-                this.sw[k] = Int32Array.from(sea.sweep(p, MOVES[m], got), ([c, r]) => c * rows + r);
+                const swept = sea.sweep(p, MOVES[m], got), toll = sea.toll;
+                this.cost[k] = secs + pauseFor(secs) + PILOT_COST.TURN + got.ride.length * PILOT_COST.PUSH
+                    + (toll && swept.some(([c, r]) => toll.squares.has(`${c},${r}`)) ? toll.secs : 0); // (through her shoals: the toll)
+                this.sw[k] = Int32Array.from(swept, ([c, r]) => c * rows + r);
             }
         };
         let n = 0;

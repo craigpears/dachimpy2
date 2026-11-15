@@ -197,6 +197,34 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     `Plan.stern`), the turtles and ghost sloops by `js/den/sea-craft.js`; the admiral picks a strategy for her too
     (her own choice, hold the outside, run for the middle, hunt their frigates).
 
+- **The board turned round, two lagoons, shoals, rock, paper, scissors** (15 Nov, the user: "Warfrigs start pointing
+  at the Imperial gates. Smaller ships come from the other sides and obviously catch the winds for sloops. And the
+  lagoons can also be on that side"; "two lagoons like that"; "there just needs to be a cost to that move"; "make it
+  closer to rock, paper, scissors ... frigates sink sloops because they just overwhelm them with just sheer firepower.
+  War brigs ... good at beating war frigates with how they deploy the turtles ... sloops beat war brigs ... because of
+  how they can just dart around and evade them"; of Grave Lantern's craft, "they launch a phantom sloop ... a little
+  bit slow ... they don't take damage ... that's how they counter frigs. So anything that's camping or just being
+  sluggish is a target for them"):
+  - the frigates come in on the south and north edges facing their gates; the sloops and the brig on the west and east
+    edges, on their own side's wind, which now blows from the edge through its lagoon and its side way into the heart;
+  - two lagoons, one on each wind (`REEFS`), their buoy in the middle (so no frigate, even in the shoals, reaches it),
+    gaps for the wind in, the wind out of the heart (`EXITS`, one a side through a gap in the side wall) and north and
+    south; the four corner lagoons gone;
+  - shoals three squares wide round each reef: a frigate in them scrapes her bottom every 1.5 s (a small shot's hole
+    where she's in them, `SHOALS`); her pilot reckons a toll of 8 s on any move through them (`ShipSea.toll`, worked
+    into her kind's chart), so she only crosses them when it's well worth it, and her bot never picks a spot in them to
+    fight from;
+  - rock, paper, scissors: a frigate goes for a sloop first; a sloop holds fire on a frigate unless she's sniping at its
+    end; a brig leaves sloops and frigates to others, fights brigs, and launches when an enemy frigate's near; her
+    turtles go only for frigates (then brigs), come at her from astern and ram her again and again (a large shot every
+    4 s, four small shots to sink a turtle); Grave Lantern's craft are phantom sloops, as slow as a frigate, shots going
+    through them, no buoys held, darting at frigates, brigs and anything that's lain still 6 s; a sloop goes for an
+    enemy brig close by off her end, the raiders a brig before a frigate; a brig's full damage 10 (not checked).
+  - Three seeded rounds, damage dealt by kind to kind (in small shots): frigates to sloops 210, sloops to frigates 39;
+    the brigs' side (brigs 59, turtles 272, phantoms 133) to frigates 464, frigates to them 208; sloops to the brigs'
+    side 64, it to them 87: the third side of the triangle not there yet (a brig needs a weakness the sloops can find).
+    Rounds 2.1 to 2.6 s of computing.
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of

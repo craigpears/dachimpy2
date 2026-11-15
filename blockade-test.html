@@ -74,7 +74,7 @@
 <body>
 <div class="ui">
   <h1>Blockade</h1>
-  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants. The best are in the fort in the middle: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. Sloops hide in the lagoons, inside their reefs where no frigate can follow, and dart out; when the frigates get into the heart, the winds out of it carry the sloops away to the lagoons. Each side's war brig fights round the islands, launching her craft: Tidecaller's turtles ram, Grave Lantern's ghost sloops hold buoys a while. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops.</p>
+  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants. The best are in the fort in the middle: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. Sloops hide in the lagoons, inside their reefs where no frigate can follow, and dart out; when the frigates get into the heart, the winds out of it carry the sloops away to the lagoons. Each side's war brig launches her craft at the frigates: Tidecaller's turtles come at them from astern and ram, Grave Lantern's phantom sloops, slow but never to be hit, dart at anything slow or sat still. Shoals round the lagoons scrape a frigate's bottom. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops.</p>
   <div class="score"><span class="gold" id="sg">0</span><span id="clock">5:00</span><span class="crimson" id="sc">0</span></div>
   <div class="bar" title="This blockade turn: scored when it fills"><i id="turn"></i></div>
   <div class="buoys" id="buoys"></div>
@@ -215,7 +215,7 @@ const hud = () => {
   $('ships').innerHTML = s.ships.filter((x) => !(x.craft && x.away)).map((x) => `<div class="ship${x.id === bk.you() ? ' me' : ''}${x.id === cam.watching && bk.you() < 0 ? ' seen' : ''}${x.id === bk.picked() ? ' picked' : ''}" data-id="${x.id}"><b class="${x.team}">${x.name}</b>`
     + `<span class="meter" title="Damage, and water in her bilge"><span class="dmg" style="width:${x.share * 100}%"></span><span class="wat" style="width:${x.water * 100}%"></span></span>`
     + (x.craft ? '' : `<button data-sail="${x.id}" title="Take her helm">Sail</button>`)
-    + `<i class="${x.out ? 'out' : ''}">${x.craft ? (x.craft === 'ram' ? 'Sea turtle' : 'Ghost sloop') : { frigate: 'War frigate', brig: 'War brig', sloop: 'Sloop' }[x.kind]} · ${x.doing}${x.order ? `<span class="order">Orders: ${x.order}</span>` : ''}</i></div>`).join('');
+    + `<i class="${x.out ? 'out' : ''}">${x.craft ? (x.craft === 'ram' ? 'Sea turtle' : 'Phantom sloop') : { frigate: 'War frigate', brig: 'War brig', sloop: 'Sloop' }[x.kind]} · ${x.doing}${x.order ? `<span class="order">Orders: ${x.order}</span>` : ''}</i></div>`).join('');
 };
 // (a ship's row: follow her; its Sail button: take her helm)
 $('ships').addEventListener('click', (e) => {

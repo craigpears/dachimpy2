@@ -27,8 +27,9 @@ export const DAMAGE = {
   /** A hit's damage, by its gun's size, in small shots' worth (YPPedia: 30 small = 20 medium = 15 large). */
   SHOT: { small: 1, medium: 1.5, large: 2 } as Record<GunSize, number>,
   /** Full damage, in small shots: a war frigate's YPPedia's (30); the sloop's and the war brig's not checked yet (6,
-      15); a brig's craft (src/blockade.ts, LAUNCH): a sea turtle's, two. */
-  FULL: { 'War frigate': 30, 'War brig': 15, Sloop: 6, 'Sea turtle': 2 } as Record<string, number>,
+      10: the brig's set so the sloops, darting round her, can wear her down: rock, paper, scissors, 15 Nov); a brig's
+      craft (src/blockade.ts, LAUNCH): a sea turtle's, four. */
+  FULL: { 'War frigate': 30, 'War brig': 10, Sloop: 6, 'Sea turtle': 4 } as Record<string, number>,
   /** Damage a second her carpenters take off, by the square root of her carpentry stations. */
   CARP: 0.035,
   /** Water a second her bilgers pump out (of a full bilge, 1), by the square root of her bilge stations. */

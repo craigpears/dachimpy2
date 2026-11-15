@@ -39,6 +39,17 @@
   .shots a:hover img { transform: scale(1.02); }
   h3 { margin: 12px 2px 4px; font: 700 25px/1.15 'Alegreya', serif; color: var(--ink-head); }
   article p, article li { color: var(--ink2); max-width: 70ch; }
+  /* The rock, paper, scissors triangle (15 Nov: "some kind of graphic with a triangle"): on the parchment, in its ink. */
+  .rps { margin: 0 0 12px; }
+  .rps svg { display: block; width: 100%; max-width: 640px; height: auto; margin: 0 auto; }
+  .rps-node circle { fill: var(--paper2); stroke: var(--ink-head); stroke-width: 3; }
+  .rps-name { fill: var(--ink-head); font: 700 21px 'Alegreya', serif; text-anchor: middle; }
+  .rps-sub { fill: var(--ink); font: 400 14px 'Alegreya Sans', sans-serif; text-anchor: middle; opacity: .8; }
+  .rps-arrow { fill: none; stroke: var(--link); stroke-width: 4; stroke-linecap: round; }
+  .rps-head { fill: var(--link); }
+  .rps-why { fill: var(--ink); font: 600 15px 'Alegreya Sans', sans-serif; }
+  .rps-why:not([text-anchor]) { text-anchor: middle; }
+  .rps figcaption { text-align: center; font-size: 14px; color: var(--ink); opacity: .75; margin-top: 4px; }
   article p { margin: 0 2px 6px; }
   article ul { margin: 2px 0 8px; padding-left: 22px; }
   article li { margin: 0 0 5px; }
@@ -305,7 +316,7 @@
   </section>
 
   <section class="tab" id="blockading">
-  <nav class="toc"><a href="#whole-sea" target="_self">a fight for the sea</a> · <a href="#roles" target="_self">every ship a role</a> · <a href="#bgates" target="_self">gates, guns and no camping</a> · <a href="#damage" target="_self">damage you can see</a> · <a href="#sink" target="_self">sinking, and fighting back in</a> · <a href="#admiral" target="_self">watch it, or command it</a> · <a href="#know" target="_self">ships that know the sea</a> · <a href="#next" target="_self">where it's heading</a></nav>
+  <nav class="toc"><a href="#whole-sea" target="_self">a fight for the sea</a> · <a href="#roles" target="_self">every ship a role</a> · <a href="#triangle" target="_self">rock, paper, scissors</a> · <a href="#bgates" target="_self">gates, guns and no camping</a> · <a href="#damage" target="_self">damage you can see</a> · <a href="#sink" target="_self">sinking, and fighting back in</a> · <a href="#admiral" target="_self">watch it, or command it</a> · <a href="#know" target="_self">ships that know the sea</a> · <a href="#next" target="_self">where it's heading</a></nav>
 
   <h2>Blockading</h2>
 
@@ -316,7 +327,7 @@
     </div>
     <h3>A fight for the whole sea</h3>
     <p>A blockade is kept close to Puzzle Pirates': a big sea board with buoys of one, two or three pennants. Every blockade turn, a buoy that only one side's ships reach scores that side its pennants; a buoy both sides reach is contested and scores nobody. So it's a dance round the buoys, pushing the other side's ships out of reach of them, and the side with the most points when the round's out wins it.</p>
-    <p>Each side comes in from two edges of its own, three war frigates and five sloops, a little pirate crew on every ship. The best buoys are in the heart, a walled fort in the middle; the rest are out on the open sea, off the gates and by the islands. Each island has a cove a sloop can hide in, one square in by a way too narrow for anything bigger. It's a fight over the whole ocean, not just one spot.</p>
+    <p>Each side comes in from two edges of its own: three war frigates from the south or north, facing their gate, and a war brig and five sloops from the west or east, on their own side's wind, a little pirate crew on every ship. The best buoys are in the heart, a walled fort in the middle; the rest are off the gates and in two lagoons, one on each side's wind, reefs round them that no frigate gets through. It's a fight over the whole ocean, not just one spot.</p>
     <p class="try">Try it: <a href="blockade-test.html"><code>blockade-test.html</code></a></p>
   </article>
 
@@ -329,10 +340,35 @@
     <p><b>The big ships are powerful but clumsy.</b> A war frigate's moves are as big as her turn, two squares at a time, so over open water she's as quick as a sloop. But she plays fewer moves a turn and each takes longer, so she's slower to react: a sloop can dart in, fire and be gone before she can answer. She turns wide, needs room, and can't fit through a one-square gap.</p>
     <p><b>The sloop's speed comes from the sea, not her moves.</b> She's small enough for the winds to carry her, and a frigate rides them out. Fast little winds blow in through the fort's side ways, so the sloops are into the heart within seconds. The quickest way about the board for her is knowing where the winds are.</p>
     <p><b>Each has her job.</b> Sloops cover ground: holding the buoys a frigate can't reach, hiding in the lagoons, and sniping. A sniper lies across a frigate's line, off her stern, where none of her broadsides can bear, rakes her and runs. The frigates hold the big open water, protect their sloops, and are the only ships whose guns can bring a gate's towers down.</p>
-    <p><b>The war brig is the middle ground.</b> Sloops get places first; frigates win the brawls. The brig sits between: a square a move like a sloop but slower at it, two medium shots a side, so she beats a sloop and loses to a frigate. Her place is round the islands. Their buoys sit in lagoons, a reef of sand and surf round each with gaps a square wide and a tiny island by the buoy: a sloop or a brig slips in, a frigate can't, and can't reach the buoy over the reef. So the lagoons are the middle ground, where the sloops get first and the brigs drive them off. She's two squares long and needs no tower shot down to get through a gate either, so she's into the heart quicker than a frigate, if slower than a sloop. And she covers more of the sea than her size by launching little craft off her sides. An Atlantean brig sends out sea turtles that swim at the enemy and ram them; a haunted brig sends out ghost sloops that hold buoys for a while, then fade.</p>
+    <p><b>The war brig is the middle ground.</b> Two squares long and a square a move, slower than a sloop and quicker than a frigate. She needs no tower shot down to get through a gate, so she's into the heart before the frigates, if after the sloops. Her place is the lagoons, and her real weapon isn't her guns but her craft: an Atlantean brig sends out sea turtles, a haunted brig phantom sloops.</p>
     <p><b>A round has phases.</b> The sloops are into the heart first, within seconds, on the winds through its side ways. The brigs come next, through a gate without shooting it down. The frigates come last, once they've blasted a tower down. When they do, the heart's no place for a sloop, so there's a way out: a wind blowing out of the heart through each corner of the fort's walls and round into a lagoon, so the sloops scatter to the reefs and the fight moves out to them.</p>
     <p><b>Every big ship is a set of choices, not a new ship.</b> Her paints, her figurehead, her guns and the furniture on her deck are a config: Primates Rule, Coral Throne the Atlantean all clams and coral, Eldritch Wail the ghost ship you can see through, and the brigs drawn from the same parts on a smaller hull. A style's trick, such as what a brig launches, comes with its look.</p>
     <p class="try">Try it: <a href="blockade-test.html"><code>blockade-test.html</code></a>, then any ship's Sail button</p>
+  </article>
+
+  <article id="triangle">
+    <figure class="rps" aria-labelledby="rps-cap">
+      <svg viewBox="0 0 640 430" role="img" aria-label="Rock, paper, scissors: the war frigate beats the sloop, the sloop beats the war brig, the war brig beats the war frigate">
+        <defs><marker id="rps-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="rps-head"/></marker></defs>
+        <!-- (each arrow from the one who wins to the one who loses) -->
+        <path class="rps-arrow" d="M378 112 L520 300" marker-end="url(#rps-head)"/>
+        <path class="rps-arrow" d="M488 352 L152 352" marker-end="url(#rps-head)"/>
+        <path class="rps-arrow" d="M120 300 L262 112" marker-end="url(#rps-head)"/>
+        <g class="rps-node"><circle cx="320" cy="70" r="58"/><text x="320" y="66" class="rps-name">War frigate</text><text x="320" y="88" class="rps-sub">powerful, clumsy</text></g>
+        <g class="rps-node"><circle cx="540" cy="352" r="58"/><text x="540" y="348" class="rps-name">Sloop</text><text x="540" y="370" class="rps-sub">quick, the winds'</text></g>
+        <g class="rps-node"><circle cx="100" cy="352" r="58"/><text x="100" y="348" class="rps-name">War brig</text><text x="100" y="370" class="rps-sub">her little craft</text></g>
+        <text x="458" y="176" class="rps-why" text-anchor="start"><tspan x="458">sinks her by sheer</tspan><tspan x="458" dy="20">weight of shot</tspan></text>
+        <text x="320" y="392" class="rps-why"><tspan x="320">too quick for her: snipes her ends,</tspan><tspan x="320" dy="20">and her turtles can't catch her</tspan></text>
+        <text x="182" y="176" class="rps-why" text-anchor="end"><tspan x="182">turtles ram her from astern;</tspan><tspan x="182" dy="20">phantoms she can't hit</tspan></text>
+      </svg>
+      <figcaption id="rps-cap">Each arrow points from the ship that wins to the one she beats.</figcaption>
+    </figure>
+    <h3>Rock, paper, scissors, Puzzle Pirates style</h3>
+    <p><b>Every kind of ship beats one and loses to another,</b> as in the classic strategy games. So a side can't just bring the biggest ships: whatever it leans on, the other side has an answer.</p>
+    <p><b>A war frigate sinks a sloop</b> by sheer weight of shot: two large guns a side against one small. A sloop that duels a frigate broadside to broadside is a sloop sunk, so she doesn't. She snipes from off the frigate's end, where none of her broadsides can bear, or runs.</p>
+    <p><b>A war brig beats a war frigate</b> with her craft, not her guns. An Atlantean brig's sea turtles come at a frigate from astern, where her broadsides can't bear, and ram her again and again. A haunted brig's phantom sloops are slow but can't be hit at all, and go for anything slow or sitting still. Bring too many frigates and the other side's turtles crush them.</p>
+    <p><b>A sloop beats a war brig</b> by being too quick for her. The brig's turtles only go for frigates and brigs, and the sloops dart round her and snipe her ends. Of the three, this is the side still being tuned: a brig needs a weakness the sloops can find.</p>
+    <p class="try">Try it: <a href="blockade-test.html"><code>blockade-test.html</code></a></p>
   </article>
 
   <article id="bgates">

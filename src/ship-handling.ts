@@ -196,6 +196,9 @@ export class ShipSea extends Sea {
       a bigger ship rides them out, never carried (15 Nov: the sloop's speed is "the opportunities you have to go
       take [winds] that the [war frig] doesn't have access to"). */
   windy = false;
+  /** Squares that cost her to cross (a frigate's shoals: src/blockade.ts), and the seconds her pilot reckons each move
+      through any of them costs her besides its own: she can go, but only takes them when it's well worth it. */
+  toll: { squares: Set<string>; secs: number } | null = null;
   constructor(public ship: Handling, cols: number, rows: number, rocks: Set<string>, public blocked: (c: number, r: number) => boolean = () => false) {
     super(1, false, true);
     this.cols = cols; this.rows = rows;
@@ -326,7 +329,7 @@ export class ShipSea extends Sea {
       neither throws the other's away; and her kind's chart is worked out on one). */
   private twin: ShipSea | null = null;
   bare(): ShipSea {
-    if (!this.twin) { this.twin = new ShipSea(this.ship, this.cols, this.rows, this.rocks); if (this.windy) this.twin.carriedBy(this.wind); }
+    if (!this.twin) { this.twin = new ShipSea(this.ship, this.cols, this.rows, this.rocks); if (this.windy) this.twin.carriedBy(this.wind); this.twin.toll = this.toll; }
     return this.twin;
   }
   /** (an exact berth is part of what a plot hangs on) */

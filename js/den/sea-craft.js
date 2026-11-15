@@ -1,5 +1,5 @@
 // A brig's little craft in 3D (src/blockade.ts, LAUNCH; src/den-brig.ts): an Atlantean's sea turtle, which swims at the
-// other side's ships and rams them, and a haunted brig's ghost sloop, the sloop's own look gone see-through and
+// other side's ships and rams them, and a haunted brig's phantom sloop, the sloop's own look gone see-through and
 // glowing faintly green as Eldritch Wail is (js/den/frigate.js). Each returns { g, tick(dt), fade(k) } (k 1 seen, 0
 // gone), her bow toward +x and her waterline at y 0, as the sloop's.
 import * as THREE from 'three';
@@ -37,7 +37,7 @@ export function turtleMesh({ shell = '#4f6b3a', skin = '#7d9a5c', plate = '#3850
   };
 }
 
-/** A ghost sloop: the sloop's look, every part see-through and glowing faintly green, flickering. */
+/** A phantom sloop: the sloop's look, every part see-through and glowing faintly green, flickering. */
 export function ghostSloopMesh() {
   const g = sloopMesh(), ghostly = new Map();
   g.traverse((o) => {

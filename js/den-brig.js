@@ -7,7 +7,7 @@
    act kind of more like troop ... transports"; "the Atlantean ... sends out little [tritons] and turtles to go and ram
    the enemy ships from the distance"; and "work on like the equivalent of war brigs ... things that can launch smaller
    ships like little sloops and Atlantis creatures." So the blockade's brigs (src/blockade.ts): Tidecaller, an
-   Atlantean, launching turtles that ram; Grave Lantern, a haunted brig, launching ghost sloops for a while.
+   Atlantean, launching turtles that ram; Grave Lantern, a haunted brig, launching phantom sloops nothing can hit.
 
    Sized as the war frigate is (src/ships.ts, hullFor): twice the sloop's length, her beam and a half less a little,
    deep enough that she holds what her hold does (WAR_BRIG, not yet checked against YPPedia). Two masts, a raised
@@ -51,7 +51,7 @@ export const TIDECALLER = {
     ],
 };
 /** Grave Lantern, Dalnoth's flag's brig: a haunted brig, see-through and glowing faintly as Eldritch Wail is, a skull
-    at her bow; she launches ghost sloops that last a while. */
+    at her bow; she launches phantom sloops, slow and never to be hit, that last a while. */
 export const GRAVE_LANTERN = {
     name: 'Grave Lantern',
     paint: { hull: '#34403f', sideboard: '#9fd8c0', railing: '#c8e8da', bottom: '#4a4440', deck: '#6e746a', sails: '#d3ecdf', gold: '#9fd8c0' },

@@ -1,5 +1,5 @@
 import { squares, drawnAt, alongs, shipPath } from './ship-handling.js';
-import { BLOCKADE, inHeart } from './blockade.js';
+import { BLOCKADE, inHeart, phantom } from './blockade.js';
 import { FREE } from './blockade-orders.js';
 export const BOTS = {
     /** Seconds between a bot's looks round for something better to do. */
@@ -30,6 +30,8 @@ export const BOTS = {
     BRIG: { OUT: 1.5, HEART: 0.35, LAUNCH: 14 },
     /** Seconds between a turtle's looks for whom to ram (quick: her prey moves), and how far she looks. */
     RAM: { THINK: 0.8, REACH: 24, STUCK: 1.6 },
+    /** Seconds a ship's lain still before a phantom sloop counts her fair game, whatever she is. */
+    CAMPED: 6,
 };
 const same = (a, z) => !!a && !!z && JSON.stringify(a) === JSON.stringify(z);
 /** The same thing to do, if not exactly (a raid on the same ship, wherever she's got to; hiding in the same cove). */
@@ -45,8 +47,8 @@ function worth(b, s, buoy, i, mates) {
     // (a sloop in the heart once the enemy's frigates are in it: out by the winds to the lagoons, before they're caught)
     if (s.kind === 'sloop' && inHeart(...buoy.at) && b.ships.some((o) => o.team !== s.team && o.kind === 'frigate' && o.away <= 0 && !o.dmg.out && b.inHeart(o)))
         w *= BOTS.FLEE;
-    // (a brig, and her ghost sloops with her: the islands' buoys before the heart's)
-    if (s.kind === 'brig' || s.craft?.kind === 'ghost')
+    // (a brig: the lagoons' buoys before the heart's)
+    if (s.kind === 'brig')
         w *= inHeart(...buoy.at) ? BOTS.BRIG.HEART : BOTS.BRIG.OUT;
     return w;
 }
@@ -168,7 +170,8 @@ export class Bot {
             return;
         }
         // (a brig: her craft launched whenever an enemy's near)
-        if (s.kind === 'brig' && b.canLaunch(s) && b.ships.some((o) => o.team !== s.team && o.away <= 0 && !o.dmg.out && Math.hypot(o.helm.pose.c - s.helm.pose.c, o.helm.pose.r - s.helm.pose.r) <= BOTS.BRIG.LAUNCH))
+        // (her craft are for the frigates: launched when an enemy frigate's near)
+        if (s.kind === 'brig' && b.canLaunch(s) && b.ships.some((o) => o.team !== s.team && o.kind === 'frigate' && o.away <= 0 && !o.dmg.out && Math.hypot(o.helm.pose.c - s.helm.pose.c, o.helm.pose.r - s.helm.pose.r) <= BOTS.BRIG.LAUNCH))
             b.launch(s.id);
         this.shoot(b, s);
         // (idle short of where she's going, she looks again sooner: but never more than twice a second)
@@ -186,7 +189,10 @@ export class Bot {
                 continue;
             const shots = b.aim(s.id, side), at = (id) => b.ship(id);
             // (an enemy, knocked out or not in a sinking blockade: finishing her sinks her)
-            const foe = shots.some((x) => x.what?.what === 'ship' && at(x.what.id).team !== s.team && (BLOCKADE.SINKING || !at(x.what.id).dmg.out));
+            // (a sloop leaves a frigate be unless she's sniping at her end: a broadside duel with one is a sloop sunk, rock,
+            // paper, scissors)
+            const duel = (o) => s.kind === 'sloop' && !s.craft && o.kind === 'frigate' && this.goal?.kind !== 'raid';
+            const foe = shots.some((x) => x.what?.what === 'ship' && at(x.what.id).team !== s.team && (BLOCKADE.SINKING || !at(x.what.id).dmg.out) && !duel(at(x.what.id)));
             // (a friend in the way, or one of a brawl's ships, left to it: holding fire)
             const friend = shots.some((x) => x.what?.what === 'ship' && (at(x.what.id).team === s.team || this.spare.has(x.what.id)));
             const gate = this.goal?.kind === 'gate' && s.h.guns === 'large' && shots.some((x) => x.what?.what === 'tower');
@@ -234,6 +240,13 @@ export class Bot {
         }
         // A sloop badly hurt hides till she's patched; a raider lurks a while, then darts out at a frigate, and back.
         const raider = this.order.kind === 'snipe' || (this.order.kind === 'free' && s.raider);
+        // A phantom sloop darts at anything slow or sat still (a frigate first, a brig, a ship that's lain still a while),
+        // again and again: she's only a while, nothing can hurt her, no hiding.
+        if (phantom(s)) {
+            const raid = this.raid(b, s, Infinity);
+            if (raid)
+                return { goal: raid, score: 8 };
+        }
         if (s.kind === 'sloop' && !s.craft) {
             const share = s.dmg.share(), hiding = this.goal?.kind === 'hide';
             if (share >= BOTS.HIDE || (hiding && share > BOTS.HEALED) || (hiding && raider && b.clock - this.since < this.lurk)) {
@@ -249,10 +262,19 @@ export class Bot {
                     if (cove)
                         return { goal: { kind: 'hide', cove }, score: 9 };
                 }
-                const raid = this.raid(b, s);
+                // (a brig before a frigate: rock, paper, scissors, the sloops' to beat)
+                const raid = this.raid(b, s, BOTS.REACH, false, undefined, 'brig');
                 if (raid)
                     return { goal: raid, score: 8 };
             }
+        }
+        // A sloop with an enemy brig close by goes for her, off her end where the brig's broadsides can't bear: too quick
+        // for a brig (rock, paper, scissors, 15 Nov: "sloops beat war brigs ... because of how they can just dart around
+        // and evade them").
+        if (s.kind === 'sloop' && !s.craft && this.order.kind === 'free') {
+            const raid = this.raid(b, s, BOTS.ENGAGE, false, undefined, 'brig');
+            if (raid && b.ship(raid.on).kind === 'brig')
+                return { goal: raid, score: 7 };
         }
         const best = [], p = s.helm.pose, post = this.order.kind;
         // (a strategy's weights: the heart's buoys, the gates, the fights)
@@ -296,16 +318,17 @@ export class Bot {
                 const left = gate.towers[berth.tower].hp;
                 best.push({ goal: { kind: 'gate', ...berth }, score: gateW * prize / (4 + eta + left * s.h.reload * 0.5) });
             }
-        // A frigate fights an enemy close by (the nearest; a frigate before a sloop), lying off her side; a brig too, a
-        // sloop before a frigate.
+        // A frigate fights an enemy close by (the nearest; a frigate before a sloop), lying off her side; a brig another
+        // brig, her craft the frigates (rock, paper, scissors: she leaves the sloops, too quick for her, be).
         if (s.kind === 'frigate' || s.kind === 'brig') {
-            const fight = this.raid(b, s, BOTS.ENGAGE, true, undefined, s.kind === 'brig' ? 'sloop' : 'frigate');
+            // (a frigate a sloop before anything: rock, paper, scissors, hers to sink, sheer weight of shot)
+            const fight = this.raid(b, s, BOTS.ENGAGE, true, undefined, s.kind === 'brig' ? 'brig' : 'sloop');
             if (fight) {
                 const was = this.goal?.kind === 'fight' && this.goal.on === fight.on, eta = Math.hypot(fight.at[0] - s.helm.pose.c, fight.at[1] - s.helm.pose.r) / s.h.stride * s.h.move;
                 const o = b.ship(fight.on), near = (x) => Math.hypot(x.helm.pose.c - o.helm.pose.c, x.helm.pose.r - o.helm.pose.r) <= BOTS.SAVE;
                 // (to finish her off, or to drive her off a friend who's knocked out)
                 const why = (o.dmg.out ? BOTS.FINISH : 1) * (b.ships.some((x) => x.team === s.team && x !== s && x.dmg.out && x.away <= 0 && near(x)) ? BOTS.RESCUE : 1);
-                const big = s.kind === 'brig' ? (o.kind === 'frigate' ? 0.6 : 1.5) : o.kind === 'frigate' ? 1.5 : 1;
+                const big = s.kind === 'brig' ? (o.kind === 'brig' ? 1.5 : 0.25) : o.kind === 'sloop' ? 1.6 : o.kind === 'frigate' ? 1.3 : 0.8;
                 best.push({ goal: { kind: 'fight', on: fight.on, at: was && this.goal?.kind === 'fight' ? this.goal.at : fight.at }, score: fightW * BOTS.FIGHT * big * why / (4 + eta) });
             }
         }
@@ -434,7 +457,9 @@ export class Bot {
     raid(b, s, reach = BOTS.REACH, any = false, only, first = 'frigate') {
         const p = s.helm.pose;
         // (a frigate's fight can be with one knocked out, to sink her, in a sinking blockade; a raider's never)
-        const foes = b.ships.filter((o) => o.team !== s.team && (any || o.kind === 'frigate') && o.away <= 0 && (any && BLOCKADE.SINKING ? true : !o.dmg.out) && (only === undefined ? !this.spare.has(o.id) : o.id === only))
+        // (a raider's: a frigate or a brig, both too slow to answer a sloop off her end)
+        const camped = (o) => phantom(s) && (b.still.get(o.id) ?? 0) >= BOTS.CAMPED && !o.craft;
+        const foes = b.ships.filter((o) => o.team !== s.team && !phantom(o) && (any || o.kind === 'frigate' || o.kind === 'brig' || camped(o)) && o.away <= 0 && (any && BLOCKADE.SINKING ? true : !o.dmg.out) && (only === undefined ? !this.spare.has(o.id) : o.id === only))
             .map((o) => ({ o, m: drawnAt(o.h, { c: o.helm.pose.c, r: o.helm.pose.r, a: o.helm.pose.d }) }))
             .filter(({ m }) => Math.hypot(m.c - p.c, m.r - p.r) <= reach)
             .sort((a, z) => (a.o.kind === z.o.kind ? 0 : a.o.kind === first ? -1 : z.o.kind === first ? 1 : 0) || Math.hypot(a.m.c - p.c, a.m.r - p.r) - Math.hypot(z.m.c - p.c, z.m.r - p.r));
@@ -458,32 +483,35 @@ export class Bot {
             }
             const sd = (o.helm.pose.d + 1) % 4;
             const spots = [1, -1].map((k) => [Math.round(m.c + DC[sd] * k * BOTS.OFF), Math.round(m.r + DR[sd] * k * BOTS.OFF)])
-                .filter(([c, r]) => s.sea.open(c, r) && !squares(o.h, o.helm.pose).some(([x, y]) => x === c && y === r))
+                // (never in the shoals, for a frigate: she'd scrape her bottom lying there)
+                .filter(([c, r]) => s.sea.open(c, r) && !squares(o.h, o.helm.pose).some(([x, y]) => x === c && y === r) && !(s.kind === 'frigate' && b.shoals.has(`${c},${r}`)))
                 .sort((a, z) => Math.hypot(a[0] - p.c, a[1] - p.r) - Math.hypot(z[0] - p.c, z[1] - p.r));
             if (spots.length)
                 return { kind: 'raid', on: o.id, at: spots[0] };
         }
         return null;
     }
-    /** A turtle's prey: the nearest enemy she can get beside (a ship before another's craft), and the open square beside
-        her nearest the turtle. */
+    /** A turtle's prey: the nearest enemy frigate (a brig if there's none; a sloop's too quick for her), and where to
+        come at her: astern of her, where none of her broadsides bears, else off her quarter, else anywhere beside her. */
     prey(b, s) {
-        const p = s.helm.pose, sea = s.sea.bare(), far = (c, r) => Math.hypot(c - p.c, r - p.r);
-        const foes = b.ships.filter((o) => o.team !== s.team && o.away <= 0 && far(o.helm.pose.c, o.helm.pose.r) <= BOTS.RAM.REACH)
-            .sort((a, z) => (a.craft ? 1 : 0) - (z.craft ? 1 : 0) || far(a.helm.pose.c, a.helm.pose.r) - far(z.helm.pose.c, z.helm.pose.r));
+        const p = s.helm.pose, sea = s.sea.bare(), far = (c, r) => Math.hypot(c - p.c, r - p.r), DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
+        const foes = b.ships.filter((o) => o.team !== s.team && !o.craft && (o.kind === 'frigate' || o.kind === 'brig') && o.away <= 0 && far(o.helm.pose.c, o.helm.pose.r) <= BOTS.RAM.REACH)
+            .sort((a, z) => (a.kind === 'frigate' ? 0 : 1) - (z.kind === 'frigate' ? 0 : 1) || far(a.helm.pose.c, a.helm.pose.r) - far(z.helm.pose.c, z.helm.pose.r));
         for (const o of foes) {
-            const hers = squares(o.h, o.helm.pose), on = new Set(hers.map(([c, r]) => `${c},${r}`)), spots = [];
+            const op = o.helm.pose, d = op.d, sd = (d + 1) % 4, al = alongs(o.h)[0], hers = squares(o.h, op), on = new Set(hers.map(([c, r]) => `${c},${r}`));
+            // (astern: the squares just past her stern, across her; then her quarters, a square further out each side)
+            const stern = Array.from(new Set(hers.map(([c, r]) => (c - op.c) * DC[d] + (r - op.r) * DR[d] === al ? `${c + DC[d] * -1},${r + DR[d] * -1}` : ''))).filter(Boolean).map((k) => k.split(',').map(Number));
+            const quarters = stern.flatMap(([c, r]) => [[c + DC[sd], r + DR[sd]], [c - DC[sd], r - DR[sd]]]);
+            const beside = [];
             for (const [c, r] of hers)
                 for (let dc = -1; dc <= 1; dc++)
-                    for (let dr = -1; dr <= 1; dr++) {
-                        const x = c + dc, y = r + dr;
-                        if (!on.has(`${x},${y}`) && sea.open(x, y) && !spots.some(([u, v]) => u === x && v === y))
-                            spots.push([x, y]);
-                    }
-            spots.sort((a, z) => far(...a) - far(...z));
-            const at = spots.find((x) => !this.blocked(b, x));
-            if (at)
-                return { kind: 'ram', on: o.id, at };
+                    for (let dr = -1; dr <= 1; dr++)
+                        beside.push([c + dc, r + dr]);
+            for (const ring of [stern, quarters, beside]) {
+                const spots = ring.filter(([x, y]) => !on.has(`${x},${y}`) && sea.open(x, y) && !this.blocked(b, [x, y])).sort((a, z) => far(...a) - far(...z));
+                if (spots.length)
+                    return { kind: 'ram', on: o.id, at: spots[0] };
+            }
         }
         return null;
     }
