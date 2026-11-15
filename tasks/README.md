@@ -55,3 +55,16 @@ only run the task script, read, and edit the design documents. It splits what yo
 where it goes: a card (asked), an idea card, a note on a card it adds to, or RACE.md, STORY.md, RULES.md or
 DISTILLING.md; then the inbox card's done, its log saying where each part went. Anything it can't place stays in the
 inbox with a note, for the main session. It doesn't commit: the main session does.
+
+## A card opened, and going through them
+
+Click a card (or Tab to it and Enter) and it opens in a panel down the right: everything on it, what was asked and its
+whole log. ← and → go through the cards showing (the stream picked), column by column from that card's own, each
+column's "Go through" starts at its top; 1 to 8 move it (Inbox to Done, the buttons along the top say which); Esc
+closes it; a card's link, `#its-id`, opens it. Below is a box for what's changed, typed or said (the user, 15 Nov:
+"some quick way of going between them, even if the quick fire way is then me just having this mic on and dictating
+into here about what the updated status of each thing is"): the Mic button where the browser can listen (Chrome,
+Edge; "next" said on its own sends it and goes on, "back" goes back), or Windows' dictation (Win+H) anywhere.
+Ctrl+Enter, or "Send and next", sends it: it's logged on the card at once in your words, and a headless Claude
+(`tools/card-update.md`; the same limits as the inbox's) acts on it, its status, its title, a new card split off, a
+duplicate closed, a decision into its document. The card says it's updating, and redraws itself when that's done.

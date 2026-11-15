@@ -11,7 +11,7 @@
 //   node tools/task.mjs stream <stream> "<where it got to>"
 //   node tools/task.mjs move <id> <stream>                into another stream
 //   node tools/task.mjs board                             draws tasks/board.html (add, set, note and stream draw it too)
-//   node tools/task.mjs serve                             the board at http://localhost:8643/, cards dragged between
+//   node tools/task.mjs serve [--port n]                  the board at http://localhost:8643/, cards dragged between
 //                                                         columns there (each drop is a `set`, by this script)
 //
 // npm run task -- <the same>. Ids are the card's file name, without .md; any unique part of one will do.
@@ -105,31 +105,33 @@ function md(text) {
   return out.join('');
 }
 
-/** The board: a column a status, a card a task, coloured by stream, filtered by stream, its streams' notes above. */
-export function board({ streams, cards }, when = new Date()) {
-  const hue = Object.fromEntries(streams.map((s) => [s.id, s.hue]));
-  const name = Object.fromEntries(streams.map((s) => [s.id, s.name]));
-  const card = (c) => {
-    const m = c.meta, link = m.link ? `<a class="go" href="${esc(LOCAL + m.link)}">Local</a><a class="go" href="${esc(LIVE + m.link)}">Live</a>` : '';
-    const shot = m.shot ? `<a class="shot" href="${esc('../' + m.shot)}"><img src="${esc('../' + m.shot)}" alt="" loading="lazy"></a>` : '';
-    const who = [m.session ? `session <code>${esc(m.session)}</code>` : '', m.branch ? `branch <code>${esc(m.branch)}</code>` : ''].filter(Boolean).join(' · ');
-    const st = m.status || 'asked';
-    const move = `<label class="move">Move to <select data-id="${esc(c.id)}">${Object.entries(STATUSES).map(([k, l]) => `<option value="${k}"${k === st ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`;
-    return `<article class="card" draggable="true" data-id="${esc(c.id)}" data-stream="${esc(c.stream)}" style="--h:${hue[c.stream] ?? 30}">
-  ${shot}<div class="tag">${esc(name[c.stream] ?? c.stream)}</div>
+/** One card on the board: its stream, title, dates and links; everything else (what was asked, its log) kept in
+ *  `.full`, read in the card's panel when it's opened. */
+export function cardHtml(c, streams) {
+  const s = streams.find((x) => x.id === c.stream);
+  const m = c.meta, link = m.link ? `<a class="go" href="${esc(LOCAL + m.link)}">Local</a><a class="go" href="${esc(LIVE + m.link)}">Live</a>` : '';
+  const shot = m.shot ? `<a class="shot" href="${esc('../' + m.shot)}"><img src="${esc('../' + m.shot)}" alt="" loading="lazy"></a>` : '';
+  const who = [m.session ? `session <code>${esc(m.session)}</code>` : '', m.branch ? `branch <code>${esc(m.branch)}</code>` : ''].filter(Boolean).join(' · ');
+  return `<article class="card" draggable="true" tabindex="0" data-id="${esc(c.id)}" data-stream="${esc(c.stream)}" data-status="${esc(m.status || 'asked')}" style="--h:${s?.hue ?? 30}">
+  ${shot}<div class="tag">${esc(s?.name ?? c.stream)}</div>
   <h3>${esc(m.title || c.id)}</h3>
   <div class="when">${m.asked ? `asked ${esc(m.asked)}` : ''}${m.updated ? ` · updated ${esc(m.updated)}` : ''}</div>
   ${link ? `<div class="links">${link}</div>` : ''}
-  <details><summary>More</summary>${move}${md(c.body)}${who ? `<p class="who">${who}</p>` : ''}<p class="id"><code>${esc(c.id)}</code></p></details>
+  <div class="full" hidden>${md(c.body)}${who ? `<p class="who">${who}</p>` : ''}<p class="id"><code>${esc(c.id)}</code></p></div>
 </article>`;
-  };
+}
+
+/** The board: a column a status, a card a task, coloured by stream, filtered by stream, its streams' notes above; a
+ *  card opened in a panel beside it, gone through one after another (tools/board-client.js does the clicking). */
+export function board({ streams, cards }, when = new Date()) {
   const cols = Object.entries(STATUSES).map(([st, label]) => {
     const here = cards.filter((c) => (c.meta.status || 'asked') === st);
     const fold = st === 'done' ? `<button class="fold">Show them</button>` : '';
-    return `<section class="col${st === 'done' ? ' folded' : ''}" data-status="${st}"><h2>${esc(label)} <span>${here.length}</span></h2>${fold}<div class="list">${here.map(card).join('\n')}</div></section>`;
+    return `<section class="col${st === 'done' ? ' folded' : ''}" data-status="${st}"><h2>${esc(label)} <span>${here.length}</span><button class="through" title="Open the first card and go through them one by one">Go through</button></h2>${fold}<div class="list">${here.map((c) => cardHtml(c, streams)).join('\n')}</div></section>`;
   }).join('\n');
   const chips = streams.map((s) => `<button class="chip" data-stream="${esc(s.id)}" style="--h:${s.hue}">${esc(s.name)} <span>${cards.filter((c) => c.stream === s.id && !['done', 'idea'].includes(c.meta.status)).length}</span></button>`).join('');
   const notes = streams.filter((s) => s.where).map((s) => `<div class="stream" data-stream="${esc(s.id)}" style="--h:${s.hue}"><b>${esc(s.name)}</b>${md(s.where)}</div>`).join('');
+  const keys = Object.entries(STATUSES).map(([k, l], i) => `<button class="st" data-status="${k}"><kbd>${i + 1}</kbd>${esc(l)}</button>`).join('');
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Task board</title>
@@ -145,130 +147,88 @@ export function board({ streams, cards }, when = new Date()) {
   .chip span { color: var(--dim); }
   .chip.on { background: hsl(var(--h) 45% 40%); }
   .where { margin: 0 16px 10px; }
-  .where > summary { color: var(--dim); font-size: 13px; margin-bottom: 8px; }
+  .where > summary { color: var(--dim); font-size: 13px; margin-bottom: 8px; cursor: pointer; }
   .streams { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
   .stream { border-left: 3px solid hsl(var(--h) 55% 55%); background: var(--tile); padding: 6px 10px; border-radius: 4px; font-size: 13px; color: var(--dim); }
   .stream b { color: var(--text); }
   .stream p { margin: 4px 0 0; }
   .cols { display: flex; gap: 10px; overflow-x: auto; padding: 0 16px 24px; align-items: flex-start; }
   .col { flex: 0 0 270px; background: var(--well); border: 1px solid var(--edge); border-radius: 8px; padding: 8px; }
-  .col h2 { margin: 2px 4px 8px; font-size: 14px; color: var(--dim); }
+  .col h2 { margin: 2px 4px 8px; font-size: 14px; color: var(--dim); display: flex; align-items: baseline; gap: 6px; }
   .col h2 span { color: var(--faint); font-weight: 400; }
-  .col[data-status="playtest"] { border-color: var(--accent); }
+  .through { margin-left: auto; background: none; border: 1px solid var(--edge); color: var(--faint); border-radius: 4px; font: inherit; font-size: 11.5px; padding: 1px 6px; cursor: pointer; }
+  .through:hover { color: var(--text); border-color: var(--accent); }
+  .col[data-status="playtest"], .col[data-status="inbox"] { border-color: var(--accent); }
   .col[data-status="idea"] { border-style: dashed; }
   .col[data-status="playtest"] h2, .col[data-status="review"] h2 { color: var(--accent-text); }
-  .card { background: var(--bg); border: 1px solid var(--edge); border-left: 4px solid hsl(var(--h) 55% 55%); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; }
+  .card { background: var(--bg); border: 1px solid var(--edge); border-left: 4px solid hsl(var(--h) 55% 55%); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; cursor: pointer; }
+  .card:hover { border-color: hsl(var(--h) 55% 55%); }
+  .card.open { outline: 2px solid var(--accent); outline-offset: 1px; }
   .card h3 { margin: 2px 0; font-size: 14.5px; color: var(--title); }
   .tag { font-size: 11.5px; color: hsl(var(--h) 60% 72%); }
   .when { font-size: 12px; color: var(--faint); }
   .links { display: flex; gap: 6px; margin-top: 6px; }
   .go { background: var(--accent); color: var(--on-accent); text-decoration: none; border-radius: 4px; padding: 2px 8px; font-size: 12.5px; font-weight: 600; }
   .shot img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 4px; display: block; margin-bottom: 6px; }
-  details { margin-top: 6px; font-size: 13px; color: var(--dim); }
-  summary { cursor: pointer; color: var(--faint); }
-  details p, details ul { margin: 6px 0; }
-  details ul { padding-left: 18px; }
-  details h4 { margin: 8px 0 2px; font-size: 12.5px; color: var(--text); }
+  .card.busy::after { content: 'Updating...'; display: block; margin-top: 4px; font-size: 12px; color: var(--accent-text); }
   code { font-size: 12px; color: var(--accent-text); }
   a { color: var(--accent-text); }
   .who, .id { color: var(--faint); font-size: 12px; }
   .drop { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; padding: 0 16px 10px; }
-  .drop textarea { flex: 1 1 320px; min-height: 2.6em; background: var(--tile); color: var(--text); border: 1px solid var(--edge); border-radius: 6px; padding: 6px 8px; font: inherit; resize: vertical; }
-  .drop button { background: var(--accent); color: var(--on-accent); border: 0; border-radius: 6px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; }
+  .drop textarea, .update textarea { flex: 1 1 320px; min-height: 2.6em; background: var(--tile); color: var(--text); border: 1px solid var(--edge); border-radius: 6px; padding: 6px 8px; font: inherit; resize: vertical; box-sizing: border-box; }
+  .drop button, .update .send { background: var(--accent); color: var(--on-accent); border: 0; border-radius: 6px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; }
   .sorting { flex-basis: 100%; color: var(--dim); font-size: 13px; }
-  .col[data-status="inbox"] { border-color: var(--accent); }
-  .card[draggable="true"] { cursor: grab; }
   .card.dragging { opacity: .45; }
   .col.over { outline: 2px dashed var(--accent); outline-offset: -2px; }
   .list { min-height: 40px; }
   .col.folded .list { display: none; }
   .fold { display: block; width: 100%; margin-bottom: 8px; background: var(--tile); color: var(--dim); border: 1px solid var(--edge); border-radius: 4px; padding: 4px; font: inherit; font-size: 13px; cursor: pointer; }
-  .move { display: block; font-size: 12.5px; color: var(--faint); }
-  .move select { font: inherit; background: var(--tile); color: var(--text); border: 1px solid var(--edge); border-radius: 4px; }
-  .say { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); background: var(--tile); color: var(--text); border: 1px solid var(--edge); border-radius: 6px; padding: 8px 12px; font-size: 13.5px; max-width: calc(100% - 32px); box-sizing: border-box; }
+  .say { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); background: var(--tile); color: var(--text); border: 1px solid var(--edge); border-radius: 6px; padding: 8px 12px; font-size: 13.5px; max-width: calc(100% - 32px); box-sizing: border-box; z-index: 20; }
+  /* A card opened: a panel down the right, the board still there beside it. */
+  .panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100%); background: var(--bg); border-left: 1px solid var(--edge); box-shadow: -8px 0 24px rgb(0 0 0 / .35); display: flex; flex-direction: column; z-index: 10; box-sizing: border-box; }
+  .panel[hidden] { display: none; }
+  .panel .bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--edge); }
+  .panel .bar .at { flex: 1; color: var(--faint); font-size: 13px; }
+  .panel .bar button, .update button { background: var(--tile); color: var(--text); border: 1px solid var(--edge); border-radius: 4px; font: inherit; font-size: 13px; padding: 4px 10px; cursor: pointer; }
+  .panel .read { flex: 1; overflow-y: auto; padding: 12px 16px; }
+  .panel .read .card { border: 0; padding: 0; margin: 0; cursor: auto; background: none; outline: 0; }
+  .panel .read .card::after { display: none; }
+  .panel .read h3 { font-size: 19px; margin: 4px 0; }
+  .panel .read .full { font-size: 14px; color: var(--text); }
+  .panel .read .full p, .panel .read .full ul { margin: 8px 0; }
+  .panel .read .full ul { padding-left: 20px; }
+  .panel .read .full h4 { margin: 14px 0 4px; font-size: 13px; color: var(--dim); text-transform: uppercase; letter-spacing: .04em; }
+  .panel .read .full h4 ~ ul { font-size: 13px; color: var(--dim); }
+  .panel .read .shot img { aspect-ratio: auto; max-height: 300px; object-fit: contain; }
+  .sts { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 14px; border-bottom: 1px solid var(--edge); }
+  .st { background: var(--tile); color: var(--dim); border: 1px solid var(--edge); border-radius: 99px; font: inherit; font-size: 12.5px; padding: 3px 10px 3px 4px; cursor: pointer; }
+  .st kbd { display: inline-block; min-width: 1.4em; margin-right: 5px; border-radius: 99px; background: var(--well); color: var(--faint); font: 11px/1.6 system-ui, sans-serif; text-align: center; }
+  .st.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .st.on kbd { background: rgb(0 0 0 / .2); color: inherit; }
+  .update { border-top: 1px solid var(--edge); padding: 10px 14px 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .update textarea { flex-basis: 100%; min-height: 4.2em; }
+  .update .mic.on { background: #b3261e; color: #fff; border-color: #b3261e; }
+  .update .hint { flex-basis: 100%; color: var(--faint); font-size: 12px; }
+  .update .send { padding: 4px 12px; font-size: 13px; }
+  .update .gap { flex: 1; }
   @media (max-width: 640px) { .cols { flex-direction: column; } .col { flex: none; width: 100%; box-sizing: border-box; } }
 </style></head>
-<body>
-<header><h1>Task board</h1><span class="made">Drawn ${esc(today(when))}, ${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')} from tasks/ by tools/task.mjs</span></header>
+<body data-port="${PORT}">
+<header><h1>Task board</h1><span class="made">Drawn ${esc(today(when))}, ${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')} from tasks/ by tools/task.mjs. Click a card to open it.</span></header>
 <form class="drop"><textarea name="text" rows="2" placeholder="Drop something in: a fix, an idea, a thought. Sorted onto the board for you."></textarea><button>Drop it in</button><span class="sorting" hidden></span></form>
 <div class="chips"><button class="chip on" data-stream="" style="--h:30">Every stream</button>${chips}</div>
 <details class="where"><summary>Where each stream's got to</summary><div class="streams">${notes}</div></details>
 <main class="cols">${cols}</main>
-<script>
-  const pick = (s) => {
-    document.querySelectorAll('.chip').forEach((b) => b.classList.toggle('on', b.dataset.stream === s));
-    document.querySelectorAll('.card, .stream').forEach((c) => { c.hidden = !!s && c.dataset.stream !== s; });
-    try { localStorage.setItem('board.stream', s); } catch (e) {}
-  };
-  document.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => pick(b.dataset.stream)));
-  try { const s = localStorage.getItem('board.stream'); if (s) pick(s); } catch (e) {}
-  document.querySelectorAll('.fold').forEach((b) => b.addEventListener('click', () => {
-    const col = b.closest('.col'); col.classList.toggle('folded'); b.textContent = col.classList.contains('folded') ? 'Show them' : 'Hide them';
-  }));
-  // Moving a card: dragged to a column, or its "Move to". Saved by tools/task.mjs serve (POST /api/move, a set);
-  // opened any other way, the board only says how.
-  let say;
-  const tell = (text) => { say?.remove(); say = Object.assign(document.createElement('div'), { className: 'say', textContent: text }); document.body.append(say); setTimeout(() => say?.remove(), 5000); };
-  const count = () => document.querySelectorAll('.col').forEach((c) => { c.querySelector('h2 span').textContent = c.querySelectorAll('.card').length; });
-  async function moveTo(id, status) {
-    const card = document.querySelector('.card[data-id="' + CSS.escape(id) + '"]');
-    try {
-      const r = await fetch('/api/move', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id, status }) });
-      if (!r.ok) throw new Error(await r.text());
-    } catch (e) {
-      tell(location.port === '${PORT}' ? 'Not saved: ' + e.message : 'To move cards, run npm run board:serve and open http://localhost:${PORT}/');
-      return false;
-    }
-    const col = document.querySelector('.col[data-status="' + status + '"] .list');
-    col.prepend(card); card.querySelector('select').value = status; count();
-    return true;
-  }
-  let dragged = null;
-  document.querySelectorAll('.card').forEach((c) => {
-    c.addEventListener('dragstart', (e) => { dragged = c; c.classList.add('dragging'); e.dataTransfer.setData('text/plain', c.dataset.id); });
-    c.addEventListener('dragend', () => { c.classList.remove('dragging'); dragged = null; });
-  });
-  document.querySelectorAll('.col').forEach((col) => {
-    col.addEventListener('dragover', (e) => { if (dragged) { e.preventDefault(); col.classList.add('over'); } });
-    col.addEventListener('dragleave', (e) => { if (!col.contains(e.relatedTarget)) col.classList.remove('over'); });
-    col.addEventListener('drop', (e) => {
-      e.preventDefault(); col.classList.remove('over');
-      if (dragged && dragged.closest('.col') !== col) moveTo(dragged.dataset.id, col.dataset.status);
-    });
-  });
-  // The inbox: what's dropped in is a card at once, then sorted by a headless Claude (tools/inbox-triage.md); the
-  // board watches it and draws itself again once it's been put where it goes.
-  const form = document.querySelector('.drop'), sorting = form.querySelector('.sorting');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const text = form.text.value.trim();
-    if (!text) return;
-    let id;
-    try {
-      const r = await fetch('/api/inbox', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text }) });
-      if (!r.ok) throw new Error(await r.text());
-      id = (await r.json()).id;
-    } catch (err) {
-      tell(location.port === '${PORT}' ? 'Not dropped in: ' + err.message : 'To drop things in, run npm run board:serve and open http://localhost:${PORT}/');
-      return;
-    }
-    form.text.value = '';
-    sorting.hidden = false; sorting.textContent = 'In the inbox. Sorting it...';
-    const started = Date.now();
-    const watch = setInterval(async () => {
-      try {
-        const c = await (await fetch('/api/card?id=' + encodeURIComponent(id))).json();
-        const last = (c.log || '').split('\\n').pop();
-        if (c.status !== 'inbox' || /left in the inbox|failed|couldn't start/.test(last)) { clearInterval(watch); sorting.textContent = last.replace(/^- /, ''); setTimeout(() => location.reload(), 2500); }
-        else if (Date.now() - started > 10 * 60e3) { clearInterval(watch); sorting.textContent = 'Still sorting; it will be on the board when you reload.'; }
-      } catch (err) {}
-    }, 3000);
-  });
-  document.querySelectorAll('.move select').forEach((s) => s.addEventListener('change', async () => {
-    const was = s.closest('.col').dataset.status;
-    if (!(await moveTo(s.dataset.id, s.value))) s.value = was;
-  }));
-</script>
+<aside class="panel" hidden aria-label="The card opened">
+  <div class="bar"><button class="prev" title="The card before (left arrow)">&larr;</button><button class="next" title="The next card (right arrow)">&rarr;</button><span class="at"></span><button class="shut" title="Close (Esc)">Close</button></div>
+  <div class="sts">${keys}</div>
+  <div class="read"></div>
+  <form class="update"><textarea name="text" placeholder="Say or type what's changed: &quot;that works now&quot;, &quot;still slow when you turn&quot;, &quot;split the guns off into their own card&quot;..."></textarea>
+    <button type="button" class="mic" hidden title="Dictate (say &quot;next&quot; to send and go on)">Mic</button><span class="gap"></span>
+    <button type="submit" class="send" name="stay">Send</button><button type="submit" class="send" name="on">Send and next</button>
+    <span class="hint">Keys: &larr; &rarr; to go through, 1-${Object.keys(STATUSES).length} to move it, Enter to write, Ctrl+Enter to send and go on, Esc to close. What you send is logged on the card and a headless Claude acts on it (moves it, splits it, notes it).</span></form>
+</aside>
+<script src="../tools/board-client.js"></script>
 </body></html>
 `;
 }
@@ -321,32 +281,58 @@ export function dropIn(text, dir = TASKS, when = new Date()) {
 }
 
 export const TRIAGE = join(ROOT, 'tools', 'inbox-triage.md');
-/** An inbox card sorted by a headless Claude (tools/inbox-triage.md says how): into a card, an idea or a document,
- *  the inbox card then done. Only the task script, reading and editing documents are allowed it. If it couldn't, the
- *  inbox card says why and stays in the inbox. */
-export function triage(card, run = spawn) {
-  const prompt = readFileSync(TRIAGE, 'utf8').replaceAll('{{card}}', `${card.stream}/${card.id}`).replaceAll('{{id}}', card.id);
-  const tools = ['Read', 'Grep', 'Glob', 'Edit', 'Bash(node tools/task.mjs:*)'].join(',');
-  let out = '';
-  const finish = (why) => {
-    const now = load().cards.find((x) => x.id === card.id);
-    if (now && now.meta.status === 'inbox' && why) change(load().cards, card.id, undefined, { note: why });
-    drawBoard();
-    console.log(`sorted ${card.id}: ${(now?.meta.status === 'inbox' ? why : 'done') ?? ''}`);
-  };
-  const child = run('claude', ['-p', '--model', 'sonnet', '--allowedTools', tools], { cwd: ROOT, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
-  child.on('error', (e) => finish(`couldn't start Claude to sort it: ${e.message}`));
+export const UPDATE = join(ROOT, 'tools', 'card-update.md');
+const TOOLS = ['Read', 'Grep', 'Glob', 'Edit', 'Bash(node tools/task.mjs:*)'].join(',');
+/** The cards a headless Claude is working on right now (the board shows them as updating). */
+export const busy = new Set();
+/** A headless Claude (Sonnet) given a prompt, allowed only the task script, reading and editing documents; done(why)
+ *  when it's finished, why saying what went wrong, if anything did. */
+function headless(id, prompt, done, run) {
+  let out = '', ended = false;
+  const end = (why) => { if (ended) return; ended = true; busy.delete(id); done(why, out); };
+  busy.add(id);
+  const child = run('claude', ['-p', '--model', 'sonnet', '--allowedTools', TOOLS], { cwd: ROOT, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
+  child.on('error', (e) => end(`couldn't start Claude: ${e.message}`));
   child.stdout?.on('data', (d) => { out += d; });
   child.stderr?.on('data', (d) => { out += d; });
-  child.on('close', (code) => finish(code ? `sorting it failed (${code}): ${out.trim().slice(-300)}` : `left in the inbox: ${out.trim().slice(-300)}`));
+  child.on('close', (code) => end(code ? `it failed (${code}): ${out.trim().slice(-300)}` : ''));
   child.stdin?.end(prompt);
-  console.log(`sorting ${card.id}`);
   return child;
+}
+const fill = (file, card, words = '') => readFileSync(file, 'utf8').replaceAll('{{card}}', `${card.stream}/${card.id}`)
+  .replaceAll('{{id}}', card.id).replaceAll('{{words}}', words);
+
+/** An inbox card sorted by a headless Claude (tools/inbox-triage.md says how): into a card, an idea or a document,
+ *  the inbox card then done. If it couldn't, the inbox card says why and stays in the inbox. */
+export function triage(card, run = spawn) {
+  console.log(`sorting ${card.id}`);
+  return headless(card.id, fill(TRIAGE, card), (why, out) => {
+    const now = load().cards.find((x) => x.id === card.id);
+    if (now && now.meta.status === 'inbox') change(load().cards, card.id, undefined, { note: why ? `sorting ${why}` : `left in the inbox: ${out.trim().slice(-300)}` });
+    drawBoard();
+    console.log(`sorted ${card.id}`);
+  }, run);
+}
+
+/** What the user said about a card as they went through the board: logged on it straight away, in their words, then
+ *  acted on by a headless Claude (tools/card-update.md: its status, its title, new cards split off, a document). */
+export function update(cards, id, text, run = spawn) {
+  const words = String(text ?? '').replace(/\s+/g, ' ').trim();
+  if (!words) throw new Error('Nothing said');
+  const c = change(cards, id, undefined, { note: `you said: "${words}"` });
+  console.log(`updating ${c.id}`);
+  headless(c.id, fill(UPDATE, c, words), (why) => {
+    if (why) change(load().cards, c.id, undefined, { note: `acting on it ${why}` });
+    drawBoard();
+    console.log(`updated ${c.id}${why ? ': ' + why : ''}`);
+  }, run);
+  return c;
 }
 
 const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.woff2': 'font/woff2' };
-/** The board served from this machine only, drawn fresh on every look, a card moved by POST /api/move {id, status}. */
+/** The board served from this machine only, drawn fresh on every look: a card moved by POST /api/move {id, status},
+ *  something dropped in by POST /api/inbox {text}, what's said about a card by POST /api/update {id, text}. */
 export function serve(port = PORT) {
   const server = createServer((req, res) => {
     const url = new URL(req.url, 'http://localhost');
@@ -376,10 +362,22 @@ export function serve(port = PORT) {
       });
       return;
     }
+    if (req.method === 'POST' && url.pathname === '/api/update') {
+      let data = '';
+      req.on('data', (d) => { data += d; if (data.length > 64 * 1024) req.destroy(); });
+      req.on('end', () => {
+        try {
+          const { id, text } = JSON.parse(data);
+          const c = update(load().cards, String(id), text);
+          res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ id: c.id }));
+        } catch (e) { res.writeHead(400, { 'content-type': 'text/plain' }).end(e.message); }
+      });
+      return;
+    }
     if (req.method === 'GET' && url.pathname === '/api/card') {
-      const c = load().cards.find((x) => x.id === url.searchParams.get('id'));
+      const all = load(), c = all.cards.find((x) => x.id === url.searchParams.get('id'));
       res.writeHead(c ? 200 : 404, { 'content-type': 'application/json', 'cache-control': 'no-store' })
-        .end(JSON.stringify(c ? { id: c.id, status: c.meta.status, log: c.body.split('## Log')[1]?.trim() ?? '' } : {}));
+        .end(JSON.stringify(c ? { id: c.id, status: c.meta.status, log: c.body.split('## Log')[1]?.trim() ?? '', busy: busy.has(c.id), html: cardHtml(c, all.streams) } : {}));
       return;
     }
     if (req.method !== 'GET') { res.writeHead(405).end(); return; }
@@ -432,7 +430,7 @@ function main(argv) {
     renameSync(c.file, join(TASKS, pos[1], id + '.md'));
     console.log(`${c.stream}/${c.id} -> ${pos[1]}/${id}`);
   } else if (cmd === 'serve') {
-    serve();
+    serve(Number(opt.port) || PORT);
     return;
   } else if (cmd === 'stream') {
     const s = all.streams.find((x) => x.id === pos[0]);

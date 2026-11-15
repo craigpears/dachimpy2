@@ -2,7 +2,7 @@
 // column for; the board drawn from them, a script's work and no one else's (the user, 15 Nov: "more deterministic").
 import { describe, it, expect } from 'vitest';
 // @ts-expect-error: a plain .mjs tool, untyped
-import { load, board, parse, format, change, dropIn, triage, STATUSES } from '../tools/task.mjs';
+import { load, board, parse, format, change, dropIn, triage, update, busy, STATUSES } from '../tools/task.mjs';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -72,10 +72,39 @@ describe('the task board (the user, 14 Nov: "a clear list of things and what the
     expect(prompt).toContain('set inbox-20261115-093005 done');
     expect(prompt).not.toContain('{{');
   });
-  it('the board lets a card be dragged, or moved from its menu', () => {
+  it('the board lets a card be dragged, or moved from its panel', () => {
     const html: string = board(all);
+    const client = readFileSync(join(__dirname, '..', 'tools', 'board-client.js'), 'utf8');
     expect(html).toContain('draggable="true"');
-    expect(html).toContain('/api/move');
-    for (const st of Object.keys(STATUSES)) expect(html).toContain(`<option value="${st}"`);
+    expect(html).toContain('<script src="../tools/board-client.js">');
+    expect(client).toContain('/api/move');
+    for (const st of Object.keys(STATUSES)) expect(html).toContain(`class="st" data-status="${st}"`);
+  });
+  it('a card opens to everything on it, and can be gone through (the user, 15 Nov: "I can\'t click on the card to open it")', () => {
+    const html: string = board(all);
+    const client = readFileSync(join(__dirname, '..', 'tools', 'board-client.js'), 'utf8');
+    // every card's log is on the board, kept for its panel
+    for (const c of all.cards) expect(html, c.id).toMatch(new RegExp(`data-id="${c.id}"[^]*?<div class="full" hidden>[^]*?<h4>Log</h4>`));
+    expect(html).toContain('class="panel"');
+    expect(html).toContain('class="through"');
+    expect(client).toMatch(/ArrowRight/);
+    expect(client).toContain('/api/update');
+  });
+  it('what\'s said about a card is logged on it at once, then a headless Claude acts on it', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'tasks-'));
+    try {
+      mkdirSync(join(dir, 'den'));
+      writeFileSync(join(dir, 'den', 'raids.md'), format({ title: 'Raids', status: 'playtest' }, '\nWhat was asked.\n\n## Log\n\n- 9 Nov: added.\n'));
+      let prompt = '';
+      const fake = () => ({ on() {}, stdout: { on() {} }, stderr: { on() {} }, stdin: { end: (p: string) => { prompt = p; } } });
+      const c = update(load(dir).cards, 'raids', '  That works now,\n  done. ', fake);
+      expect(parse(readFileSync(c.file, 'utf8')).body).toContain(': you said: "That works now, done."');
+      expect(prompt).toContain('> That works now, done.');
+      expect(prompt).toContain('set raids <status>');
+      expect(prompt).not.toContain('{{');
+      expect(busy.has('raids')).toBe(true);
+      expect(() => update(load(dir).cards, 'raids', ' ', fake)).toThrow();
+      busy.delete('raids');
+    } finally { rmSync(dir, { recursive: true, force: true }); }
   });
 });
