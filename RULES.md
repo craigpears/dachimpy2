@@ -1002,7 +1002,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   quickly, because I'm conscious we haven't play tested any of the [Tzz] stuff yet. So we need to
   finish things really one at a time", and "I want to reveal things one at a time." A feature is
   built, played by the user, fixed and finished before the next is started; the next ones wait in
-  TODO.md, ready to start, not started.
+  on the task board, ready to start, not started.
 - **No hidden gems in the proof of concept: show everything (12 Nov, replacing the rule below).** "make
   the [starlit] door public. Yeah, no hidden. I think we get rid of the hidden gem idea ... I just want to
   show stuff ... maybe in a full game, some of these things will be hidden gems, but not for a proof of
@@ -3993,5 +3993,5 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   bit personal"); a test holds it.
 - Our own take: Aladdin's a folk tale, but the film's look and songs aren't ours. Our colours for the outfit, an
   original tune if it ever gets music, no lyrics.
-- Still to come (TODO.md): the second leg to the blockade; Gravee painting her portrait ("Naturally [Gravee] taking
+- Still to come (the task board, tasks/carpet-ride/): the second leg to the blockade; Gravee painting her portrait ("Naturally [Gravee] taking
   a portrait").

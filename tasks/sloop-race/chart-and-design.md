@@ -8,6 +8,11 @@ link: design.html
 
 Whether `changelog/race-map.jpg`, its changelog entry and design.html read well.
 
+## From TODO.md
+
+**The race's chart (12 Nov):** `changelog/race-map.jpg` and its changelog entry, and the design
+page (`design.html`), for whether they read well.
+
 ## Log
 
 - 15 Nov: put on the board.

@@ -9,24 +9,29 @@
 //   node tools/task.mjs set <id> <status> [--note "a line for its log"] [--link ?at=..] [--shot path] [--session id] [--branch b]
 //   node tools/task.mjs note <id> "<a line for its log>"
 //   node tools/task.mjs stream <stream> "<where it got to>"
+//   node tools/task.mjs move <id> <stream>                into another stream
 //   node tools/task.mjs board                             draws tasks/board.html (add, set, note and stream draw it too)
+//   node tools/task.mjs serve                             the board at http://localhost:8643/, cards dragged between
+//                                                         columns there (each drop is a `set`, by this script)
 //
 // npm run task -- <the same>. Ids are the card's file name, without .md; any unique part of one will do.
-import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSync } from 'node:fs';
-import { join, dirname, relative } from 'node:path';
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSync, renameSync } from 'node:fs';
+import { join, dirname, relative, resolve, extname, sep } from 'node:path';
+import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const TASKS = join(ROOT, 'tasks');
 export const STATUSES = {
+  idea: 'Ideas',
   asked: 'Asked',
   ready: 'Ready to start',
   doing: 'Being done',
   review: 'For you to review',
   playtest: 'For you to playtest',
   done: 'Done',
-  parked: 'Parked',
 };
+export const PORT = 8643;
 const LOCAL = 'http://localhost:8642/', LIVE = 'https://dachimpy2.dachimpy.workers.dev/';
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 export const today = (d = new Date()) => `${d.getDate()} ${MONTHS[d.getMonth()]}`;
@@ -106,19 +111,22 @@ export function board({ streams, cards }, when = new Date()) {
     const m = c.meta, link = m.link ? `<a class="go" href="${esc(LOCAL + m.link)}">Local</a><a class="go" href="${esc(LIVE + m.link)}">Live</a>` : '';
     const shot = m.shot ? `<a class="shot" href="${esc('../' + m.shot)}"><img src="${esc('../' + m.shot)}" alt="" loading="lazy"></a>` : '';
     const who = [m.session ? `session <code>${esc(m.session)}</code>` : '', m.branch ? `branch <code>${esc(m.branch)}</code>` : ''].filter(Boolean).join(' · ');
-    return `<article class="card" data-stream="${esc(c.stream)}" style="--h:${hue[c.stream] ?? 30}">
+    const st = m.status || 'asked';
+    const move = `<label class="move">Move to <select data-id="${esc(c.id)}">${Object.entries(STATUSES).map(([k, l]) => `<option value="${k}"${k === st ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>`;
+    return `<article class="card" draggable="true" data-id="${esc(c.id)}" data-stream="${esc(c.stream)}" style="--h:${hue[c.stream] ?? 30}">
   ${shot}<div class="tag">${esc(name[c.stream] ?? c.stream)}</div>
   <h3>${esc(m.title || c.id)}</h3>
   <div class="when">${m.asked ? `asked ${esc(m.asked)}` : ''}${m.updated ? ` · updated ${esc(m.updated)}` : ''}</div>
   ${link ? `<div class="links">${link}</div>` : ''}
-  <details><summary>More</summary>${md(c.body)}${who ? `<p class="who">${who}</p>` : ''}<p class="id"><code>${esc(c.id)}</code></p></details>
+  <details><summary>More</summary>${move}${md(c.body)}${who ? `<p class="who">${who}</p>` : ''}<p class="id"><code>${esc(c.id)}</code></p></details>
 </article>`;
   };
   const cols = Object.entries(STATUSES).map(([st, label]) => {
     const here = cards.filter((c) => (c.meta.status || 'asked') === st);
-    return `<section class="col" data-status="${st}"><h2>${esc(label)} <span>${here.length}</span></h2>${here.map(card).join('\n')}</section>`;
+    const fold = st === 'done' ? `<button class="fold">Show them</button>` : '';
+    return `<section class="col${st === 'done' ? ' folded' : ''}" data-status="${st}"><h2>${esc(label)} <span>${here.length}</span></h2>${fold}<div class="list">${here.map(card).join('\n')}</div></section>`;
   }).join('\n');
-  const chips = streams.map((s) => `<button class="chip" data-stream="${esc(s.id)}" style="--h:${s.hue}">${esc(s.name)} <span>${cards.filter((c) => c.stream === s.id && !['done', 'parked'].includes(c.meta.status)).length}</span></button>`).join('');
+  const chips = streams.map((s) => `<button class="chip" data-stream="${esc(s.id)}" style="--h:${s.hue}">${esc(s.name)} <span>${cards.filter((c) => c.stream === s.id && !['done', 'idea'].includes(c.meta.status)).length}</span></button>`).join('');
   const notes = streams.filter((s) => s.where).map((s) => `<div class="stream" data-stream="${esc(s.id)}" style="--h:${s.hue}"><b>${esc(s.name)}</b>${md(s.where)}</div>`).join('');
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -145,6 +153,7 @@ export function board({ streams, cards }, when = new Date()) {
   .col h2 { margin: 2px 4px 8px; font-size: 14px; color: var(--dim); }
   .col h2 span { color: var(--faint); font-weight: 400; }
   .col[data-status="playtest"] { border-color: var(--accent); }
+  .col[data-status="idea"] { border-style: dashed; }
   .col[data-status="playtest"] h2, .col[data-status="review"] h2 { color: var(--accent-text); }
   .card { background: var(--bg); border: 1px solid var(--edge); border-left: 4px solid hsl(var(--h) 55% 55%); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; }
   .card h3 { margin: 2px 0; font-size: 14.5px; color: var(--title); }
@@ -161,6 +170,15 @@ export function board({ streams, cards }, when = new Date()) {
   code { font-size: 12px; color: var(--accent-text); }
   a { color: var(--accent-text); }
   .who, .id { color: var(--faint); font-size: 12px; }
+  .card[draggable="true"] { cursor: grab; }
+  .card.dragging { opacity: .45; }
+  .col.over { outline: 2px dashed var(--accent); outline-offset: -2px; }
+  .list { min-height: 40px; }
+  .col.folded .list { display: none; }
+  .fold { display: block; width: 100%; margin-bottom: 8px; background: var(--tile); color: var(--dim); border: 1px solid var(--edge); border-radius: 4px; padding: 4px; font: inherit; font-size: 13px; cursor: pointer; }
+  .move { display: block; font-size: 12.5px; color: var(--faint); }
+  .move select { font: inherit; background: var(--tile); color: var(--text); border: 1px solid var(--edge); border-radius: 4px; }
+  .say { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); background: var(--tile); color: var(--text); border: 1px solid var(--edge); border-radius: 6px; padding: 8px 12px; font-size: 13.5px; max-width: calc(100% - 32px); box-sizing: border-box; }
   @media (max-width: 640px) { .cols { flex-direction: column; } .col { flex: none; width: 100%; box-sizing: border-box; } }
 </style></head>
 <body>
@@ -176,6 +194,44 @@ export function board({ streams, cards }, when = new Date()) {
   };
   document.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => pick(b.dataset.stream)));
   try { const s = localStorage.getItem('board.stream'); if (s) pick(s); } catch (e) {}
+  document.querySelectorAll('.fold').forEach((b) => b.addEventListener('click', () => {
+    const col = b.closest('.col'); col.classList.toggle('folded'); b.textContent = col.classList.contains('folded') ? 'Show them' : 'Hide them';
+  }));
+  // Moving a card: dragged to a column, or its "Move to". Saved by tools/task.mjs serve (POST /api/move, a set);
+  // opened any other way, the board only says how.
+  let say;
+  const tell = (text) => { say?.remove(); say = Object.assign(document.createElement('div'), { className: 'say', textContent: text }); document.body.append(say); setTimeout(() => say?.remove(), 5000); };
+  const count = () => document.querySelectorAll('.col').forEach((c) => { c.querySelector('h2 span').textContent = c.querySelectorAll('.card').length; });
+  async function moveTo(id, status) {
+    const card = document.querySelector('.card[data-id="' + CSS.escape(id) + '"]');
+    try {
+      const r = await fetch('/api/move', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id, status }) });
+      if (!r.ok) throw new Error(await r.text());
+    } catch (e) {
+      tell(location.port === '${PORT}' ? 'Not saved: ' + e.message : 'To move cards, run npm run board:serve and open http://localhost:${PORT}/');
+      return false;
+    }
+    const col = document.querySelector('.col[data-status="' + status + '"] .list');
+    col.prepend(card); card.querySelector('select').value = status; count();
+    return true;
+  }
+  let dragged = null;
+  document.querySelectorAll('.card').forEach((c) => {
+    c.addEventListener('dragstart', (e) => { dragged = c; c.classList.add('dragging'); e.dataTransfer.setData('text/plain', c.dataset.id); });
+    c.addEventListener('dragend', () => { c.classList.remove('dragging'); dragged = null; });
+  });
+  document.querySelectorAll('.col').forEach((col) => {
+    col.addEventListener('dragover', (e) => { if (dragged) { e.preventDefault(); col.classList.add('over'); } });
+    col.addEventListener('dragleave', (e) => { if (!col.contains(e.relatedTarget)) col.classList.remove('over'); });
+    col.addEventListener('drop', (e) => {
+      e.preventDefault(); col.classList.remove('over');
+      if (dragged && dragged.closest('.col') !== col) moveTo(dragged.dataset.id, col.dataset.status);
+    });
+  });
+  document.querySelectorAll('.move select').forEach((s) => s.addEventListener('change', async () => {
+    const was = s.closest('.col').dataset.status;
+    if (!(await moveTo(s.dataset.id, s.value))) s.value = was;
+  }));
 </script>
 </body></html>
 `;
@@ -184,6 +240,57 @@ export function drawBoard(dir = TASKS) {
   const out = join(dir, 'board.html');
   writeFileSync(out, board(load(dir)));
   return out;
+}
+
+/** A card changed: its status (logged), any of its fields, a line for its log. The one way a card's changed. */
+export function change(cards, id, status, opt = {}) {
+  const c = find(cards, id);
+  const meta = { ...c.meta, updated: today() };
+  const what = [];
+  if (status !== undefined) {
+    if (!(status in STATUSES)) throw new Error(`Status is one of: ${Object.keys(STATUSES).join(', ')}`);
+    meta.status = status; what.push(STATUSES[status].toLowerCase());
+  }
+  for (const k of ['link', 'shot', 'session', 'branch', 'title']) if (k in opt) meta[k] = opt[k];
+  if (opt.note) what.push(opt.note);
+  const body = what.length ? logged(c.body, what.join(': ')) : c.body;
+  writeFileSync(c.file, format(meta, body));
+  return { ...c, meta, body };
+}
+
+const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.woff2': 'font/woff2' };
+/** The board served from this machine only, drawn fresh on every look, a card moved by POST /api/move {id, status}. */
+export function serve(port = PORT) {
+  const server = createServer((req, res) => {
+    const url = new URL(req.url, 'http://localhost');
+    if (req.method === 'POST' && url.pathname === '/api/move') {
+      let data = '';
+      req.on('data', (d) => { data += d; if (data.length > 4096) req.destroy(); });
+      req.on('end', () => {
+        try {
+          const { id, status } = JSON.parse(data);
+          const c = change(load().cards, String(id), String(status), { note: 'moved on the board' });
+          drawBoard();
+          res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ id: c.id, status: c.meta.status }));
+          console.log(`moved ${c.stream}/${c.id} to ${c.meta.status}`);
+        } catch (e) { res.writeHead(400, { 'content-type': 'text/plain' }).end(e.message); }
+      });
+      return;
+    }
+    if (req.method !== 'GET') { res.writeHead(405).end(); return; }
+    if (url.pathname === '/' || url.pathname === '/tasks/board.html') {
+      if (url.pathname === '/') { res.writeHead(302, { location: '/tasks/board.html' }).end(); return; }
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' }).end(board(load()));
+      return;
+    }
+    // The board's stylesheet, theme and screenshots, from the repo; nothing outside it.
+    const file = resolve(ROOT, '.' + decodeURIComponent(url.pathname));
+    if (!file.startsWith(ROOT + sep) || !existsSync(file) || !statSync(file).isFile()) { res.writeHead(404).end(); return; }
+    res.writeHead(200, { 'content-type': TYPES[extname(file).toLowerCase()] || 'application/octet-stream' }).end(readFileSync(file));
+  });
+  server.listen(port, '127.0.0.1', () => console.log(`The board: http://localhost:${port}/ (Ctrl+C to stop)`));
+  return server;
 }
 
 function args(argv) {
@@ -216,23 +323,25 @@ function main(argv) {
     writeFileSync(join(sd, id + '.md'), format({ title, status: status(opt.status || 'asked'), asked: today(), updated: today() }, `\n${body}\n\n## Log\n\n- ${today()}: added.\n`));
     console.log(`added ${stream}/${id}`);
   } else if (cmd === 'set' || cmd === 'note') {
+    const c = change(all.cards, pos[0], cmd === 'set' ? pos[1] : undefined, { ...opt, note: cmd === 'note' ? pos[1] : opt.note });
+    console.log(line(c));
+  } else if (cmd === 'move') {
     const c = find(all.cards, pos[0]);
-    const meta = { ...c.meta, updated: today() };
-    let body = c.body, what = [];
-    if (cmd === 'set') { meta.status = status(pos[1]); what.push(STATUSES[meta.status].toLowerCase()); }
-    for (const k of ['link', 'shot', 'session', 'branch', 'title']) if (k in opt) meta[k] = opt[k];
-    const note = cmd === 'note' ? pos[1] : opt.note;
-    if (note) what.push(note);
-    if (what.length) body = logged(body, what.join(': '));
-    writeFileSync(c.file, format(meta, body));
-    console.log(line({ ...c, meta }));
+    if (!all.streams.some((s) => s.id === pos[1])) throw new Error(`No stream "${pos[1]}": ${all.streams.map((x) => x.id).join(', ')}`);
+    let id = c.id, n = 2;
+    while (existsSync(join(TASKS, pos[1], id + '.md'))) id = `${c.id}-${n++}`;
+    renameSync(c.file, join(TASKS, pos[1], id + '.md'));
+    console.log(`${c.stream}/${c.id} -> ${pos[1]}/${id}`);
+  } else if (cmd === 'serve') {
+    serve();
+    return;
   } else if (cmd === 'stream') {
     const s = all.streams.find((x) => x.id === pos[0]);
     if (!s) throw new Error(`No stream "${pos[0]}": ${all.streams.map((x) => x.id).join(', ')}`);
     const { meta } = existsSync(s.file) ? parse(readFileSync(s.file, 'utf8')) : { meta: { name: s.id, hue: 30 } };
     writeFileSync(s.file, format(meta, `\n${pos[1]} (${today()})\n`));
     console.log(`${s.id}: ${pos[1]}`);
-  } else throw new Error(`Unknown command "${cmd}" (list, show, add, set, note, stream, board)`);
+  } else throw new Error(`Unknown command "${cmd}" (list, show, add, set, note, move, stream, board, serve)`);
   drawBoard();
 }
 

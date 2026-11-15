@@ -8,6 +8,11 @@ link: den.html?at=rowing&as=dachimpy
 
 A lopsided Bingo's worth turns her at a lead of 6 now (was 7.5), the view coming round a moment after her. Is it turning too often by accident?
 
+## From TODO.md
+
+**Rowing's turn (14 Nov):** a lopsided Bingo's worth turns her at a lead of 6 now (was 7.5), the view
+coming round a moment after her so the turn shows, and it's said; is it turning too often by accident?
+
 ## Log
 
 - 15 Nov: put on the board.

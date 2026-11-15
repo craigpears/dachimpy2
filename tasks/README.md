@@ -10,8 +10,9 @@ and rendering it").
 - **A file a card** in it: its title, status, when it was asked and last updated, its `?at=` link, a screenshot
   (a path from the repo's root), the session or branch doing it; then what was asked, in the user's words, what done
   looks like, and its log.
-- **Statuses:** asked, ready (to start), doing (being done), review (for the user to review), playtest (for the user to
-  playtest), done, parked.
+- **Statuses:** idea (the Ideas column, the left-most: what was IDEAS.md), asked, ready (to start), doing (being done), review (for the user to review), playtest (for the user to
+  playtest), done. Nothing's parked (the user, 15 Nov: "if things are parked, that means they're done,
+  really"): a maybe-later is asked.
 - **The board:** `tasks/board.html`, drawn from the files by `tools/task.mjs` (not committed, not published). Open it
   straight from the folder, or at http://localhost:8642/tasks/board.html.
 
@@ -23,15 +24,20 @@ npm run task -- show <id>
 npm run task -- add <stream> "<title>" --status ready --asked "the user's words" --done "what done looks like"
 npm run task -- set <id> playtest --link "den.html?at=x&as=dachimpy" --shot changelog/x.jpg --note "what's ready"
 npm run task -- note <id> "a line for its log"
+npm run task -- move <id> <stream>
 npm run task -- stream <stream> "where it got to"
 npm run board
+npm run board:serve
 ```
 
-Each draws the board again. An id is the card's file name; any unique part of one will do.
+Each draws the board again. `board:serve` shows it at http://localhost:8643/, where cards are dragged between columns
+(or moved with "Move to" under More, on a phone), each drop a `set` by the script; Ctrl+C stops it. An id is the card's file name; any unique part of one will do.
 
 ## How work goes through it
 
-1. Something asked for that's more than a few minutes' work gets a card (`add`), as well as its TODO.md note.
+1. Anything asked for gets a card (`add`), before work on it starts; a new idea one too (`--status idea`). There's
+   no TODO.md or IDEAS.md: every fix and tweak is a card
+   (15 Nov: "It should just be all these little files").
 2. The user says start it, or "pick up tasks": the main session reads the `ready` cards (`list --status ready`, then
    `show`), and offers each as a session of its own, its brief from the card; on the user's go it's `doing`, with
    `--session`.

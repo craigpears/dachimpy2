@@ -6,8 +6,8 @@ some kind of game design document specific to these races."
 
 How it sits with the other notes:
 - **RULES.md** ("The sloop race", "The starlit door") has the exact rules as built.
-- **TODO.md** has the agreed work still to do.
-- **IDEAS.md** keeps the long brain-dumps.
+- **The task board** (`tasks/sloop-race/`) has the agreed work still to do.
+- **The task board's idea cards** keep the long brain-dumps (`tasks/*/idea-*.md`; IDEAS.md, before 15 Nov).
 - **This file** pulls them together, with the reasoning, and is kept up to date as the race changes. Each
   heading says whether it's **built**, **agreed** (in TODO) or an **idea**.
 

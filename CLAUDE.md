@@ -94,22 +94,27 @@ and targets, researched 12 Nov): read it before working on Distilling, and keep 
 The sloop race has a design document of its own, [RACE.md](RACE.md) (the user, 11 Nov: "all these kind of
 thoughts, design and balance decisions should all be in some kind of game design document specific to these
 races"): read it before working on the race, and keep it up to date with every design or balance decision and
-idea about racing, alongside RULES.md (the rules as built), TODO.md and IDEAS.md.
+idea about racing, alongside RULES.md (the rules as built) and the task board's cards (its ideas too).
 
 Pushing to main deploys, so a commit that only changes notes or docs (any `.md`) is committed locally and
 not pushed on its own; it goes up with the next push that carries a real change (the user, 11 Nov: "I don't
 think we want to trigger deployments for doc changes. Not if there's no other change with them").
 
-Pirate Den notes: [TODO.md](TODO.md) holds the fixes and quality-of-life changes the user has asked for
-(agreed; just do them), and [IDEAS.md](IDEAS.md) holds their unrefined ideas for new puzzles and features.
-Keep the two apart: when the user mentions a fix or tweak, add it to TODO.md; when they brain-dump a new idea,
-add it to IDEAS.md.
-The task board (15 Nov; [tasks/README.md](tasks/README.md)): what's in flight, a card a file in `tasks/<stream>/`,
-by status (asked, ready, doing, review, playtest, done, parked), drawn into `tasks/board.html` by `tools/task.mjs`.
-Only the script changes a card (`npm run task -- add | set | note | stream`), never a hand edit or a hand-drawn page
-(the user: "more deterministic ... I don't have to worry about how many tokens are being spent"). Anything bigger
-than a quick fix gets a card beside its TODO.md note; a session started for one is put on it (`set <id> doing
---session <id>`); sessions themselves never touch `tasks/`; when one reports back, the main session moves its
+Pirate Den notes: the fixes, tweaks and work the user has asked for (agreed; just do them) are cards on the task board,
+and so are their unrefined ideas for new puzzles and features, in its Ideas column (`--status idea`; the user, 15 Nov:
+"an ideas column on the left as well"). When the user mentions a fix or tweak, it's a card (`npm run task -- add
+<stream> "<title>" --asked "their words"`), before work on it starts; when they brain-dump a new idea, it's an idea
+card, or a `note` on the idea it adds to. There is no TODO.md or IDEAS.md any more (the user, 15 Nov: "there should
+basically be no to-do thing anymore. It should just be all these little files"); older notes citing "TODO.md, ..."
+or "IDEAS.md, ..." mean the card of that name (an idea's id starts `idea-`), or git history. The principles that
+opened IDEAS.md are in STORY.md.
+The task board (15 Nov; [tasks/README.md](tasks/README.md)): a card a file in `tasks/<stream>/`, by status (idea,
+asked, ready, doing, review, playtest, done; nothing parked: "if things are parked, that means they're done, really"),
+drawn into `tasks/board.html` by `tools/task.mjs`. Only the script changes a card (`npm run task -- add | set | note |
+move | stream`), never a hand edit or a hand-drawn page (the user: "more deterministic ... I don't have to worry about
+how many tokens are being spent"); the user drags cards between columns on `npm run board:serve`
+(http://localhost:8643/), each drop a `set` by the same script. A session started for a card is put on it (`set <id>
+doing --session <id>`); sessions themselves never touch `tasks/`; when one reports back, the main session moves its
 card on (`review` or `playtest`, its link and a screenshot). "Pick up tasks" means offer each `ready` card as a
 session, its brief from `show <id>`.
 
