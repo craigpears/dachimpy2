@@ -10,3 +10,4 @@ updated: 15 Nov
 ## Log
 
 - 15 Nov: added.
+- 15 Nov: Goes with the idea card on the heart's corners (a rock in each, a brig's enclosed launching spot): one layout pass. Suggested: 6 squares of open sea added all round (44x36 to 56x48), the edge winds lengthened so sloops still come in fast; frigates two entries each (their own outer edge and the far one, a gate-front buoy each side); brigs and sloops as now, from further out.
