@@ -81,7 +81,8 @@ export const BLOCKADE = {
         // scissors: "War brigs, can they be good at beating war frigates with how they deploy the turtles?"; "if you go for
         // too many frigs ... the other team having Atlantean war frigs. They'll just send in the turtles and crush your war
         // frigs")
-        RAM: { gun: 'large', hits: 1, COOL: 4 },
+        RAM: { gun: 'large', hits: 1, COOL: 4, STILL: 1 },
+        CREWED: 0.5,
     },
     /** Seconds a blockade turn, scored at its end, and a round. */
     TURN: 10,
@@ -133,8 +134,9 @@ const HANDLINGS = { sloop: SLOOP_HANDLING, brig: BRIG_HANDLING, frigate: FRIGATE
 const CLASSES = { sloop: SLOOP, brig: WAR_BRIG, frigate: WAR_FRIGATE };
 /** A brig's sea turtle: a sloop's size on the board, no guns, a couple of small shots and she's gone. */
 export const SEA_TURTLE = { ...SLOOP, name: 'Sea turtle', crew: 1, minCrew: 1, guns: 0, mainDeckGuns: 0, stations: { nav: 1, sailing: 0, carpentry: 0, bilge: 0, gunnery: 0 } };
-/** A sea turtle swims: quicker than a sloop sails (a move in 0.7 of her time), or she'd never catch anything. */
-export const TURTLE_HANDLING = { ...SLOOP_HANDLING, name: 'Sea turtle', pace: SLOOP_HANDLING.pace * 0.7, move: SLOOP_HANDLING.move * 0.7, turn: SLOOP_HANDLING.turn * 0.7 };
+/** A sea turtle swims slower than a sloop sails, quicker than a frigate's square: she catches a frigate, never a sloop
+    that's under way (rock, paper, scissors by handling, not by rule). */
+export const TURTLE_HANDLING = { ...SLOOP_HANDLING, name: 'Sea turtle', pace: SLOOP_HANDLING.pace * 1.15, move: SLOOP_HANDLING.move * 1.15, turn: SLOOP_HANDLING.turn * 1.15 };
 /** A phantom sloop: the sloop's size, sluggish as a frigate (her moves taking as long as a frigate's square does). */
 export const PHANTOM_HANDLING = { ...SLOOP_HANDLING, name: 'Phantom sloop', pace: SLOOP_HANDLING.pace * 1.3, move: SLOOP_HANDLING.move * 1.3, turn: SLOOP_HANDLING.turn * 1.3 };
 /** A phantom: shots go through her, she holds no buoy, nothing can hurt her (she fades when her time's up). */
@@ -198,27 +200,38 @@ export class Blockade {
     gunOn = [];
     /** Each kind of ship's chart of this board (src/hull-chart.ts): all the sloops share one, all the frigates another. */
     charts = {};
-    constructor() {
-        const B = BLOCKADE, side = new Set([...B.SIDEWAYS, ...B.EXITS.flat().flatMap(laneSquares)].map(([c, r]) => key(c, r))), ways = new Set(B.GATES.flatMap((x) => [key(x.way, x.r0), key(x.way, x.r1)]));
-        for (const w of B.WALLS)
-            for (let c = w.c0; c <= w.c1; c++)
-                for (let r = w.r0; r <= w.r1; r++)
-                    if (!side.has(key(c, r)) && !ways.has(key(c, r)))
-                        this.rocks.add(key(c, r));
-        for (const [c, r] of B.ROCKS)
-            this.rocks.add(key(c, r));
-        for (const reef of B.REEFS)
-            for (const [c, r] of [...reefSquares(reef), reef.islet])
+    /** Ships sunk stay sunk (a skirmish). */
+    skirmish = false;
+    constructor(setup = {}) {
+        const B = BLOCKADE, teams = setup.teams ?? B.TEAMS, open = !!setup.open;
+        this.skirmish = !!setup.skirmish;
+        if (open) {
+            this.gates = [];
+            this.battery = [];
+            this.gunGate = [];
+        }
+        const side = new Set([...B.SIDEWAYS, ...B.EXITS.flat().flatMap(laneSquares)].map(([c, r]) => key(c, r))), ways = new Set(B.GATES.flatMap((x) => [key(x.way, x.r0), key(x.way, x.r1)]));
+        if (!open) {
+            for (const w of B.WALLS)
+                for (let c = w.c0; c <= w.c1; c++)
+                    for (let r = w.r0; r <= w.r1; r++)
+                        if (!side.has(key(c, r)) && !ways.has(key(c, r)))
+                            this.rocks.add(key(c, r));
+            for (const [c, r] of B.ROCKS)
                 this.rocks.add(key(c, r));
-        for (const lane of [...B.WINDS, ...B.EXITS.flat()])
-            for (const [c, r] of laneSquares(lane))
-                this.wind.set(key(c, r), lane.d);
-        for (const reef of B.REEFS)
-            for (const [c, r] of shoalSquares(reef))
-                if (!this.rocks.has(key(c, r)))
-                    this.shoals.add(key(c, r));
+            for (const reef of B.REEFS)
+                for (const [c, r] of [...reefSquares(reef), reef.islet])
+                    this.rocks.add(key(c, r));
+            for (const lane of [...B.WINDS, ...B.EXITS.flat()])
+                for (const [c, r] of laneSquares(lane))
+                    this.wind.set(key(c, r), lane.d);
+            for (const reef of B.REEFS)
+                for (const [c, r] of shoalSquares(reef))
+                    if (!this.rocks.has(key(c, r)))
+                        this.shoals.add(key(c, r));
+        }
         let id = 0;
-        for (const team of B.TEAMS)
+        for (const team of teams)
             for (const s of team.ships) {
                 const h = HANDLINGS[s.kind], me = id++;
                 const sea = new ShipSea(h, B.COLS, B.ROWS, this.rocks, (c, r) => { const o = this.taken.get(key(c, r)); return o !== undefined && o !== me; });
@@ -232,7 +245,7 @@ export class Blockade {
                 this.ships.push({ id: me, name: s.name, team: team.id, kind: s.kind, h, cls: CLASSES[s.kind], raider: !!s.raider, sea, helm: new ShipHelm(sea, { ...s.at }), guns: new Guns(h.reload), dmg: new Damage(CLASSES[s.kind]), start: { ...s.at }, away: 0, launched: -Infinity });
             }
         // (each brig's craft, aboard her till she launches them: after every fleet's ships, so theirs keep their ids)
-        for (const team of B.TEAMS)
+        for (const team of teams)
             for (const f of team.ships) {
                 if (!f.craft)
                     continue;
@@ -266,8 +279,8 @@ export class Blockade {
         for (const s of this.ships) {
             // (sunk: back where she came in once her time's up and nobody's lying there)
             if (s.away > 0) {
-                if (s.craft)
-                    continue; // (aboard her brig, till she's launched)
+                if (s.craft || this.skirmish)
+                    continue; // (aboard her brig, till she's launched; a skirmish's sunk, gone)
                 if ((s.away -= dt) <= 0 && !this.comeBack(s))
                     s.away = 0.5;
                 if (s.away <= 0)
@@ -305,7 +318,10 @@ export class Blockade {
             s.sea.drag = s.dmg.drag();
             out.damage.set(s.id, ev);
             out.sail.set(s.id, s.helm.tick(dt));
-            s.guns.tick(dt);
+            // (a brig with her craft out has fewer hands at her guns: they load at CREWED of the speed. Her craft are her strength
+            // against a frigate and her weakness against sloops: she can't have both, the user, 15 Nov: "they can't just have
+            // the best of both worlds")
+            s.guns.tick(s.kind === 'brig' && this.craftOf(s).some((x) => x.away <= 0) ? dt * BLOCKADE.LAUNCH.CREWED : dt);
             this.notice();
         }
         // (a turtle beside an enemy frigate or brig rams her: her holes where she struck; the turtle backs off a moment and
@@ -464,7 +480,7 @@ export class Blockade {
             this.aboard(s);
             return;
         }
-        s.away = BLOCKADE.RETURN;
+        s.away = this.skirmish ? Infinity : BLOCKADE.RETURN;
         s.helm.moor(s.helm.pose);
         s.helm.hole = null;
         this.notice();
@@ -522,14 +538,16 @@ export class Blockade {
         }
         return out;
     }
-    /** An enemy frigate or brig beside a turtle (on a square next to hers, diagonals too), and the square of hers it's
-        on: a sloop's too quick for her. */
+    /** An enemy beside a turtle (on a square next to hers, diagonals too; any ship but another brig's craft), and the
+        square of hers it's on. */
     besideFoe(s) {
         const { c, r } = s.helm.pose;
         for (let dc = -1; dc <= 1; dc++)
             for (let dr = -1; dr <= 1; dr++) {
                 const o = this.under(c + dc, r + dr);
-                if (o && o !== s && o.team !== s.team && o.away <= 0 && (o.kind === 'frigate' || o.kind === 'brig'))
+                // (a ram lands on a ship lying still a moment, a frigate trading broadsides, a ship at anchor on a buoy; a sloop under
+                // way slips her)
+                if (o && o !== s && o.team !== s.team && o.away <= 0 && !o.craft && (this.still.get(o.id) ?? 0) >= BLOCKADE.LAUNCH.RAM.STILL)
                     return { o, at: [c + dc, r + dr] };
             }
         return null;

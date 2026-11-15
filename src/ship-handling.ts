@@ -76,6 +76,10 @@ export const HANDLING = {
   FRIGATE_PACE: 1.3,
   /** A war brig's (src/den-brig.ts): a square a move, as the sloop's, but slower at it: between the two. */
   BRIG_PACE: 1.15,
+  /** How much longer a war brig's turn takes than her move forward: clumsy for her size, so a sloop off her end has time
+      to stay there (rock, paper, scissors, src/blockade-skirmish.ts: "sloops beat war brigs ... because of how they can
+      just dart around and evade them"). */
+  BRIG_TURN: 1.6,
   /** Seconds a side's guns take to load again, by their size. */
   RELOAD: { small: 2, medium: 2.5, large: 3 } as Record<GunSize, number>,
 };
@@ -102,7 +106,8 @@ export function handlingFor(ship: ShipClass, hull: Hull, pace: number = SAIL.MOV
 }
 export const SLOOP_HANDLING = handlingFor(SLOOP, SLOOP_HULL);
 export const FRIGATE_HANDLING = handlingFor(WAR_FRIGATE, FRIGATE_HULL, SAIL.MOVE * HANDLING.FRIGATE_PACE);
-export const BRIG_HANDLING = handlingFor(WAR_BRIG, BRIG_HULL, SAIL.MOVE * HANDLING.BRIG_PACE);
+const brig = handlingFor(WAR_BRIG, BRIG_HULL, SAIL.MOVE * HANDLING.BRIG_PACE);
+export const BRIG_HANDLING = { ...brig, turn: brig.turn * HANDLING.BRIG_TURN };
 
 // (worked out once a size: every ship's squares are asked for many times a tick)
 const spans = new Map<number, readonly number[]>();

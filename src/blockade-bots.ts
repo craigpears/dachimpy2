@@ -72,6 +72,10 @@ export const BOTS = {
   BRIG: { OUT: 1.5, HEART: 0.35, LAUNCH: 14 },
   /** Seconds between a turtle's looks for whom to ram (quick: her prey moves), and how far she looks. */
   RAM: { THINK: 0.8, REACH: 24, STUCK: 1.6 },
+  /** How near (squares, middle to middle) an enemy she's fighting has to be for her to swing her broadside round onto her. */
+  SWING: 5,
+  /** A skirmishing sloop's seconds running off after each broadside (hit and run). */
+  RUN: 4,
   /** Seconds a ship's lain still before a phantom sloop counts her fair game, whatever she is. */
   CAMPED: 6,
 };
@@ -180,6 +184,8 @@ export class Bot {
   spare = new Set<number>();
   /** Her admiral's order (src/blockade-orders.ts), carried out before anything she'd pick herself. */
   order: Order = FREE;
+  /** A skirmish (src/blockade-skirmish.ts): no buoys, the nearest enemy hers to fight, as her kind best can. */
+  skirmish = false;
   constructor(public id: number, public random: () => number = Math.random) { this.t = random() * BOTS.THINK; }
 
   tick(b: Blockade, dt: number, mates: Goal[] = []) {
@@ -195,8 +201,8 @@ export class Bot {
       return;
     }
     // (a brig: her craft launched whenever an enemy's near)
-    // (her craft are for the frigates: launched when an enemy frigate's near)
-    if (s.kind === 'brig' && b.canLaunch(s) && b.ships.some((o) => o.team !== s.team && o.kind === 'frigate' && o.away <= 0 && !o.dmg.out && Math.hypot(o.helm.pose.c - s.helm.pose.c, o.helm.pose.r - s.helm.pose.r) <= BOTS.BRIG.LAUNCH)) b.launch(s.id);
+    // (her craft launched whenever an enemy's near)
+    if (s.kind === 'brig' && b.canLaunch(s) && b.ships.some((o) => o.team !== s.team && !o.craft && o.away <= 0 && !o.dmg.out && Math.hypot(o.helm.pose.c - s.helm.pose.c, o.helm.pose.r - s.helm.pose.r) <= BOTS.BRIG.LAUNCH)) b.launch(s.id);
     this.shoot(b, s);
     // (idle short of where she's going, she looks again sooner: but never more than twice a second)
     const idle = s.helm.slot < 0 && !s.helm.pin && (this.goal?.kind === 'buoy' ? !b.reaches(s, BLOCKADE.BUOYS[this.goal.i]) : this.goal?.kind === 'raid' || this.goal?.kind === 'fight');
@@ -249,6 +255,28 @@ export class Bot {
         const there = was && squares(s.h, s.helm.pose).some(([c, r]) => c === was[0] && r === was[1]);
         const bears = (['L', 'R'] as Side[]).some((side) => b.aim(s.id, side).some((x) => x.what?.what === 'ship' && x.what.id === this.foe));
         return { goal: { kind: 'fight', on: this.foe, at: was && (!there || bears) ? was : fight.at }, score: 99 };
+      }
+    }
+    // A skirmish: the nearest enemy, as her kind best can fight her: a frigate or a brig broadside on; a sloop off a big
+    // ship's end, where her broadsides can't bear, and broadside to another sloop (a sloop badly hurt hides, below).
+    if (this.skirmish && !s.craft && !(s.kind === 'sloop' && s.dmg.share() >= BOTS.HIDE)) {
+      const far = (o: Ship) => Math.hypot(o.helm.pose.c - s.helm.pose.c, o.helm.pose.r - s.helm.pose.r);
+      const t = b.ships.filter((o) => o.team !== s.team && o.away <= 0 && !o.craft).sort((a, z) => far(a) - far(z))[0];
+      if (t) {
+        // (a sloop hits and runs: a few seconds away from her after each broadside, then back at her)
+        if (s.kind === 'sloop' && b.clock - this.firedAt < BOTS.RUN) {
+          const p = s.helm.pose, dc = p.c - t.helm.pose.c, dr = p.r - t.helm.pose.r, k = 6 / (Math.hypot(dc, dr) || 1);
+          const at: [number, number] = [Math.max(1, Math.min(BLOCKADE.COLS - 2, Math.round(p.c + dc * k))), Math.max(1, Math.min(BLOCKADE.ROWS - 2, Math.round(p.r + dr * k)))];
+          if (s.sea.bare().open(...at)) return { goal: { kind: 'camp', at }, score: 9 };
+        }
+        if (s.kind === 'sloop' && t.kind !== 'sloop') { const r = this.raid(b, s, Infinity, false, t.id); if (r) return { goal: r, score: 9 }; }
+        const f = this.raid(b, s, Infinity, true, t.id);
+        // (her spot off her side picked afresh each look, as she moves: kept while she's still near her, so she doesn't
+        // change her mind every look)
+        if (f) {
+          const was = this.goal?.kind === 'fight' && this.goal.on === t.id ? this.goal.at : null, near = was && Math.hypot(was[0] - f.at[0], was[1] - f.at[1]) <= 2;
+          return { goal: { kind: 'fight', on: t.id, at: near ? was! : f.at }, score: 9 };
+        }
       }
     }
     // Her admiral's order, if she has one (sniping's a raider's way, below; the middle and the outside bend her own
@@ -467,12 +495,14 @@ export class Bot {
     return null;
   }
 
-  /** A turtle's prey: the nearest enemy frigate (a brig if there's none; a sloop's too quick for her), and where to
-      come at her: astern of her, where none of her broadsides bears, else off her quarter, else anywhere beside her. */
+  /** A turtle's prey: the nearest enemy ship, whatever she is (whether she can catch her is her handling's to say: the
+      user, 15 Nov, "it feels a bit artificial ... turtles don't go for sloops at all, rather than it being a mechanical
+      advantage"), and where to come at her: astern of her, where none of her broadsides bears, else off her quarter,
+      else anywhere beside her. */
   private prey(b: Blockade, s: Ship): { kind: 'ram'; on: number; at: [number, number] } | null {
     const p = s.helm.pose, sea = s.sea.bare(), far = (c: number, r: number) => Math.hypot(c - p.c, r - p.r), DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
-    const foes = b.ships.filter((o) => o.team !== s.team && !o.craft && (o.kind === 'frigate' || o.kind === 'brig') && o.away <= 0 && far(o.helm.pose.c, o.helm.pose.r) <= BOTS.RAM.REACH)
-      .sort((a, z) => (a.kind === 'frigate' ? 0 : 1) - (z.kind === 'frigate' ? 0 : 1) || far(a.helm.pose.c, a.helm.pose.r) - far(z.helm.pose.c, z.helm.pose.r));
+    const foes = b.ships.filter((o) => o.team !== s.team && !o.craft && o.away <= 0 && far(o.helm.pose.c, o.helm.pose.r) <= BOTS.RAM.REACH)
+      .sort((a, z) => far(a.helm.pose.c, a.helm.pose.r) - far(z.helm.pose.c, z.helm.pose.r));
     for (const o of foes) {
       const op = o.helm.pose, d = op.d, sd = (d + 1) % 4, al = alongs(o.h)[0], hers = squares(o.h, op), on = new Set(hers.map(([c, r]) => `${c},${r}`));
       // (astern: the squares just past her stern, across her; then her quarters, a square further out each side)
@@ -503,6 +533,23 @@ export class Bot {
   /** A turtle's nearest yet to her prey (charge). */
   private near = Infinity;
 
+  /** Swing her broadside round onto an enemy in gun range that neither side of hers bears on just now (lying ahead of or
+      astern of her): a turn, if she's free to make one. Whether she did. */
+  private swing(b: Blockade, s: Ship, o: Ship): boolean {
+    if (o.away > 0 || s.helm.slot >= 0 || s.helm.mine.length) return false;
+    const p = s.helm.pose, m = drawnAt(o.h, { c: o.helm.pose.c, r: o.helm.pose.r, a: o.helm.pose.d }), me = drawnAt(s.h, { c: p.c, r: p.r, a: p.d });
+    const dc = m.c - me.c, dr = m.r - me.r;
+    if (Math.hypot(dc, dr) > BOTS.SWING) return false;
+    if ((['L', 'R'] as Side[]).some((side) => b.aim(s.id, side).some((x) => x.what?.what === 'ship' && x.what.id === o.id))) return false;
+    const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0], ahead = dc * DC[p.d] + dr * DR[p.d], across = dc * DC[(p.d + 1) % 4] + dr * DR[(p.d + 1) % 4];
+    if (Math.abs(ahead) < Math.abs(across)) return false;   // (abeam already: her guns will bear as she lies)
+    const turn = (['L', 'R'] as const).find((m2) => s.sea.clear(p, m2));
+    if (!turn) return false;
+    if (s.helm.pin) s.helm.stop();
+    s.helm.put(turn);
+    return true;
+  }
+
   /** She found no way there as things are a little while ago (another ship in the way): left alone a while. */
   private blocked(b: Blockade, at: [number, number]): boolean {
     const when = this.noway.get(`${at[0]},${at[1]}`);
@@ -518,6 +565,9 @@ export class Bot {
   /** Set her pin for her goal. */
   private steer(b: Blockade, s: Ship) {
     const g = this.goal!;
+    // (in a fight and in gun range of her, no broadside bearing: she swings her side round to her, rather than sailing on
+    // for a spot off her side that moves as she does, the two of them circling and never firing)
+    if (g.kind === 'fight' && this.swing(b, s, b.ship(g.on))) return;
     if (g.kind === 'gate' || g.kind === 'guns') {
       const p = s.helm.pose;
       if (!(p.c === g.pose.c && p.r === g.pose.r && p.d === g.pose.d)) s.helm.sailTo(g.pose);
@@ -549,8 +599,8 @@ export class Bot {
 export class Bots {
   bots: Bot[];
   /** `brawl`: two ships' ids (Blockade.brawl) that fight each other and nothing else. */
-  constructor(b: Blockade, people: number[] = [], random: () => number = Math.random, brawl: [number, number] | null = null) {
-    this.bots = b.ships.filter((s) => !people.includes(s.id)).map((s) => new Bot(s.id, random));
+  constructor(b: Blockade, people: number[] = [], random: () => number = Math.random, brawl: [number, number] | null = null, skirmish = false) {
+    this.bots = b.ships.filter((s) => !people.includes(s.id)).map((s) => Object.assign(new Bot(s.id, random), { skirmish }));
     if (brawl) for (const bot of this.bots) {
       if (brawl.includes(bot.id)) bot.foe = brawl[0] === bot.id ? brawl[1] : brawl[0];
       else bot.spare = new Set(brawl);

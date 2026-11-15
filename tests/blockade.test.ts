@@ -462,26 +462,32 @@ describe('war brigs, the middle class (15 Nov: "a middle ship class, so it\'s no
     while (b.clock < B.LAUNCH.EVERY) b.tick(0.5);
     expect(b.launch(t.id)).toHaveLength(3);
   });
-  it('a turtle beside an enemy frigate rams her, backs off a moment, and rams again (15 Nov: "send in the turtles and crush your war frigs")', () => {
+  it('a turtle beside an enemy lying still rams her, backs off a moment, and rams again; whatever she is (15 Nov: "send in the turtles and crush your war frigs"; "rather than ... [a rule] ... a mechanical advantage")', () => {
     const b = new Blockade(), t = brig(b, 'gold'), f = frigate(b, 'crimson');
     clearAway(b, [t, f]);
     t.helm.moor({ c: 20, r: 6, d: 1 }); f.helm.moor({ c: 26, r: 9, d: 1 }); b.notice();
     const [turtle] = b.launch(t.id), x = b.ship(turtle);
+    for (const c of b.craftOf(t)) if (c !== x) c.helm.moor({ c: 40, r: 30 + (c.id % 3), d: 1 });
     // (lying just off the frigate's side)
     x.helm.moor({ c: f.helm.pose.c, r: Math.max(...squares(f.h, f.helm.pose).map(([, r]) => r)) + 1, d: 1 }); b.notice();
-    const ev = b.tick(0.1);
-    expect(ev.rams).toHaveLength(1);
-    expect(ev.rams[0].on).toBe(f.id);
+    // (a ship that's only just come there slips her; lying still a moment, she's rammed)
+    expect(b.tick(0.1).rams).toHaveLength(0);
+    let first: ReturnType<Blockade['tick']>['rams'] = [];
+    for (let i = 0; i < 20 && !first.length; i++) first = b.tick(0.1).rams;
+    expect(first).toHaveLength(1);
+    expect(first[0].on).toBe(f.id);
     expect(f.dmg.holes).toHaveLength(B.LAUNCH.RAM.hits);
     expect(x.away).toBe(0);
     expect(b.tick(0.1).rams).toHaveLength(0);
     let again = 0;
     for (let i = 0; i < B.LAUNCH.RAM.COOL * 10 + 5 && !again; i++) again = b.tick(0.1).rams.length;
     expect(again).toBe(1);
-    // (a sloop beside her is too quick for her: never rammed)
+    // (a sloop lying still beside her is rammed as any ship is: no rule keeps her off)
     const sl = sloop(b, 'crimson');
-    f.helm.moor({ c: 40, r: 30, d: 1 }); sl.helm.moor({ c: x.helm.pose.c + 1, r: x.helm.pose.r, d: 1 }); b.notice();
-    for (let i = 0; i < 60; i++) expect(b.tick(0.1).rams.filter((r) => r.on === sl.id)).toHaveLength(0);
+    f.helm.moor({ c: 40, r: 20, d: 1 }); sl.helm.moor({ c: x.helm.pose.c + 1, r: x.helm.pose.r, d: 1 }); b.notice();
+    let onSloop = 0;
+    for (let i = 0; i < 60 && !onSloop; i++) onSloop = b.tick(0.1).rams.filter((r) => r.on === sl.id).length;
+    expect(onSloop).toBe(1);
   });
   it('a phantom sloop: no shot ever hits her, and she holds no buoy; nor does a turtle (15 Nov: "they don\'t take damage. Like, you really can\'t shoot them")', () => {
     const b = new Blockade(), t = brig(b, 'gold'), g = brig(b, 'crimson'), f = frigate(b, 'gold');

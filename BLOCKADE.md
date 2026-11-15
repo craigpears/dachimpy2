@@ -225,6 +225,23 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     side 64, it to them 87: the third side of the triangle not there yet (a brig needs a weakness the sloops can find).
     Rounds 2.1 to 2.6 s of computing.
 
+- **Proved fleet against fleet, not by rules** (15 Nov: "it feels a bit artificial ... turtles don't go for sloops at
+  all, rather than it being a mechanical advantage. Certainly set some balance tests up ... a fight with all frigs ...
+  versus all brigs, etc."). `src/blockade-skirmish.ts`: two fleets of the same points (`POINTS`: a frigate 3, a brig 3, a
+  sloop 1; six a side) on open sea, sunk ships staying sunk, each bot going for the nearest enemy as her kind best can
+  (a sloop off a big ship's end, hitting and running; a frigate or a brig broadside on, swinging her side round when
+  she's in range and no gun bears). Run by `tools/blockade-balance.mjs [seeds]`; `tests/blockade-balance.test.ts`.
+  - The rules taken out: a turtle goes for any enemy, a brig launches at any. What's left is handling: a turtle swims
+    slower than a sloop sails and faster than a frigate goes (`TURTLE_HANDLING`, 1.15 of a sloop's time a move); a
+    ram only lands on a ship lying still a second (`RAM.STILL`: a frigate trading broadsides, a ship on a buoy; a
+    sloop under way slips her); a brig's turn takes 1.6 of her move (`BRIG_TURN`: clumsy, so a sloop off her end has
+    time); with her craft out, a brig's guns load at half speed (`LAUNCH.CREWED`: her hands are in them; "they can't
+    just have the best of both worlds").
+  - Four fights a pairing (two seeds, both ways round): frigates beat sloops 4 of 4. Brigs and frigates 2 of 4 at a
+    brig's three points (at two, three brigs won all four, but crushed the sloops 0 of 4). Sloops beat brigs 1 of 4:
+    the turtle brigs still beat them, the phantom brigs about even. Two sides of the triangle still to find in the
+    handling (the test has them as to-dos): the turtles' edge over sloops, and a brig's price.
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of
