@@ -53,9 +53,11 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   - **an imperial gate** in its south wall and another in its north: its way one square wide under its arch, a
     tower two squares wide either side, four bastion guns on the wall (doubled, 15 Nov: below). The sloops run
     straight through; a frigate lies broadside to a tower and shoots it down (6 large shots, both of each broadside
-    on it: three broadsides), and then the way's three wide for anyone. A gate's guns fire on anyone who lies still in
-    their reach (`CAMP`, 4 s; moving about in it, however long, isn't camping: 15 Nov, "if the sloops are constantly
-    moving, they shouldn't be vulnerable to the guns"), and once the gate's fired on, on whoever's in reach at all (the gate's medium shot's
+    on it: three broadsides), and then the way's three wide for anyone. A gate's guns paint a target on the square of the nearest ship in
+    their reach and fire, the shot `GATE_AIM` (2.4 s) coming down, drawn as a red ring filling on the water, over any hull
+    (15 Nov: "paint a target on a square and then just take quite a while to fire ... a sloop will move quickly before it
+    shoots. But for a [war frig] ... that's basically an entire turn, so they can't dodge it"): a sloop's move is a
+    second, a frigate's two and a half, and her hull four squares long; and once the gate's fired on, on whoever's in reach at all (the gate's medium shot's
     damage); any ship's hits quieten one, three wreck it;
   - **a side way** through its west wall and its east: a one-square gap with a wind blowing in through it from the
     open sea. A sloop on it is carried through, fast; a frigate rides the winds out (and wouldn't fit anyway).
@@ -145,7 +147,7 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   [cannons] ... first of all, stop people camping. And provide more of a barrier to the war frigates ... that central
   three-pointer is fantastic for how fast the sloops can get in ... you have the choice. You either charge the guns
   and take damage, get into that middle fast, or ..."). Four bastion guns a gate, two by its towers and two further
-  along the wall; a gun fires on any ship that's lain still in its reach 4 s, roused or not, so camping by a gate, on
+  along the wall; a gun paints and fires on the nearest ship in its reach (painted targets since, below), so camping by a gate, on
   the buoy off it or lying broadside to a tower, is punished, while slipping past mostly isn't; once its gate's fired
   on, on anyone in its reach. A frigate's choice at a gate: charge it under fire (a tower down, the way three wide),
   or wreck its guns first (three hits each), slower. A ship knocked out in a gate's mouth is camping there: the guns
@@ -235,7 +237,11 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   own board (`board: 'blockade'`: its lagoons, reefs, shoals, winds, walls and gate guns), the north fleet the south's
   turned round. (The gate guns were silenced at first, the sloops' hit and run under them counting as camping; the
   user, 15 Nov: "remember, the gate guns are part of the point ... if the sloops are constantly moving, they shouldn't
-  be vulnerable to the guns". So a gun counts only the time a ship lies still in its reach, and they're live.) Run by `tools/blockade-balance.mjs [seeds]
+  be vulnerable to the guns". So a gun counts only the time a ship lies still in its reach, and they're live. Then, the user: paint a target and be
+  slow to fire, so moving is plainly the answer: a gun paints the nearest ship's square, the shot coming down 2.4 s later,
+  no camping count at all. With it, on the board, frigates beat sloops 5 of 6, brigs frigates 6 of 6, and the brigs
+  mostly beat the sloops head-on (sloops 2 of 6), as the user expects: "brigs should just be able to shoot ... sloops";
+  the triangle's third side to come out in a full blockade, "when brigs are forced away from the centre by the frigates".) Run by `tools/blockade-balance.mjs [seeds]
   [open|blockade]`; `tests/blockade-balance.test.ts`.
   - The rules taken out: a turtle goes for any enemy. What's left is handling and tactics: a turtle swims slower than
     a sloop sails, faster than a frigate goes (`TURTLE_HANDLING`); a ram only lands on a ship lying still a second

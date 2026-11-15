@@ -14,3 +14,4 @@ link: blockade-test.html?as=dachimpy
 
 - 15 Nov: added.
 - 15 Nov: for you to playtest: Gate guns count only time lying still in reach; back on in board skirmishes: sloops beat brigs 6/6 there, brigs beat frigates 6/6.
+- 15 Nov: Then: guns paint a target (a red ring filling over any hull) and fire 2.4 s later on the nearest ship in reach; no camping count. Board balance: frigates beat sloops 5/6, brigs beat frigates 6/6, brigs mostly beat sloops head-on.

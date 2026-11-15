@@ -4014,8 +4014,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   keeps moving slips her, and one that sits still foolishly is rammed just the same ("that makes it ... emergent
   rather than some magical rule"); a brig anchored to launch is a sitting duck for a sloop quick into position; a
   sloop that duels a frigate is sunk by her weight of shot.
-- **The gate guns punish sitting still, not being near.** A ship moving about in a gun's reach, however long, isn't
-  camping ("if the sloops are constantly moving, they shouldn't be vulnerable to the guns").
+- **The gate guns paint a target and are slow to fire,** so moving is plainly the answer: the nearest ship's square
+  marked, the shot down 2.4 s later. A sloop on the move dodges it; a frigate's move is too long ("paint a target on a
+  square and then just take quite a while to fire ... for a [war frig] ... that's basically an entire turn, so they
+  can't dodge it"). No camping count: what's punished is what doesn't move.
+- **Head-on, a brig should beat sloops** ("brigs should just be able to shoot ... sloops"); the triangle's third side
+  comes out of tactics in a full blockade, when frigates force the brigs out of the centre.
 - **Balance is proved fleet against fleet, terrain included** (tests/blockade-balance.test.ts, BLOCKADE.md §3): equal
   points, both ways round, on open sea and on the blockade's own board, guns and all ("brigs being able to use the
   terrain to launch from a protected position is very key to the balance test"). When a side of the triangle doesn't

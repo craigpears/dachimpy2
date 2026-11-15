@@ -109,13 +109,19 @@ export function turretView(V, t, dt, aim = null) {
 // afresh and never freed, they piled up with every shot.)
 const ballGeo = new THREE.SphereGeometry(0.24, 10, 8), ballMat = mat('#2a2d31', { metalness: 0.6 });
 const ringGeo = new THREE.RingGeometry(1.5, 1.9, 32).rotateX(-Math.PI / 2);   // (wide enough to show round her hull)
-const ringMat = () => new THREE.MeshBasicMaterial({ color: '#e0412e', transparent: true, opacity: 0.85, depthWrite: false, fog: false });
+// (drawn over everything: painted on the square a ship's lying on, it'd be hidden under her hull otherwise)
+const ringMat = () => new THREE.MeshBasicMaterial({ color: '#e0412e', transparent: true, opacity: 0.85, depthWrite: false, depthTest: false, fog: false });
+// (inside the ring, a disc filling it as the shot comes down: how long there is to get off the square, at a glance; the
+// user, 15 Nov: "paint a target on a square and then just take quite a while to fire ... it's clear that a sloop will
+// move quickly before it shoots")
+const discGeo = new THREE.CircleGeometry(1.5, 32).rotateX(-Math.PI / 2);
 const shots = [];
 let warmed = false;
 // A shot's done: off the water, its ring's material freed.
 function gone(v) {
   scene.remove(v.ball);
   if (v.ring) { scene.remove(v.ring); v.ring.material.dispose(); }
+  if (v.disc) { scene.remove(v.disc); v.disc.material.dispose(); }
 }
 /* A shot fired (a 'fire' event from its Turret): out of its muzzle, onto the square `to` (in the world:
    `where`), on an arc; one aimed at her has a red ring on the water where it'll come down, so you can
@@ -126,14 +132,18 @@ export function turretFire(V, e, where, owner = V) {
   burst(from, '#ffcf6a', 14, 3); burst(from, '#cfc6b8', 10, 1.8);
   const ball = mesh(ballGeo, ballMat);
   scene.add(ball);
-  let ring = null;
+  let ring = null, disc = null;
   if (e.aimed) {
     ring = new THREE.Mesh(ringGeo, ringMat());
     ring.position.copy(where).setY(where.y + 0.1);
-    ring.renderOrder = 3;
+    ring.renderOrder = 9;
     scene.add(ring);
+    disc = new THREE.Mesh(discGeo, Object.assign(ringMat(), { opacity: 0.35 }));
+    disc.position.copy(where).setY(where.y + 0.09); disc.scale.setScalar(0.05);
+    disc.renderOrder = 8;
+    scene.add(disc);
   }
-  shots.push({ owner, to: e.to, t: 0, secs: e.secs, from, at: where.clone(), ball, ring, aimed: e.aimed });
+  shots.push({ owner, to: e.to, t: 0, secs: e.secs, from, at: where.clone(), ball, ring, disc, aimed: e.aimed });
 }
 // A shot comes down (a 'land' event): a splash, or a hit on her.
 export function turretLand(owner, e) {
@@ -153,7 +163,8 @@ export function turretShotsTick(dt) {
     const u = Math.min(1, v.t / v.secs), to = v.at.clone().setY(v.at.y + 0.3);
     v.ball.position.lerpVectors(v.from, to, u);
     v.ball.position.y += Math.sin(u * Math.PI) * (v.aimed ? 4 : 1.5);
-    if (v.ring) v.ring.material.opacity = 0.5 + 0.4 * Math.sin(v.t * 14);
+    if (v.ring) v.ring.material.opacity = 0.5 + 0.4 * Math.sin(v.t * (8 + 14 * u));   // (flashing faster as it comes)
+    if (v.disc) { v.disc.scale.setScalar(0.05 + 0.95 * u); v.disc.material.opacity = 0.25 + 0.35 * u; }
   }
 }
 export const shotComing = (c, r) => shots.some((v) => v.to[0] === c && v.to[1] === r);

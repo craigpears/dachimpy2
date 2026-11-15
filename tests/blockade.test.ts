@@ -172,12 +172,11 @@ describe('shooting each other: holes where she\'s shot, and dead in the water (1
     expect(back).toBe(true);
     expect(s.helm.dazed()).toBe(false);
   });
-  it('only a frigate\'s large guns hurt a gate\'s towers, and shooting one rouses its guns, not the other gate\'s', () => {
+  it('only a frigate\'s large guns hurt a gate\'s towers', () => {
     const b = new Blockade(), f = frigate(b), berth = bombardBerths(b, f)[0];
     expect(berth).toBeTruthy();
     f.helm.moor(berth.pose);
     expect(b.fire(f.id, berth.side)!.shots.some((x) => x.got === 'hit')).toBe(true);
-    b.battery.forEach((g, i) => expect(g.roused, `gun ${i}`).toBe(b.gunGate[i] === berth.g));
     const s = sloop(b), sb = bombardBerths(b, s)[0];
     s.helm.moor(sb.pose);
     expect(b.fire(s.id, sb.side)!.shots.some((x) => x.got === 'bounced')).toBe(true);
@@ -190,33 +189,35 @@ describe('the gates\' guns doubled, punishing campers (15 Nov: "training on peop
     for (let g = 0; g < b.gates.length; g++) expect(b.gunGate.filter((x) => x === g)).toHaveLength(4);
     for (const gun of b.battery) expect(b.rocks.has(`${gun.at[0]},${gun.at[1]}`)).toBe(true);
   });
-  it(`a gun not yet roused leaves a ship passing under it be, and fires on her once she's lingered there CAMP seconds`, () => {
+  it('a gun paints a target on the square of the nearest ship in its reach and fires on it, the shot GATE_AIM coming down: lying still, she\'s hit (15 Nov: "paint a target on a square and then just take quite a while to fire")', () => {
     const b = new Blockade(), s = sloop(b), gun = b.battery[0];
     b.ships.filter((x) => x !== s).forEach((x, i) => x.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
-    // (lying still under the south gate's first gun, unroused)
     s.helm.moor({ c: gun.at[0], r: gun.at[1] - 2, d: 1 }); b.notice();
-    expect(gun.roused).toBe(false);
-    let fired = -1;
-    for (let t = 0; t < B.CAMP + 3 && fired < 0; t += 0.1) if (b.tick(0.1).guns.some((x) => x.gun === 0 && x.e.kind === 'fire')) fired = t;
-    expect(fired).toBeGreaterThanOrEqual(B.CAMP - 0.2);
+    let fired: { to: [number, number]; secs: number } | null = null, t = 0;
+    for (; t < 1 && !fired; t += 0.1) { const e = b.tick(0.1).guns.find((x) => x.gun === 0 && x.e.kind === 'fire'); if (e && e.e.kind === 'fire') fired = e.e; }
+    expect(fired).not.toBeNull();
+    expect(fired!.to).toEqual([s.helm.pose.c, s.helm.pose.r]);
+    expect(fired!.secs).toBe(B.GATE_AIM);
     expect(b.gunOn[0]).toBe(s.id);
-    // (away from it, the count starts again)
-    s.helm.moor({ c: 2, r: 30, d: 1 }); b.notice();
-    for (let t = 0; t < 1; t += 0.1) b.tick(0.1);
-    expect(b.gunOn[0]).toBe(-1);
+    let hit = false;
+    for (let u = 0; u < B.GATE_AIM + 0.3 && !hit; u += 0.1) hit = b.tick(0.1).guns.some((x) => x.gun === 0 && x.e.kind === 'land' && x.hit === s.id);
+    expect(hit).toBe(true);
   });
-  it(`a ship moving about in a gun's reach, however long, isn't camping: only lying still is (15 Nov: "if the sloops are constantly moving, they shouldn't be vulnerable to the guns")`, () => {
+  it('a sloop that moves off the painted square before the shot comes down is missed: keep moving and the guns can\'t touch her (15 Nov: "it\'s clear that a sloop will move quickly before it shoots")', () => {
     const b = new Blockade(), s = sloop(b), gun = b.battery[0];
     b.ships.filter((x) => x !== s).forEach((x, i) => x.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
-    // (back and forth under the gun, a square every half second, for twice CAMP)
-    const spots = [{ c: gun.at[0] - 1, r: gun.at[1] - 2, d: 1 }, { c: gun.at[0], r: gun.at[1] - 2, d: 1 }];
+    s.helm.moor({ c: gun.at[0], r: gun.at[1] - 2, d: 1 }); b.notice();
     let fired = false;
-    for (let t = 0, i = 0; t < B.CAMP * 2; t += 0.1, i++) {
-      if (i % 5 === 0) { s.helm.moor(spots[(i / 5) % 2]); b.notice(); }
-      fired ||= b.tick(0.1).guns.some((x) => x.gun === 0 && x.e.kind === 'fire');
-    }
-    expect(fired).toBe(false);
-    expect(gun.reaches(s.helm.pose.c, s.helm.pose.r)).toBe(true);
+    for (let t = 0; t < 1 && !fired; t += 0.1) fired = b.tick(0.1).guns.some((x) => x.gun === 0 && x.e.kind === 'fire');
+    expect(fired).toBe(true);
+    // (a square along, well inside the time a sloop's move takes)
+    s.helm.moor({ c: s.helm.pose.c + 1, r: s.helm.pose.r, d: 1 }); b.notice();
+    let landed = false, hit = false;
+    for (let u = 0; u < B.GATE_AIM + 0.3 && !landed; u += 0.1) for (const x of b.tick(0.1).guns) if (x.gun === 0 && x.e.kind === 'land') { landed = true; hit = x.hit === s.id; }
+    expect(landed).toBe(true);
+    expect(hit).toBe(false);
+    expect(B.GATE_AIM).toBeGreaterThan(SLOOP_HANDLING.move * 1.5);
+    expect(B.GATE_AIM).toBeLessThan(FRIGATE_HANDLING.move);
   });
 });
 

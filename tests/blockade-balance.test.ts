@@ -32,11 +32,12 @@ describe('rock, paper, scissors, fleet against fleet (15 Nov: "set some balance 
   it('on open sea, frigates beat sloops: sheer weight of shot', () => { expect(wins('frigate', 'sloop')).toBeGreaterThanOrEqual(3); }, 120000);
   it('on open sea, brigs beat frigates: their craft, turtles from astern and phantoms nothing can hit', () => { expect(wins('brig', 'frigate')).toBeGreaterThanOrEqual(3); }, 120000);
   it('on open sea, sloops beat brigs: a brig anchored to launch is a sitting duck, and too clumsy to bring her guns round on them', () => { expect(wins('sloop', 'brig')).toBeGreaterThanOrEqual(3); }, 120000);
-  it('on the blockade\'s board, brigs beat frigates from the lagoons, and sloops beat brigs', () => {
+  it('on the blockade\'s board, brigs beat frigates from the lagoons, and frigates beat sloops', () => {
     expect(wins('brig', 'frigate', 'blockade')).toBeGreaterThanOrEqual(3);
-    expect(wins('sloop', 'brig', 'blockade')).toBeGreaterThanOrEqual(3);
+    expect(wins('frigate', 'sloop', 'blockade')).toBeGreaterThanOrEqual(3);
   }, 120000);
-  // (on the board, sloops hide and patch up in the lagoons where no frigate can follow them, so a fight to the last ship
-  // is a stand-off: about half each by what's left at the end. In a blockade the buoys bring them out)
-  it.todo('on the blockade\'s board, frigates beat sloops');
+  // (head-on, on the board, the brigs mostly beat the sloops, as the user, 15 Nov, expects: "brigs should just be able to
+  // shoot ... sloops ... the triangle only really comes in when brigs are forced away from the centre by the frigates.
+  // So it kind of emerges in the tactics". To prove in a full blockade, buoys and all, mixed fleets)
+  it.todo('in a full blockade, sloops beat brigs once frigates force the brigs out of the centre');
 });
