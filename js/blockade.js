@@ -24,8 +24,8 @@ export const BLOCKADE = {
         { way: 21, r0: 12, r1: 13, guns: [[16, 12], [18, 12], [24, 12], [26, 12]] },
         { way: 22, r0: 22, r1: 23, guns: [[17, 23], [19, 23], [25, 23], [27, 23]] },
     ],
-    /** Seconds a ship lingers in a gate gun's reach before it fires on her, roused or not: camping there's punished;
-        slipping past isn't, mostly; charging through a fallen gate under its guns costs her. */
+    /** Seconds a ship lies still in a gate gun's reach before it fires on her, roused or not: camping there's punished;
+        moving through isn't, however long it takes; charging through a fallen gate under roused guns costs her. */
     CAMP: 4,
     /** The side ways: a one-square gap through the west wall and the east. */
     SIDEWAYS: [[14, 18], [15, 18], [28, 17], [29, 17]],
@@ -359,8 +359,10 @@ export class Blockade {
         this.battery.forEach((g, i) => {
             // (how long each ship's been under it: a gun not yet roused fires on whoever's camped there)
             const dw = this.dwell[i] ??= new Map(), near = new Set(on.filter((x) => g.reaches(x.c, x.r)).map((x) => x.id));
+            // (only while she lies still: a ship moving through, however long she's in its reach, isn't camping. The user, 15 Nov:
+            // "if the sloops are constantly moving, they shouldn't be vulnerable to the guns ... like the brig is, if you sit")
             for (const s of this.ships)
-                if (near.has(s.id))
+                if (near.has(s.id) && (this.still.get(s.id) ?? 0) > 0)
                     dw.set(s.id, (dw.get(s.id) ?? 0) + dt);
                 else
                     dw.delete(s.id);

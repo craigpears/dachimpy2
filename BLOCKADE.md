@@ -53,8 +53,9 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   - **an imperial gate** in its south wall and another in its north: its way one square wide under its arch, a
     tower two squares wide either side, four bastion guns on the wall (doubled, 15 Nov: below). The sloops run
     straight through; a frigate lies broadside to a tower and shoots it down (6 large shots, both of each broadside
-    on it: three broadsides), and then the way's three wide for anyone. A gate's guns fire on anyone who lingers in
-    their reach (`CAMP`, 4 s), and once the gate's fired on, on whoever's in reach at all (the gate's medium shot's
+    on it: three broadsides), and then the way's three wide for anyone. A gate's guns fire on anyone who lies still in
+    their reach (`CAMP`, 4 s; moving about in it, however long, isn't camping: 15 Nov, "if the sloops are constantly
+    moving, they shouldn't be vulnerable to the guns"), and once the gate's fired on, on whoever's in reach at all (the gate's medium shot's
     damage); any ship's hits quieten one, three wreck it;
   - **a side way** through its west wall and its east: a one-square gap with a wind blowing in through it from the
     open sea. A sloop on it is carried through, fast; a frigate rides the winds out (and wouldn't fit anyway).
@@ -144,7 +145,7 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   [cannons] ... first of all, stop people camping. And provide more of a barrier to the war frigates ... that central
   three-pointer is fantastic for how fast the sloops can get in ... you have the choice. You either charge the guns
   and take damage, get into that middle fast, or ..."). Four bastion guns a gate, two by its towers and two further
-  along the wall; a gun fires on any ship that's lingered in its reach 4 s, roused or not, so camping by a gate, on
+  along the wall; a gun fires on any ship that's lain still in its reach 4 s, roused or not, so camping by a gate, on
   the buoy off it or lying broadside to a tower, is punished, while slipping past mostly isn't; once its gate's fired
   on, on anyone in its reach. A frigate's choice at a gate: charge it under fire (a tower down, the way three wide),
   or wreck its guns first (three hits each), slower. A ship knocked out in a gate's mouth is camping there: the guns
@@ -231,8 +232,10 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   sloop 1; six a side) to the last ship, sunk ships staying sunk, each bot going for the nearest enemy as her kind best
   can (a sloop off a big ship's end, hitting and running; a frigate or a brig broadside on, swinging her side round when
   in range and no gun bears; a frigate leaving be an enemy in a lagoon or its shoals). On open sea, or on the blockade's
-  own board (`board: 'blockade'`: its lagoons, reefs, shoals, winds and walls; the gate guns silenced, or they'd decide a
-  fight by where it happens), the north fleet the south's turned round. Run by `tools/blockade-balance.mjs [seeds]
+  own board (`board: 'blockade'`: its lagoons, reefs, shoals, winds, walls and gate guns), the north fleet the south's
+  turned round. (The gate guns were silenced at first, the sloops' hit and run under them counting as camping; the
+  user, 15 Nov: "remember, the gate guns are part of the point ... if the sloops are constantly moving, they shouldn't
+  be vulnerable to the guns". So a gun counts only the time a ship lies still in its reach, and they're live.) Run by `tools/blockade-balance.mjs [seeds]
   [open|blockade]`; `tests/blockade-balance.test.ts`.
   - The rules taken out: a turtle goes for any enemy. What's left is handling and tactics: a turtle swims slower than
     a sloop sails, faster than a frigate goes (`TURTLE_HANDLING`); a ram only lands on a ship lying still a second
@@ -243,8 +246,8 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     reach and no enemy sloop within 7 squares (`BRIG.SAFE`), and on the board from inside a lagoon ("brigs being able to
     use the terrain to launch from a protected position is very key").
   - Three seeds, both ways round, six fights a pairing: on open sea, frigates beat sloops 6 of 6, brigs beat frigates 6
-    of 6, sloops beat brigs 6 of 6. On the board, brigs beat frigates 6 of 6 and sloops beat brigs 6 of 6; frigates and
-    sloops 3 of 6, every fight to the time limit: the sloops slip into the lagoons to hide and patch up where no frigate
+    of 6, sloops beat brigs 6 of 6. On the board, guns live, brigs beat frigates 6 of 6 and sloops beat brigs 6 of 6; frigates
+    and sloops 2 of 6, every fight to the time limit: the sloops slip into the lagoons to hide and patch up where no frigate
     can follow, a stand-off by design (in a blockade the buoys bring them out). Points: at a brig's two, three brigs
     crushed the sloops; at three, the triangle holds.
 

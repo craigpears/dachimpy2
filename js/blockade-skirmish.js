@@ -10,7 +10,8 @@
    - each kind of ship costs points (POINTS: a frigate three, a brig two, a sloop one), and each side brings the same:
      six points is two frigates, three brigs or six sloops;
    - open sea, the board's size, no fort, gates, reefs, rocks or winds: only the ships; or the blockade's own board, its
-     lagoons, reefs, shoals, winds and walls (its gate guns silent: they'd decide a fight by where it happens);
+     lagoons, reefs, shoals, winds, walls and gate guns (which fire on a ship lying still in their reach, not on one
+     moving through: the user, 15 Nov, "if the sloops are constantly moving, they shouldn't be vulnerable to the guns");
    - a ship sunk stays sunk; every bot goes for the nearest enemy as her kind best can (src/blockade-bots.ts,
      `skirmish`);
    - a side's strength is its ships' points still afloat, each by how whole she is (knocked out, a quarter); the side
@@ -48,9 +49,6 @@ export function skirmish(gold, crimson, random, opts = {}) {
     // to launch from, the user, 15 Nov: "brigs being able to use the terrain to launch from a protected position is very
     // key to the balance test")
     const b = new Blockade({ open: opts.board !== 'blockade', skirmish: true, teams: [fleet(gold, 'gold', points, opts.goldCraft), fleet(crimson, 'crimson', points, opts.crimsonCraft)] });
-    // (the gate guns silenced: they fire on whoever lingers, so they'd decide a fight by where it happens, not by the ships)
-    for (const g of b.battery)
-        g.wrecked = true;
     const bots = new Bots(b, [], random, null, true), dt = 0.1;
     let t = 0;
     for (; t < secs; t += dt) {

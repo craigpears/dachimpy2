@@ -205,6 +205,19 @@ describe('the gates\' guns doubled, punishing campers (15 Nov: "training on peop
     for (let t = 0; t < 1; t += 0.1) b.tick(0.1);
     expect(b.gunOn[0]).toBe(-1);
   });
+  it(`a ship moving about in a gun's reach, however long, isn't camping: only lying still is (15 Nov: "if the sloops are constantly moving, they shouldn't be vulnerable to the guns")`, () => {
+    const b = new Blockade(), s = sloop(b), gun = b.battery[0];
+    b.ships.filter((x) => x !== s).forEach((x, i) => x.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
+    // (back and forth under the gun, a square every half second, for twice CAMP)
+    const spots = [{ c: gun.at[0] - 1, r: gun.at[1] - 2, d: 1 }, { c: gun.at[0], r: gun.at[1] - 2, d: 1 }];
+    let fired = false;
+    for (let t = 0, i = 0; t < B.CAMP * 2; t += 0.1, i++) {
+      if (i % 5 === 0) { s.helm.moor(spots[(i / 5) % 2]); b.notice(); }
+      fired ||= b.tick(0.1).guns.some((x) => x.gun === 0 && x.e.kind === 'fire');
+    }
+    expect(fired).toBe(false);
+    expect(gun.reaches(s.helm.pose.c, s.helm.pose.r)).toBe(true);
+  });
 });
 
 describe('a sinking blockade (15 Nov: "that sense of working your way back in would be lost if you can\'t [sink] at all")', () => {
