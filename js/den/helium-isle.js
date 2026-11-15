@@ -233,8 +233,8 @@ function handTick(dt) {
    Then their opening choice (14 Nov; TUTORIALS.md, src/tutorial.ts): what are you after, the basics, the early or
    mid game, a higher Crystal Clear; and that part's list, its phases, scenarios and tricks; the one picked played
    next on a board of its own (src/den-helium-tutor.ts), step one their lesson as it was. `beats`: the lesson's
-   beats (by default the opening and the choice); `wide`: the opening's wide shot first, else in on the board. */
-function lessonPlay(beats = [...opening(), CHOOSE], { wide: opening = true } = {}) {
+   beats (by default the opening and the choice); `wide` (`wideFirst`, not `opening`, which is their opening): the opening's wide shot first, else in on the board. */
+function lessonPlay(beats = [...opening(), CHOOSE], { wide: wideFirst = true } = {}) {
   const W = helium.W, P = PACE_LESSON;
   sail.helm.moor(HELIUM_MOOR);
   sail.riding = false;
@@ -246,7 +246,7 @@ function lessonPlay(beats = [...opening(), CHOOSE], { wide: opening = true } = {
   // side behind; then in on the board for the lesson, boardView)
   const still = W.distillery.g.getWorldPosition(V3(0, 0, 0)).add(V3(0, 1.8, 0));
   const wide = { look: at.clone().lerp(still, 0.45), dist: Math.max(dist * 1.25, at.distanceTo(still) * 2.1), tilt: 0.16, yaw: W.yaw + 0.22 };
-  let i = -1, t = 0, need = 0, acted = true, gap = 0, on = false, burned = false, zoom = !opening, waiting = false, panel = null;
+  let i = -1, t = 0, need = 0, acted = true, gap = 0, on = false, burned = false, zoom = !wideFirst, waiting = false, panel = null;
   W.them.lookAt = { x: look.x + Math.sin(W.yaw) * dist, z: look.z + Math.cos(W.yaw) * dist };   // (to the camera, their audience)
   const goOn = () => { if (i >= 0 && t >= P.READ_FIRST && !waiting) on = true; };
   const click = (e) => { if (e.button === 0) goOn(); };
@@ -267,7 +267,7 @@ function lessonPlay(beats = [...opening(), CHOOSE], { wide: opening = true } = {
     }, (e) => { console.error(e); go([]); });
   };
   const c = {
-    cam: opening ? wide : boardView(),
+    cam: wideFirst ? wide : boardView(),
     started: performance.now(),
     /** Space or Enter: on to the next line, once this one's been up a moment (Esc still skips: cine.js). */
     key(k) { if (k === ' ' || k === 'enter') { goOn(); return true; } return false; },
@@ -276,7 +276,7 @@ function lessonPlay(beats = [...opening(), CHOOSE], { wide: opening = true } = {
       if (zoom) c.cam = boardView();
       if (waiting) return;
       // (not till the camera's flown out to their island: the bang's the first thing to see)
-      if (i < 0 && opening && t < 12 && camera.position.distanceTo(c.cam.look) > c.cam.dist * 1.6) return;
+      if (i < 0 && wideFirst && t < 12 && camera.position.distanceTo(c.cam.look) > c.cam.dist * 1.6) return;
       const B = helium.board, b = beats[i];
       if (b && !acted && (t >= actAfter(b) || on)) {
         acted = true;
