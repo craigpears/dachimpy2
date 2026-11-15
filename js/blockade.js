@@ -145,6 +145,12 @@ export const BLOCKADE = {
         this many seconds later where she came in at the start, refitted. */
     SINKING: true,
     RETURN: 25,
+    /** The safe zone: a band this many squares deep round the board's edge, where nobody can fire or be shot (the user,
+        15 Nov: "when they respawn, usually they have there's like the safe zone around the edge ... you can't shoot each
+        other"); and the seconds a ship back in waits before she can move ("just like one turn before they can move
+        again"). */
+    SAFE: 4,
+    RESPAWN_WAIT: 3,
     /** The brawl to watch (blockade-test.html?watch=brawl, 15 Nov: "I want to see two of the big ships really having a
         brawl and fighting it out to see what that damage looks like"; "That needs to be like one of the shortcuts so
         people can actually see a cinematic of the blockade"): two war frigates broadside to broadside on the open water
@@ -196,6 +202,8 @@ export function farSide(p) { return { c: BLOCKADE.COLS - 1 - p.c, r: p.r, d: p.d
 export class Blockade {
     rocks = new Set();
     wind = new Map();
+    /** Seconds a ship just back in still waits before she can move (BLOCKADE.RESPAWN_WAIT). */
+    waiting = new Map();
     /** How long each ship's lain still (on the same square, the same way), seconds: a phantom's for the taking. */
     still = new Map();
     stillAt = new Map();
@@ -306,6 +314,15 @@ export class Blockade {
         const out = { sail: new Map(), damage: new Map(), guns: [], scored: false, returned: [], faded: [], rams: [], scrapes: [] };
         if (this.over)
             return out;
+        // (a ship just back in, waiting her turn: whatever's put in for her let go)
+        for (const [id, w] of this.waiting) {
+            const s = this.ship(id);
+            s.helm.stop();
+            if (w - dt <= 0)
+                this.waiting.delete(id);
+            else
+                this.waiting.set(id, w - dt);
+        }
         for (const s of this.ships) {
             // (sunk: back where she came in once her time's up and nobody's lying there)
             if (s.away > 0) {
@@ -481,8 +498,16 @@ export class Blockade {
         if (!ships)
             return null;
         const s = this.under(c, r);
-        // (a phantom: the shot goes through her)
-        return s && s !== from && !phantom(s) ? { what: 'ship', id: s.id } : null;
+        // (a phantom: the shot goes through her; and anyone in the safe zone round the edge)
+        return s && s !== from && !phantom(s) && !this.safe(s) ? { what: 'ship', id: s.id } : null;
+    }
+    /** Whether she's in the safe zone round the board's edge, where nobody fires or is shot (BLOCKADE.SAFE; none on open
+        sea, a skirmish's). */
+    safe(s) {
+        if (this.open)
+            return false;
+        const { c, r } = s.helm.pose, k = BLOCKADE.SAFE;
+        return c < k || r < k || c > BLOCKADE.COLS - 1 - k || r > BLOCKADE.ROWS - 1 - k;
     }
     /** Her broadside out of that side as it would fly now (or lying at `at`), without firing it (a bot's look
         before it fires; `ships` false, as if no ship were in the way). */
@@ -494,10 +519,10 @@ export class Blockade {
         was the last she could take). */
     hurt(s, gun, at, from) {
         const where = struck(s.helm.pose, s.h.long, at, from), got = s.dmg.hit(gun, where.along, where.side, BLOCKADE.SINKING);
-        if (got.out)
-            s.helm.hit(); // (dead in the water: held till she's rebuilt)
-        // (a brig's craft knocked out goes down at once)
-        if (got.sunk || (s.craft && got.out)) {
+        // (full damage sinks her at once, spinning down, and she sails back in from an edge: no lying dead in the water
+        // knocked out for her crew to rebuild; the user, 15 Nov: "how is that different than being sunk? As I thought we were
+        // supposed to be sinking ships, not having them just float around there")
+        if (got.sunk || got.out) {
             this.sink(s);
             return { ...got, sunk: true };
         }
@@ -603,7 +628,7 @@ export class Blockade {
                 const o = this.under(c + dc, r + dr);
                 // (a ram lands on a ship lying still a moment, a frigate trading broadsides, a ship at anchor on a buoy; a sloop under
                 // way slips her)
-                if (o && o !== s && o.team !== s.team && o.away <= 0 && !o.craft && (this.still.get(o.id) ?? 0) >= BLOCKADE.LAUNCH.RAM.STILL)
+                if (o && o !== s && o.team !== s.team && o.away <= 0 && !o.craft && !this.safe(o) && (this.still.get(o.id) ?? 0) >= BLOCKADE.LAUNCH.RAM.STILL)
                     return { o, at: [c + dc, r + dr] };
             }
         return null;
@@ -631,13 +656,14 @@ export class Blockade {
         s.helm.hole = null;
         s.guns.wait = { L: 0, R: 0 };
         s.away = 0;
+        this.waiting.set(s.id, BLOCKADE.RESPAWN_WAIT);
         this.notice();
         return true;
     }
     /** Fire a ship's broadside out of that side, if it's loaded and she's not knocked out (null if not). */
     fire(id, side) {
         const s = this.ship(id);
-        if (s.dmg.out || s.away > 0 || !s.guns.fire(side))
+        if (s.dmg.out || s.away > 0 || this.safe(s) || !s.guns.fire(side))
             return null;
         this.notice(); // (where everyone is now, if they've been moved by hand)
         const roused = new Set();

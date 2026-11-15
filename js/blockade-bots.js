@@ -70,6 +70,10 @@ export const BOTS = {
     BOW: 8,
     /** How near an enemy has to be (squares) for a frigate to fight her, and how much she's worth fighting. */
     ENGAGE: 9, FIGHT: 3,
+    /** How much a fight's worth to a big ship with an enemy on no buoy (one on a buoy, or contesting it, 1). */
+    OFF_POINTS: 0.35,
+    /** How much longer than her way itself a big ship's way round the ships in it can be before she'd rather wait. */
+    DETOUR: 1.6,
     /** How near (squares) an enemy has to come for a frigate holding a buoy in the heart to leave it to fight her. */
     HOLD: 5,
     /** How much more a fight's worth to finish an enemy who's knocked out, or to save a friend who is (an enemy within
@@ -456,8 +460,10 @@ export class Bot {
                 // (to finish her off, or to drive her off a friend who's knocked out)
                 const why = (o.dmg.out ? BOTS.FINISH : 1) * (b.ships.some((x) => x.team === s.team && x !== s && x.dmg.out && x.away <= 0 && near(x)) ? BOTS.RESCUE : 1);
                 const big = s.kind === 'brig' ? (o.kind === 'brig' ? 1.5 : 0.25) : o.kind === 'sloop' ? 1.6 : o.kind === 'frigate' ? 1.3 : 0.8;
-                // (more for one more damaged than she is, less for one she'd lose to: her nerve)
-                best.push({ goal: { kind: 'fight', on: fight.on, at: was && this.goal?.kind === 'fight' ? this.goal.at : fight.at }, score: fightW * BOTS.FIGHT * big * why * this.nerve(s, o) / (4 + eta) });
+                // (more for one more damaged than she is, less for one she'd lose to: her nerve; and a fight's for the points: one
+                // on a buoy, or contesting one, is worth it, one off them far less: 15 Nov, "this is a game about the points")
+                const onPoints = BLOCKADE.BUOYS.some((x) => b.reaches(o, x)) ? 1 : BOTS.OFF_POINTS;
+                best.push({ goal: { kind: 'fight', on: fight.on, at: was && this.goal?.kind === 'fight' ? this.goal.at : fight.at }, score: fightW * BOTS.FIGHT * big * why * this.nerve(s, o) * onPoints / (4 + eta) });
             }
         }
         // Best first.
@@ -610,7 +616,8 @@ export class Bot {
         // them as they come in reach and keeps to what she's at)
         // (nor a ship sheltering in a lagoon or its shoals, for a frigate: she'd scrape her bottom going in after her, and
         // there are no points in chasing her there)
-        const chase = (o) => !(any && only === undefined && ((o.craft && (s.kind === 'frigate' || s.kind === 'brig')) || (s.kind === 'frigate' && b.sheltered(o))));
+        // (and nobody goes after a ship in the safe zone round the edge: there's no shooting there)
+        const chase = (o) => !b.safe(o) && !(any && only === undefined && ((o.craft && (s.kind === 'frigate' || s.kind === 'brig')) || (s.kind === 'frigate' && b.sheltered(o))));
         const foes = b.ships.filter((o) => o.team !== s.team && !phantom(o) && chase(o) && (any || o.kind === 'frigate' || o.kind === 'brig' || camped(o)) && o.away <= 0 && (any && BLOCKADE.SINKING ? true : !o.dmg.out) && (only === undefined ? !this.spare.has(o.id) : o.id === only))
             .map((o) => ({ o, m: drawnAt(o.h, { c: o.helm.pose.c, r: o.helm.pose.r, a: o.helm.pose.d }) }))
             .filter(({ m }) => Math.hypot(m.c - p.c, m.r - p.r) <= reach)
@@ -658,7 +665,7 @@ export class Bot {
         const was = this.goal?.kind === 'ram' ? this.goal.on : -1;
         const lies = (o) => far(o.helm.pose.c, o.helm.pose.r) - ((b.still.get(o.id) ?? 0) >= RAM_STILL ? BOTS.RAM.STILL_FIRST : 0)
             - (o.kind === 'frigate' ? BOTS.RAM.WORTH : o.kind === 'brig' ? BOTS.RAM.WORTH / 2 : 0) - (o.id === was ? BOTS.RAM.KEEP : 0);
-        const foes = b.ships.filter((o) => o.team !== s.team && !o.craft && o.away <= 0 && !this.spare.has(o.id) && far(o.helm.pose.c, o.helm.pose.r) <= BOTS.RAM.REACH)
+        const foes = b.ships.filter((o) => o.team !== s.team && !o.craft && o.away <= 0 && !b.safe(o) && !this.spare.has(o.id) && far(o.helm.pose.c, o.helm.pose.r) <= BOTS.RAM.REACH)
             .sort((a, z) => lies(a) - lies(z));
         for (const o of foes) {
             const op = o.helm.pose, d = op.d, sd = (d + 1) % 4, al = alongs(o.h)[0], hers = squares(o.h, op), on = new Set(hers.map(([c, r]) => `${c},${r}`));
@@ -806,6 +813,11 @@ export class Bot {
         if (this.blocked(b, at))
             return null;
         const k = `${at[0]},${at[1]}`, got = s.sea.plot(s.helm.after(), ...at);
+        // (a big ship's way round the ships in hers far longer than the way itself (a gateway full, say): they'll have moved
+        // long before she's got round, so she waits for them rather than setting off right round the fort, 15 Nov: "one's
+        // really out there, near the edge of the map. Like, what is going on again?")
+        if (got && s.kind !== 'sloop' && got.length * s.h.move > s.sea.eta(s.helm.after(), ...at) * BOTS.DETOUR + 6)
+            return null;
         if (got)
             this.noway.delete(k);
         else
@@ -854,6 +866,12 @@ export class Bot {
         }
         // (another ship's in her way: rather than wait on each other for ever, she makes a move of her own, forward if
         // she can, to try another way)
+        // (a big ship waits instead: a move off at random is a big ship's long way off her course)
+        if (s.kind !== 'sloop') {
+            if (s.helm.pin)
+                s.helm.stop();
+            return;
+        }
         if (s.helm.slot < 0 && !s.helm.mine.length) {
             const free = ['F', 'L', 'R'].filter((m) => s.sea.clear(s.helm.pose, m));
             if (free.length)

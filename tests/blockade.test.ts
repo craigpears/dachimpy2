@@ -161,21 +161,43 @@ describe('scoring, as YPPedia has it: a buoy in one side\'s influence alone scor
 });
 
 describe('shooting each other: holes where she\'s shot, and dead in the water (15 Nov: "I want to shoot the sloop from the war frigate and see it just go dead in the water")', () => {
-  it('a frigate\'s broadside on a sloop holes her where it struck; the third knocks her out, held till she\'s rebuilt', () => {
+  it('a frigate\'s broadside on a sloop holes her where it struck; the third sinks her, gone till she comes back in (15 Nov: "we were supposed to be sinking ships, not having them just float around there")', () => {
     const b = new Blockade(), f = frigate(b), s = sloop(b, 'crimson');
     f.helm.moor({ c: 14, r: 20, d: 0 }); s.helm.moor({ c: 16, r: 20, d: 0 });
     for (let i = 0; i < 3; i++) {
       const shot = b.fire(f.id, 'R')!.shots.find((x) => x.what?.what === 'ship')!;
       expect(shot.hole).toBeTruthy();
-      expect(shot.hole!.side).toBe('L');   // (facing up the board, the frigate's off her port side)
+      expect(shot.hole!.side).toBe('L');   // (facing up the board, the frigate\'s off her port side)
+      if (i < 2) expect(s.away).toBe(0);
       f.guns.tick(9);
     }
-    expect(s.dmg.out).toBe(true);
-    expect(s.helm.dazed()).toBe(true);
+    expect(s.away).toBeGreaterThan(0);
     let back = false;
-    for (let t = 0; t < 300 && !back; t += 0.5) back = (b.tick(0.5).damage.get(s.id) ?? []).some((e) => e.kind === 'back');
+    for (let t = 0; t < 60 && !back; t += 0.5) back = b.tick(0.5).returned.includes(s.id);
     expect(back).toBe(true);
-    expect(s.helm.dazed()).toBe(false);
+    expect(s.dmg.share()).toBe(0);
+  });
+  it('a ship back in waits a moment before she can move; nobody in the safe zone round the edge can fire or be shot (15 Nov: "the safe zone around the edge ... you can\'t shoot each other ... one turn before they can move again")', () => {
+    const b = new Blockade(), s = sloop(b);
+    b.sink(s);
+    for (let t = 0; t < 60 && s.away > 0; t += 0.5) b.tick(0.5);
+    const at = { ...s.helm.pose };
+    expect(b.safe(s)).toBe(true);
+    s.helm.put('F');
+    b.tick(1);
+    expect(s.helm.pose).toEqual(at);
+    for (let t = 0; t < B.RESPAWN_WAIT + 1; t += 0.5) b.tick(0.5);
+    s.helm.put('F');
+    for (let t = 0; t < 3; t += 0.1) b.tick(0.1);
+    expect(s.helm.pose).not.toEqual(at);
+    // (a frigate lying off a ship in the safe zone: her broadside goes through her; and from in it, no broadside at all)
+    const f = frigate(b, 'crimson'), o = sloop(b, 'gold');
+    clearAway(b, [f, o]);
+    f.helm.moor({ c: 6, r: 2 + 6, d: 0 }); o.helm.moor({ c: 8, r: 2, d: 0 }); b.notice();
+    expect(b.safe(o)).toBe(true);
+    expect(b.aim(f.id, 'R').some((x) => x.what?.what === 'ship')).toBe(false);
+    f.helm.moor({ c: 6, r: 2, d: 0 }); b.notice();
+    expect(b.fire(f.id, 'R')).toBeNull();
   });
   it('only a frigate\'s large guns hurt a gate\'s towers', () => {
     const b = new Blockade(), f = frigate(b), berth = bombardBerths(b, f)[0];
@@ -315,6 +337,8 @@ describe('admiral mode: an order for each ship (15 Nov: "you need to be able to 
   it('hunting: after that enemy, broadside on (a sloop after a frigate, off her end); escorting: off her friend\'s side', () => {
     const b = new Blockade(), bots = new Bots(b, [], dice(4)), f = frigate(b), foe = frigate(b, 'crimson');
     const sl = b.ships.find((x) => x.team === 'gold' && x.kind === 'sloop' && !x.raider)!;
+    // (her prey out of the safe zone round the edge, where she came in: there's no fighting in it)
+    foe.helm.moor({ c: 30, r: 38, d: 2 }); b.notice();
     bots.order(f.id, { kind: 'hunt', ship: foe.id });
     bots.order(sl.id, { kind: 'escort', ship: f.id });
     const raider = b.ships.find((x) => x.team === 'gold' && x.raider)!;
@@ -394,16 +418,17 @@ describe('the brawl, to watch (15 Nov: "I want to see two of the big ships reall
     const bears = (x: typeof a, y: typeof a) => (['L', 'R'] as const).some((side) => b.aim(x.id, side).every((q) => q.what?.what === 'ship' && q.what.id === y.id));
     expect(bears(a, z)).toBe(true);
     expect(bears(z, a)).toBe(true);
-    let moved = false;
-    // (the first half minute: by then one's often sunk, and the other's gone on to the gates)
-    for (let i = 0; i < 300; i++) {
+    let moved = false, holed = [false, false];
+    // (till one's sunk, both at it the whole while: full damage sinks her at once since 15 Nov)
+    for (let i = 0; i < 900 && !duel.some((id) => b.ship(id).away > 0); i++) {
       bots.tick(b, 0.1); b.tick(0.1);
       if (duel.some((id, k) => JSON.stringify(b.ship(id).helm.pose) !== JSON.stringify(start[k]))) moved = true;
+      duel.forEach((id, k) => { if (b.ship(id).dmg.holes.length) holed[k] = true; });
+      if (i > 20 && i % 10 === 0) for (const id of duel) if (b.ship(id).away <= 0) expect(bots.doing(b, id), b.ship(id).name).toMatch(/fighting/);
     }
-    for (const id of duel) expect(bots.doing(b, id), b.ship(id).name).toMatch(/fighting|knocked out/);
+    expect(duel.some((id) => b.ship(id).away > 0)).toBe(true);
     expect(moved).toBe(true);
-    expect(a.dmg.holes.length + (a.dmg.out ? 1 : 0)).toBeGreaterThan(0);
-    expect(z.dmg.holes.length + (z.dmg.out ? 1 : 0)).toBeGreaterThan(0);
+    expect(holed).toEqual([true, true]);
   });
 });
 

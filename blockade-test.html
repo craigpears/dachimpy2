@@ -57,6 +57,12 @@
   body.cinema .ui { display: none; }
   #cinema { display: none; position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 8px 14px; text-align: center; }
   body.cinema #cinema { display: block; }
+  /* the round's end, plain to see: who won, the score, another round (15 Nov: "for quite a few times I thought it had
+     frozen") */
+  #over { display: none; position: fixed; left: 50%; top: 38%; transform: translate(-50%, -50%); width: max-content; max-width: calc(100vw - 32px); background: var(--panel); border: 2px solid var(--gold); border-radius: 14px; padding: 16px 26px; text-align: center; z-index: 5; }
+  body.over #over { display: block; }
+  #over b { display: block; font-size: 26px; color: var(--gold); margin-bottom: 4px; }
+  #over span { display: block; font-size: 15px; margin-bottom: 10px; }
   /* the admiral's (?admiral): your side's ships each an order, picked and drawn on the board */
   #admiral { display: none; margin: 8px 0; padding: 8px; border: 1px solid var(--edge); border-radius: 8px; }
   body.admiral #admiral { display: block; }
@@ -74,7 +80,7 @@
 <body>
 <div class="ui">
   <h1>Blockade</h1>
-  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants. The best are in the fort in the middle: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. Sloops hide in the lagoons, inside their reefs where no frigate can follow, and dart out; when the frigates get into the heart, the winds out of it carry the sloops away to the lagoons. Each side's war brig launches her craft at the frigates: Tidecaller's turtles come at them from astern and ram, Grave Lantern's phantom sloops, slow but never to be hit, dart at anything slow or sat still. Shoals round the lagoons scrape a frigate's bottom. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops; in a brig, L launches her craft, Tab takes the helm of one of them (the rest on autopilot) and G calls them home. Watching, W A S D move the camera about and Q E turn it.</p>
+  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants, the best in the fort in the middle. Sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. War brigs launch their craft at the frigates: Tidecaller's turtles ram a ship lying still, Grave Lantern's phantom sloops can't be hit. Nobody hides: a ship sunk spins down and sails back in from the edge, where nobody can shoot. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops; in a brig, L launches her craft, Tab takes the helm of one of them (the rest on autopilot) and G calls them home. Watching, W A S D move the camera about and Q E turn it.</p>
   <div class="score"><span class="gold" id="sg">0</span><span id="clock">5:00</span><span class="crimson" id="sc">0</span></div>
   <div class="bar" title="This blockade turn: scored when it fills"><i id="turn"></i></div>
   <div class="buoys" id="buoys"></div>
@@ -107,6 +113,7 @@
   <div class="ships" id="ships"></div>
 </div>
 <div id="say"></div>
+<div id="over"><b id="overTitle"></b><span id="overScore"></span><button id="overAgain">New round</button></div>
 <div id="cinema"><b id="cineTitle"></b><span id="cineLine"></span><button id="cineAll">Watch the whole blockade</button></div>
 <script src="js/engine.js"></script>
 <script type="importmap">
@@ -121,7 +128,7 @@ import { renderer, scene, camera, paintSky, pirate, tickSparks } from './js/den/
 import { blockadeSea } from './js/den/blockade.js';
 import { BLOCKADE } from './js/blockade.js';
 
-const $ = (id) => document.getElementById(id), params = new URLSearchParams(location.search);
+const $ = (id) => document.getElementById(id), params = new URLSearchParams(location.search), showReach = params.has('reach');
 paintSky('#4f8fd0', '#cfe2ee');
 camera.far = 640; camera.updateProjectionMatrix();
 scene.fog.near = 200; scene.fog.far = 460;   // (out past the bigger board, 15 Nov: seen whole from above, not lost in the haze)
@@ -195,6 +202,7 @@ $('whole').onclick = () => {
   Object.assign(cam, cam.follow ? FOLLOW : WHOLE); if (!cam.follow) cam.at.set(0, 0, 0);
 };
 $('again').onclick = () => location.reload();
+$('overAgain').onclick = () => location.reload();
 document.querySelectorAll('[data-key]').forEach((b) => { b.onclick = () => bk.key(b.dataset.key); });
 // (spectating: W A S D, or the arrows, move the camera about over the sea, Q E turn it; the user, 15 Nov: "when I'm
 // spectating, I want to be able to like WASD my way around"; at a helm, they're her moves)
@@ -218,6 +226,11 @@ let sig = '';
 const hud = () => {
   const s = bk.hud(), left = Math.max(0, 300 - s.clock);
   $('sg').textContent = `Dachimpy's ${s.score.gold}`; $('sc').textContent = `${s.score.crimson} Dalnoth's`;
+  if (s.over && !document.body.classList.contains('over')) {
+    document.body.classList.add('over');
+    $('overTitle').textContent = s.leader ? `${s.leader === 'gold' ? "Dachimpy's flag" : "Dalnoth's flag"} wins the blockade` : "The blockade's a draw";
+    $('overScore').textContent = `Dachimpy's ${s.score.gold}, Dalnoth's ${s.score.crimson}`;
+  }
   $('clock').textContent = s.over ? (s.leader ? `${s.leader === 'gold' ? 'Dachimpy\'s' : 'Dalnoth\'s'} win` : 'A draw') : `${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`;
   $('turn').style.width = `${(s.turn / 10) * 100}%`;
   if (s.me) {
@@ -313,8 +326,9 @@ function frame() {
     cam.yaw += dt * 0.06;
     $('cineLine').textContent = [a, z].map((s) => `${s.name} ${s.away > 0 ? `sunk, back in ${Math.ceil(s.away)}s` : s.dmg.out ? 'knocked out, her crew rebuilding her' : `${Math.round(s.dmg.share() * 100)}% damaged`}`).join(' · ');
   } else if (cam.follow) cam.at.lerp(bk.focus(bk.you() >= 0 ? bk.you() : cam.watching).setY(2), Math.min(1, dt * 2.5));
-  // (the frigate you follow or sail: her broadside reach shaded, her blind spots plain)
-  bk.showReach(bk.you() >= 0 ? bk.you() : cam.follow ? cam.watching : -1);
+  // (?reach only: the frigate you follow or sail, her broadside reach shaded, her blind spots plain; for the design
+  // page's picture of them, not otherwise: the user, 15 Nov, "I really don't see what that's adding")
+  if (showReach) bk.showReach(bk.you() >= 0 ? bk.you() : cam.follow ? cam.watching : -1);
   hud();
   if ((sayT -= dt) <= 0) $('say').classList.remove('on');
   camera.position.set(cam.at.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cam.at.y + Math.sin(cam.pitch) * cam.dist, cam.at.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist);

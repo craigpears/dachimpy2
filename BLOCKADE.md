@@ -376,6 +376,24 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   when launched; she puts in a whole turn's moves at a time; a turtle lasts 40 seconds (was 30, a phantom's). Three
   games after: rams on frigates 12, 25, 41.
 
+- **Full damage sinks her; a safe edge; frigates back to the middle; the round's end plain** (15 Nov: "how is that
+  different than being sunk? As I thought we were supposed to be sinking ships, not having them just float around
+  there"; "the safe zone around the edge ... you can't shoot each other ... one turn before they can move again"; "the
+  frigs really are not being very aggressive still at returning to the middle ... one's really out there, near the edge
+  of the map"; "I thought it had frozen"):
+  - full damage sinks her at once (no knocked-out state, its crew rebuilding her), from any shot, ram, gun or scrape;
+  - a safe zone four squares deep round the edge (`SAFE`): nobody in it fires, shots go through ships in it, turtles
+    don't ram there, the bots leave ships in it be; a ship back in waits three seconds (`RESPAWN_WAIT`);
+  - a big ship's fight counts fully only with an enemy on or contesting a buoy (`OFF_POINTS` 0.35 otherwise); and when
+    the ships in her way would send her far round (more than `DETOUR` 1.6 times her way, a gateway full), a big ship
+    waits for them rather than setting off round the fort or moving off at random: watched, Iron Pride, back by the
+    south entry, wandered west for 75 seconds that way;
+  - after, two games: frigates in the heart 32 and 38% of the time (11 to 37 before), holding the prize 225 and 375
+    seconds; rams 16 and 31;
+  - a banner at the round's end, who won and the score, and New round.
+  - the red broadside reach off: only with `?reach` in the address, for the blind spots' picture ("I really don't see
+    what that's adding ... the only reason for adding it, was for one screenshot").
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of

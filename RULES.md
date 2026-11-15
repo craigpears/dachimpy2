@@ -4018,6 +4018,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   by an edge and sailing in ("there needs to be a bit of a buffer travel zone"), the sloops quick on the edge winds;
   every ship can come in by either end (frigates by either gate's side, sloops and brigs by either side's edge: "island
   and oceanside spawns").
+- **Full damage sinks her, and the edge is safe.** No lying dead in the water: "we were supposed to be sinking ships, not
+  having them just float around there". A ship at full damage spins down and comes back in at an edge, in a safe zone
+  four squares deep where nobody can fire or be shot, waiting a moment before she can move ("the safe zone around the
+  edge ... you can't shoot each other ... one turn before they can move again").
 - **A sheltered spot has a way in from outside.** The heart's corners are out of any frigate's reach inside the fort,
   a brig's launching spot; each has a gap through the wall from the open sea, a postern or a way out, so a sloop can
   slip in at her ("balance that with another kind of gap coming from the outside").

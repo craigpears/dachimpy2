@@ -1,6 +1,6 @@
 ---
 title: Blockade: a ship at full damage sinks at once (no knocked-out state), and sloops race in to contest when the frigates are gone
-status: asked
+status: playtest
 asked: 15 Nov
 updated: 15 Nov
 ---
@@ -10,3 +10,4 @@ updated: 15 Nov
 ## Log
 
 - 15 Nov: added.
+- 15 Nov: for you to playtest
