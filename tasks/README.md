@@ -83,3 +83,11 @@ and what was dropped said in the old card's last note; the old card then `done`,
 went, so nothing's lost. A decision made on the way (dropped for good, not just not yet) goes into the document it
 belongs in. The inbox's sorter and the card updates (`tools/inbox-triage.md`, `tools/card-update.md`) split the same
 way.
+
+## What you've sent, and what came of it
+
+Everything you send from the board, an update or something dropped in the inbox, shows at once in a short list in
+the bottom-left corner, and on the card itself, its log and all (the user, 15 Nov: "It makes you nervous. Like, did
+that save? Did it not?"). Its line says "Saved on the card" as soon as it's written, then, once the headless Claude
+is done, what it did in a line ("Set it done: the same as raids."), green, or red if it couldn't; the server's own
+window prints the same line ("all it says is updated ... some one-liner short confirmation"). A line opens its card.

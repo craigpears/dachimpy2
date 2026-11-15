@@ -151,18 +151,54 @@
   panel.addEventListener('click', (e) => { if (e.target.closest('button')) e.target.closest('button').blur(); });
   $('.drop').addEventListener('click', (e) => { if (e.target.closest('button')) e.target.closest('button').blur(); });
 
-  // What's said about a card: logged on it at once, then acted on by a headless Claude; the card's redrawn when it's
-  // finished (watched every few seconds).
+  // What's been sent, and what came of it, in a list in the corner that stays (the user, 15 Nov: "It makes you
+  // nervous. Like, did that save? Did it not?"): each line there at once, "saved" when it's on the card, then what
+  // the headless Claude said it did. A line opens its card.
+  const feed = Object.assign(document.createElement('ol'), { className: 'feed' });
+  document.body.append(feed);
+  function feedLine(id, title, words) {
+    const li = document.createElement('li');
+    li.dataset.id = id;
+    li.innerHTML = '<b></b> <span class="said"></span><span class="what">Saving...</span>';
+    $('b', li).textContent = title;
+    $('.said', li).textContent = '"' + (words.length > 90 ? words.slice(0, 90) + '...' : words) + '"';
+    li.addEventListener('click', () => cardEl(id) && openCard(id));
+    feed.prepend(li);
+    while (feed.children.length > 6) feed.lastElementChild.remove();
+    return li;
+  }
+  const feedSays = (id, text, state) => $$('li', feed).filter((li) => li.dataset.id === id).slice(0, 1).forEach((li) => {
+    $('.what', li).textContent = text; li.className = state || '';
+  });
+  // A card drawn afresh from the server, where it was if it's still in that column.
+  function replaceCard(id, html, status) {
+    const old = cardEl(id), t = document.createElement('template');
+    t.innerHTML = html.trim();
+    const fresh = t.content.firstElementChild;
+    fresh.hidden = old?.hidden ?? false; wire(fresh);
+    if (old && old.dataset.status === status) old.replaceWith(fresh);
+    else { old?.remove(); $(`.col[data-status="${status}"] .list`).prepend(fresh); }
+    count();
+    return fresh;
+  }
+
+  // What's said about a card: logged on it at once (and shown on it, its log and all), then acted on by a headless
+  // Claude; the card's redrawn when it's finished (watched every few seconds).
   async function send(goOn) {
     if (into === box) keepHeard(); // the end of what's being said goes with it, not onto the next card
     const id = open, text = box.value.trim();
     if (!text) { if (goOn) step(1); return; }
     if (!served) { notServed('send updates'); return; }
-    try { await post('/api/update', { id, text }); } catch (e) { served ? tell('Not sent: ' + e.message) : notServed('send updates'); return; }
+    const li = feedLine(id, $('h3', cardEl(id)).textContent, text);
+    let r;
+    try { r = await post('/api/update', { id, text }); } catch (e) {
+      feedSays(id, 'Not saved: ' + (served ? e.message : 'the board isn\'t being served'), 'bad');
+      served ? tell('Not sent: ' + e.message) : notServed('send updates'); return;
+    }
     box.value = ''; fit(box); delete draft[id];
-    cardEl(id)?.classList.add('busy'); watching.add(id);
-    tell('Logged on the card; acting on it now.');
-    if (goOn) step(1); else render();
+    replaceCard(id, r.html, r.status).classList.add('busy'); watching.add(id);
+    feedSays(id, 'Saved on the card. Acting on it...', 'saved');
+    if (open === id) { if (goOn) step(1); else render(); }
   }
   form.addEventListener('submit', (e) => { e.preventDefault(); send(e.submitter?.name === 'on'); });
   // Something that isn't about this card, thought of while going through: the same box, into the inbox instead.
@@ -174,15 +210,10 @@
         const c = await (await fetch('/api/card?id=' + encodeURIComponent(id))).json();
         if (c.busy) continue;
         watching.delete(id);
-        const old = cardEl(id), t = document.createElement('template');
-        t.innerHTML = c.html.trim();
-        const fresh = t.content.firstElementChild;
-        fresh.hidden = old?.hidden ?? false; wire(fresh);
-        old?.remove();
-        $(`.col[data-status="${c.status}"] .list`).prepend(fresh);
-        count();
+        if (!c.id) { feedSays(id, 'Done (the card was moved or renamed: reload to see it).', 'done'); continue; }
+        replaceCard(id, c.html, c.status);
+        feedSays(id, c.did || 'Done.', /^(couldn't|it failed|did nothing)/.test(c.did || '') ? 'bad' : 'done');
         if (open === id) render();
-        else tell(`Updated: ${$('h3', fresh).textContent}`);
       } catch (e) {}
     }
   }, 3000);
@@ -296,7 +327,6 @@
   // mic on, something half written), when it says so instead.
   const drop = $('.drop'), sorting = $('.sorting', drop);
   [box, drop.text].forEach((t) => t.addEventListener('input', () => fit(t)));
-  const busyHere = () => !panel.hidden || !!rec || !!drop.text.value.trim();
   async function dropIt(from = drop.text) {
     if (into === from) keepHeard();
     const text = from.value.trim();
@@ -306,8 +336,9 @@
     try { id = (await post('/api/inbox', { text })).id; } catch (err) { served ? tell('Not dropped in: ' + err.message) : notServed('drop things in'); return; }
     from.value = ''; fit(from);
     if (from === box && open) delete draft[open];
-    sorting.hidden = false; sorting.textContent = 'In the inbox. Sorting it...';
-    tell('In the inbox. Sorting it...');
+    feedLine(id, 'Inbox', text);
+    feedSays(id, 'In the inbox. Sorting it...', 'saved');
+    sorting.hidden = true;
     const started = Date.now();
     const watch = setInterval(async () => {
       try {
@@ -315,11 +346,10 @@
         const last = (c.log || '').split('\n').pop().replace(/^- /, '');
         if (!c.busy && (c.status !== 'inbox' || /left in the inbox|failed|couldn't start/.test(last))) {
           clearInterval(watch);
-          if (busyHere()) {
-            sorting.replaceChildren(last + ' ', Object.assign(document.createElement('a'), { href: location.href, textContent: 'Reload to see it on the board' }));
-            tell('Sorted: ' + last);
-          } else { sorting.textContent = last; setTimeout(() => location.reload(), 2500); }
-        } else if (Date.now() - started > 10 * 60e3) { clearInterval(watch); sorting.textContent = 'Still sorting; it will be on the board when you reload.'; }
+          replaceCard(id, c.html, c.status);
+          // (what it made elsewhere shows on a reload: offered, never forced, so this list and your place stay)
+          feedSays(id, (c.did || last) + ' Reload to see it on the board.', c.status === 'inbox' ? 'bad' : 'done');
+        } else if (Date.now() - started > 10 * 60e3) { clearInterval(watch); feedSays(id, 'Still sorting; it will be on the board when you reload.', 'saved'); }
       } catch (err) {}
     }, 3000);
   }

@@ -214,6 +214,16 @@ export function board({ streams, cards }, when = new Date()) {
   @media (min-width: 900px) { .panel { width: min(560px, 45vw); } body.reading { padding-right: min(560px, 45vw); } }
   .update .hint { flex-basis: 100%; color: var(--faint); font-size: 12px; }
   .heard { flex: 1 1 200px; align-self: center; color: var(--accent-text); font-size: 13px; font-style: italic; }
+  .feed { position: fixed; left: 16px; bottom: 16px; width: min(380px, calc(100% - 32px)); margin: 0; padding: 0; list-style: none; z-index: 15; display: flex; flex-direction: column; gap: 4px; }
+  .feed li { background: var(--tile); border: 1px solid var(--edge); border-left: 3px solid var(--faint); border-radius: 6px; padding: 5px 9px; font-size: 12.5px; color: var(--dim); cursor: pointer; box-shadow: 0 2px 8px rgb(0 0 0 / .25); }
+  .feed li b { color: var(--text); font-weight: 600; }
+  .feed li .said { font-style: italic; }
+  .feed li .what { display: block; margin-top: 2px; color: var(--text); }
+  .feed li.saved { border-left-color: var(--accent); }
+  .feed li.done { border-left-color: #3fa66b; }
+  .feed li.bad { border-left-color: #e5484d; }
+  .feed li:nth-child(n+4) { opacity: .65; }
+  .feed:empty { display: none; }
   .wave { width: 120px; height: 18px; align-self: center; color: #e5484d; }
   .update textarea { min-height: 9em; max-height: 45vh; }
   .drop textarea { min-height: 3.2em; max-height: 40vh; }
@@ -348,8 +358,20 @@ export function triage(card, run = spawn) {
     const now = load().cards.find((x) => x.id === card.id);
     if (now && now.meta.status === 'inbox') change(load().cards, card.id, undefined, { note: why ? `sorting ${why}` : `left in the inbox: ${out.trim().slice(-300)}` });
     drawBoard();
-    console.log(`sorted ${card.id}`);
+    did.set(card.id, why ? `couldn't: ${why}` : summary(out));
+    console.log(`sorted ${card.id}: ${did.get(card.id)}`);
   }, run);
+}
+
+/** What each run said it did, in a line, kept for the board to show beside the card (the user, 15 Nov: "it would be
+ *  good to just have some one-liner short confirmation of like, what's it done with it?"). */
+export const did = new Map();
+/** A run's last words, in a line: all of them if they're short, else their first line. */
+export function summary(out) {
+  const all = String(out ?? '').replace(/\s+/g, ' ').trim();
+  if (all.length <= 200) return all || 'done';
+  const first = String(out).trim().split('\n').find((l) => l.trim()) ?? '';
+  return first.replace(/\s+/g, ' ').trim().slice(0, 200);
 }
 
 /** What the user said about a card as they went through the board: logged on it straight away, in their words, then
@@ -369,7 +391,8 @@ function act(c, words, run) {
     if (!why && now && now.body.trim().endsWith(`you said: "${words}"`)) why = `did nothing: ${out.trim().slice(-300)}`;
     if (why && now) change(load().cards, c.id, undefined, { note: `acting on it ${why}` }); // (gone? moved while it ran)
     drawBoard();
-    console.log(`updated ${c.id}${why ? ': ' + why : ''}`);
+    did.set(c.id, why || summary(out));
+    console.log(`updated ${c.id}: ${did.get(c.id)}`);
   }, run);
 }
 
@@ -431,7 +454,7 @@ export function serve(port = PORT, { pickUp = true } = {}) {
         try {
           const { id, text } = JSON.parse(data);
           const c = update(load().cards, String(id), text);
-          res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ id: c.id }));
+          res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ id: c.id, status: c.meta.status, html: cardHtml(c, load().streams) })); // the card as it is now, what you said on it
         } catch (e) { res.writeHead(400, { 'content-type': 'text/plain' }).end(e.message); }
       });
       return;
@@ -439,7 +462,7 @@ export function serve(port = PORT, { pickUp = true } = {}) {
     if (req.method === 'GET' && url.pathname === '/api/card') {
       const all = load(), c = all.cards.find((x) => x.id === url.searchParams.get('id'));
       res.writeHead(c ? 200 : 404, { 'content-type': 'application/json', 'cache-control': 'no-store' })
-        .end(JSON.stringify(c ? { id: c.id, status: c.meta.status, log: c.body.split('## Log')[1]?.trim() ?? '', busy: busy.has(c.id), html: cardHtml(c, all.streams) } : {}));
+        .end(JSON.stringify(c ? { id: c.id, status: c.meta.status, log: c.body.split('## Log')[1]?.trim() ?? '', busy: busy.has(c.id), did: did.get(c.id) ?? '', html: cardHtml(c, all.streams) } : {}));
       return;
     }
     if (req.method !== 'GET') { res.writeHead(405).end(); return; }

@@ -33,7 +33,7 @@ on and dictating into here about what the updated status of each thing is.")
    - **A design decision or a rule**: written into the document it belongs in (RACE.md, STORY.md, RULES.md,
      DISTILLING.md; never design.html), dated, their words quoted, then `note` it on the card.
    - **A question, or something you can't tell**: `note {{id}} "to ask: <what's unclear>"` and leave the rest.
-3. Finish with one line saying what you did.
+3. Finish with a single short line, under 25 words, saying what you did ("Set it done: the same as <id>."), and nothing after it: it's shown on the board.
 
 Rules: their words kept (quoted, lightly trimmed), plain English, pirate names only (CLAUDE.md). Cards only through
 `node tools/task.mjs`, never edited by hand; don't log their words again, they're logged. Edit only the documents
