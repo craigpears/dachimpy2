@@ -30,6 +30,12 @@ export const STRATEGIES = {
         { name: 'Run for the middle', order: { kind: 'middle' }, says: 'in by the side ways\' winds, to hold the heart\'s buoys' },
         { name: 'Hold the outside', order: { kind: 'outside' }, says: 'hold the buoys out on the open sea' },
     ],
+    brig: [
+        { name: 'Their own choice', order: { kind: 'free' }, says: 'each picks for herself: the islands\' buoys, sloops to fight' },
+        { name: 'Hold the outside', order: { kind: 'outside' }, says: 'hold the buoys round the islands, her craft spreading her further' },
+        { name: 'Run for the middle', order: { kind: 'middle' }, says: 'in by a gate, under its guns, to hold the heart\'s buoys' },
+        { name: 'Hunt their frigates', order: { kind: 'frigates' }, says: 'after the enemy frigates, her craft with her' },
+    ],
     frigate: [
         { name: 'Their own choice', order: { kind: 'free' }, says: 'each picks for herself' },
         { name: 'Rush the middle', order: { kind: 'rush' }, says: 'shoot a tower down and charge in under the guns' },

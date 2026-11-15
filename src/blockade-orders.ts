@@ -29,12 +29,18 @@ export type Order = { kind: 'free' } | { kind: 'hold'; buoy: number } | { kind: 
   | { kind: 'middle' } | { kind: 'outside' } | { kind: 'rush' } | { kind: 'siege' } | { kind: 'frigates' } | { kind: 'sinks' };
 
 /** The admiral's strategies, a handful for each kind of ship: what each is called, and the order it gives her. */
-export const STRATEGIES: Record<'sloop' | 'frigate', { name: string; order: Order; says: string }[]> = {
+export const STRATEGIES: Record<'sloop' | 'brig' | 'frigate', { name: string; order: Order; says: string }[]> = {
   sloop: [
     { name: 'Their own choice', order: { kind: 'free' }, says: 'each picks for herself' },
     { name: 'Hide and snipe', order: { kind: 'snipe' }, says: 'hide in the coves, dart out at the enemy frigates\' ends' },
     { name: 'Run for the middle', order: { kind: 'middle' }, says: 'in by the side ways\' winds, to hold the heart\'s buoys' },
     { name: 'Hold the outside', order: { kind: 'outside' }, says: 'hold the buoys out on the open sea' },
+  ],
+  brig: [
+    { name: 'Their own choice', order: { kind: 'free' }, says: 'each picks for herself: the islands\' buoys, sloops to fight' },
+    { name: 'Hold the outside', order: { kind: 'outside' }, says: 'hold the buoys round the islands, her craft spreading her further' },
+    { name: 'Run for the middle', order: { kind: 'middle' }, says: 'in by a gate, under its guns, to hold the heart\'s buoys' },
+    { name: 'Hunt their frigates', order: { kind: 'frigates' }, says: 'after the enemy frigates, her craft with her' },
   ],
   frigate: [
     { name: 'Their own choice', order: { kind: 'free' }, says: 'each picks for herself' },

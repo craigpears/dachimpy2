@@ -23,6 +23,13 @@
      can really get to on those fast little winds");
    - islands out on the open sea, each with a cove in it a sloop can hide in, one square in by a narrow way no
      frigate fits, its rocks between her and anyone's guns;
+   - a war brig a side between them (src/den-brig.ts; the user, 15 Nov: "a middle ship class, so it's not a big
+     [brawling] fighter ... medium cannonballs ... but it can spawn ... haunted sloops that ... hang around for a set
+     number of turns"; "the Atlantean ... sends out little [tritons] and turtles to go and ram the enemy ships"): medium
+     guns, a square a move, and every so often her little craft launched off her sides (launch): Dachimpy's Tidecaller,
+     an Atlantean, sends out turtles that make for the nearest enemy and ram her, gone as they strike; Dalnoth's Grave
+     Lantern, a haunted brig, sends out ghost sloops that sail and fight and hold buoys as a sloop does, and fade a
+     while later. Sunk or faded, a craft's back aboard her brig till she launches again;
    - every ship's damage as Puzzle Pirates keeps it (src/ship-damage.ts): holes where she's shot, water in her
      bilge slowing her, her crew patching and pumping; at full damage she's knocked out, dead in the water, till
      they've rebuilt her; shot on while she's out, she sinks, and comes back a while later from her side's own edge
@@ -30,24 +37,29 @@
      we've got to get back in there again. And that sense of working your way back in would be lost if you can't
      [sink] at all"). */
 import type { Move, Pose, SailEvent } from './den-sail.js';
-import { ShipSea, ShipHelm, Guns, broadside, squares, SLOOP_HANDLING, FRIGATE_HANDLING, type Handling, type Side, type Shot } from './ship-handling.js';
+import { ShipSea, ShipHelm, Guns, broadside, squares, SLOOP_HANDLING, FRIGATE_HANDLING, BRIG_HANDLING, type Handling, type Side, type Shot } from './ship-handling.js';
 import { HullChart } from './hull-chart.js';
-import { SLOOP, WAR_FRIGATE, type ShipClass } from './ships.js';
+import { SLOOP, WAR_FRIGATE, WAR_BRIG, type ShipClass } from './ships.js';
 import { Gate } from './imperial-gate.js';
 import { Turret, type TurretEvent } from './den-turret.js';
 import { Damage, struck, type Hole, type DamageEvent } from './ship-damage.js';
 
 const key = (c: number, r: number) => `${c},${r}`;
 
-export type Kind = 'sloop' | 'frigate';
+export type Kind = 'sloop' | 'brig' | 'frigate';
+/** What a brig launches: ghost sloops (a haunted brig's), or sea turtles that ram (an Atlantean's). */
+export type CraftKind = 'ghost' | 'ram';
+/** A brig's craft: whose (her brig's id), what she is, and her seconds left before she fades. */
+export interface Craft { by: number; kind: CraftKind; life: number }
 export type TeamId = 'gold' | 'crimson';
 export interface Lane { at: [number, number]; d: number; n: number }
 export interface Buoy { at: [number, number]; pennants: 1 | 2 | 3 }
 export interface Rect { c0: number; c1: number; r0: number; r1: number }
 /** An island: its land, and the cove in it (`cove`, the square a sloop hides on, open to the sea by `way`). */
 export interface Island extends Rect { cove: [number, number]; way: [number, number][] }
-/** A ship of a side's fleet: her name, kind, where she comes in, and (a sloop) whether her bot's a raider. */
-export interface FleetShip { name: string; kind: Kind; at: Pose; raider?: boolean }
+/** A ship of a side's fleet: her name, kind, where she comes in, (a sloop) whether her bot's a raider, and (a brig)
+    what she launches. */
+export interface FleetShip { name: string; kind: Kind; at: Pose; raider?: boolean; craft?: CraftKind }
 
 /** The board (c across, r up from the south edge). */
 export const BLOCKADE = {
@@ -98,7 +110,16 @@ export const BLOCKADE = {
   ] as Buoy[],
   /** Squares from any of her squares a ship's influence reaches, by her size (YPPedia: "different sized ships
       have different sized influence circles"). */
-  INFLUENCE: { sloop: 2, frigate: 3.5 } as Record<Kind, number>,
+  INFLUENCE: { sloop: 2, brig: 2.75, frigate: 3.5 } as Record<Kind, number>,
+  /** A brig's craft: seconds between her launches, how many she launches, their names, seconds each lasts before she
+      fades (a ghost sloop's "a set number of turns", four blockade turns), and a turtle's ram, as so many hits of a gun
+      that size where she strikes. */
+  LAUNCH: {
+    EVERY: 30,
+    CRAFT: { ghost: ['Wisp', 'Shade'], ram: ['Snapper', 'Old Shell', 'Barnacle'] } as Record<CraftKind, string[]>,
+    LIFE: { ghost: 40, ram: 30 } as Record<CraftKind, number>,
+    RAM: { gun: 'large' as const, hits: 2 },
+  },
   /** Seconds a blockade turn, scored at its end, and a round. */
   TURN: 10,
   ROUND: 360,
@@ -113,6 +134,7 @@ export const BLOCKADE = {
       { name: 'Cheeky Monkey', kind: 'sloop', at: { c: 24, r: 1, d: 0 } },
       { name: 'Bananarama', kind: 'sloop', at: { c: 1, r: 21, d: 1 }, raider: true },
       { name: 'Coconut Shy', kind: 'sloop', at: { c: 1, r: 10, d: 1 } },
+      { name: 'Tidecaller', kind: 'brig', at: { c: 9, r: 1, d: 0 }, craft: 'ram' },
     ] },
     { id: 'crimson', name: 'Dalnoth\'s flag', ships: [
       { name: 'Iron Pride', kind: 'frigate', at: { c: 14, r: 33, d: 2 } },
@@ -123,6 +145,7 @@ export const BLOCKADE = {
       { name: 'Scarlet Fever', kind: 'sloop', at: { c: 23, r: 34, d: 2 } },
       { name: 'Blood Orange', kind: 'sloop', at: { c: 42, r: 14, d: 3 }, raider: true },
       { name: 'Rust Bucket', kind: 'sloop', at: { c: 42, r: 26, d: 3 } },
+      { name: 'Grave Lantern', kind: 'brig', at: { c: 35, r: 34, d: 2 }, craft: 'ghost' },
     ] },
   ] as { id: TeamId; name: string; ships: FleetShip[] }[],
   /** How near (squares) a ship has to be to another for her moving to make the other's pilot think again. */
@@ -143,8 +166,10 @@ export const BLOCKADE = {
   BRAWL: [{ name: 'Primates Rule', at: { c: 7, r: 10, d: 1 } }, { name: 'Iron Pride', at: { c: 7, r: 14, d: 1 } }] as { name: string; at: Pose }[],
 };
 
-const HANDLINGS: Record<Kind, Handling> = { sloop: SLOOP_HANDLING, frigate: FRIGATE_HANDLING };
-const CLASSES: Record<Kind, ShipClass> = { sloop: SLOOP, frigate: WAR_FRIGATE };
+const HANDLINGS: Record<Kind, Handling> = { sloop: SLOOP_HANDLING, brig: BRIG_HANDLING, frigate: FRIGATE_HANDLING };
+const CLASSES: Record<Kind, ShipClass> = { sloop: SLOOP, brig: WAR_BRIG, frigate: WAR_FRIGATE };
+/** A brig's sea turtle: a sloop's size on the board, no guns, a couple of small shots and she's gone. */
+export const SEA_TURTLE: ShipClass = { ...SLOOP, name: 'Sea turtle', crew: 1, minCrew: 1, guns: 0, mainDeckGuns: 0, stations: { nav: 1, sailing: 0, carpentry: 0, bilge: 0, gunnery: 0 } };
 const inRect = (x: Rect, c: number, r: number) => c >= x.c0 && c <= x.c1 && r >= x.r0 && r <= x.r1;
 /** A square in the heart. */
 export const inHeart = (c: number, r: number): boolean => inRect(BLOCKADE.HEART, c, r);
@@ -162,9 +187,16 @@ export interface Ship {
   sea: ShipSea; helm: ShipHelm; guns: Guns; dmg: Damage;
   /** Where she came in at the start (and comes back in after she's sunk). */
   start: Pose;
-  /** Sunk: seconds till she's back (0 on the board). Off the board meanwhile: in nobody's way, no influence. */
+  /** Sunk: seconds till she's back (0 on the board). Off the board meanwhile: in nobody's way, no influence. A brig's
+      craft not launched: Infinity. */
   away: number;
+  /** A brig's craft: whose, what, and how long she's left (src/blockade.ts, LAUNCH). */
+  craft?: Craft;
+  /** A brig: when she last launched her craft. */
+  launched: number;
 }
+/** A turtle's ram: the turtle, the ship she rammed, the square she struck, its holes, and whether she sank her. */
+export interface Rammed { ram: number; on: number; at: [number, number]; holes: Hole[]; sunk: boolean }
 
 /** What a broadside stopped at: a rock, a gate's tower (which gate, which tower), one of the gates' guns, or a ship. */
 export type Stop = { what: 'rock' } | { what: 'tower'; g: number; i: number } | { what: 'gun'; i: number } | { what: 'ship'; id: number };
@@ -172,7 +204,7 @@ export interface FiredShot extends Shot<Stop> { got?: 'hit' | 'crumbled' | 'boun
 export interface Fired { ship: number; side: Side; shots: FiredShot[] }
 /** A buoy's state just now: whose (the one side influencing it), contested, or nobody's. */
 export type Hold = TeamId | 'contested' | null;
-export type Ticked = { sail: Map<number, SailEvent[]>; damage: Map<number, DamageEvent[]>; guns: { gun: number; e: TurretEvent; hit: number | null; hole?: Hole; sunk?: boolean }[]; scored: boolean; returned: number[] };
+export type Ticked = { sail: Map<number, SailEvent[]>; damage: Map<number, DamageEvent[]>; guns: { gun: number; e: TurretEvent; hit: number | null; hole?: Hole; sunk?: boolean }[]; scored: boolean; returned: number[]; faded: number[]; rams: Rammed[] };
 
 export class Blockade {
   rocks = new Set<string>();
@@ -189,6 +221,8 @@ export class Blockade {
   over = false;
   /** Every broadside fired since whoever draws them last took them (anyone's: a bot's or yours). */
   fired: Fired[] = [];
+  /** Every launch of a brig's craft, and every turtle's ram, since whoever draws them last took them. */
+  launches: { by: number; ids: number[] }[] = [];
   private seen = new Map<number, string>();
   /** Each square a ship covers just now, and whose (kept as they move: notice). */
   private taken = new Map<string, number>();
@@ -212,7 +246,20 @@ export class Blockade {
       if (s.kind === 'sloop') sea.carriedBy(this.wind);
       sea.chart = this.charts[s.kind] ??= new HullChart(sea.bare());
       sea.near = B.IN_WAY;
-      this.ships.push({ id: me, name: s.name, team: team.id, kind: s.kind, h, cls: CLASSES[s.kind], raider: !!s.raider, sea, helm: new ShipHelm(sea, { ...s.at }), guns: new Guns(h.reload), dmg: new Damage(CLASSES[s.kind]), start: { ...s.at }, away: 0 });
+      this.ships.push({ id: me, name: s.name, team: team.id, kind: s.kind, h, cls: CLASSES[s.kind], raider: !!s.raider, sea, helm: new ShipHelm(sea, { ...s.at }), guns: new Guns(h.reload), dmg: new Damage(CLASSES[s.kind]), start: { ...s.at }, away: 0, launched: -Infinity });
+    }
+    // (each brig's craft, aboard her till she launches them: after every fleet's ships, so theirs keep their ids)
+    for (const team of B.TEAMS) for (const f of team.ships) {
+      if (!f.craft) continue;
+      const by = this.ships.find((x) => x.name === f.name)!;
+      for (const name of B.LAUNCH.CRAFT[f.craft]) {
+        const me = id++, cls = f.craft === 'ram' ? SEA_TURTLE : SLOOP;
+        const sea = new ShipSea(SLOOP_HANDLING, B.COLS, B.ROWS, this.rocks, (c, r) => { const o = this.taken.get(key(c, r)); return o !== undefined && o !== me; });
+        sea.carriedBy(this.wind);
+        sea.chart = this.charts.sloop ??= new HullChart(sea.bare());
+        sea.near = B.IN_WAY;
+        this.ships.push({ id: me, name, team: team.id, kind: 'sloop', h: SLOOP_HANDLING, cls, raider: false, sea, helm: new ShipHelm(sea, { ...by.start }), guns: new Guns(SLOOP_HANDLING.reload), dmg: new Damage(cls), start: { ...by.start }, away: Infinity, craft: { by: by.id, kind: f.craft, life: 0 }, launched: -Infinity });
+      }
     }
     // (the charts worked out now, while the board's being set up, rather than on the first move)
     for (const c of Object.values(this.charts)) c.fresh();
@@ -229,15 +276,18 @@ export class Blockade {
 
   /** Everything a tick on: each ship's helm and crew, the gates' guns, the blockade turn's scoring. */
   tick(dt: number): Ticked {
-    const out: Ticked = { sail: new Map(), damage: new Map(), guns: [], scored: false, returned: [] };
+    const out: Ticked = { sail: new Map(), damage: new Map(), guns: [], scored: false, returned: [], faded: [], rams: [] };
     if (this.over) return out;
     for (const s of this.ships) {
       // (sunk: back where she came in once her time's up and nobody's lying there)
       if (s.away > 0) {
+        if (s.craft) continue;   // (aboard her brig, till she's launched)
         if ((s.away -= dt) <= 0 && !this.comeBack(s)) s.away = 0.5;
         if (s.away <= 0) out.returned.push(s.id);
         continue;
       }
+      // (a craft's time up, or her brig gone down: she fades)
+      if (s.craft && ((s.craft.life -= dt) <= 0 || this.ships[s.craft.by].away > 0)) { this.aboard(s); out.faded.push(s.id); continue; }
       const ev = s.dmg.tick(dt);
       if (ev.some((e) => e.kind === 'back')) s.helm.hole = null;
       s.sea.drag = s.dmg.drag();
@@ -245,6 +295,17 @@ export class Blockade {
       out.sail.set(s.id, s.helm.tick(dt));
       s.guns.tick(dt);
       this.notice();
+    }
+    // (a turtle beside an enemy rams her: her holes where she struck, and the turtle's gone)
+    for (const s of this.ships) {
+      if (s.craft?.kind !== 'ram' || s.away > 0 || s.dmg.out) continue;
+      const hit = this.besideFoe(s);
+      if (!hit) continue;
+      const { o, at } = hit, from: [number, number] = [s.helm.pose.c, s.helm.pose.r], holes: Hole[] = [];
+      let sunk = false;
+      for (let i = 0; i < BLOCKADE.LAUNCH.RAM.hits && !sunk && o.away <= 0; i++) { const got = this.hurt(o, BLOCKADE.LAUNCH.RAM.gun, at, from); holes.push(got.hole); sunk = got.sunk; }
+      this.aboard(s);
+      out.rams.push({ ram: s.id, on: o.id, at, holes, sunk });
     }
     // (every square a ship's on, read once for all the guns)
     const on = [...this.taken].map(([k, id]) => { const [c, r] = k.split(',').map(Number); return { c, r, id }; });
@@ -298,7 +359,7 @@ export class Blockade {
 
   /** A ship's influence reaches this buoy: within her circle of any square of hers, and she's not knocked out. */
   reaches(s: Ship, b: Buoy): boolean {
-    if (s.dmg.out || s.away > 0) return false;
+    if (s.dmg.out || s.away > 0 || s.craft?.kind === 'ram') return false;
     const R = BLOCKADE.INFLUENCE[s.kind];
     return squares(s.h, s.helm.pose).some(([c, r]) => Math.hypot(c - b.at[0], r - b.at[1]) <= R + 1e-9);
   }
@@ -336,15 +397,67 @@ export class Blockade {
   private hurt(s: Ship, gun: Handling['guns'], at: [number, number], from: [number, number]): { hole: Hole; out: boolean; sunk: boolean } {
     const where = struck(s.helm.pose, s.h.long, at, from), got = s.dmg.hit(gun, where.along, where.side, BLOCKADE.SINKING);
     if (got.out) s.helm.hit();   // (dead in the water: held till she's rebuilt)
-    if (got.sunk) this.sink(s);
+    // (a brig's craft knocked out goes down at once)
+    if (got.sunk || (s.craft && got.out)) { this.sink(s); return { ...got, sunk: true }; }
     return got;
   }
-  /** She's gone down: off the board till she comes back (comeBack), in nobody's way meanwhile. */
+  /** She's gone down: off the board till she comes back (comeBack), in nobody's way meanwhile; a brig's craft, back
+      aboard her brig. */
   sink(s: Ship) {
+    if (s.craft) { this.aboard(s); return; }
     s.away = BLOCKADE.RETURN;
     s.helm.moor(s.helm.pose);
     s.helm.hole = null;
     this.notice();
+  }
+  /** A brig's craft back aboard her (faded, sunk, or rammed home): off the board till she's launched again. */
+  private aboard(s: Ship) {
+    s.away = Infinity; s.craft!.life = 0;
+    s.helm.moor(s.helm.pose); s.helm.hole = null;
+    this.notice();
+  }
+
+  /** A brig's craft still aboard her. */
+  craftOf(brig: Ship): Ship[] { return this.ships.filter((x) => x.craft?.by === brig.id); }
+  /** She can launch: a brig afloat and in action, her time since her last launch up, and her craft all aboard. */
+  canLaunch(s: Ship): boolean {
+    const craft = this.craftOf(s);
+    return s.kind === 'brig' && s.away <= 0 && !s.dmg.out && this.clock - s.launched >= BLOCKADE.LAUNCH.EVERY && craft.length > 0 && craft.every((x) => x.away > 0);
+  }
+  /** A brig launches her craft off her sides (port and starboard by each of her squares, then off her bow and her
+      stern), each heading as she is, refitted, for her LIFE: their ids (none, if she can't). */
+  launch(id: number): number[] {
+    const s = this.ship(id);
+    if (!this.canLaunch(s)) return [];
+    this.notice();
+    const p = s.helm.pose, DC = [0, 1, 0, -1], DR = [1, 0, -1, 0], sd = (p.d + 1) % 4, mine = squares(s.h, p), al = mine.length;
+    const spots: [number, number][] = [];
+    for (const [c, r] of mine) for (const k of [1, -1]) spots.push([c + DC[sd] * k, r + DR[sd] * k]);
+    const [bc, br] = mine[0], [sc, sr] = mine[al - 1];
+    spots.push([bc + DC[p.d], br + DR[p.d]], [sc - DC[p.d], sr - DR[p.d]]);
+    const out: number[] = [];
+    for (const x of this.craftOf(s)) {
+      const at = spots.find(([c, r]) => x.sea.bare().fits({ c, r, d: p.d }) && !this.taken.has(key(c, r)));
+      if (!at) break;
+      spots.splice(spots.indexOf(at), 1);
+      x.dmg.refit(); x.sea.drag = 1; x.sea.exact = null;
+      x.helm.moor({ c: at[0], r: at[1], d: p.d }); x.helm.hole = null;
+      x.guns.wait = { L: 0, R: 0 };
+      x.away = 0; x.craft!.life = BLOCKADE.LAUNCH.LIFE[x.craft!.kind];
+      this.taken.set(key(...at), x.id);
+      out.push(x.id);
+    }
+    if (out.length) { s.launched = this.clock; this.launches.push({ by: id, ids: out }); this.notice(); }
+    return out;
+  }
+  /** An enemy beside a turtle (on a square next to hers, diagonals too), and the square of hers it's on. */
+  private besideFoe(s: Ship): { o: Ship; at: [number, number] } | null {
+    const { c, r } = s.helm.pose;
+    for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
+      const o = this.under(c + dc, r + dr);
+      if (o && o !== s && o.team !== s.team && o.away <= 0) return { o, at: [c + dc, r + dr] };
+    }
+    return null;
   }
   /** Back where she came in, refitted, if nobody's lying there: whether she is. */
   private comeBack(s: Ship): boolean {

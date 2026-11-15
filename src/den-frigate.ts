@@ -37,8 +37,8 @@ export interface Plan {
   stripes: { at: [number, number]; h: number };
   /** Her gun ports, two rows a side, each in the middle of its band of black (portRows): how many in
       each, their size, from and to along her. The upper row is the gun deck's (her 12 guns below);
-      the lower, staggered, shut. */
-  ports: { each: number; size: number; from: number; to: number };
+      the lower, staggered, shut. `rows` 1: the upper only (a brig's: src/den-brig.ts). */
+  ports: { each: number; size: number; from: number; to: number; rows?: 1 };
   masts: Mast[];
   /** The ship's wheel, on the quarterdeck. */
   helm: { x: number };
@@ -46,6 +46,10 @@ export interface Plan {
   stairs: { quarter: { len: number }; fore: { len: number; w: number } };
   /** Hatches in the main deck, down to the gun deck. */
   hatches: { x: number; z: number; w: number }[];
+  /** A smaller ship's few fixed sizes at her stern and bow, where they differ from a war frigate's (js/den/frigate.js):
+      her cabin's windows along her (x), her stern windows and taffrail lanterns across it (z), her name plate's width,
+      her bowsprit's length as a share of the frigate's. */
+  stern?: { cabin?: number[]; windows?: number[]; lanterns?: number[]; plate?: number; sprit?: number };
 }
 
 /** A war frigate's hull, from the sloop's by YPPedia's numbers. */

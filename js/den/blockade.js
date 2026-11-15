@@ -2,7 +2,8 @@
 // src/blockade-bots.ts; BLOCKADE.md). Drawn here: the board's squares faintly, its rocks, the fort round the heart,
 // its imperial gates (gate-look.js) and their bastion guns, the islands and their coves, the winds blowing in through
 // the side ways, the buoys (their pennants, coloured by whose they are), every ship (each war frigate by her config,
-// src/den-frigate.ts: Primates Rule, Coral Throne the Atlantean, Eldritch Wail the ghost ship...; the sloops) with
+// src/den-frigate.ts: Primates Rule, Coral Throne the Atlantean, Eldritch Wail the ghost ship...; each war brig by
+// hers, src/den-brig.ts; the sloops; a brig's craft, sea-craft.js, launched off her sides and fading) with
 // her crew at work and her name over her, her influence circle on the water and her damage (ship-damage.js: holes where
 // she's shot, her crew at work, sitting low, dead in the water), the shots between them, and the pin, berth and
 // course of the ship you sail. Everything else is the rules'.
@@ -13,6 +14,7 @@ import { Bots } from '../blockade-bots.js';
 import { FREE, STRATEGIES, orderAt, orderText, orderTarget } from '../blockade-orders.js';
 import { drawnAt } from '../ship-handling.js';
 import { FRIGATES, WAR_FRIGATE_PLAN, deckY } from '../den-frigate.js';
+import { BRIGS, WAR_BRIG_PLAN } from '../den-brig.js';
 import { SLOOP_HULL } from '../ships.js';
 import { scene, mat, mesh, canvasTex, burst, makePirate } from './world.js';
 import { blastTick } from './blast.js';
@@ -21,6 +23,7 @@ import { gateLook } from './gate-look.js';
 import { damageLook } from './ship-damage.js';
 import { frigateMesh } from './frigate.js';
 import { sloopMesh, SLOOP_DECK } from './sloop.js';
+import { turtleMesh, ghostSloopMesh } from './sea-craft.js';
 
 const CELL = SAIL.CELL, B = BLOCKADE;
 export const TEAM_COL = { gold: '#e0a92a', crimson: '#c8372a' };
@@ -122,17 +125,25 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
   });
 
   // ----- the ships: each her own look, her name, her influence circle, her crew and her damage -----
+  // (a turtle's damage isn't drawn on her: two hits and she's gone)
+  const NO_DAMAGE = { tick: () => ({ low: 0, list: 0, turn: 0 }), reset() {} };
   const ships = b.ships.map((s) => {
-    const big = s.kind === 'frigate', look = big ? frigateMesh(FRIGATES[s.name] ?? FRIGATES['Primates Rule']) : null, m = big ? look.g : sloopMesh(), col = TEAM_COL[s.team];
+    const big = s.kind === 'frigate', brig = s.kind === 'brig', craft = s.craft?.kind, col = TEAM_COL[s.team];
+    const plan = big ? WAR_FRIGATE_PLAN : brig ? WAR_BRIG_PLAN : null;
+    const look = big ? frigateMesh(FRIGATES[s.name] ?? FRIGATES['Primates Rule']) : brig ? frigateMesh(BRIGS[s.name] ?? BRIGS.Tidecaller, WAR_BRIG_PLAN)
+      : craft === 'ram' ? turtleMesh() : craft === 'ghost' ? ghostSloopMesh() : null;
+    const m = look ? look.g : sloopMesh();
     g.add(m);
-    const hull = big ? WAR_FRIGATE_PLAN.hull : SLOOP_HULL, deck = big ? deckY(WAR_FRIGATE_PLAN, 'waist') : SLOOP_DECK;
-    const crew = big
+    const hull = plan ? plan.hull : SLOOP_HULL, deck = plan ? deckY(plan, 'waist') : SLOOP_DECK;
+    const crew = craft ? [] : big
       ? [{ x: -1.4, z: 1.15, job: 'carp' }, { x: 0.1, z: -1.15, job: 'carp' }, { x: 3.1, z: 1.05, job: 'carp' }, { x: -0.3, z: 0.25, job: 'bilge' }, { x: 1.5, z: -0.25, job: 'bilge' }]
-      : [{ x: 0.55, z: 0.35, job: 'carp' }, { x: 0.05, z: -0.35, job: 'bilge' }];
-    const dl = damageLook(m, hull, { deck, crew, dress: DRESS[s.team] });
-    // (her helmsman, at her wheel or tiller)
-    const helm = makePirate(DRESS[s.team]); helm.g.position.set(big ? -hull.len / 2 + 2.4 : -1.15, big ? deckY(WAR_FRIGATE_PLAN, 'quarter') : SLOOP_DECK, 0); helm.g.rotation.y = Math.PI / 2; m.add(helm.g);
+      : brig ? [{ x: -0.4, z: 0.75, job: 'carp' }, { x: 1.9, z: -0.7, job: 'carp' }, { x: 0.9, z: 0.3, job: 'bilge' }]
+        : [{ x: 0.55, z: 0.35, job: 'carp' }, { x: 0.05, z: -0.35, job: 'bilge' }];
+    const dl = craft === 'ram' ? NO_DAMAGE : damageLook(m, hull, { deck, crew, dress: DRESS[s.team] });
+    // (her helmsman, at her wheel or tiller; a craft has none to see)
+    if (!craft) { const helm = makePirate(DRESS[s.team]); helm.g.position.set(plan ? plan.helm.x - 0.6 : -1.15, plan ? deckY(plan, 'quarter') : SLOOP_DECK, 0); helm.g.rotation.y = Math.PI / 2; m.add(helm.g); }
     const name = label(s.name, col); g.add(name);
+    if (craft) name.scale.multiplyScalar(0.7);
     const R = (B.INFLUENCE[s.kind] + (s.h.long - 1) / 2) * CELL;
     const ring = new THREE.Mesh(new THREE.RingGeometry(R - 0.25, R, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.32, depthWrite: false }));
     ring.renderOrder = 2; g.add(ring);
@@ -141,7 +152,9 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     line.visible = false; line.frustumCulled = false; g.add(line);
     const mark = new THREE.Mesh(new THREE.RingGeometry(1.0, 1.5, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.85, depthWrite: false }));
     mark.visible = false; mark.renderOrder = 3; g.add(mark);
-    return { s, m, look, dl, name, ring, line, mark, big, heel: 0, pending: new Set() };
+    // (a craft starts aboard her brig, unseen)
+    if (craft) { m.visible = false; name.visible = false; ring.visible = false; }
+    return { s, m, look, dl, name, ring, line, mark, big, brig, craft, heel: 0, pending: new Set(), fadeT: craft ? 99 : undefined };
   });
 
   // ----- your pin, the block of squares she'll lie on there, her course -----
@@ -156,12 +169,12 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
   const ballGeo = new THREE.SphereGeometry(1, 10, 8), ballM = mat('#1b1a1c', { metalness: 0.5, roughness: 0.4 }), flying = [];
   /** A broadside fired (anyone's, from the rules' list), set flying. */
   function show(got) {
-    const s = b.ship(got.ship), V = ships[got.ship], size = s.h.guns === 'large' ? 0.26 : 0.15;
+    const s = b.ship(got.ship), V = ships[got.ship], size = { large: 0.26, medium: 0.2, small: 0.15 }[s.h.guns];
     const hit = got.shots.find((x) => x.what?.what === 'ship'), tower = got.shots.find((x) => x.what?.what === 'tower' && x.got !== 'bounced');
     saw(got.ship, hit ? 'hit' : tower ? 'gate' : 'fire', hit?.out ? 6 : tower?.got === 'crumbled' ? 6 : hit || tower ? 3 : 1);
     got.shots.forEach((shot, i) => {
       const end = shot.hit ?? shot.cells[shot.cells.length - 1], w = shot.what?.what;
-      const a = v3(...shot.from, V.big ? 2.2 : 1.1), z = v3(...end, w === 'rock' ? 1.2 : w === 'tower' ? 4 : w === 'gun' ? 2.6 : w === 'ship' ? 1 : 0.1);
+      const a = v3(...shot.from, V.big ? 2.2 : V.brig ? 1.6 : 1.1), z = v3(...end, w === 'rock' ? 1.2 : w === 'tower' ? 4 : w === 'gun' ? 2.6 : w === 'ship' ? 1 : 0.1);
       const m = new THREE.Mesh(ballGeo, ballM); m.scale.setScalar(size); m.visible = false; g.add(m);
       if (shot.hole) ships[shot.what.id].pending.add(shot.hole.id);   // (its hole shows when it comes down)
       burst(a, '#ffcf6a', 10, 3); burst(a, '#cfc6b8', 8, 1.5);
@@ -183,13 +196,14 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
 
   /** She's gone down (the rules sank her as the shot was fired; seen as it lands): said, a great splash. */
   function sank(V, z) {
-    say(`${V.s.name} has gone down! She'll be back from her side's edge in ${B.RETURN} seconds`, V.s.id === me);
+    if (V.craft) say(`${V.s.name}, ${b.ship(V.s.craft.by).name}'s ${V.craft === 'ram' ? 'turtle' : 'ghost sloop'}, has gone down`);
+    else say(`${V.s.name} has gone down! She'll be back from her side's edge in ${B.RETURN} seconds`, V.s.id === me);
     saw(V.s.id, 'sunk', 8);
     burst(z.clone().setY(0.2), '#e8f4fa', 30, 6); burst(z.clone().setY(0.2), '#9cc8d4', 18, 4);
     V.sinking = true;
   }
-  /** How long she takes going under, seen. */
-  const SINK_SECS = 5;
+  /** How long she takes going under, seen; and a craft fading, her time up. */
+  const SINK_SECS = 5, FADE_SECS = 1.6;
   const SAY_GUN = { L: 'port', R: 'starboard' };
   /** What's just happened worth a look (for the camera's director, spectating): { at (clock), ship, what, weight }. */
   const action = [];
@@ -213,6 +227,28 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         if (sunk) sank(ships[hit], v3(...e.to));
         if (hit !== null && hit === me) say(`The gate's gun has hit ${b.ship(hit).name}!`, true);
       }
+      // A brig's craft launched off her sides: a splash each, seen; a turtle's ram, a great one where she struck; a
+      // craft's time up, she fades.
+      for (const { by, ids } of b.launches.splice(0)) {
+        for (const id of ids) {
+          const V = ships[id];
+          V.m.visible = V.name.visible = true; V.ring.visible = true; V.fadeT = undefined; V.sinkT = 0; V.sinking = false; V.dl.reset(); V.look?.fade?.(1);
+          const at = drawnAt(V.s.h, V.s.helm.now()), p = v3(at.c, at.r, 0.3);
+          burst(p, V.craft === 'ghost' ? '#9fffd0' : '#e8f4fa', 18, 4);
+        }
+        const brig = b.ship(by), what = ships[ids[0]].craft === 'ram' ? 'her turtles' : 'her ghost sloops';
+        saw(by, 'launch', 5);
+        if (b.ship(by).team === (me >= 0 ? b.ship(me).team : admiral)) say(`${brig.name} launches ${what}`);
+      }
+      for (const r of ev.rams) {
+        const V = ships[r.ram], O = ships[r.on], p = v3(...r.at, 0.6);
+        V.fadeT = 0;
+        burst(p, '#e8f4fa', 26, 6); burst(p, '#7d9a5c', 10, 3); burst(p, '#8a6a44', 10, 4);
+        saw(r.on, 'hit', r.sunk ? 8 : 4);
+        if (r.on === me) say(`${V.s.name} has rammed ${O.s.name}!`, true);
+        if (r.sunk) sank(O, p);
+      }
+      for (const id of ev.faded) ships[id].fadeT = 0;
       if (ev.scored && me >= 0) {
         const mine = b.ship(me).team;
         say(`Turn scored: ${b.score.gold} to ${b.score.crimson}${b.leader() ? `, ${b.leader() === mine ? 'your side' : 'theirs'} ahead` : ''}`);
@@ -236,14 +272,14 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         const s = V.s, h = s.helm, at = drawnAt(s.h, h.now()), turning = h.cur && (h.cur.m === 'L' || h.cur.m === 'R') && !h.cur.bump && h.t < h.cur.secs;
         V.heel += ((turning ? (h.cur.m === 'L' ? -1 : 1) * (V.big ? 0.05 : 0.12) : 0) - V.heel) * Math.min(1, dt * 3);
         // (gone under: nothing more of her drawn, her smoke and crew with her)
-        const under = s.away > 0 && (V.sinkT ?? 0) > SINK_SECS + 0.7, d = under ? { low: 0, list: 0, turn: 0 } : V.dl.tick(dt, s.dmg, { pending: V.pending });
+        const aboard = s.craft && s.away > 0 && !V.sinking, under = s.away > 0 && (aboard || (V.sinkT ?? 0) > SINK_SECS + 0.7), d = under ? { low: 0, list: 0, turn: 0 } : V.dl.tick(dt, s.dmg, { pending: V.pending });
         const [x, z] = seaXZ(at.c, at.r);
         V.m.position.set(x, d.low + Math.sin(clock * (V.big ? 0.8 : 1.1) + s.id) * 0.05, z);
         V.m.rotation.set(V.heel + d.list, Math.PI / 2 - at.a * Math.PI / 2 + d.turn, Math.sin(clock * 0.6 + s.id) * 0.012, 'YXZ');
         V.look?.tick(dt);
-        V.name.position.set(x, V.big ? 16 : 7.5, z);
+        V.name.position.set(x, V.big ? 16 : V.brig ? 10 : V.craft === 'ram' ? 4 : 7.5, z);
         V.name.material.opacity = s.dmg.out ? 0.5 : 1;
-        V.ring.position.set(x, 0.05, z); V.ring.visible = !s.dmg.out;
+        V.ring.position.set(x, 0.05, z); V.ring.visible = !s.dmg.out && V.craft !== 'ram';   // (a turtle holds no buoy)
         V.ring.material.opacity = s.id === me || s.id === picked ? 0.6 : 0.28;
         // (her order's line, the admiral's side's ships)
         const tgt = admiral && s.team === admiral && s.away <= 0 ? orderTarget(b, bots.orderOf(s.id)) : null;
@@ -256,7 +292,14 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         }
         // Sunk: she settles by the stern, bow lifting, and goes under (once the shot that did it has landed); then
         // she's gone till she comes back.
-        if (s.away > 0) {
+        // A craft back aboard her brig (faded, or rammed home): fading out where she was, then gone till she's launched.
+        if (aboard) {
+          V.fadeT = (V.fadeT ?? 99) + dt;
+          const k = Math.max(0, 1 - V.fadeT / FADE_SECS);
+          V.m.visible = k > 0; V.name.visible = false; V.ring.visible = false;
+          V.look?.fade?.(k);
+          if (V.craft === 'ghost' && k > 0 && Math.random() < dt * 8) burst(v3(at.c, at.r, 1), '#bfffe0', 3, 1.5);
+        } else if (s.away > 0) {
           V.sinkT = (V.sinkT ?? 0) + dt;
           const k = Math.max(0, Math.min(1, (V.sinkT - 0.7) / SINK_SECS));
           V.m.visible = k < 1; V.name.visible = false; V.ring.visible = false;
@@ -334,7 +377,8 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     strategies: STRATEGIES,
     strategy(kind, i) {
       const st = STRATEGIES[kind][i];
-      for (const s of b.ships) if (s.team === admiral && s.kind === kind) bots.order(s.id, st.order);
+      // (a brig's craft as her own bots have them: they've only a while)
+      for (const s of b.ships) if (s.team === admiral && s.kind === kind && !s.craft) bots.order(s.id, st.order);
       return st;
     },
     /** The ship on the square a point on the sea is over (-1: none). */
@@ -354,7 +398,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         score: { ...b.score }, clock: b.clock, turn: b.turnT, over: b.over, leader: b.leader(),
         buoys: B.BUOYS.map((x) => ({ pennants: x.pennants, hold: b.hold(x), heart: x.at[0] >= B.HEART.c0 && x.at[0] <= B.HEART.c1 && x.at[1] >= B.HEART.r0 && x.at[1] <= B.HEART.r1 })),
         gates: b.gates.map((x) => ({ towers: x.towers.map((t) => t.hp), open: x.open() })),
-        ships: b.ships.map((x) => ({ id: x.id, name: x.name, team: x.team, kind: x.kind, order: admiral === x.team ? orderText(b, bots.orderOf(x.id)) : null, share: x.away > 0 ? 0 : x.dmg.share(), water: x.away > 0 ? 0 : x.dmg.water, out: x.dmg.out || x.away > 0, away: x.away > 0, doing: x.id === me ? (x.away > 0 ? `yours, sunk: back in ${Math.ceil(x.away)}s` : 'yours') : bots.doing(b, x.id) })),
+        ships: b.ships.map((x) => ({ id: x.id, name: x.name, team: x.team, kind: x.kind, craft: x.craft?.kind ?? null, order: admiral === x.team ? orderText(b, bots.orderOf(x.id)) : null, share: x.away > 0 ? 0 : x.dmg.share(), water: x.away > 0 ? 0 : x.dmg.water, out: x.dmg.out || x.away > 0, away: x.away > 0, doing: x.id === me ? (x.away > 0 ? `yours, sunk: back in ${Math.ceil(x.away)}s` : 'yours') : bots.doing(b, x.id) })),
         me: s && { name: s.name, team: s.team, h: s.h, moves: h.slot >= 0 ? h.turn : h.next(), lit: h.lit(), mine: h.mine.length, load: { L: s.guns.wait.L / s.h.reload, R: s.guns.wait.R / s.h.reload }, out: s.dmg.out },
       };
     },

@@ -20,6 +20,13 @@ export const WAR_FRIGATE = {
     // (the main deck has 12 Gunnery stations, the galley below 10: her 24 guns, 12 on top)
     stations: { nav: 1, sailing: 18, carpentry: 18, bilge: 12, gunnery: 6 }, mainDeckGuns: 12,
 };
+/** A war brig, the blockade's middle class of ship (15 Nov). YPPedia's: 16 cannons, medium, two shots a side a move;
+    the rest (her crew, hold, tokens, cloth, stations) not checked yet, put between the sloop's and the war frigate's. */
+export const WAR_BRIG = {
+    name: 'War brig', crew: 30, minCrew: 8, holdLitres: 108000, holdKg: 72000,
+    guns: 16, gunSize: 'medium', shotsPerSide: 2, tokens: 4, sailCloth: 200,
+    stations: { nav: 1, sailing: 8, carpentry: 6, bilge: 4, gunnery: 3 }, mainDeckGuns: 8,
+};
 /** The plain prism every hull was until 11 Nov: square across the stern, straight up and down. */
 export const BOX_SHAPE = { stern: 0, square: 2, shoulder: [0.564, 0.733], cheek: [0.897, 0.4], tumble: 0, sheer: 0, bilge: 0 };
 /** The ships' curves to try against each other (frigate-test.html?curve=...). */

@@ -42,6 +42,8 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN, { furled = false } = 
   const P = plan, H = P.hull, l = H.len / 2, tip = stemX(H);
   const yW = deckY(P, 'waist'), yQ = deckY(P, 'quarter'), yF = deckY(P, 'fore'), qto = P.quarter.to, ffrom = P.fore.from;
   const bw = P.bulwark, pt = ship.paint;
+  // (her stern's and bow's few fixed sizes: a war frigate's, unless her plan has its own, a brig's: src/den-brig.ts)
+  const S = { cabin: [-6.5, -5.5, -4.5], windows: [-1.2, -0.4, 0.4, 1.2], lanterns: [-1.3, 0, 1.3], plate: 2.6, sprit: 1, ...P.stern };
   const M = {
     hull: mat(pt.hull, { roughness: 0.55 }), side: mat(pt.sideboard, { roughness: 0.6 }), rail: mat(pt.railing, { roughness: 0.6 }),
     bottom: mat(pt.bottom, { map: woodTex, roughness: 0.85 }), deck: mat(pt.deck, { map: deckTex, roughness: 0.9 }),
@@ -95,7 +97,7 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN, { furled = false } = 
   const [upper, lower] = portXs(P), rows = portRows(P);
   for (const sd of [-1, 1]) {
     upper.forEach((x) => port(x, rows[1], sd, P.ports.size));
-    lower.forEach((x) => { if (x < tip - 1.2) port(x, rows[0], sd, P.ports.size); });
+    if (P.ports.rows !== 1) lower.forEach((x) => { if (x < tip - 1.2) port(x, rows[0], sd, P.ports.size); });
   }
   const guns = deckGuns(P, ship.guns);
   for (const gun of guns) {
@@ -109,20 +111,20 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN, { furled = false } = 
   box(0.09, 1.2, 0.03, M.dark, faceX + 0.02, yW + 0.6, 0); box(0.1, 0.05, 0.05, M.gold, faceX + 0.04, yW + 0.6, 0.12);
   box(0.04, 0.06, qW * 2 - 0.1, M.side, faceX - 0.01, yQ - 0.03, 0);
   // (her cabin's windows, as her stripes, where her sheer lifts her side)
-  for (const sd of [-1, 1]) for (const x of [-6.5, -5.5, -4.5]) { const Y = sideY(H, x, yW + 0.78); onSide(x, Y, sd, 0.5, 0.42, 0.03, M.side); onSide(x, Y, sd, 0.4, 0.32, 0.035, M.glass, 0.016); }
+  for (const sd of [-1, 1]) for (const x of S.cabin) { const Y = sideY(H, x, yW + 0.78); onSide(x, Y, sd, 0.5, 0.42, 0.03, M.side); onSide(x, Y, sd, 0.4, 0.32, 0.035, M.glass, 0.016); }
   // Her stern windows, round her curved stern, and her name across it.
   const sY = (y) => sideY(H, -l, y);
-  for (const z of [-1.2, -0.4, 0.4, 1.2]) { onStern(z, sY(yW + 0.8), 0.5, 0.46, 0.03, M.side); onStern(z, sY(yW + 0.8), 0.4, 0.36, 0.035, M.glass, 0.018); }
+  for (const z of S.windows) { onStern(z, sY(yW + 0.8), 0.5, 0.46, 0.03, M.side); onStern(z, sY(yW + 0.8), 0.4, 0.36, 0.035, M.glass, 0.018); }
   {
     // (a plate bent round her stern: each point of it set just off her stern there)
-    const geo = new THREE.PlaneGeometry(2.6, 0.48, 16, 1).rotateY(-Math.PI / 2), p = geo.attributes.position;
+    const geo = new THREE.PlaneGeometry(S.plate, 0.48, 16, 1).rotateY(-Math.PI / 2), p = geo.attributes.position;
     for (let i = 0; i < p.count; i++) { const z = p.getZ(i), Y = sY(yW + 0.2) + p.getY(i); p.setXYZ(i, sternX(H, z, Y) - 0.02, Y, z); }
     geo.computeVertexNormals();
     g.add(mesh(geo, new THREE.MeshStandardMaterial({ map: nameTex(ship.name, pt.railing, pt.hull), roughness: 0.6 }), false));
   }
   // Lanterns on the taffrail, and its white scrollwork.
   const tY = yQ + bw.h + liftAt(H, -l);
-  for (const z of [-1.3, 0, 1.3]) {
+  for (const z of S.lanterns) {
     const x = sternX(H, z, tY) + bw.t / 2;
     rod([x, tY, z], [x, tY + 0.55, z], 0.025, M.dark);
     box(0.18, 0.24, 0.18, M.dark, x, tY + 0.66, z); box(0.13, 0.17, 0.2, M.lamp, x, tY + 0.66, z); box(0.2, 0.17, 0.13, M.lamp, x, tY + 0.66, z);
@@ -177,8 +179,8 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN, { furled = false } = 
     s.rotateZ(dx * 2); g.add(s);
   }
   // The bowsprit and jib boom.
-  rod([tip - 0.5, yF + 0.45, 0], [tip + 3.3, yF + 1.55, 0], 0.09, M.spar, 8);
-  rod([tip + 2.2, yF + 1.25, 0], [tip + 4.6, yF + 1.95, 0], 0.045, M.spar, 6);
+  rod([tip - 0.5, yF + 0.45, 0], [tip + 3.3 * S.sprit, yF + 0.45 + 1.1 * S.sprit, 0], 0.09, M.spar, 8);
+  rod([tip + 2.2 * S.sprit, yF + 0.45 + 0.8 * S.sprit, 0], [tip + 4.6 * S.sprit, yF + 0.45 + 1.5 * S.sprit, 0], 0.045, M.spar, 6);
 
   // ----- stairs up, and the rails along each break -----
   // (rising toward x1)
@@ -241,12 +243,12 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN, { furled = false } = 
       sails.add(arm);
     });
   }
-  // Stays: fore to the bowsprit, main to fore, mizzen to main, and back to the stern.
-  const tops = P.masts.map((m) => [m.x, mastSails(m).top - 0.3, 0]);
-  rod(tops[0], [tip + 4.4, yF + 1.9, 0], 0.02, M.rope, 3);
-  rod(tops[1], [P.masts[0].x, mastSails(P.masts[0]).feet[1], 0], 0.02, M.rope, 3);
-  rod(tops[2], [P.masts[1].x, mastSails(P.masts[1]).feet[1], 0], 0.02, M.rope, 3);
-  rod(tops[2], [-l + 0.2, railY(-l + 0.2), 0], 0.02, M.rope, 3);
+  // Stays: the foremast to the bowsprit, each mast after to the one before, and the last back to the stern (three
+  // masts on a war frigate, two on a brig: src/den-brig.ts).
+  const tops = P.masts.map((m) => [m.x, mastSails(m).top - 0.3, 0]), last = tops[tops.length - 1];
+  rod(tops[0], [tip + 4.4 * S.sprit, yF + 0.45 + 1.45 * S.sprit, 0], 0.02, M.rope, 3);
+  for (let i = 1; i < tops.length; i++) rod(tops[i], [P.masts[i - 1].x, mastSails(P.masts[i - 1]).feet[Math.min(1, P.masts[i - 1].sails.length - 1)], 0], 0.02, M.rope, 3);
+  rod(last, [-l + 0.2, railY(-l + 0.2), 0], 0.02, M.rope, 3);
 
   // ----- her guns and furniture, as her config places them -----
   const piece = (kind, opts, x, z, yaw) => {

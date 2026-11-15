@@ -37,8 +37,9 @@
    of the whole ship", 15 Nov), going straight on when that gets her there; where she'll lie then, her berth,
    is drawn as the block of squares she'll cover ("aim you for like a block of squares, not just one"). */
 import { SAIL, Sea, Helm, pauseFor, type Move, type Pose } from './den-sail.js';
-import { SLOOP, WAR_FRIGATE, SLOOP_HULL, type ShipClass, type Hull } from './ships.js';
+import { SLOOP, WAR_FRIGATE, WAR_BRIG, SLOOP_HULL, type ShipClass, type Hull } from './ships.js';
 import { FRIGATE_HULL } from './den-frigate.js';
+import { BRIG_HULL } from './den-brig.js';
 import type { HullChart } from './hull-chart.js';
 
 /** The four ways (den-sail.ts's): 0 out to sea (r + 1), 1 right (c + 1), 2 back in, 3 left. */
@@ -73,6 +74,8 @@ export const HANDLING = {
   /** A war frigate's seconds a square, against the sloop's SAIL.MOVE: as quick as the sloop over open water, all
       told, her moves twice as big and her turns of moves half as long again (her fewer moves, each paused after). */
   FRIGATE_PACE: 1.3,
+  /** A war brig's (src/den-brig.ts): a square a move, as the sloop's, but slower at it: between the two. */
+  BRIG_PACE: 1.15,
   /** Seconds a side's guns take to load again, by their size. */
   RELOAD: { small: 2, medium: 2.5, large: 3 } as Record<GunSize, number>,
 };
@@ -99,8 +102,11 @@ export function handlingFor(ship: ShipClass, hull: Hull, pace: number = SAIL.MOV
 }
 export const SLOOP_HANDLING = handlingFor(SLOOP, SLOOP_HULL);
 export const FRIGATE_HANDLING = handlingFor(WAR_FRIGATE, FRIGATE_HULL, SAIL.MOVE * HANDLING.FRIGATE_PACE);
+export const BRIG_HANDLING = handlingFor(WAR_BRIG, BRIG_HULL, SAIL.MOVE * HANDLING.BRIG_PACE);
 
-const span = (n: number) => Array.from({ length: n }, (_, i) => i - Math.floor(n / 2));
+// (worked out once a size: every ship's squares are asked for many times a tick)
+const spans = new Map<number, readonly number[]>();
+const span = (n: number): number[] => (spans.get(n) ?? spans.set(n, Object.freeze(Array.from({ length: n }, (_, i) => i - Math.floor(n / 2)))).get(n)!) as number[];
 /** Her squares along her from her own (+ toward her bow), and across her (+ to starboard): her own square
     in the middle, or just forward and to port of it with an even count. */
 export const alongs = (h: Handling): number[] => span(h.long);
@@ -108,8 +114,9 @@ export const acrosses = (h: Handling): number[] => span(h.wide);
 
 /** The squares she covers at a pose. */
 export function squares(h: Handling, p: Pose): [number, number][] {
-  const s = (p.d + 1) % 4;
-  return alongs(h).flatMap((a) => acrosses(h).map((x) => [p.c + DC[p.d] * a + DC[s] * x, p.r + DR[p.d] * a + DR[s] * x] as [number, number]));
+  const s = (p.d + 1) % 4, out: [number, number][] = [];
+  for (const a of alongs(h)) for (const x of acrosses(h)) out.push([p.c + DC[p.d] * a + DC[s] * x, p.r + DR[p.d] * a + DR[s] * x]);
+  return out;
 }
 
 const mean = (xs: number[]) => xs.reduce((t, x) => t + x, 0) / xs.length;

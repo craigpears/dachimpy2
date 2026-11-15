@@ -37,8 +37,9 @@
    of the whole ship", 15 Nov), going straight on when that gets her there; where she'll lie then, her berth,
    is drawn as the block of squares she'll cover ("aim you for like a block of squares, not just one"). */
 import { SAIL, Sea, Helm, pauseFor } from './den-sail.js';
-import { SLOOP, WAR_FRIGATE, SLOOP_HULL } from './ships.js';
+import { SLOOP, WAR_FRIGATE, WAR_BRIG, SLOOP_HULL } from './ships.js';
 import { FRIGATE_HULL } from './den-frigate.js';
+import { BRIG_HULL } from './den-brig.js';
 /** The four ways (den-sail.ts's): 0 out to sea (r + 1), 1 right (c + 1), 2 back in, 3 left. */
 const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const key = (c, r) => `${c},${r}`;
@@ -47,6 +48,8 @@ export const HANDLING = {
     /** A war frigate's seconds a square, against the sloop's SAIL.MOVE: as quick as the sloop over open water, all
         told, her moves twice as big and her turns of moves half as long again (her fewer moves, each paused after). */
     FRIGATE_PACE: 1.3,
+    /** A war brig's (src/den-brig.ts): a square a move, as the sloop's, but slower at it: between the two. */
+    BRIG_PACE: 1.15,
     /** Seconds a side's guns take to load again, by their size. */
     RELOAD: { small: 2, medium: 2.5, large: 3 },
 };
@@ -70,15 +73,21 @@ export function handlingFor(ship, hull, pace = SAIL.MOVE) {
 }
 export const SLOOP_HANDLING = handlingFor(SLOOP, SLOOP_HULL);
 export const FRIGATE_HANDLING = handlingFor(WAR_FRIGATE, FRIGATE_HULL, SAIL.MOVE * HANDLING.FRIGATE_PACE);
-const span = (n) => Array.from({ length: n }, (_, i) => i - Math.floor(n / 2));
+export const BRIG_HANDLING = handlingFor(WAR_BRIG, BRIG_HULL, SAIL.MOVE * HANDLING.BRIG_PACE);
+// (worked out once a size: every ship's squares are asked for many times a tick)
+const spans = new Map();
+const span = (n) => (spans.get(n) ?? spans.set(n, Object.freeze(Array.from({ length: n }, (_, i) => i - Math.floor(n / 2)))).get(n));
 /** Her squares along her from her own (+ toward her bow), and across her (+ to starboard): her own square
     in the middle, or just forward and to port of it with an even count. */
 export const alongs = (h) => span(h.long);
 export const acrosses = (h) => span(h.wide);
 /** The squares she covers at a pose. */
 export function squares(h, p) {
-    const s = (p.d + 1) % 4;
-    return alongs(h).flatMap((a) => acrosses(h).map((x) => [p.c + DC[p.d] * a + DC[s] * x, p.r + DR[p.d] * a + DR[s] * x]));
+    const s = (p.d + 1) % 4, out = [];
+    for (const a of alongs(h))
+        for (const x of acrosses(h))
+            out.push([p.c + DC[p.d] * a + DC[s] * x, p.r + DR[p.d] * a + DR[s] * x]);
+    return out;
 }
 const mean = (xs) => xs.reduce((t, x) => t + x, 0) / xs.length;
 /** Her middle from her own square (along her, across her): (0, 0) for one square; with an even count,

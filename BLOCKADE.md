@@ -150,6 +150,33 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   side ways' winds, is out of every gun's reach.
 - **Knocked out, seen** (15 Nov: "a tiny bit clearer"): a thick black column of smoke off her middle, seen across the
   board. Holes are drawn anywhere along the square they struck, so a still duel's don't stack.
+- **War brigs, the middle class** (15 Nov: "a middle ship class, so it's not a big [brawling] fighter ... medium
+  cannonballs ... but it can spawn ... haunted sloops that ... hang around for a set number of turns ... act kind of
+  more like troop ... transports"; "the Atlantean ... sends out little [tritons] and turtles to go and ram the enemy
+  ships"; "work on like the equivalent of war brigs ... things that can launch smaller ships like little sloops and
+  Atlantis creatures"; and, on where she fits, "they can help fight around the islands, help cover more space in a way
+  that ... the sloops get there first ... but like brig v sloop wins ... Maybe need like some middle ground"). One a
+  side (`src/den-brig.ts`, `WAR_BRIG` in src/ships.ts):
+  - **her numbers**: YPPedia's 16 medium guns, two shots a side; the rest not checked yet. Two squares long and one
+    wide, a square a move as the sloop's but slower at it (`BRIG_PACE` 1.15 to the frigate's 1.3); she rides the
+    winds out, as a frigate does. Full damage 15 small shots (the sloop's 6, the frigate's 30), her influence 2.75
+    squares (2 and 3.5). So brig v sloop, the brig wins: she knocks a sloop out in two broadsides and the sloop needs
+    fifteen for her; a frigate's large guns beat her. One wide, she slips through a gate's way without shooting a
+    tower down, under its guns;
+  - **her place, the islands**: her bot weighs the open sea's buoys half as much again and the heart's at a third,
+    fights an enemy close by as a frigate does but a sloop before a frigate, and launches her craft whenever an
+    enemy's within 10 squares. Her ghost sloops weigh buoys as she does;
+  - **her craft** (`LAUNCH`): every 30 s, once they're all back aboard, off her sides by each of her squares (then off
+    her bow and stern), heading as she is. Dachimpy's **Tidecaller**, an Atlantean, launches three **sea turtles**:
+    no guns and no influence; each makes for the nearest enemy, straight at her a move at a time (her pilot's way only
+    when she's stuck four seconds getting no nearer), and beside her rams her: two large shots' holes where she
+    struck, and the turtle's gone. Dalnoth's **Grave Lantern**, a haunted brig, launches two **ghost sloops**: sloops
+    in all but their look (see-through, glowing green, as Eldritch Wail), holding buoys and firing, never hiding,
+    gone after 40 s (four blockade turns: "a set number of turns"). A craft knocked out goes down at once, and her
+    brig sunk, they fade; either way she's back aboard, never coming in at the edge;
+  - drawn from a war frigate's parts on her own plan (two masts, one row of ports, her stern's few sizes her own:
+    `Plan.stern`), the turtles and ghost sloops by `js/den/sea-craft.js`; the admiral picks a strategy for her too
+    (her own choice, hold the outside, run for the middle, hunt their frigates).
 
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
@@ -188,8 +215,17 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   the heart in two of the three (54 and 311 s); 4.4 to 4.8 s of computing a round. A frigate knocked out by a gate can
   lie in its mouth, in everyone's way, till she's finished.
 
+- With a war brig a side (15 Nov), three seeded rounds: 14 to 18 launches, 12 to 15 rams a round (2 to 5 of them
+  sinking a ship), 1 to 12 craft sunk; the brigs out round the islands two thirds of the time and more, fighting
+  sloops; a frigate still in the heart (seed 6's round). 2.9 to 4.4 s of computing a round: the turtles steer straight
+  at their prey rather than have a way worked out to wherever she's got to (that was 9.7 s).
+
 ## 5. To shape with the user
 
+- **The map's middle ground for the brigs** (15 Nov: "I don't know how the map would change around that ... Maybe need
+  like some middle ground somewhere"): her role is in her numbers and her bot so far, the board unchanged. A place
+  of her own would make it plain: reefs round the island buoys with gaps one square wide (a brig and a sloop get in, a
+  frigate can't, and can't reach the buoy over the reef), so the islands are where brig meets sloop.
 - Whether the frigate's handling feels right: as quick as the sloop over open water, clumsy (her turns of moves half
   as long again), the sloop's speed the winds'.
 - The sloop's full damage (6 small shots, not YPPedia's yet), and how long a knocked-out ship takes to rebuild.
@@ -207,5 +243,5 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
 - **Admiral mode, further** (IDEAS.md): where each ship comes in ("starting from the middle"), saved plans, two
   admirals, orders in sequence.
 - **Islands as the capture points** ("you're blockading not just one island, but ... having a fight around the whole
-  ocean"), **shallows a frigate scrapes through at a cost**, **carriers** (a middle class of ship launching little
-  craft), **a ramming specialist** (the Atlantean's sea creatures): IDEAS.md.
+  ocean"), **shallows a frigate scrapes through at a cost**: idea cards. Carriers and the ramming Atlantean are the war
+  brigs, above.

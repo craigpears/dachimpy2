@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Blockade test</title>
-<!-- A blockade, a proof of concept, unlinked like frigate-test.html (BLOCKADE.md): two sides, three war frigates and
-     five sloops each, coming in from two edges each, fighting for the buoys of a blockade board, the best of them in
+<!-- A blockade, a proof of concept, unlinked like frigate-test.html (BLOCKADE.md): two sides, three war frigates, a
+     war brig launching her little craft and five sloops each, coming in from two edges each, fighting for the buoys of a blockade board, the best of them in
      a walled fort in its heart with imperial gates the frigates shoot their way through and side ways the sloops'
      winds carry them through, islands with coves for the sloops to hide in. You spectate (the camera following the
      action, or any ship you click), or sail any of them (its Sail button; ?ship= its number); bots sail the rest. Rules src/blockade.ts, bots src/blockade-bots.ts, damage src/ship-damage.ts; its 3D
@@ -73,7 +73,7 @@
 <body>
 <div class="ui">
   <h1>Blockade</h1>
-  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants. The best are in the fort in the middle: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. Sloops hide in the islands' coves and dart out. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops.</p>
+  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants. The best are in the fort in the middle: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. Sloops hide in the islands' coves and dart out. Each side's war brig fights round the islands, launching her craft: Tidecaller's turtles ram, Grave Lantern's ghost sloops hold buoys a while. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops.</p>
   <div class="score"><span class="gold" id="sg">0</span><span id="clock">5:00</span><span class="crimson" id="sc">0</span></div>
   <div class="bar" title="This blockade turn: scored when it fills"><i id="turn"></i></div>
   <div class="buoys" id="buoys"></div>
@@ -91,8 +91,9 @@
   <div class="row"><button id="watch">Spectate</button><button id="director" title="The camera follows the action">Director</button><button id="whole">Whole board</button><button id="again">New round</button></div>
   <div id="admiral">
     <b>Admiral of Dachimpy's flag</b>
-    <p id="plan">Your plan: a strategy for your sloops and one for your war frigates, then start the round.</p>
+    <p id="plan">Your plan: a strategy for your sloops, one for your war brig and one for your war frigates, then start the round.</p>
     <div class="strat"><span>Your sloops</span><div class="row" id="stratSloop"></div></div>
+    <div class="strat"><span>Your war brig</span><div class="row" id="stratBrig"></div></div>
     <div class="strat"><span>Your war frigates</span><div class="row" id="stratFrigate"></div></div>
     <div class="row"><button id="startRound">Start the round</button></div>
     <p>Or give one ship an order of her own: click her on the board, then what she's to do there (a buoy to hold, open water to camp on, a gate to shoot down, a friend to escort, an enemy to hunt); click her again when you're done.</p>
@@ -150,20 +151,20 @@ $('cineAll').onclick = () => cinema(false);
 if (admiral) {
   document.body.classList.add('admiral');
   Object.assign(cam, WHOLE); cam.follow = false; cam.at.set(0, 0, 0); $('whole').classList.add('on');
-  say('Your plan: a strategy for your sloops and one for your war frigates, then start');
+  say('Your plan: a strategy for your sloops, one for your war brig and one for your war frigates, then start');
 }
 const pickShip = (id) => { bk.pick(id); sig = ''; };
 $('startRound').onclick = () => { bk.start(); $('startRound').hidden = true; $('plan').textContent = 'Under way: change a strategy as it plays, give one ship an order of her own, or Sail to take her helm.'; say('The round\'s begun: your orders are being carried out'); };
 // (a strategy for each kind of ship: a button each, the one picked lit; 15 Nov: "keep the Admiral mode relatively
 // simple ... like choosing just a strategy ... a handful of ... choices of each")
-for (const [kind, el] of [['sloop', $('stratSloop')], ['frigate', $('stratFrigate')]]) {
+for (const [kind, el] of [['sloop', $('stratSloop')], ['brig', $('stratBrig')], ['frigate', $('stratFrigate')]]) {
   el.innerHTML = bk.strategies[kind].map((st, i) => `<button data-i="${i}" title="${st.says}" class="${i ? '' : 'on'}">${st.name}</button>`).join('');
   el.onclick = (e) => {
     const btn = e.target.closest('[data-i]');
     if (!btn) return;
     const st = bk.strategy(kind, Number(btn.dataset.i));
     el.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === btn));
-    say(`Your ${kind === 'sloop' ? 'sloops' : 'war frigates'}: ${st.name.toLowerCase()}, ${st.says}`);
+    say(`Your ${{ sloop: 'sloops', brig: 'war brig', frigate: 'war frigates' }[kind]}: ${st.name.toLowerCase()}, ${st.says}`);
     sig = '';
   };
 }
@@ -207,10 +208,11 @@ const hud = () => {
   if (next === sig) return;
   sig = next;
   $('buoys').innerHTML = s.buoys.map((x) => `<span class="${x.hold ?? ''}" title="${x.heart ? 'In the heart' : 'Out on the open sea'}">${P[x.pennants]}${x.heart ? '♥' : ''}</span>`).join('') + s.gates.map((g, i) => `<span title="The ${i ? 'north' : 'south'} gate's towers">${i ? 'N' : 'S'} ${g.open ? 'down' : g.towers.join('·')}</span>`).join('');
-  $('ships').innerHTML = s.ships.map((x) => `<div class="ship${x.id === bk.you() ? ' me' : ''}${x.id === cam.watching && bk.you() < 0 ? ' seen' : ''}${x.id === bk.picked() ? ' picked' : ''}" data-id="${x.id}"><b class="${x.team}">${x.name}</b>`
+  // (a brig's craft listed only while she's out on the sea)
+  $('ships').innerHTML = s.ships.filter((x) => !(x.craft && x.away)).map((x) => `<div class="ship${x.id === bk.you() ? ' me' : ''}${x.id === cam.watching && bk.you() < 0 ? ' seen' : ''}${x.id === bk.picked() ? ' picked' : ''}" data-id="${x.id}"><b class="${x.team}">${x.name}</b>`
     + `<span class="meter" title="Damage, and water in her bilge"><span class="dmg" style="width:${x.share * 100}%"></span><span class="wat" style="width:${x.water * 100}%"></span></span>`
-    + `<button data-sail="${x.id}" title="Take her helm">Sail</button>`
-    + `<i class="${x.out ? 'out' : ''}">${x.kind === 'frigate' ? 'War frigate' : 'Sloop'} · ${x.doing}${x.order ? `<span class="order">Orders: ${x.order}</span>` : ''}</i></div>`).join('');
+    + (x.craft ? '' : `<button data-sail="${x.id}" title="Take her helm">Sail</button>`)
+    + `<i class="${x.out ? 'out' : ''}">${x.craft ? (x.craft === 'ram' ? 'Sea turtle' : 'Ghost sloop') : { frigate: 'War frigate', brig: 'War brig', sloop: 'Sloop' }[x.kind]} · ${x.doing}${x.order ? `<span class="order">Orders: ${x.order}</span>` : ''}</i></div>`).join('');
 };
 // (a ship's row: follow her; its Sail button: take her helm)
 $('ships').addEventListener('click', (e) => {
