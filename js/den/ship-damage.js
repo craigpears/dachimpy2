@@ -71,6 +71,14 @@ export function damageLook(g, hull, { deck, crew = [], dress = {} }) {
   const patched = [];
 
   return {
+    /** Refitted (back after she sank): her holes and patches gone at once, no planks nailed over them. */
+    reset() {
+      for (const { o } of drawn.values()) g.remove(o);
+      drawn.clear();
+      for (const o of patched) g.remove(o);
+      patched.length = 0;
+      turn = 0;
+    },
     tick(dt, dmg, { pending = new Set() } = {}) {
       t += dt;
       const ids = new Set(dmg.holes.map((h) => h.id));

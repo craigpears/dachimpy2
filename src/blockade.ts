@@ -25,7 +25,10 @@
      frigate fits, its rocks between her and anyone's guns;
    - every ship's damage as Puzzle Pirates keeps it (src/ship-damage.ts): holes where she's shot, water in her
      bilge slowing her, her crew patching and pumping; at full damage she's knocked out, dead in the water, till
-     they've rebuilt her (a non-sinking blockade's way). */
+     they've rebuilt her; shot on while she's out, she sinks, and comes back a while later from her side's own edge
+     of the board, to fight her way back in (the user, 15 Nov: "oh, look, we've lost control of the central area,
+     we've got to get back in there again. And that sense of working your way back in would be lost if you can't
+     [sink] at all"). */
 import type { Move, Pose, SailEvent } from './den-sail.js';
 import { ShipSea, ShipHelm, Guns, broadside, squares, SLOOP_HANDLING, FRIGATE_HANDLING, type Handling, type Side, type Shot } from './ship-handling.js';
 import { HullChart } from './hull-chart.js';
@@ -123,6 +126,10 @@ export const BLOCKADE = {
   IN_WAY: 5,
   /** The gates' guns' size. */
   GATE_GUNS: 'medium' as const,
+  /** A sinking blockade: a ship shot on while she's knocked out sinks (src/ship-damage.ts, SINK), and comes back
+      this many seconds later where she came in at the start, refitted. */
+  SINKING: true,
+  RETURN: 25,
   /** The brawl to watch (blockade-test.html?watch=brawl, 15 Nov: "I want to see two of the big ships really having a
       brawl and fighting it out to see what that damage looks like"; "That needs to be like one of the shortcuts so
       people can actually see a cinematic of the blockade"): two war frigates broadside to broadside on the open water
@@ -147,15 +154,19 @@ export function islandLand(i: Island): [number, number][] {
 export interface Ship {
   id: number; name: string; team: TeamId; kind: Kind; h: Handling; cls: ShipClass; raider: boolean;
   sea: ShipSea; helm: ShipHelm; guns: Guns; dmg: Damage;
+  /** Where she came in at the start (and comes back in after she's sunk). */
+  start: Pose;
+  /** Sunk: seconds till she's back (0 on the board). Off the board meanwhile: in nobody's way, no influence. */
+  away: number;
 }
 
 /** What a broadside stopped at: a rock, a gate's tower (which gate, which tower), one of the gates' guns, or a ship. */
 export type Stop = { what: 'rock' } | { what: 'tower'; g: number; i: number } | { what: 'gun'; i: number } | { what: 'ship'; id: number };
-export interface FiredShot extends Shot<Stop> { got?: 'hit' | 'crumbled' | 'bounced' | 'quiet' | 'wrecked'; hole?: Hole; out?: boolean }
+export interface FiredShot extends Shot<Stop> { got?: 'hit' | 'crumbled' | 'bounced' | 'quiet' | 'wrecked'; hole?: Hole; out?: boolean; sunk?: boolean }
 export interface Fired { ship: number; side: Side; shots: FiredShot[] }
 /** A buoy's state just now: whose (the one side influencing it), contested, or nobody's. */
 export type Hold = TeamId | 'contested' | null;
-export type Ticked = { sail: Map<number, SailEvent[]>; damage: Map<number, DamageEvent[]>; guns: { gun: number; e: TurretEvent; hit: number | null; hole?: Hole }[]; scored: boolean };
+export type Ticked = { sail: Map<number, SailEvent[]>; damage: Map<number, DamageEvent[]>; guns: { gun: number; e: TurretEvent; hit: number | null; hole?: Hole; sunk?: boolean }[]; scored: boolean; returned: number[] };
 
 export class Blockade {
   rocks = new Set<string>();
@@ -191,7 +202,7 @@ export class Blockade {
       if (s.kind === 'sloop') sea.carriedBy(this.wind);
       sea.chart = this.charts[s.kind] ??= new HullChart(sea.bare());
       sea.near = B.IN_WAY;
-      this.ships.push({ id: me, name: s.name, team: team.id, kind: s.kind, h, cls: CLASSES[s.kind], raider: !!s.raider, sea, helm: new ShipHelm(sea, { ...s.at }), guns: new Guns(h.reload), dmg: new Damage(CLASSES[s.kind]) });
+      this.ships.push({ id: me, name: s.name, team: team.id, kind: s.kind, h, cls: CLASSES[s.kind], raider: !!s.raider, sea, helm: new ShipHelm(sea, { ...s.at }), guns: new Guns(h.reload), dmg: new Damage(CLASSES[s.kind]), start: { ...s.at }, away: 0 });
     }
     // (the charts worked out now, while the board's being set up, rather than on the first move)
     for (const c of Object.values(this.charts)) c.fresh();
@@ -199,6 +210,8 @@ export class Blockade {
   }
 
   ship(id: number): Ship { return this.ships[id]; }
+  /** On the board: not sunk and waiting to come back. */
+  afloat(s: Ship): boolean { return s.away <= 0; }
   /** The ship on this square, if one is. */
   under(c: number, r: number): Ship | null { const o = this.taken.get(key(c, r)); return o === undefined ? null : this.ships[o]; }
   /** A gate's down: the heart's open to a frigate. */
@@ -206,9 +219,15 @@ export class Blockade {
 
   /** Everything a tick on: each ship's helm and crew, the gates' guns, the blockade turn's scoring. */
   tick(dt: number): Ticked {
-    const out: Ticked = { sail: new Map(), damage: new Map(), guns: [], scored: false };
+    const out: Ticked = { sail: new Map(), damage: new Map(), guns: [], scored: false, returned: [] };
     if (this.over) return out;
     for (const s of this.ships) {
+      // (sunk: back where she came in once her time's up and nobody's lying there)
+      if (s.away > 0) {
+        if ((s.away -= dt) <= 0 && !this.comeBack(s)) s.away = 0.5;
+        if (s.away <= 0) out.returned.push(s.id);
+        continue;
+      }
       const ev = s.dmg.tick(dt);
       if (ev.some((e) => e.kind === 'back')) s.helm.hole = null;
       s.sea.drag = s.dmg.drag();
@@ -220,9 +239,9 @@ export class Blockade {
     this.battery.forEach((g, i) => {
       for (const e of g.tick(dt, this.gunTarget(g))) {
         const hit = e.kind === 'land' ? this.under(...e.to) : null;
-        let hole: Hole | undefined;
-        if (hit) hole = this.hurt(hit, BLOCKADE.GATE_GUNS, e.to, g.at).hole;
-        out.guns.push({ gun: i, e, hit: hit?.id ?? null, hole });
+        let hole: Hole | undefined, sunk = false;
+        if (hit) ({ hole, sunk } = this.hurt(hit, BLOCKADE.GATE_GUNS, e.to, g.at));
+        out.guns.push({ gun: i, e, hit: hit?.id ?? null, hole, sunk });
       }
     });
     this.clock += dt;
@@ -234,7 +253,7 @@ export class Blockade {
   private gunTarget(g: Turret): { c: number; r: number } | null {
     let best: [number, number] | null = null, far = Infinity;
     for (const s of this.ships) {
-      if (s.dmg.out) continue;
+      if (s.dmg.out || s.away > 0) continue;
       for (const id of s.helm.covers()) {
         const [c, r] = id.split(',').map(Number), d = Math.max(Math.abs(c - g.at[0]), Math.abs(r - g.at[1]));
         if (g.reaches(c, r) && d < far) { far = d; best = [c, r]; }
@@ -247,7 +266,7 @@ export class Blockade {
     let moved = false;
     for (const s of this.ships) {
       // (where she is and where the move she's on takes her: what she covers, cheaply)
-      const p = s.helm.pose, to = s.helm.cur?.to, sig = `${p.c},${p.r},${p.d}${to ? `>${to.c},${to.r},${to.d}` : ''}`;
+      const p = s.helm.pose, to = s.helm.cur?.to, sig = s.away > 0 ? 'away' : `${p.c},${p.r},${p.d}${to ? `>${to.c},${to.r},${to.d}` : ''}`;
       // (only the ships near enough for her to be in their way work their ways out afresh: one far off will have
       // moved again by the time she's near, and a bump makes her pilot think again anyway)
       if (sig !== this.seen.get(s.id)) {
@@ -257,12 +276,12 @@ export class Blockade {
     }
     if (!moved && this.taken.size) return;
     this.taken.clear();
-    for (const s of this.ships) for (const k of s.helm.covers()) this.taken.set(k, s.id);
+    for (const s of this.ships) if (s.away <= 0) for (const k of s.helm.covers()) this.taken.set(k, s.id);
   }
 
   /** A ship's influence reaches this buoy: within her circle of any square of hers, and she's not knocked out. */
   reaches(s: Ship, b: Buoy): boolean {
-    if (s.dmg.out) return false;
+    if (s.dmg.out || s.away > 0) return false;
     const R = BLOCKADE.INFLUENCE[s.kind];
     return squares(s.h, s.helm.pose).some(([c, r]) => Math.hypot(c - b.at[0], r - b.at[1]) <= R + 1e-9);
   }
@@ -295,17 +314,36 @@ export class Blockade {
     return broadside(s.h, from, side, (c, r) => this.stopAt(s, c, r, ships));
   }
 
-  /** A ship struck by a shot of that size on that square, fired from `from`: her hole, there. */
-  private hurt(s: Ship, gun: Handling['guns'], at: [number, number], from: [number, number]): { hole: Hole; out: boolean } {
-    const where = struck(s.helm.pose, s.h.long, at, from), got = s.dmg.hit(gun, where.along, where.side);
+  /** A ship struck by a shot of that size on that square, fired from `from`: her hole, there (and she's sunk, if it
+      was the last she could take). */
+  private hurt(s: Ship, gun: Handling['guns'], at: [number, number], from: [number, number]): { hole: Hole; out: boolean; sunk: boolean } {
+    const where = struck(s.helm.pose, s.h.long, at, from), got = s.dmg.hit(gun, where.along, where.side, BLOCKADE.SINKING);
     if (got.out) s.helm.hit();   // (dead in the water: held till she's rebuilt)
+    if (got.sunk) this.sink(s);
     return got;
+  }
+  /** She's gone down: off the board till she comes back (comeBack), in nobody's way meanwhile. */
+  sink(s: Ship) {
+    s.away = BLOCKADE.RETURN;
+    s.helm.moor(s.helm.pose);
+    s.helm.hole = null;
+    this.notice();
+  }
+  /** Back where she came in, refitted, if nobody's lying there: whether she is. */
+  private comeBack(s: Ship): boolean {
+    if (!s.sea.bare().fits(s.start) || squares(s.h, s.start).some(([c, r]) => this.taken.has(key(c, r)))) return false;
+    s.dmg.refit(); s.sea.drag = 1; s.sea.exact = null;
+    s.helm.moor(s.start); s.helm.hole = null;
+    s.guns.wait = { L: 0, R: 0 };
+    s.away = 0;
+    this.notice();
+    return true;
   }
 
   /** Fire a ship's broadside out of that side, if it's loaded and she's not knocked out (null if not). */
   fire(id: number, side: Side): Fired | null {
     const s = this.ship(id);
-    if (s.dmg.out || !s.guns.fire(side)) return null;
+    if (s.dmg.out || s.away > 0 || !s.guns.fire(side)) return null;
     this.notice();   // (where everyone is now, if they've been moved by hand)
     const roused = new Set<number>();
     const shots: FiredShot[] = this.aim(id, side).map((shot) => {
@@ -318,8 +356,8 @@ export class Blockade {
         return { ...shot, got: got ?? undefined };
       }
       if (w.what === 'gun') { roused.add(this.gunGate[w.i]); return { ...shot, got: this.battery[w.i].hit() ?? undefined }; }
-      const { hole, out } = this.hurt(this.ship(w.id), s.h.guns, shot.hit!, shot.from);
-      return { ...shot, got: 'hit', hole, out };
+      const { hole, out, sunk } = this.hurt(this.ship(w.id), s.h.guns, shot.hit!, shot.from);
+      return { ...shot, got: 'hit', hole, out, sunk };
     });
     this.battery.forEach((g, i) => { if (roused.has(this.gunGate[i])) g.rouse(); });
     const got = { ship: id, side, shots };

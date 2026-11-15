@@ -59,3 +59,30 @@ describe('her crew at work (15 Nov: "a few like carpentry bots on board ... slow
     expect(d.share()).toBeLessThanOrEqual(DAMAGE.RECOVER + 1e-9);
   });
 });
+
+describe('sinking (15 Nov: "eventually you do need ships to be able to [sink] ... we\'ve lost control of the central area, we\'ve got to get back in there again")', () => {
+  it('knocked out, she sinks only once she\'s shot past full by SINK of it; never while she\'s still fighting', () => {
+    const d = new Damage(WAR_FRIGATE);
+    for (let i = 0; i < 15; i++) expect(d.hit('large', 0, 'L').sunk).toBe(false);
+    expect(d.out).toBe(true);
+    const more = Math.ceil(DAMAGE.SINK * d.full / DAMAGE.SHOT.large);
+    for (let i = 0; i < more - 1; i++) expect(d.hit('large', 0, 'L').sunk).toBe(false);
+    expect(d.hit('large', 0, 'L').sunk).toBe(true);
+    expect(d.sunk).toBe(true);
+  });
+  it('her carpenters patching while she\'s out put it off: shot slower than they patch, she never goes down', () => {
+    const d = new Damage(WAR_FRIGATE);
+    for (let i = 0; i < 15; i++) d.hit('large', 0, 'L');
+    for (let i = 0; i < 20; i++) { for (let t = 0; t < 40; t++) d.tick(0.5); expect(d.hit('large', 0, 'L').sunk).toBe(false); }
+  });
+  it('where nobody sinks (`sinks` false) she never does; refitted, she\'s as new', () => {
+    const d = new Damage(SLOOP);
+    for (let i = 0; i < 10; i++) expect(d.hit('large', 0, 'L', false).sunk).toBe(false);
+    const z = new Damage(SLOOP);
+    for (let i = 0; i < 5; i++) z.hit('large', 0, 'L');
+    expect(z.sunk).toBe(true);
+    expect(z.tick(5)).toEqual([]);
+    z.refit();
+    expect([z.sunk, z.out, z.holes.length, z.water]).toEqual([false, false, 0, 0]);
+  });
+});

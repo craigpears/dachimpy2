@@ -13,6 +13,9 @@ export const DAMAGE = {
     DRAG: 0.6,
     /** Knocked out at full damage, she's back in action under this share of it. */
     RECOVER: 0.6,
+    /** Knocked out, she sinks with this share of full damage more on her (a war frigate 12 small shots' worth more, six
+        large; a sloop between one and two large). */
+    SINK: 0.4,
 };
 let ids = 0;
 /** One ship's damage and her crew working on it. */
@@ -23,6 +26,8 @@ export class Damage {
     water = 0;
     /** Knocked out: dead in the water. */
     out = false;
+    /** Sunk: shot on while she was knocked out till she went down. */
+    sunk = false;
     full;
     carp;
     pump;
@@ -36,18 +41,27 @@ export class Damage {
     total() { return this.holes.reduce((t, h) => t + h.left, 0); }
     /** Her damage as a share of full. */
     share() { return Math.min(1, this.total() / this.full); }
-    /** Struck by a shot of that size, there: the hole it makes (knocking her out if it's her last). */
-    hit(gun, along, side) {
+    /** Struck by a shot of that size, there: the hole it makes (knocking her out if it's her last; sinking her if she
+        was knocked out already and it's more than she can take, `sinks` false where nobody sinks). */
+    hit(gun, along, side, sinks = true) {
         const hole = { id: ++ids, along: Math.max(-0.5, Math.min(0.5, along)), side, gun, left: DAMAGE.SHOT[gun] };
+        const was = this.out;
         this.holes.push(hole);
         const out = !this.out && this.total() >= this.full - 1e-9;
         if (out)
             this.out = true;
-        return { hole, out };
+        const sunk = sinks && was && !this.sunk && this.total() >= this.full * (1 + DAMAGE.SINK) - 1e-9;
+        if (sunk)
+            this.sunk = true;
+        return { hole, out, sunk };
     }
+    /** Refitted (back in action after she sank): no holes, a dry bilge. */
+    refit() { this.holes = []; this.water = 0; this.out = false; this.sunk = false; }
     /** Her crew at work a while: her carpenters on the oldest hole, her bilgers on the water, the water coming in. */
     tick(dt) {
         const out = [];
+        if (this.sunk)
+            return out;
         let work = this.carp * dt;
         while (work > 0 && this.holes.length) {
             const h = this.holes[0], d = Math.min(work, h.left);

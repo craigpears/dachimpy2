@@ -68,8 +68,17 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   (not checked: three of a frigate's large shots). Her carpenters patch the oldest hole first, her bilgers pump,
   both quicker with more stations (by the square root of her carpentry and bilge stations: a frigate's 18 and 12, a
   sloop's 2 and 2). Water comes in in proportion to her damage and slows her moves (up to 60% longer, full). At full
-  damage she's knocked out: dead in the water, no influence, till her crew have her back under 60% (a non-sinking
-  blockade's way).
+  damage she's knocked out: dead in the water, no influence, till her crew have her back under 60%.
+- **Sinking** (15 Nov: "eventually you do need ships to be able to [sink]. Because that's part of the joy of
+  blockading is, oh, look, we've lost control of the central area, we've got to get back in there again"): a sinking
+  blockade (`BLOCKADE.SINKING`). A ship knocked out and still shot on sinks once she's 40% past full damage
+  (`DAMAGE.SINK`: a war frigate six large shots more, a sloop one or two); her carpenters keep at it while she's out,
+  so shot slowly enough she never goes down, and her friends can save her by driving off whoever's finishing her.
+  Sunk, she settles by the stern, bow lifting, and goes under; she's off the board (in nobody's way, no influence, no
+  guns) for 25 s (`RETURN`), then comes back refitted where she came in at the start, her side's own edge, to fight
+  her way back in (waiting while anyone's lying there). The bots fire on a knocked-out enemy to sink her, and a war
+  frigate's fights weigh twice as much against one (`FINISH`), and more against an enemy near a knocked-out friend
+  (`RESCUE`). Not YPPedia's numbers: ours, to shape.
 - **Seen**: every ship's crew aboard, little pirates at work (a frigate's helmsman, three carpenters and two
   bilgers; a sloop's helmsman, a carpenter and a bilger), in their side's colours; a hole made with a bang where the
   shot comes down, a dark hole ringed with raw splintered wood (it shows on black paint), patched with a fresh plank
@@ -140,6 +149,9 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   344 s; raiders on a raid hit frigates mostly from off their ends (25 hits to 15 from the side, those on the way in),
   frigates hitting raiders 9 to 22 times a round. The brawl: the two land 9 to 24 hits each in two minutes, one
   knocked out at 37 s in one, at 111 s in another, neither in the third.
+- With sinking, three seeded rounds: 5 to 8 ships sunk a round (frigates and sloops both), every one back; a frigate in
+  the heart in two of the three (54 and 311 s); 4.4 to 4.8 s of computing a round. A frigate knocked out by a gate can
+  lie in its mouth, in everyone's way, till she's finished.
 
 ## 5. To shape with the user
 
@@ -153,9 +165,8 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
 - The styles' own mechanics (IDEAS.md): the Atlantean launching little craft (trikes, an octopus), the ghost ship
   gliding through rocks.
 - Frigates getting into the heart more often (two rounds in four), and the bots' fights round the gates.
-- **Ships that sink** (15 Nov: "eventually you do need ships to be able to [sink]. Because that's part of the joy of
-  blockading is, oh, look, we've lost control of the central area, we've got to get back in there again"): a sinking
-  blockade's way, a ship sunk coming back from her side's edge. TODO.md.
+- Sinking's numbers (40% past full, 25 s away), and how long a knocked-out ship lies dead in the water: a frigate
+  kept under fire can lie out for two minutes or more before she's finished or saved.
 - **The buoys' flags clear, and the bots as teams** (15 Nov: "the [war frigs] control that large open area and protect
   the sloops ... the sloops ... help the [war frigs] cover more ground"). TODO.md.
 - **Admiral mode** (15 Nov: "give each ship a target or directive, where it's going, what it's doing ... then you

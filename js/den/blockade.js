@@ -168,9 +168,19 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
       const V = ships[shot.what.id];
       if (shot.hole) V.pending.delete(shot.hole.id);
       if (shot.out) { say(`${V.s.name} is knocked out: dead in the water till her crew rebuild her`, V.s.id === me); saw(V.s.id, 'out', 5); }
+      if (shot.sunk) sank(V, z);
     } else { burst(z.clone().setY(0.1), '#e8f4fa', 16, 4); burst(z.clone().setY(0.1), '#9cc8d4', 8, 2.5); }
   }
 
+  /** She's gone down (the rules sank her as the shot was fired; seen as it lands): said, a great splash. */
+  function sank(V, z) {
+    say(`${V.s.name} has gone down! She'll be back from her side's edge in ${B.RETURN} seconds`, V.s.id === me);
+    saw(V.s.id, 'sunk', 8);
+    burst(z.clone().setY(0.2), '#e8f4fa', 30, 6); burst(z.clone().setY(0.2), '#9cc8d4', 18, 4);
+    V.sinking = true;
+  }
+  /** How long she takes going under, seen. */
+  const SINK_SECS = 5;
   const SAY_GUN = { L: 'port', R: 'starboard' };
   /** What's just happened worth a look (for the camera's director, spectating): { at (clock), ship, what, weight }. */
   const action = [];
@@ -186,9 +196,10 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
       // (the bots' broadsides: fired through the rules, seen here as they fly)
       const ev = b.tick(dt);
       for (const got of b.fired.splice(0)) show(got);
-      for (const { gun, e, hit } of ev.guns) {
+      for (const { gun, e, hit, sunk } of ev.guns) {
         if (e.kind === 'fire') { turretFire(bastions[gun], e, v3(...e.to)); continue; }
         turretLand(bastions[gun], { ...e, hit: hit !== null });
+        if (sunk) sank(ships[hit], v3(...e.to));
         if (hit !== null && hit === me) say(`The gate's gun has hit ${b.ship(hit).name}!`, true);
       }
       if (ev.scored && me >= 0) {
@@ -202,10 +213,19 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
       });
       for (const gl of gls) gl.tick(dt);
       // Each ship where her helm has her, riding the swell, heeling into her turns, her damage drawn on her.
+      // (back after she sank: her holes gone, a splash where she comes in)
+      for (const id of ev.returned) {
+        const V = ships[id];
+        V.dl.reset(); V.sinkT = 0; V.sinking = false; V.m.visible = true; V.name.visible = true;
+        const at = drawnAt(V.s.h, V.s.helm.now()), p = v3(at.c, at.r, 0.3);
+        burst(p, '#e8f4fa', 24, 5);
+        if (id === me) say(`${V.s.name} is back, refitted: fight your way in again`); else saw(id, 'back', 4);
+      }
       for (const V of ships) {
         const s = V.s, h = s.helm, at = drawnAt(s.h, h.now()), turning = h.cur && (h.cur.m === 'L' || h.cur.m === 'R') && !h.cur.bump && h.t < h.cur.secs;
         V.heel += ((turning ? (h.cur.m === 'L' ? -1 : 1) * (V.big ? 0.05 : 0.12) : 0) - V.heel) * Math.min(1, dt * 3);
-        const d = V.dl.tick(dt, s.dmg, { pending: V.pending });
+        // (gone under: nothing more of her drawn, her smoke and crew with her)
+        const under = s.away > 0 && (V.sinkT ?? 0) > SINK_SECS + 0.7, d = under ? { low: 0, list: 0, turn: 0 } : V.dl.tick(dt, s.dmg, { pending: V.pending });
         const [x, z] = seaXZ(at.c, at.r);
         V.m.position.set(x, d.low + Math.sin(clock * (V.big ? 0.8 : 1.1) + s.id) * 0.05, z);
         V.m.rotation.set(V.heel + d.list, Math.PI / 2 - at.a * Math.PI / 2 + d.turn, Math.sin(clock * 0.6 + s.id) * 0.012, 'YXZ');
@@ -214,6 +234,16 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
         V.name.material.opacity = s.dmg.out ? 0.5 : 1;
         V.ring.position.set(x, 0.05, z); V.ring.visible = !s.dmg.out;
         V.ring.material.opacity = s.id === me ? 0.55 : 0.28;
+        // Sunk: she settles by the stern, bow lifting, and goes under (once the shot that did it has landed); then
+        // she's gone till she comes back.
+        if (s.away > 0) {
+          V.sinkT = (V.sinkT ?? 0) + dt;
+          const k = Math.max(0, Math.min(1, (V.sinkT - 0.7) / SINK_SECS));
+          V.m.visible = k < 1; V.name.visible = false; V.ring.visible = false;
+          V.m.position.y = d.low - k * k * (V.big ? 10 : 5);
+          V.m.rotation.z = k * 0.45;
+          if (k > 0 && k < 1 && Math.random() < dt * 6) burst(v3(at.c, at.r, 0.2), '#d8eef6', 4, 2);
+        }
       }
       // The buoys, by whose they are; contested, flickering.
       B.BUOYS.forEach((x, i) => {
@@ -244,6 +274,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
     click(point) {
       if (me < 0) return;
       const [c, r] = seaCR(point.x, point.z).map(Math.round), s = b.ship(me);
+      if (s.away > 0) return say(`She's gone down: she'll be back in ${Math.ceil(s.away)} seconds`, true);
       if (s.dmg.out) return say('She\'s dead in the water: her crew are rebuilding her', true);
       const got = b.drop(me, c, r);
       if (!got) say(`${s.name} can't get anywhere near there`, true);
@@ -281,7 +312,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
         score: { ...b.score }, clock: b.clock, turn: b.turnT, over: b.over, leader: b.leader(),
         buoys: B.BUOYS.map((x) => ({ pennants: x.pennants, hold: b.hold(x), heart: x.at[0] >= B.HEART.c0 && x.at[0] <= B.HEART.c1 && x.at[1] >= B.HEART.r0 && x.at[1] <= B.HEART.r1 })),
         gates: b.gates.map((x) => ({ towers: x.towers.map((t) => t.hp), open: x.open() })),
-        ships: b.ships.map((x) => ({ id: x.id, name: x.name, team: x.team, kind: x.kind, share: x.dmg.share(), water: x.dmg.water, out: x.dmg.out, doing: x.id === me ? 'yours' : bots.doing(b, x.id) })),
+        ships: b.ships.map((x) => ({ id: x.id, name: x.name, team: x.team, kind: x.kind, share: x.away > 0 ? 0 : x.dmg.share(), water: x.away > 0 ? 0 : x.dmg.water, out: x.dmg.out || x.away > 0, away: x.away > 0, doing: x.id === me ? (x.away > 0 ? `yours, sunk: back in ${Math.ceil(x.away)}s` : 'yours') : bots.doing(b, x.id) })),
         me: s && { name: s.name, team: s.team, h: s.h, moves: h.slot >= 0 ? h.turn : h.next(), lit: h.lit(), mine: h.mine.length, load: { L: s.guns.wait.L / s.h.reload, R: s.guns.wait.R / s.h.reload }, out: s.dmg.out },
       };
     },

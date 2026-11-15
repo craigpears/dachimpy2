@@ -21,6 +21,9 @@ export const BOTS = {
     BOW: 8,
     /** How near an enemy has to be (squares) for a frigate to fight her, and how much she's worth fighting. */
     ENGAGE: 9, FIGHT: 3,
+    /** How much more a fight's worth to finish an enemy who's knocked out, or to save a friend who is (an enemy within
+        SAVE squares of her). */
+    FINISH: 2, RESCUE: 1.6, SAVE: 7,
 };
 const same = (a, z) => !!a && !!z && JSON.stringify(a) === JSON.stringify(z);
 /** The same thing to do, if not exactly (a raid on the same ship, wherever she's got to; hiding in the same cove). */
@@ -101,7 +104,7 @@ export class Bot {
     }
     tick(b, dt, mates = []) {
         const s = b.ship(this.id);
-        if (s.dmg.out) {
+        if (s.dmg.out || s.away > 0) {
             this.goal = null;
             return;
         }
@@ -122,7 +125,8 @@ export class Bot {
             if (!s.guns.ready(side))
                 continue;
             const shots = b.aim(s.id, side), at = (id) => b.ship(id);
-            const foe = shots.some((x) => x.what?.what === 'ship' && at(x.what.id).team !== s.team && !at(x.what.id).dmg.out);
+            // (an enemy, knocked out or not in a sinking blockade: finishing her sinks her)
+            const foe = shots.some((x) => x.what?.what === 'ship' && at(x.what.id).team !== s.team && (BLOCKADE.SINKING || !at(x.what.id).dmg.out));
             // (a friend in the way, or one of a brawl's ships, left to it: holding fire)
             const friend = shots.some((x) => x.what?.what === 'ship' && (at(x.what.id).team === s.team || this.spare.has(x.what.id)));
             const gate = this.goal?.kind === 'gate' && s.h.guns === 'large' && shots.some((x) => x.what?.what === 'tower');
@@ -149,7 +153,7 @@ export class Bot {
     pick(b, s, mates) {
         // A brawl: she fights her foe off her side, broadside to broadside, keeping her spot while she's getting there or
         // her guns bear, and finding another as the foe moves off.
-        if (this.foe !== null && !b.ship(this.foe).dmg.out) {
+        if (this.foe !== null && b.ship(this.foe).away <= 0 && (BLOCKADE.SINKING || !b.ship(this.foe).dmg.out)) {
             const fight = this.raid(b, s, Infinity, true, this.foe);
             if (fight) {
                 const was = this.goal?.kind === 'fight' && this.goal.on === this.foe ? this.goal.at : null;
@@ -221,7 +225,10 @@ export class Bot {
             const fight = this.raid(b, s, BOTS.ENGAGE, true);
             if (fight) {
                 const was = this.goal?.kind === 'fight' && this.goal.on === fight.on, eta = Math.hypot(fight.at[0] - s.helm.pose.c, fight.at[1] - s.helm.pose.r) / s.h.stride * s.h.move;
-                best.push({ goal: { kind: 'fight', on: fight.on, at: was && this.goal?.kind === 'fight' ? this.goal.at : fight.at }, score: BOTS.FIGHT * (b.ship(fight.on).kind === 'frigate' ? 1.5 : 1) / (4 + eta) });
+                const o = b.ship(fight.on), near = (x) => Math.hypot(x.helm.pose.c - o.helm.pose.c, x.helm.pose.r - o.helm.pose.r) <= BOTS.SAVE;
+                // (to finish her off, or to drive her off a friend who's knocked out)
+                const why = (o.dmg.out ? BOTS.FINISH : 1) * (b.ships.some((x) => x.team === s.team && x !== s && x.dmg.out && x.away <= 0 && near(x)) ? BOTS.RESCUE : 1);
+                best.push({ goal: { kind: 'fight', on: fight.on, at: was && this.goal?.kind === 'fight' ? this.goal.at : fight.at }, score: BOTS.FIGHT * (o.kind === 'frigate' ? 1.5 : 1) * why / (4 + eta) });
             }
         }
         // Best first.
@@ -252,7 +259,8 @@ export class Bot {
         while none of the frigate's can bear on her; a frigate's fight, a square off her side, broadside to broadside. */
     raid(b, s, reach = BOTS.REACH, any = false, only) {
         const p = s.helm.pose;
-        const foes = b.ships.filter((o) => o.team !== s.team && (any || o.kind === 'frigate') && !o.dmg.out && (only === undefined ? !this.spare.has(o.id) : o.id === only))
+        // (a frigate's fight can be with one knocked out, to sink her, in a sinking blockade; a raider's never)
+        const foes = b.ships.filter((o) => o.team !== s.team && (any || o.kind === 'frigate') && o.away <= 0 && (any && BLOCKADE.SINKING ? true : !o.dmg.out) && (only === undefined ? !this.spare.has(o.id) : o.id === only))
             .map((o) => ({ o, m: drawnAt(o.h, { c: o.helm.pose.c, r: o.helm.pose.r, a: o.helm.pose.d }) }))
             .filter(({ m }) => Math.hypot(m.c - p.c, m.r - p.r) <= reach)
             .sort((a, z) => (a.o.kind === z.o.kind ? 0 : a.o.kind === 'frigate' ? -1 : 1) || Math.hypot(a.m.c - p.c, a.m.r - p.r) - Math.hypot(z.m.c - p.c, z.m.r - p.r));
@@ -366,6 +374,8 @@ export class Bots {
     /** What a ship's bot is up to, in plain words. */
     doing(b, id) {
         const bot = this.bots.find((x) => x.id === id), s = b.ship(id);
+        if (s.away > 0)
+            return `sunk: back in ${Math.ceil(s.away)}s from her side's edge`;
         if (s.dmg.out)
             return 'knocked out: her crew rebuilding her';
         const g = bot?.goal;

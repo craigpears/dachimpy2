@@ -175,9 +175,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   - **Ships that sink (15 Nov):** "while I do like the idea that ... a quick hit just requires a bit of patching,
     eventually you do need ships to be able to [sink]. Because that's part of the joy of blockading is, oh, look, we've
     lost control of the central area, we've got to get back in there again. And that sense of working your way back in
-    would be lost if you can't [sink] at all." To do: a ship knocked out and still shot (or damaged past it) sinks, and
-    comes back from her side's edge of the board (a sinking blockade's way). Today a knocked-out ship still takes hits
-    and holes (one took 106 in a test) with nothing more happening: that's where sinking goes.
+    would be lost if you can't [sink] at all." Done: a ship knocked out and shot on past full by 40% sinks, goes under
+    by the stern, and comes back refitted 25 s later where she came in, at her side's edge; the bots finish off a
+    knocked-out enemy and fight harder near a knocked-out friend (BLOCKADE.md §3). To playtest.
   - **The buoys' flags clear, and the bots as teams (15 Nov):** "you should see some flags in the middle of those
     things ... the [war frigs] control that large open area and protect the sloops, but the sloops ... help the [war
     frigs] cover more ground while the [war frigs] do the protecting." To do: the buoys' flags plainly seen from the

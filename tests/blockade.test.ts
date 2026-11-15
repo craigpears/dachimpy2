@@ -134,6 +134,53 @@ describe('shooting each other: holes where she\'s shot, and dead in the water (1
   });
 });
 
+describe('a sinking blockade (15 Nov: "that sense of working your way back in would be lost if you can\'t [sink] at all")', () => {
+  const knockOut = (b: Blockade, s: ReturnType<typeof frigate>) => { while (!s.dmg.out) s.dmg.hit('large', 0, 'L'); s.helm.hit(); };
+  it('a frigate knocked out and shot on sinks: off the board, in nobody\'s way, no influence, no guns, till she comes back where she came in', () => {
+    const b = new Blockade(), f = frigate(b, 'crimson'), g = frigate(b, 'gold');
+    // (the two out on open water, the gold frigate's broadside on her)
+    b.ships.filter((s) => s !== f && s !== g).forEach((s, i) => s.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
+    g.helm.moor({ c: 7, r: 10, d: 1 }); f.helm.moor({ c: 7, r: 14, d: 1 }); b.notice();
+    knockOut(b, f);
+    let sunk = false;
+    for (let i = 0; i < 20 && !sunk; i++) { g.guns.tick(9); sunk = (['L', 'R'] as const).some((side) => b.fire(g.id, side)?.shots.some((x) => x.sunk)); }
+    expect(sunk).toBe(true);
+    expect(f.away).toBe(B.RETURN);
+    expect(b.afloat(f)).toBe(false);
+    for (const [c, r] of squares(f.h, f.helm.pose)) expect(b.under(c, r)).toBeNull();
+    expect(B.BUOYS.some((x) => b.reaches(f, x))).toBe(false);
+    f.guns.tick(9);
+    expect(b.fire(f.id, 'L')).toBeNull();
+    let back = -1;
+    for (let t = 0; t < B.RETURN + 2 && back < 0; t += 0.5) if (b.tick(0.5).returned.includes(f.id)) back = t;
+    expect(back).toBeGreaterThan(B.RETURN - 1);
+    expect(f.helm.pose).toEqual(f.start);
+    expect([f.dmg.out, f.dmg.sunk, f.dmg.holes.length]).toEqual([false, false, 0]);
+    for (const [c, r] of squares(f.h, f.helm.pose)) expect(b.under(c, r)?.id).toBe(f.id);
+  });
+  it('someone lying where she came in: she waits till they\'ve gone', () => {
+    const b = new Blockade(), f = frigate(b, 'crimson'), other = frigate(b, 'gold');
+    b.sink(f);
+    other.helm.moor(f.start); b.notice();
+    for (let t = 0; t < B.RETURN + 5; t += 0.5) expect(b.tick(0.5).returned).not.toContain(f.id);
+    other.helm.moor({ c: 7, r: 10, d: 1 }); b.notice();
+    let back = false;
+    for (let t = 0; t < 2 && !back; t += 0.5) back = b.tick(0.5).returned.includes(f.id);
+    expect(back).toBe(true);
+  });
+  it('a bot fires on an enemy who\'s knocked out, to sink her; and leaves her be once she\'s gone', () => {
+    const b = new Blockade(), f = frigate(b, 'crimson'), g = frigate(b, 'gold');
+    b.ships.filter((s) => s !== f && s !== g).forEach((s, i) => s.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
+    g.helm.moor({ c: 7, r: 10, d: 1 }); f.helm.moor({ c: 7, r: 14, d: 1 }); b.notice();
+    knockOut(b, f);
+    const bot = new Bot(g.id, dice(2));
+    let fired = 0;
+    for (let i = 0; i < 300 && f.away <= 0; i++) { bot.tick(b, 0.1); b.fired.splice(0).forEach((x) => { if (x.ship === g.id) fired++; }); b.tick(0.1); }
+    expect(fired).toBeGreaterThan(0);
+    expect(f.away).toBeGreaterThan(0);
+  });
+});
+
 describe('a raider snipes from off a frigate\'s bow or stern (15 Nov: "they snipe at the back or the front of the ship where they\'re safe, then they can\'t return a broadside")', () => {
   it('she makes for a berth across the frigate\'s line past her end, from where her own broadside rakes her and none of the frigate\'s bears on her', () => {
     const b = new Blockade(), raider = b.ships.find((s) => s.raider && s.team === 'gold')!, foe = frigate(b, 'crimson');
@@ -184,11 +231,15 @@ describe('the brawl, to watch (15 Nov: "I want to see two of the big ships reall
 });
 
 describe('the bots, a whole round (15 Nov: "you should see sloops hiding out, sometimes coming out ... while [war frigs] are having a fight to land a few pot shots")', () => {
-  it('sloops in by the side ways first; frigates fight, shoot a gate down and get in; sloops hide, raid, are knocked out and rebuilt; both sides score', () => {
-    const b = new Blockade(), bots = new Bots(b, [], dice(5)), log = { gate: -1, sloopIn: -1, frigateIn: -1, hid: 0, raided: 0, fought: 0, outs: 0 };
+  it('sloops in by the side ways first; frigates fight, shoot a gate down and get in; sloops hide, raid, are knocked out and rebuilt; ships sink and come back; both sides score', () => {
+    // (seed 6: any seed's round has all of this but a frigate getting into the heart, which two rounds in three do)
+    const b = new Blockade(), bots = new Bots(b, [], dice(6)), log = { gate: -1, sloopIn: -1, frigateIn: -1, hid: 0, raided: 0, fought: 0, outs: 0, sunk: 0, back: 0 };
     const wasOut = new Set<number>();
     for (let i = 0; i < B.ROUND * 10; i++) {
-      bots.tick(b, 0.1); b.tick(0.1);
+      bots.tick(b, 0.1);
+      const ev = b.tick(0.1);
+      log.back += ev.returned.length;
+      for (const f of b.fired.splice(0)) for (const x of f.shots) if (x.sunk) log.sunk++;
       if (log.gate < 0 && b.gateOpen()) log.gate = b.clock;
       if (log.sloopIn < 0 && b.ships.some((s) => s.kind === 'sloop' && b.inHeart(s))) log.sloopIn = b.clock;
       if (log.frigateIn < 0 && b.ships.some((s) => s.kind === 'frigate' && b.inHeart(s))) log.frigateIn = b.clock;
@@ -198,10 +249,10 @@ describe('the bots, a whole round (15 Nov: "you should see sloops hiding out, so
     expect(log.sloopIn).toBeGreaterThan(0);
     expect(log.gate).toBeGreaterThan(log.sloopIn);
     expect(log.frigateIn).toBeGreaterThan(log.gate);
-    for (const k of ['hid', 'raided', 'fought', 'outs'] as const) expect(log[k], k).toBeGreaterThan(0);
+    for (const k of ['hid', 'raided', 'fought', 'outs', 'sunk', 'back'] as const) expect(log[k], k).toBeGreaterThan(0);
     expect(b.score.gold).toBeGreaterThan(0);
     expect(b.score.crimson).toBeGreaterThan(0);
     expect(b.over).toBe(true);
-    for (const s of b.ships) for (const [c, r] of squares(s.h, s.helm.pose)) expect(b.rocks.has(`${c},${r}`)).toBe(false);
+    for (const s of b.ships) if (s.away <= 0) for (const [c, r] of squares(s.h, s.helm.pose)) expect(b.rocks.has(`${c},${r}`)).toBe(false);
   }, 120000);
 });

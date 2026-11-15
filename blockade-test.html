@@ -223,11 +223,13 @@ function frame() {
     // (the brawl: between the two while they're close, else on whichever's knocked out, her crew at work; the camera
     // drawn back to keep both in, and drifting slowly round)
     const [a, z] = bk.duel.map((id) => bk.b.ship(id)), fa = bk.focus(a.id), fz = bk.focus(z.id), apart = fa.distanceTo(fz);
-    const out = a.dmg.out ? a : z.dmg.out ? z : null, mid = apart < 50 ? fa.clone().lerp(fz, 0.5) : bk.focus((out ?? a).id);
+    // (one sunk: on the other; far apart, on whichever's knocked out, else Primates Rule on her way)
+    const gone = a.away > 0 ? a : z.away > 0 ? z : null, out = a.dmg.out ? a : z.dmg.out ? z : null;
+    const mid = gone ? bk.focus((gone === a ? z : a).id) : apart < 50 ? fa.clone().lerp(fz, 0.5) : bk.focus((out ?? a).id);
     cam.at.lerp(mid.setY(2), Math.min(1, dt * 1.5));
-    cam.dist += ((apart < 50 ? Math.max(26, Math.min(64, 18 + apart * 0.85)) : 30) - cam.dist) * Math.min(1, dt * 0.8);
+    cam.dist += ((apart < 50 && !gone ? Math.max(26, Math.min(64, 18 + apart * 0.85)) : 30) - cam.dist) * Math.min(1, dt * 0.8);
     cam.yaw += dt * 0.06;
-    $('cineLine').textContent = [a, z].map((s) => `${s.name} ${s.dmg.out ? 'knocked out, her crew rebuilding her' : `${Math.round(s.dmg.share() * 100)}% damaged`}`).join(' · ');
+    $('cineLine').textContent = [a, z].map((s) => `${s.name} ${s.away > 0 ? `sunk, back in ${Math.ceil(s.away)}s` : s.dmg.out ? 'knocked out, her crew rebuilding her' : `${Math.round(s.dmg.share() * 100)}% damaged`}`).join(' · ');
   } else if (cam.follow) cam.at.lerp(bk.focus(bk.you() >= 0 ? bk.you() : cam.watching).setY(2), Math.min(1, dt * 2.5));
   hud();
   if ((sayT -= dt) <= 0) $('say').classList.remove('on');

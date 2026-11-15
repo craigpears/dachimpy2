@@ -15,8 +15,11 @@
    - full damage by her class (FULL; a war frigate's YPPedia's, the sloop's to check);
    - her carpenters patch the holes in order, her bilgers pump, both quicker with more stations (CREW);
    - water comes in faster the more she's damaged, and slows her moves (`drag`);
-   - at full damage she's knocked out, dead in the water (a non-sinking blockade's), till her carpenters have her
-     back under RECOVER of it. */
+   - at full damage she's knocked out, dead in the water, till her carpenters have her back under RECOVER of it;
+   - shot on while she's knocked out, past full by SINK of it, she sinks (the user, 15 Nov: "eventually you do need
+     ships to be able to [sink]. Because that's part of the joy of blockading is, oh, look, we've lost control of the
+     central area, we've got to get back in there again"). Her carpenters keep at it while she's out, so her friends
+     can still save her by driving off whoever's finishing her. */
 import type { GunSize } from './ship-handling.js';
 import type { ShipClass } from './ships.js';
 
@@ -35,6 +38,9 @@ export const DAMAGE = {
   DRAG: 0.6,
   /** Knocked out at full damage, she's back in action under this share of it. */
   RECOVER: 0.6,
+  /** Knocked out, she sinks with this share of full damage more on her (a war frigate 12 small shots' worth more, six
+      large; a sloop between one and two large). */
+  SINK: 0.4,
 };
 
 /** A hole, where it struck: `along` her from stern (-0.5) to bow (0.5), on her port or starboard side (or her
@@ -50,6 +56,8 @@ export class Damage {
   water = 0;
   /** Knocked out: dead in the water. */
   out = false;
+  /** Sunk: shot on while she was knocked out till she went down. */
+  sunk = false;
   readonly full: number;
   readonly carp: number;
   readonly pump: number;
@@ -62,17 +70,24 @@ export class Damage {
   total(): number { return this.holes.reduce((t, h) => t + h.left, 0); }
   /** Her damage as a share of full. */
   share(): number { return Math.min(1, this.total() / this.full); }
-  /** Struck by a shot of that size, there: the hole it makes (knocking her out if it's her last). */
-  hit(gun: GunSize, along: number, side: Hole['side']): { hole: Hole; out: boolean } {
+  /** Struck by a shot of that size, there: the hole it makes (knocking her out if it's her last; sinking her if she
+      was knocked out already and it's more than she can take, `sinks` false where nobody sinks). */
+  hit(gun: GunSize, along: number, side: Hole['side'], sinks = true): { hole: Hole; out: boolean; sunk: boolean } {
     const hole = { id: ++ids, along: Math.max(-0.5, Math.min(0.5, along)), side, gun, left: DAMAGE.SHOT[gun] };
+    const was = this.out;
     this.holes.push(hole);
     const out = !this.out && this.total() >= this.full - 1e-9;
     if (out) this.out = true;
-    return { hole, out };
+    const sunk = sinks && was && !this.sunk && this.total() >= this.full * (1 + DAMAGE.SINK) - 1e-9;
+    if (sunk) this.sunk = true;
+    return { hole, out, sunk };
   }
+  /** Refitted (back in action after she sank): no holes, a dry bilge. */
+  refit() { this.holes = []; this.water = 0; this.out = false; this.sunk = false; }
   /** Her crew at work a while: her carpenters on the oldest hole, her bilgers on the water, the water coming in. */
   tick(dt: number): DamageEvent[] {
     const out: DamageEvent[] = [];
+    if (this.sunk) return out;
     let work = this.carp * dt;
     while (work > 0 && this.holes.length) {
       const h = this.holes[0], d = Math.min(work, h.left);
