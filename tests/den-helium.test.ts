@@ -95,7 +95,7 @@ describe('their lesson: a real board, by the real rules', () => {
     expect(LESSON_SEED).toBeGreaterThan(0);
   });
   it('goes straight to step one after the opening: the whites ringed, walked out, why, your go', () => {
-    expect(plan.map((b) => b.name)).toEqual(['step', 'clear', 'why', 'else', 'burner', 'yours']);
+    expect(plan.map((b) => b.name)).toEqual(['step', 'clear', 'why', 'burner', 'yours']);
     for (const b of plan) { expect(b.says.length).toBeGreaterThan(0); expect(b.note.length).toBeGreaterThan(0); }
   });
   it('plays every move legally on the board, opening and lesson, and burns one white, the opening\'s', () => {

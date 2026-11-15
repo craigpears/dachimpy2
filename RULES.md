@@ -178,6 +178,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   just kind of jumped into it without any context of what it was doing, what it was achieving, what the point
   was"): first what's wrong or wanted on this board, then the move, then what it achieved, the pieces it's about
   ringed. Its words come from the read guide's own text for that trick, so the two say the same.
+- **A lesson's other parts: one button among the puzzle's own, a single level, then Next (15 Nov).** The middle
+  ground between a menu in your way and none at all, after a button floating beside Helium's cutscene ("I'm not
+  liking this button at all ... We've gone from this was too much because there were too many menus to back to
+  where we started"): the wolf den's way ("it's got like lessons at the bottom ... I like that it's a single level.
+  You can click how it works ... It was like click, click, and in. It felt a lot smoother"). So nothing's over the
+  lesson or its cutscene; "Lessons" sits in the row of the puzzle's own buttons once it's yours; a choice opens one
+  plain list in a game's order, no tabs, and a part picked plays; then Next plays the one after it in that list.
+  The structure, tabs and links are the read guide's. Step one still plays straight after the opening, so something
+  happens without a click.
 
 - **Every adventure ends with something to keep (14 Nov).** "If you ... complete [any little adventure], there should
   be some meaningful reward, even if it's a small token thing like a visible persistent change to the map, a creature
