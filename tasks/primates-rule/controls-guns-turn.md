@@ -39,3 +39,4 @@ branch: claude/primates-rule-controls-1119f7
 - 15 Nov: being done: restarted in its own session and worktree, the repository trusted
 - 15 Nov: being done: the original session restarted by you; the duplicate stopped
 - 15 Nov: for you to review: done on its branch (e14baa7): shooting with Q and E, the imperial gate, her wide turn sailed forward and never quicker than the sloop, the pilot there once the point's under her; not merged yet
+- 15 Nov: 15 Nov, from the inbox: "just looking at the Frigate test that just needs to be a bit more dramatic when you hit somebody that needs to be a little explosion animation or at more of an animation and it's strikes the enemy ship" (a hit on frigate-test.html should show a small explosion / strike animation on the enemy ship).

@@ -84,7 +84,7 @@ function find(cards, id) {
 const slug = (t) => t.toLowerCase().replace(/[’']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48);
 /** A card's log: its `## Log` list, a line added. */
 function logged(body, line) {
-  const entry = `- ${today()}: ${line}`;
+  const entry = `- ${today()}: ${String(line).replace(/\s+/g, ' ').trim()}`; // one line, always: the log's read an entry a line
   return /^## Log/m.test(body) ? body.replace(/\s*$/, `\n${entry}\n`) : `${body.replace(/\s*$/, '')}\n\n## Log\n\n${entry}\n`;
 }
 
@@ -378,12 +378,15 @@ function act(c, words, run) {
 export function resume(run = spawn, dir = TASKS) {
   const picked = [];
   for (const c of load(dir).cards) {
-    const lines = c.body.trim().split('\n'), last = lines.at(-1);
+    // its log an entry each (older failure notes ran over several lines)
+    const log = (c.body.split(/^## Log\s*$/m)[1] ?? '').trim().split(/\n(?=- )/).filter(Boolean);
     // what you said last, with nothing after it but one failed try (the runs that failed before 15 Nov's fix, retried once)
-    const at = lines.findLastIndex((l) => /^- [^:]+: you said: "/.test(l)), after = at < 0 ? [] : lines.slice(at + 1);
-    const said = at >= 0 && after.length <= 1 && after.every((l) => /^- [^:]+: acting on it /.test(l)) ? lines[at].match(/^- [^:]+: you said: "(.*)"$/)?.[1] : undefined;
+    const at = log.findLastIndex((l) => /^- [^:]+: you said: "/.test(l)), after = at < 0 ? [] : log.slice(at + 1);
+    const said = at >= 0 && after.length <= 1 && after.every((l) => /^- [^:]+: acting on it /.test(l)) ? log[at].match(/^- [^:]+: you said: "([^]*)"\s*$/)?.[1] : undefined;
     if (said) { act(c, said, run); picked.push(c.id); }
-    else if (c.meta.status === 'inbox' && /^- [^:]+: added\.$/.test(last)) { triage(c, run); picked.push(c.id); }
+    else if (c.meta.status === 'inbox' && /^- [^:]+: added\.$/.test(log[0] ?? '')
+      // not yet sorted; or sorted once and failed (the runs before 15 Nov's fix), retried once
+      && (log.length === 1 || (log.length === 2 && /^- [^:]+: (left in the inbox|sorting )/.test(log[1])))) { triage(c, run); picked.push(c.id); }
   }
   return picked;
 }
@@ -490,7 +493,9 @@ function main(argv) {
     console.log(`tidied ${c.stream}/${c.id}`);
   } else if (cmd === 'move') {
     const c = find(all.cards, pos[0]);
-    if (!all.streams.some((s) => s.id === pos[1])) throw new Error(`No stream "${pos[1]}": ${all.streams.map((x) => x.id).join(', ')}`);
+    // (a stream that isn't there yet is made, as add makes one: named and described with `stream` after)
+    if (!/^[a-z0-9-]+$/.test(pos[1] ?? '')) throw new Error(`A stream is a folder name: "${pos[1]}"`);
+    if (!existsSync(join(TASKS, pos[1]))) { mkdirSync(join(TASKS, pos[1])); writeFileSync(join(TASKS, pos[1], '_stream.md'), format({ name: pos[1], hue: 30 }, '\n')); }
     let id = c.id, n = 2;
     while (existsSync(join(TASKS, pos[1], id + '.md'))) id = `${c.id}-${n++}`;
     renameSync(c.file, join(TASKS, pos[1], id + '.md'));

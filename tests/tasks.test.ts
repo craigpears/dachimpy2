@@ -109,9 +109,12 @@ describe('the task board (the user, 14 Nov: "a clear list of things and what the
       const fake = () => ({ on(ev: string, f: any) { if (ev === 'close') closers.push(f); }, stdout: { on() {} }, stderr: { on() {} }, stdin: { end: (p: string) => { prompts.push(p); } } });
       writeFileSync(join(dir, 'den', 'failed.md'), format({ title: 'Failed', status: 'idea' }, '\nC.\n\n## Log\n\n- 15 Nov: you said: "tidy it"\n- 15 Nov: acting on it did nothing: approve node?\n'));
       writeFileSync(join(dir, 'den', 'twice.md'), format({ title: 'Twice', status: 'idea' }, '\nD.\n\n## Log\n\n- 15 Nov: you said: "tidy it"\n- 15 Nov: acting on it did nothing: x\n- 15 Nov: acting on it did nothing: y\n'));
-      expect(resume(fake, dir).sort()).toEqual(['failed', 'said']);
+      mkdirSync(join(dir, 'inbox'));
+      writeFileSync(join(dir, 'inbox', 'inbox-1.md'), format({ title: 'One', status: 'inbox' }, '\nE.\n\n## Log\n\n- 15 Nov: added.\n- 15 Nov: left in the inbox: I can run\n\nthe two commands once you approve them.\n'));
+      writeFileSync(join(dir, 'inbox', 'inbox-2.md'), format({ title: 'Two', status: 'inbox' }, '\nF.\n\n## Log\n\n- 15 Nov: added.\n'));
+      expect(resume(fake, dir).sort()).toEqual(['failed', 'inbox-1', 'inbox-2', 'said']);
       expect(prompts.some((p) => p.includes('> this is done'))).toBe(true);
-      closers.forEach((f) => f(1)); // the runs finish (failed), freeing their places
+      while (closers.length) closers.shift()!(1); // the runs finish (failed), freeing their places, the waiting ones too
     } finally { rmSync(dir, { recursive: true, force: true }); }
   });
   it('a card tidied up: its text rewritten, its log kept (the user, 15 Nov: "can you tidy this idea card up just so it\'s a bit more concise")', () => {

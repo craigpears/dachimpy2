@@ -15,6 +15,9 @@ on and dictating into here about what the updated status of each thing is.")
      a few words>"`. Said nothing about whether it's done? Leave its status alone.
    - **What it's about changed** (a better name, what's wanted now): `node tools/task.mjs note {{id}} "<what's
      wanted now>" --title "<a better title>"` (the title only if the old one's now wrong).
+   - **Into another stream** (it belongs with something else): `node tools/task.mjs move {{id}} <stream>`, the card
+     itself, never a copy. A stream that isn't there yet is made; then name it and say what it's for, `node
+     tools/task.mjs stream <stream> "<what it's for>" --name "<Its name>"`.
    - **Something else they mention** (a new fix, a new idea, a part to split off): a card of its own, `node
      tools/task.mjs add <stream> "<title>" --asked "<their words>"` (`--status idea` for an idea), in the stream it
      belongs to, then `note {{id}} "split off: <new id>"`. Already a card for it? `note` that card instead.
