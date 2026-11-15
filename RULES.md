@@ -2633,8 +2633,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - Constellations of 3 places in the centre, 2 in the middle, 1 in the third; a fresh board's first 3 and 1.
   - Points: each ring's weight (3, 5, 9) times (1.5 times its places) squared, rounded down (71 the first, 125 the
     usual), times the chart's step in the move's cascade; lines a point a star times their step. No par.
-  - Wild places (ringed in every colour, a paw print), filled by any star: a chart in a chain (a clear before or
-    after it in the same move) deals the next with its centre all wild, two or more clears a fourth wild place in it;
+  - Wild targets (ringed in every colour, a paw print), filled by any star: a chart in a chain (a clear before or
+    after it in the same move) deals the next with its centre all wild, two or more clears a fourth wild target in it;
     a combo's clear (the move's second step or later) turns wild the constellation's places on and beside what it
     cleared. A plain chart deals plain.
   - The cascade named over the stars as it goes: "Single! +3", "Double! +6", "Triple! Constellation! +18".
@@ -2646,12 +2646,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     going up), the board waiting while she talks (Space moves her on). Her words are src/lines/multibella.ts's
     `LESSON`, by board and cue; a slot turned wild by a clear is drawn wild only once that clear's shown. "How it
     works" is four steps in order (`MECHANICS`), N or Next for the next one: a cascade, lines only, +3, +6, +9, its
-    combo clears leaving wild slots; the fourth ring, a star waiting up there, carried round, dropped in by a clear
+    combo clears leaving wild targets; the fourth ring, a star waiting up there, carried round, dropped in by a clear
     under it (250), then the next constellation going up; the same cascade charting the last slot on its third clear
     (375, a line's 3); and Umami's evil constellation (below), first a star at a time (the fifth red makes a line and
     they go), then by her combo, both reds landing together (486).
-  - **"Wild slot"** in her words and the guide's: the Wolf Dens Guide's word, and the players' (the user's too). The
-    code still says wild places.
+  - **"Wild target"** in her words, the guide's and the code's: YPPedia's word (the user, 15 Nov: "Go with yppedia and
+    wild targets"), over "wild slot", the Wolf Dens Guide's and the players'.
   - **Umami's evil constellation at the wolf den (15 Nov):** the user's combo-only constellation (11 Nov, "The
     starlit door"; IDEAS.md), made with Umami in mind, at last somewhere in the world: shown in her lesson, credited
     to Umami in the changelog. Not yet dealt in play.
