@@ -36,7 +36,8 @@ describe('the board, as a blockade board is, and more epic (15 Nov: "three or fo
       expect(mine.filter((s) => s.kind === 'sloop')).toHaveLength(5);
       const edges = new Set(mine.map(({ helm: { pose: p } }) => (p.r <= 2 ? 'south' : p.c <= 2 ? 'west' : p.r >= B.ROWS - 3 ? 'north' : p.c >= B.COLS - 3 ? 'east' : 'none')));
       expect(edges.has('none')).toBe(false);
-      expect(edges.size).toBe(2);
+      // (the frigates by their own edge; the small ships by both side edges, island side and ocean side, 15 Nov)
+      expect(edges.size).toBe(3);
       for (const s of mine) for (const [c, r] of squares(s.h, s.helm.pose)) expect(b.rocks.has(`${c},${r}`), s.name).toBe(false);
     }
   });
@@ -720,5 +721,30 @@ describe('playing a brig (15 Nov: "Are they expected to go on autopilot and you 
     for (let t = 0; t < B.LAUNCH.WEIGH + 1; t += 0.1) b.tick(0.1);
     expect(b.fleet(br.id)).toEqual([br.id]);
     expect(ids.every((id) => b.ship(id).away > 0)).toBe(true);
+  });
+});
+
+describe('island side and ocean side (15 Nov: "for the smaller ships, they should ... be able to spawn ... on any side that they want to ... that\'s probably what\'s creating this one-sided thing where brigs are quite safe")', () => {
+  it('each side\'s sloops and brigs start on both side edges, a brig on each; its frigates on their own edge', () => {
+    const b = new Blockade();
+    for (const team of ['gold', 'crimson'] as const) {
+      const small = b.ships.filter((s) => s.team === team && !s.craft && s.kind !== 'frigate');
+      const west = small.filter((s) => s.helm.pose.c <= 2), east = small.filter((s) => s.helm.pose.c >= B.COLS - 3);
+      expect(west.length + east.length).toBe(small.length);
+      expect(west.some((s) => s.kind === 'brig') && east.some((s) => s.kind === 'brig')).toBe(true);
+      expect(west.filter((s) => s.kind === 'sloop').length).toBeGreaterThan(0);
+      expect(east.filter((s) => s.kind === 'sloop').length).toBeGreaterThan(0);
+      for (const f of b.ships.filter((s) => s.team === team && s.kind === 'frigate')) expect(f.entries).toHaveLength(1);
+    }
+  });
+  it('a sloop sunk comes back in by the other side\'s edge, then her own again', () => {
+    const b = new Blockade(), sl = sloop(b), was = sl.helm.pose.c;
+    b.sink(sl);
+    for (let t = 0; t <= B.RETURN + 1 && sl.away > 0; t += 0.5) b.tick(0.5);
+    expect(sl.away).toBe(0);
+    expect(Math.abs(sl.helm.pose.c - was)).toBeGreaterThan(B.COLS / 2);
+    b.sink(sl);
+    for (let t = 0; t <= B.RETURN + 1 && sl.away > 0; t += 0.5) b.tick(0.5);
+    expect(sl.helm.pose.c).toBe(was);
   });
 });

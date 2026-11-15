@@ -288,7 +288,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     V.sinking = true;
   }
   /** How long she takes going under, seen; and a craft fading, her time up. */
-  const SINK_SECS = 5, FADE_SECS = 1.6;
+  const SINK_SECS = 5, FADE_SECS = 1.6, SPIN_TURNS = 3;
   const SAY_GUN = { L: 'port', R: 'starboard' };
   /** What's just happened worth a look (for the camera's director, spectating): { at (clock), ship, what, weight }. */
   const action = [];
@@ -402,9 +402,16 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
           V.sinkT = (V.sinkT ?? 0) + dt;
           const k = Math.max(0, Math.min(1, (V.sinkT - 0.7) / SINK_SECS));
           V.m.visible = k < 1; V.name.visible = false; V.ring.visible = false;
-          V.m.position.y = d.low - k * k * (V.big ? 10 : 5);
-          V.m.rotation.z = k * 0.45;
-          if (k > 0 && k < 1 && Math.random() < dt * 6) burst(v3(at.c, at.r, 0.2), '#d8eef6', 4, 2);
+          // (spinning down, as Puzzle Pirates sinks a ship (the user, 15 Nov: "we definitely need the spinning sink
+          // animation"): round and round, faster and faster, a little heeled, going under, the sea swirling white
+          // round her; then back from her side's edge)
+          const spin = k * k * Math.PI * 2 * SPIN_TURNS;
+          V.m.position.y = d.low - k * k * (V.big ? 9 : 4.5);
+          V.m.rotation.y += spin; V.m.rotation.z = 0.12 + k * 0.25;
+          if (k > 0 && k < 1) {
+            const R = (V.big ? 4.5 : V.brig ? 3.4 : 2.2) * (1 - k * 0.4), a = clock * 7 + spin;
+            for (const side of [0, Math.PI]) if (Math.random() < dt * 22) burst(new THREE.Vector3(V.m.position.x + Math.cos(a + side) * R, 0.15, V.m.position.z + Math.sin(a + side) * R), '#e8f4fa', 6, 1.8);
+          }
         }
       }
       // The buoys, by whose they are; contested, flickering.

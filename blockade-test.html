@@ -74,7 +74,7 @@
 <body>
 <div class="ui">
   <h1>Blockade</h1>
-  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants. The best are in the fort in the middle: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. Sloops hide in the lagoons, inside their reefs where no frigate can follow, and dart out; when the frigates get into the heart, the winds out of it carry the sloops away to the lagoons. Each side's war brig launches her craft at the frigates: Tidecaller's turtles come at them from astern and ram, Grave Lantern's phantom sloops, slow but never to be hit, dart at anything slow or sat still. Shoals round the lagoons scrape a frigate's bottom. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops; in a brig, L launches her craft, Tab takes the helm of one of them (the rest on autopilot) and G calls them home.</p>
+  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants. The best are in the fort in the middle: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. Sloops hide in the lagoons, inside their reefs where no frigate can follow, and dart out; when the frigates get into the heart, the winds out of it carry the sloops away to the lagoons. Each side's war brig launches her craft at the frigates: Tidecaller's turtles come at them from astern and ram, Grave Lantern's phantom sloops, slow but never to be hit, dart at anything slow or sat still. Shoals round the lagoons scrape a frigate's bottom. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops; in a brig, L launches her craft, Tab takes the helm of one of them (the rest on autopilot) and G calls them home. Watching, W A S D move the camera about and Q E turn it.</p>
   <div class="score"><span class="gold" id="sg">0</span><span id="clock">5:00</span><span class="crimson" id="sc">0</span></div>
   <div class="bar" title="This blockade turn: scored when it fills"><i id="turn"></i></div>
   <div class="buoys" id="buoys"></div>
@@ -196,10 +196,21 @@ $('whole').onclick = () => {
 };
 $('again').onclick = () => location.reload();
 document.querySelectorAll('[data-key]').forEach((b) => { b.onclick = () => bk.key(b.dataset.key); });
+// (spectating: W A S D, or the arrows, move the camera about over the sea, Q E turn it; the user, 15 Nov: "when I'm
+// spectating, I want to be able to like WASD my way around"; at a helm, they're her moves)
+const PAN = { w: 1, s: 1, a: 1, d: 1, q: 1, e: 1, arrowup: 'w', arrowdown: 's', arrowleft: 'a', arrowright: 'd' }, held = new Set();
 addEventListener('keydown', (e) => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
-  if (bk.key(e.key.toLowerCase())) e.preventDefault();
+  const k = e.key.toLowerCase();
+  if (bk.you() < 0 && PAN[k]) {
+    held.add(PAN[k] === 1 ? k : PAN[k]);
+    if (cam.follow || cam.director) { cam.follow = false; cam.director = false; $('director').classList.remove('on'); $('whole').classList.remove('on'); }
+    e.preventDefault(); return;
+  }
+  if (bk.key(k)) e.preventDefault();
 });
+addEventListener('keyup', (e) => { const k = e.key.toLowerCase(); held.delete(PAN[k] === 1 ? k : PAN[k] ?? k); });
+addEventListener('blur', () => held.clear());
 
 // ----- the panel: the score and the clock, the buoys, your moves and guns, every ship -----
 const TOK = { F: '↑', L: '↰', R: '↱' }, P = ['', 'I', 'II', 'III', 'IIII', 'V'];
@@ -279,6 +290,13 @@ function frame() {
   const dt = Math.min(0.05, clock.getDelta());
   bk.tick(dt);
   tickSparks(dt);
+  // (the camera moved about by hand, spectating: along the sea the way it's looking, quicker the further out it is)
+  if (held.size && bk.you() < 0) {
+    const f = (held.has('w') ? 1 : 0) - (held.has('s') ? 1 : 0), r = (held.has('d') ? 1 : 0) - (held.has('a') ? 1 : 0), v = Math.max(cam.dist, 30) * 0.9 * dt;
+    cam.at.x += (-Math.sin(cam.yaw) * f + Math.cos(cam.yaw) * r) * v;
+    cam.at.z += (-Math.cos(cam.yaw) * f - Math.sin(cam.yaw) * r) * v;
+    cam.yaw += ((held.has('q') ? 1 : 0) - (held.has('e') ? 1 : 0)) * dt * 1.4;
+  }
   // Spectating with the director: on to whatever's happening, never cutting more often than every few seconds, the
   // camera drifting slowly round her.
   if (bk.you() < 0 && cam.director && (cam.cut -= dt) <= 0) { const id = bk.director(); if (id !== cam.watching) { cam.watching = id; cam.cut = 5; sig = ''; } }

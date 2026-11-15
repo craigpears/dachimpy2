@@ -1,6 +1,6 @@
 ---
 title: Blockade sinking: a ship spins as she goes down, as in Puzzle Pirates, then sails back in from her entry
-status: asked
+status: playtest
 asked: 15 Nov
 updated: 15 Nov
 ---
@@ -10,3 +10,5 @@ updated: 15 Nov
 ## Log
 
 - 15 Nov: added.
+- 15 Nov: being done
+- 15 Nov: for you to playtest

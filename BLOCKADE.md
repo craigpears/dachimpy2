@@ -333,6 +333,18 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   them home; a craft you're steering gone home puts you back at her helm. Steering a turtle leaves the brig at anchor
   undefended: the triangle's weakness, felt.
 
+- **Island side and ocean side, and a spinning sink** (15 Nov: "each side is swarming one of the lagoons ... they're
+  not really doing much to compete each other's lagoons"; "for the smaller ships, they should ... be able to spawn ...
+  on any side that they want to ... island and oceanside spawns ... brigs are quite safe because all the sloops are
+  spawning around them"; "we definitely need the spinning sink animation"):
+  - a sloop or a brig has two entries, her side's edge and the same place on the far one (`farSide`); each side starts
+    a brig and two sloops on the far edge (`far`); sunk, she comes back by the other entry from last time;
+  - after, two games: an enemy sloop within 5 squares of a brig at anchor 30 to 38% of the time (was 5%), sloops'
+    hits on brigs 62 and 71 a game (was 16); but each lagoon still ends up mostly one side's (flipped: the far
+    starters take the other side's);
+  - a ship sunk spins down, three turns, faster and faster, the sea swirling white round her;
+  - spectating, W A S D move the camera and Q E turn it.
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of

@@ -87,9 +87,9 @@ export interface Team { id: TeamId; name: string; ships: FleetShip[] }
 /** How a blockade's set up, if not as BLOCKADE has it: the sides' fleets; `open`, open sea (no fort, gates, reefs, rocks
     or winds: a skirmish's, src/blockade-skirmish.ts); `skirmish`, a ship sunk stays sunk. */
 export interface Setup { teams?: Team[]; open?: boolean; skirmish?: boolean }
-/** A ship of a side's fleet: her name, kind, where she comes in, (a sloop) whether her bot's a raider, and (a brig)
-    what she launches. */
-export interface FleetShip { name: string; kind: Kind; at: Pose; raider?: boolean; craft?: CraftKind }
+/** A ship of a side's fleet: her name, kind, where she comes in, (a sloop) whether her bot's a raider, (a brig) what she
+    launches, and (a sloop or a brig) whether she starts on the far side's edge instead (the same place, across). */
+export interface FleetShip { name: string; kind: Kind; at: Pose; raider?: boolean; craft?: CraftKind; far?: boolean }
 
 /** The board (c across, r up from the south edge). */
 export const BLOCKADE = {
@@ -190,23 +190,23 @@ export const BLOCKADE = {
       { name: 'Primates Rule', kind: 'frigate', at: { c: 17, r: 2, d: 0 } },
       { name: 'Coral Throne', kind: 'frigate', at: { c: 27, r: 2, d: 0 } },
       { name: 'Lucky Banana', kind: 'sloop', at: { c: 1, r: 10, d: 1 }, raider: true },
-      { name: 'Grin and Bear It', kind: 'sloop', at: { c: 1, r: 16, d: 1 } },
+      { name: 'Grin and Bear It', kind: 'sloop', at: { c: 1, r: 16, d: 1 }, far: true },
       { name: 'Cheeky Monkey', kind: 'sloop', at: { c: 1, r: 20, d: 1 } },
-      { name: 'Bananarama', kind: 'sloop', at: { c: 1, r: 26, d: 1 }, raider: true },
+      { name: 'Bananarama', kind: 'sloop', at: { c: 1, r: 26, d: 1 }, raider: true, far: true },
       { name: 'Coconut Shy', kind: 'sloop', at: { c: 1, r: 13, d: 1 } },
       { name: 'Tidecaller', kind: 'brig', at: { c: 2, r: 23, d: 1 }, craft: 'ram' },
-      { name: 'Pearl Diver', kind: 'brig', at: { c: 2, r: 7, d: 1 }, craft: 'ram' },
+      { name: 'Pearl Diver', kind: 'brig', at: { c: 2, r: 7, d: 1 }, craft: 'ram', far: true },
     ] },
     { id: 'crimson', name: 'Dalnoth\'s flag', ships: [
       { name: 'Iron Pride', kind: 'frigate', at: { c: 26, r: 33, d: 2 } },
       { name: 'Eldritch Wail', kind: 'frigate', at: { c: 16, r: 33, d: 2 } },
       { name: 'Red Wake', kind: 'sloop', at: { c: 42, r: 25, d: 3 }, raider: true },
-      { name: 'Smoke and Mirrors', kind: 'sloop', at: { c: 42, r: 19, d: 3 } },
+      { name: 'Smoke and Mirrors', kind: 'sloop', at: { c: 42, r: 19, d: 3 }, far: true },
       { name: 'Scarlet Fever', kind: 'sloop', at: { c: 42, r: 15, d: 3 } },
-      { name: 'Blood Orange', kind: 'sloop', at: { c: 42, r: 9, d: 3 }, raider: true },
+      { name: 'Blood Orange', kind: 'sloop', at: { c: 42, r: 9, d: 3 }, raider: true, far: true },
       { name: 'Rust Bucket', kind: 'sloop', at: { c: 42, r: 22, d: 3 } },
       { name: 'Grave Lantern', kind: 'brig', at: { c: 41, r: 12, d: 3 }, craft: 'ghost' },
-      { name: 'Wraith\'s Wake', kind: 'brig', at: { c: 41, r: 28, d: 3 }, craft: 'ghost' },
+      { name: 'Wraith\'s Wake', kind: 'brig', at: { c: 41, r: 28, d: 3 }, craft: 'ghost', far: true },
     ] },
   ] as { id: TeamId; name: string; ships: FleetShip[] }[],
   /** How near (squares) a ship has to be to another for her moving to make the other's pilot think again. */
@@ -271,6 +271,9 @@ export interface Ship {
   sea: ShipSea; helm: ShipHelm; guns: Guns; dmg: Damage;
   /** Where she came in at the start (and comes back in after she's sunk). */
   start: Pose;
+  /** Where she can come in (a frigate, her own edge facing her gate; a sloop or a brig, her side's edge or the far one,
+      island side or ocean side as a Puzzle Pirates blockade has it), and which she came in by last. */
+  entries: Pose[]; entry: number;
   /** Sunk: seconds till she's back (0 on the board). Off the board meanwhile: in nobody's way, no influence. A brig's
       craft not launched: Infinity. */
   away: number;
@@ -290,6 +293,9 @@ export interface Fired { ship: number; side: Side; shots: FiredShot[] }
 /** A buoy's state just now: whose (the one side influencing it), contested, or nobody's. */
 export type Hold = TeamId | 'contested' | null;
 export type Ticked = { sail: Map<number, SailEvent[]>; damage: Map<number, DamageEvent[]>; guns: { gun: number; e: TurretEvent; hit: number | null; hole?: Hole; sunk?: boolean }[]; scored: boolean; returned: number[]; faded: number[]; rams: Rammed[]; scrapes: { ship: number; at: [number, number]; hole: Hole; sunk: boolean }[] };
+
+/** The same place on the far side's edge: across the board, facing the other way (a sloop's or a brig's other entry). */
+export function farSide(p: Pose): Pose { return { c: BLOCKADE.COLS - 1 - p.c, r: p.r, d: p.d === 1 ? 3 : p.d === 3 ? 1 : p.d }; }
 
 export class Blockade {
   rocks = new Set<string>();
@@ -346,7 +352,12 @@ export class Blockade {
       if (s.kind === 'frigate') sea.toll = { squares: this.shoals, secs: B.SHOALS.TOLL };
       sea.chart = this.charts[s.kind] ??= new HullChart(sea.bare());
       sea.near = B.IN_WAY;
-      this.ships.push({ id: me, name: s.name, team: team.id, kind: s.kind, h, cls: CLASSES[s.kind], raider: !!s.raider, sea, helm: new ShipHelm(sea, { ...s.at }), guns: new Guns(h.reload), dmg: new Damage(CLASSES[s.kind]), start: { ...s.at }, away: 0, launched: -Infinity });
+      // (a sloop or a brig on the blockade's board can come in by either side's edge: her own, or the same place on the
+      // far one; the user, 15 Nov: "for the smaller ships, they should ... be able to spawn ... on any side that they
+      // want to ... island and oceanside spawns", so no side's lagoon is a safe home for its brigs)
+      const entries = s.kind !== 'frigate' && !setup.open && !setup.skirmish ? [{ ...s.at }, farSide(s.at)] : [{ ...s.at }], entry = s.far && entries.length > 1 ? 1 : 0;
+      const at = entries[entry];
+      this.ships.push({ id: me, name: s.name, team: team.id, kind: s.kind, h, cls: CLASSES[s.kind], raider: !!s.raider, sea, helm: new ShipHelm(sea, { ...at }), guns: new Guns(h.reload), dmg: new Damage(CLASSES[s.kind]), start: { ...at }, away: 0, launched: -Infinity, entries, entry });
     }
     // (each brig's craft, aboard her till she launches them: after every fleet's ships, so theirs keep their ids)
     for (const team of teams) for (const f of team.ships) {
@@ -358,7 +369,7 @@ export class Blockade {
         sea.carriedBy(this.wind);
         sea.chart = this.charts.sloop ??= new HullChart(sea.bare());
         sea.near = B.IN_WAY;
-        this.ships.push({ id: me, name, team: team.id, kind: 'sloop', h, cls, raider: false, sea, helm: new ShipHelm(sea, { ...by.start }), guns: new Guns(SLOOP_HANDLING.reload), dmg: new Damage(cls), start: { ...by.start }, away: Infinity, craft: { by: by.id, kind: f.craft, life: 0 }, launched: -Infinity });
+        this.ships.push({ id: me, name, team: team.id, kind: 'sloop', h, cls, raider: false, sea, helm: new ShipHelm(sea, { ...by.start }), guns: new Guns(SLOOP_HANDLING.reload), dmg: new Damage(cls), start: { ...by.start }, away: Infinity, craft: { by: by.id, kind: f.craft, life: 0 }, launched: -Infinity, entries: [{ ...by.start }], entry: 0 });
       }
     }
     // (the charts worked out now, while the board's being set up, rather than on the first move)
@@ -598,9 +609,13 @@ export class Blockade {
     }
     return null;
   }
-  /** Back where she came in, refitted, if nobody's lying there: whether she is. */
+  /** Back in, refitted, by the next of her entries that nobody's lying on (a sloop or a brig the other side's edge from
+      last time, then her own again: so she's in the fight at both ends of the board): whether she is. */
   private comeBack(s: Ship): boolean {
-    if (!s.sea.bare().fits(s.start) || squares(s.h, s.start).some(([c, r]) => this.taken.has(key(c, r)))) return false;
+    const n = s.entries.length, free = (p: Pose) => s.sea.bare().fits(p) && !squares(s.h, p).some(([c, r]) => this.taken.has(key(c, r)));
+    const k = Array.from({ length: n }, (_, i) => (s.entry + 1 + i) % n).find((i) => free(s.entries[i]));
+    if (k === undefined) return false;
+    s.entry = k; s.start = { ...s.entries[k] };
     s.dmg.refit(); s.sea.drag = 1; s.sea.exact = null;
     s.helm.moor(s.start); s.helm.hole = null;
     s.guns.wait = { L: 0, R: 0 };
