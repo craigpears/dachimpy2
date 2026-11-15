@@ -46,3 +46,4 @@ small ships because of the narrower gaps. I think that would be a cool proof of 
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: For the flags' changelog entry when it lands, your pitch (15 Nov): "you ever wondered what blockading would look like if ships were to scale, and can that create more tactical depth, strategic depth to the blockading game? ... what if sloops had to run the gauntlet to get to the point, but were actually the ones that ... scored the points, while war frigates controlled the ... large choke points [and] access ways?"
