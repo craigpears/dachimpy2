@@ -27,12 +27,12 @@ const clearAway = (b: Blockade, keep: { id: number }[]) => {
 };
 
 describe('the board, as a blockade board is, and more epic (15 Nov: "three or four [war frigs] ... coming from different directions ... Some ocean, some island")', () => {
-  it('each side three war frigates, a war brig and five sloops, coming in from two edges of its own, where they fit', () => {
+  it('each side two war frigates, two war brigs and five sloops (three frigates till 15 Nov: "a bit crowded with [war frigates]"), coming in from two edges of its own, where they fit', () => {
     const b = new Blockade();
     for (const team of ['gold', 'crimson'] as const) {
       const mine = b.ships.filter((s) => s.team === team && !s.craft);
-      expect(mine.filter((s) => s.kind === 'frigate')).toHaveLength(3);
-      expect(mine.filter((s) => s.kind === 'brig')).toHaveLength(1);
+      expect(mine.filter((s) => s.kind === 'frigate')).toHaveLength(2);
+      expect(mine.filter((s) => s.kind === 'brig')).toHaveLength(2);
       expect(mine.filter((s) => s.kind === 'sloop')).toHaveLength(5);
       const edges = new Set(mine.map(({ helm: { pose: p } }) => (p.r <= 2 ? 'south' : p.c <= 2 ? 'west' : p.r >= B.ROWS - 3 ? 'north' : p.c >= B.COLS - 3 ? 'east' : 'none')));
       expect(edges.has('none')).toBe(false);

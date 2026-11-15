@@ -13,8 +13,9 @@
      turn a buoy inside the influence circle of one side's ships only scores that side its pennants; a buoy both
      sides reach is contested and scores nobody. A bigger ship's circle is bigger. The side with the most points
      when the round's out wins it;
-   - two sides, three war frigates, a war brig and five sloops each (one of them yours to sail if you like, the rest
-     bots). The frigates come in facing their gate, Dachimpy's from the south edge, Dalnoth's from the north; the sloops
+   - two sides, two war frigates, two war brigs and five sloops each (one of them yours to sail if you like, the rest
+     bots; three frigates a side till 15 Nov: "it seems a bit crowded with [war frigates]. So maybe just tuning down how
+     many are in there. Then I think the strengths will emerge a bit more"). The frigates come in facing their gate, Dachimpy's from the south edge, Dalnoth's from the north; the sloops
      and the brig from the side, Dachimpy's from the west, Dalnoth's from the east, by their own side's wind (the user,
      15 Nov: "Warfrigs start pointing at the Imperial gates. Smaller ships come from the other sides and obviously catch
      the winds for sloops. And the lagoons can also be on that side, which is maybe what the war brigs fight over in the
@@ -182,26 +183,26 @@ export const BLOCKADE = {
   /** The sides, and their fleets: where each ship comes in (a frigate's config by her name: src/den-frigate.ts). */
   TEAMS: [
     { id: 'gold', name: 'Dachimpy\'s flag', ships: [
-      { name: 'Primates Rule', kind: 'frigate', at: { c: 22, r: 2, d: 0 } },
-      { name: 'Coral Throne', kind: 'frigate', at: { c: 30, r: 2, d: 0 } },
-      { name: 'Golden Grin', kind: 'frigate', at: { c: 14, r: 2, d: 0 } },
+      { name: 'Primates Rule', kind: 'frigate', at: { c: 17, r: 2, d: 0 } },
+      { name: 'Coral Throne', kind: 'frigate', at: { c: 27, r: 2, d: 0 } },
       { name: 'Lucky Banana', kind: 'sloop', at: { c: 1, r: 10, d: 1 }, raider: true },
       { name: 'Grin and Bear It', kind: 'sloop', at: { c: 1, r: 16, d: 1 } },
       { name: 'Cheeky Monkey', kind: 'sloop', at: { c: 1, r: 20, d: 1 } },
       { name: 'Bananarama', kind: 'sloop', at: { c: 1, r: 26, d: 1 }, raider: true },
       { name: 'Coconut Shy', kind: 'sloop', at: { c: 1, r: 13, d: 1 } },
       { name: 'Tidecaller', kind: 'brig', at: { c: 2, r: 23, d: 1 }, craft: 'ram' },
+      { name: 'Pearl Diver', kind: 'brig', at: { c: 2, r: 7, d: 1 }, craft: 'ram' },
     ] },
     { id: 'crimson', name: 'Dalnoth\'s flag', ships: [
-      { name: 'Iron Pride', kind: 'frigate', at: { c: 21, r: 33, d: 2 } },
-      { name: 'Eldritch Wail', kind: 'frigate', at: { c: 13, r: 33, d: 2 } },
-      { name: 'Crimson Tide', kind: 'frigate', at: { c: 29, r: 33, d: 2 } },
+      { name: 'Iron Pride', kind: 'frigate', at: { c: 26, r: 33, d: 2 } },
+      { name: 'Eldritch Wail', kind: 'frigate', at: { c: 16, r: 33, d: 2 } },
       { name: 'Red Wake', kind: 'sloop', at: { c: 42, r: 25, d: 3 }, raider: true },
       { name: 'Smoke and Mirrors', kind: 'sloop', at: { c: 42, r: 19, d: 3 } },
       { name: 'Scarlet Fever', kind: 'sloop', at: { c: 42, r: 15, d: 3 } },
       { name: 'Blood Orange', kind: 'sloop', at: { c: 42, r: 9, d: 3 }, raider: true },
       { name: 'Rust Bucket', kind: 'sloop', at: { c: 42, r: 22, d: 3 } },
       { name: 'Grave Lantern', kind: 'brig', at: { c: 41, r: 12, d: 3 }, craft: 'ghost' },
+      { name: 'Wraith\'s Wake', kind: 'brig', at: { c: 41, r: 28, d: 3 }, craft: 'ghost' },
     ] },
   ] as { id: TeamId; name: string; ships: FleetShip[] }[],
   /** How near (squares) a ship has to be to another for her moving to make the other's pilot think again. */
@@ -227,9 +228,10 @@ const HANDLINGS: Record<Kind, Handling> = { sloop: SLOOP_HANDLING, brig: BRIG_HA
 const CLASSES: Record<Kind, ShipClass> = { sloop: SLOOP, brig: WAR_BRIG, frigate: WAR_FRIGATE };
 /** A brig's sea turtle: a sloop's size on the board, no guns, a couple of small shots and she's gone. */
 export const SEA_TURTLE: ShipClass = { ...SLOOP, name: 'Sea turtle', crew: 1, minCrew: 1, guns: 0, mainDeckGuns: 0, stations: { nav: 1, sailing: 0, carpentry: 0, bilge: 0, gunnery: 0 } };
-/** A sea turtle swims slower than a sloop sails, quicker than a frigate's square: she catches a frigate, never a sloop
-    that's under way (rock, paper, scissors by handling, not by rule). */
-export const TURTLE_HANDLING: Handling = { ...SLOOP_HANDLING, name: 'Sea turtle', pace: SLOOP_HANDLING.pace * 1.15, move: SLOOP_HANDLING.move * 1.15, turn: SLOOP_HANDLING.turn * 1.15 };
+/** A sea turtle swims fast, a move in 0.6 of a sloop's time, at a frigate in seconds (the user, 15 Nov: "they're
+    supposed to be much faster than the [war brigs] ... a quick deploy tool"); what keeps her off a sloop is her ram,
+    which needs a ship lying still a moment (RAM.STILL), not her pace. */
+export const TURTLE_HANDLING: Handling = { ...SLOOP_HANDLING, name: 'Sea turtle', pace: SLOOP_HANDLING.pace * 0.6, move: SLOOP_HANDLING.move * 0.6, turn: SLOOP_HANDLING.turn * 0.6 };
 /** A phantom sloop: the sloop's size, sluggish as a frigate (her moves taking as long as a frigate's square does). */
 export const PHANTOM_HANDLING: Handling = { ...SLOOP_HANDLING, name: 'Phantom sloop', pace: SLOOP_HANDLING.pace * 1.3, move: SLOOP_HANDLING.move * 1.3, turn: SLOOP_HANDLING.turn * 1.3 };
 /** A phantom: shots go through her, she holds no buoy, nothing can hurt her (she fades when her time's up). */

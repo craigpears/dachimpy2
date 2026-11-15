@@ -65,5 +65,17 @@ export const GRAVE_LANTERN = {
         { kind: 'lantern', x: 3.0, z: 0.45 },
     ],
 };
+/** Pearl Diver, Dachimpy's flag's second brig: an Atlantean as Tidecaller is, sand and coral rather than sea green. */
+export const PEARL_DIVER = {
+    ...TIDECALLER,
+    name: 'Pearl Diver',
+    paint: { hull: '#c7a46a', sideboard: '#3f8f88', railing: '#f4ead0', bottom: '#7a5a3c', deck: '#c8b07e', sails: '#f6efe0', gold: '#e3b53f' },
+};
+/** Wraith's Wake, Dalnoth's flag's second brig: a haunted brig as Grave Lantern is, paler, the colour of mist. */
+export const WRAITHS_WAKE = {
+    ...GRAVE_LANTERN,
+    name: 'Wraith\'s Wake',
+    paint: { hull: '#5d6b6a', sideboard: '#c8ecdf', railing: '#e2f4ec', bottom: '#4a4440', deck: '#7a8076', sails: '#e6f4ee', gold: '#c8ecdf' },
+};
 /** Every war brig there's a config for, by name. */
-export const BRIGS = Object.fromEntries([TIDECALLER, GRAVE_LANTERN].map((f) => [f.name, f]));
+export const BRIGS = Object.fromEntries([TIDECALLER, GRAVE_LANTERN, PEARL_DIVER, WRAITHS_WAKE].map((f) => [f.name, f]));

@@ -52,6 +52,8 @@ export const BOTS = {
   STICK: 1.3,
   /** How much more the heart's buoys are worth to a frigate; and to a sloop, once the enemy's frigates are in it. */
   HEART: 1.6, FLEE: 0.3,
+  /** How near (squares) an enemy frigate has to be to a buoy for a sloop to leave it be. */
+  WARY: 5,
   /** A sloop hurt this badly runs to hide and be patched; and comes out again patched to this. */
   HIDE: 0.5, HEALED: 0.1,
   /** Seconds a raider lies hidden before she darts out again, and the longest a raid lasts. */
@@ -97,6 +99,9 @@ function worth(b: Blockade, s: Ship, buoy: Buoy, i: number, mates: Goal[]): numb
   if (s.kind === 'frigate' && inHeart(...buoy.at)) w *= BOTS.HEART;
   // (a sloop in the heart once the enemy's frigates are in it: out by the winds to the lagoons, before they're caught)
   if (s.kind === 'sloop' && inHeart(...buoy.at) && b.ships.some((o) => o.team !== s.team && o.kind === 'frigate' && o.away <= 0 && !o.dmg.out && b.inHeart(o))) w *= BOTS.FLEE;
+  // (a sloop, wary: a buoy an enemy frigate's close to is a sloop sunk, so she leaves it to her and goes where she isn't;
+  // the user, 15 Nov, of sloops "hanging around in the middle being blown up by [war frigs], foolishly")
+  if (s.kind === 'sloop' && !s.craft && b.ships.some((o) => o.team !== s.team && o.kind === 'frigate' && o.away <= 0 && !o.dmg.out && Math.hypot(o.helm.pose.c - buoy.at[0], o.helm.pose.r - buoy.at[1]) <= BOTS.WARY)) w *= BOTS.FLEE;
   // (a brig: the lagoons' buoys before the heart's)
   if (s.kind === 'brig') w *= inHeart(...buoy.at) ? BOTS.BRIG.HEART : BOTS.BRIG.OUT;
   return w;
@@ -518,7 +523,8 @@ export class Bot {
       else anywhere beside her. */
   private prey(b: Blockade, s: Ship): { kind: 'ram'; on: number; at: [number, number] } | null {
     const p = s.helm.pose, sea = s.sea.bare(), far = (c: number, r: number) => Math.hypot(c - p.c, r - p.r), DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
-    const foes = b.ships.filter((o) => o.team !== s.team && !o.craft && o.away <= 0 && far(o.helm.pose.c, o.helm.pose.r) <= BOTS.RAM.REACH)
+    // (a brawl's ships left to it, as every bot leaves them)
+    const foes = b.ships.filter((o) => o.team !== s.team && !o.craft && o.away <= 0 && !this.spare.has(o.id) && far(o.helm.pose.c, o.helm.pose.r) <= BOTS.RAM.REACH)
       .sort((a, z) => far(a.helm.pose.c, a.helm.pose.r) - far(z.helm.pose.c, z.helm.pose.r));
     for (const o of foes) {
       const op = o.helm.pose, d = op.d, sd = (d + 1) % 4, al = alongs(o.h)[0], hers = squares(o.h, op), on = new Set(hers.map(([c, r]) => `${c},${r}`));

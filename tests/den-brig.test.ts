@@ -34,7 +34,7 @@ describe('the blockade\'s brigs: Tidecaller the Atlantean, Grave Lantern the hau
     expect(TIDECALLER.figurehead.kind).toBe('mermaid');
     expect(GRAVE_LANTERN.figurehead.kind).toBe('skull');
     expect(GRAVE_LANTERN.ghost).toBe(true);
-    expect(Object.keys(BRIGS).sort()).toEqual(['Grave Lantern', 'Tidecaller']);
+    expect(Object.keys(BRIGS).sort()).toEqual(['Grave Lantern', 'Pearl Diver', 'Tidecaller', "Wraith's Wake"]);
   });
   for (const f of Object.values(BRIGS)) it(`keeps ${f.name}'s deck clear: everything inside her bulwarks, nothing in anything else's way`, () => {
     const all = onDeck(P, f);

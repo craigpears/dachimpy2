@@ -274,6 +274,19 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     frigates 4 of 4. So in a blockade the cheap sloops, everywhere at once, a buoy contested by any one of them, are the
     strongest fleet: to shape with the user (their price, how a contest is decided, or the lagoons' worth).
 
+- **Fewer frigates, wary sloops, quick turtles, and the lagoons tried** (15 Nov: "I don't like the bigger ships,
+  circles win, that is very against Puzzle Pirates ... just maybe do something simple like [tweak] the lagoons"; "sloops
+  hanging around in the middle being blown up by [war frigs], foolishly ... a bit crowded with [war frigates]. So maybe
+  just tuning down how many are in there"; "the turtles ... supposed to be much faster ... a quick deploy tool"):
+  - each side two frigates and two brigs (Pearl Diver, Dachimpy's second, an Atlantean; Wraith's Wake, Dalnoth's, a
+    haunted brig) and five sloops;
+  - a sloop leaves be a buoy an enemy frigate's within 5 squares of (`WARY`), and goes where she isn't;
+  - turtles swim fast again (0.6 of a sloop's time a move): their ram needing a ship lying still is what keeps them off
+    moving sloops, not their pace; they leave a brawl's two ships be, as every bot does;
+  - the lagoons tried at 5, 4 and 3 in whole blockades: it hardly matters. Six sloops beat two frigates at any of them
+    (400 to 100), being six hulls on seven buoys; one of each kind beat six sloops 3 of 4 with the sloops wary, at 5, so 5
+    it stays. In a blockade, numbers of hulls tell: the open question.
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of
