@@ -1548,14 +1548,19 @@ check, a share link, and the den's own race for 3D.
       sitting low and listing: js/den/holed.js, the race's look pulled out to share). There's no deck patch board
       on the test sea, so her crew patch her in a few seconds: 3 for a small shot, 5 for a large (`TWO_SEA.HOLED`).
       Her two shots a side are a wider net than the sloop's one; they don't hole her twice.
-    - **The two obstacles:** a narrow gap one square wide (the sloop's); a channel three wide under an imperial gate
-      (15 Nov: "put like a ... destructible. That Imperial Gate thing"): the Empire's gatehouse over it (empire.js,
-      its arch high enough for her masts), its boom of chained logs across the way in, which only large guns hurt
-      (4 shots, two of her broadsides, then open water for both; the sloop's small guns bounce off), and a bastion
-      gun either side, the den's destructible gun (src/den-turret.ts, turret.js). They leave you be till someone
-      fires on the gate, then fire on whoever's in their reach (3 squares), a shot on her square holing her; any
-      ship's hits quieten one, the third wrecks it. So the frigate lying broadside to the boom gets fired on while
-      she breaks it, and the sloop can quieten the guns for her but never break the boom.
+    - **The imperial gate, the one way through (15 Nov, reworked).** First a narrow gap for the sloop and a channel
+      three wide with a boom only large guns broke. Then: "taking it from that rock boundary into making it a
+      full-on Imperial Gate ... the sloop can run through it. The ship, the war frig has to shoot through it because
+      there's only one tile of ... canal between the Imperial Gate. So since the war frig needs two, it has to
+      destroy and crumble the towers in order to get through ... It's a way of naturally delaying the war [frigs].
+      Like, they have to go through a shooting destruction phase before they can get into the heart and center of
+      the board." So the rocks' one way through is the gate's, one square wide under its arch: the sloop runs
+      straight through; the frigate lies broadside to it and crumbles a tower either side of it (`TOWER_HP` 4 large
+      shots; one of each broadside's two lands on the tower, the other goes down the way: four broadsides), and then
+      the way's two wide for anyone. The sloop's small guns bounce off the towers. Its bastion guns (src/den-turret.ts,
+      turret.js) leave you be till someone fires on the gate, then fire on whoever's in their reach (3 squares), a
+      shot on her square holing her; any ship's hits quieten one, the third wrecks it. So the frigate pays for her
+      way in while she shoots it open, and the sloop can quieten the guns for her but never open the gate.
     - **Out of her anchorage in the den (15 Nov: "put into the main game where you've got [Primates Rule] all in
       progress, so you can just kind of be like ... park this sloop there and then take the war frig on a test
       run, even if it's just to go shoot some nearby things and destructible obstacles, or sail out into the ocean

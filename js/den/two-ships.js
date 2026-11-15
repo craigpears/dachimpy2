@@ -1,16 +1,16 @@
 // A war frigate and a sloop on one small sea, in 3D: the proof of concept on the unlinked frigate-test.html
 // (IDEAS.md, "A war frigate and a sloop on one board"; RACE.md §11). Its rules are src/two-ships.ts (the sea,
-// its narrow gap and its boom, both ships on it) and src/ship-handling.ts (each ship's handling on the squares,
+// its imperial gate, both ships on it) and src/ship-handling.ts (each ship's handling on the squares,
 // sailed by the den's own helm); this only draws them: the rocks, the imperial gate over the channel (the
-// Empire's gatehouse, empire.js; the boom of chained logs across its way in; a bastion gun either side, the
-// den's destructible gun, turret.js), the buoy to make for, the squares each ship covers, her pin and course,
+// Empire's gatehouse, empire.js, over its one-square way, its towers crumbling under a war frigate's large shots;
+// a bastion gun either side, the den's destructible gun, turret.js), the buoy to make for, the squares each ship covers, her pin and course,
 // the shots, and a ship holed by one (holed.js, as the race's sloops are). The ships are the den's own
 // (js/den/frigate.js, js/den/sloop.js), handed in.
 import * as THREE from 'three';
 import { SAIL } from '../den-sail.js';
 import { TwoShips, TWO_SEA, KINDS, seaXZ, seaCR } from '../two-ships.js';
 import { squares, drawnAt } from '../ship-handling.js';
-import { scene, mat, mesh, woodTex, burst, sparks } from './world.js';
+import { scene, mat, mesh, burst, sparks } from './world.js';
 import { blast, puff, blastTick } from './blast.js';
 import { gatehouse, bastionLook } from './empire.js';
 import { turretMesh, turretView, turretWrecked, turretFire, turretLand, turretShotsTick } from './turret.js';
@@ -48,7 +48,7 @@ export function twoShipsSea(ships, say = () => {}) {
   const stoneM = mat('#6b6158', { flatShading: true, roughness: 0.95 }), stoneGeo = new THREE.DodecahedronGeometry(1, 0);
   for (const k of t.rocks) {
     const [c, r] = k.split(',').map(Number);
-    if (t.boom.has(c, r) || t.gunAt(c, r) >= 0) continue;   // (a bastion has rocks of its own round its foot)
+    if (t.towerAt(c, r) >= 0 || t.gunAt(c, r) >= 0) continue;   // (a tower or a bastion stands on its own foot)
     const roll = dice(c, r), at = v3(c, r);
     // (filling its square, so a line of them reads as a wall and a gap in it as a gap)
     for (let i = 0; i < 4; i++) {
@@ -60,29 +60,29 @@ export function twoShipsSea(ships, say = () => {}) {
     }
   }
 
-  // ----- the boom: chained logs across the channel, posts at its ends -----
-  const logM = mat('#7a5634', { map: woodTex, roughness: 0.9 }), ironM = mat('#2b2a2c', { metalness: 0.6, roughness: 0.5 });
-  const logs = [], { c0, c1 } = TWO_SEA.CHANNEL, R = TWO_SEA.BOOM.r;
-  for (let c = c0; c <= c1; c++) for (const dx of [-1, 1]) {
-    const L = new THREE.Group(), at = v3(c, R);
-    L.add(mesh(new THREE.CylinderGeometry(0.38, 0.42, 1.95, 10).rotateZ(Math.PI / 2), logM));
-    for (const bx of [-0.6, 0.6]) L.add(mesh(new THREE.CylinderGeometry(0.44, 0.44, 0.1, 10).rotateZ(Math.PI / 2).translate(bx, 0, 0), ironM));
-    L.position.set(at.x + dx, 0.12, at.z);
-    L.userData = { x: L.position.x, z: L.position.z, ph: logs.length * 1.7, knock: 0, v: null };
-    logs.push(L); g.add(L);
-  }
-  for (const c of [c0 - 0.5, c1 + 0.5]) {
-    const at = v3(c, R), post = mesh(new THREE.CylinderGeometry(0.3, 0.36, 3.2, 8), logM);
-    post.position.set(at.x, 1.2, at.z); g.add(post);
-    const cap = mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.14, 8), ironM); cap.position.set(at.x, 2.8, at.z); g.add(cap);
-  }
-  let brokeAt = -1;
-
-  // ----- the imperial gate over it: the Empire's gatehouse, its arch high enough for her masts, and its two
-  // bastion guns (src/den-turret.ts's rules, turret.js's look, as the checkpoint's) -----
-  const [[ta], [tb]] = TWO_SEA.GATE.TOWERS, gz = v3(0, R + 0.5).z;
-  g.add(gatehouse({ xa: v3(ta, 0).x, xb: v3(tb, 0).x, z: gz, archY: 11, tw: 3.4, bannerH: 4.5 }));
+  // ----- the imperial gate: the Empire's gatehouse over its one-square way, its arch high enough for her masts,
+  // each tower on its column of the wall (sitting lower with each large shot, crumbling at the last, the arch
+  // coming down with it), and its two bastion guns (src/den-turret.ts's rules, turret.js's look) -----
+  const W = TWO_SEA.GATE.WAY, [ta, tb] = TWO_SEA.GATE.TOWERS, R = TWO_SEA.WALL.r0, gz = v3(0, R + 0.5).z, stoneM2 = mat('#d8cdb8', { flatShading: true, roughness: 0.95 });
+  const gh = gatehouse({ xa: v3(ta, 0).x, xb: v3(tb, 0).x, z: gz, archY: 11, tw: 3.6, bannerH: 4.5 });
+  g.add(gh);
+  const { sides, arch } = gh.userData, shake = [0, 0], fall = [-1, -1];
+  let archFall = -1, archWay = 1;
+  // (a tower's foot: the wall's two squares of it, a plinth of the Empire's stone under it)
+  for (const c of TWO_SEA.GATE.TOWERS) { const p = mesh(new THREE.BoxGeometry(CELL * 0.95, 1.2, CELL * 2), stoneM2); p.position.set(v3(c, 0).x, 0.3, gz); g.add(p); }
   const bastions = t.battery.map((gun) => { const V = turretMesh(bastionLook()); V.g.position.copy(v3(...gun.at)); g.add(V.g); return V; });
+  /** A tower knocked: it shudders and sits a little lower; its last shot brings it down, and the arch with it. */
+  function knock(i, crumbled) {
+    const side = sides[i], at = v3(TWO_SEA.GATE.TOWERS[i], R + 0.5, 4);
+    burst(at, '#d8cdb8', 22, 6); burst(at.clone().setY(7), '#9a9088', 12, 4);
+    shake[i] = 0.5;
+    if (!crumbled) { side.position.y = -1.6 * (1 - t.towers[i].hp / TWO_SEA.TOWER_HP); return; }
+    blast(at.clone().setY(5), 2, { bits: [{ mat: stoneM2, n: 18, w: 0.9, h: 0.7, d: 0.9 }], ground: () => 0.2 });
+    fall[i] = 0;
+    if (archFall < 0) { archFall = 0; archWay = i ? -1 : 1; }
+    // (rubble heaped low on its squares, open water over them)
+    for (let k = 0; k < 5; k++) { const m = mesh(stoneGeo, stoneM2); const s = 0.6 + Math.random() * 0.5; m.scale.set(s, s * 0.5, s); m.position.set(at.x + (Math.random() - 0.5) * 3, -0.1, gz + (Math.random() - 0.5) * 6); m.rotation.set(Math.random() * 3, Math.random() * 3, 0); g.add(m); }
+  }
 
   // ----- the buoy to make for -----
   const goal = new THREE.Group(), gold = mat('#e0a92a', { metalness: 0.4, roughness: 0.4 }), red = mat('#c8372a', { roughness: 0.6 }), white = mat('#f3ecdc');
@@ -114,7 +114,7 @@ export function twoShipsSea(ships, say = () => {}) {
 
   // ----- shots in flight -----
   const ballGeo = new THREE.SphereGeometry(1, 10, 8), ballM = mat('#1b1a1c', { metalness: 0.5, roughness: 0.4 }), flying = [];
-  const hitSay = { hit: () => `A hit! The gate's boom is splintering: ${t.boom.hp} more large shot${t.boom.hp === 1 ? '' : 's'} to break it.`, bounced: () => 'Your sloop\'s small guns bounce off the gate\'s boom: it would take a war frigate\'s.', broken: () => 'The gate\'s boom is smashed: the channel\'s open, for either ship.' };
+  const hitSay = { hit: (i) => `A hit on the gate's tower! ${t.towers[i].hp} more large shot${t.towers[i].hp === 1 ? '' : 's'} to crumble it.`, bounced: () => 'Your sloop\'s small guns bounce off the gate\'s towers: it would take a war frigate\'s.', crumbled: () => 'The tower\'s crumbled! The gate\'s way is two wide now, for either ship.' };
   const gunSay = { quiet: (n) => `A hit on the gate's gun! It's quiet a while: ${n} more to wreck it.`, wrecked: () => 'The gate\'s gun is wrecked!' };
   function fire(side) {
     const kind = t.active, s = t.ships[kind], wasQuiet = t.battery.every((x) => !x.roused), got = t.fire(side);
@@ -125,30 +125,25 @@ export function twoShipsSea(ships, say = () => {}) {
       const m = new THREE.Mesh(ballGeo, ballM); m.scale.setScalar(size); m.position.copy(a); m.visible = false; g.add(m);
       flying.push({ m, a, b, t: -i * 0.12, dur: 0.1 * shot.cells.length + 0.15, shot });
     });
-    const booms = got.shots.map((sh) => sh.boom), said = booms.includes('broken') ? 'broken' : booms.find(Boolean);
+    const tw = got.shots.find((sh) => sh.got === 'crumbled') ?? got.shots.find((sh) => sh.got);
     const gun = got.shots.find((sh) => sh.quieted);
-    if (said) say(hitSay[said]() + (wasQuiet ? ' The gate\'s guns are firing back!' : ''), said === 'bounced');
+    if (tw) say(hitSay[tw.got](tw.tower) + (wasQuiet ? ' The gate\'s guns are firing back!' : ''), tw.got === 'bounced');
     else if (gun) say(gunSay[gun.quieted](t.battery[gun.gun].left()));
     else if (got.shots.some((sh) => sh.holed)) say(`A hit on ${her(t.other(kind))}! She's holed: her crew are patching her.`);
   }
   function land(f) {
     const { shot, b } = f;
     if (shot.what === 'rock') burst(b, '#9a9088', 14, 4);
-    else if (shot.what === 'boom') {
-      burst(b, shot.boom === 'bounced' ? '#f2e2a0' : '#8a6240', shot.boom === 'bounced' ? 8 : 22, shot.boom === 'bounced' ? 3 : 6);
-      if (shot.boom === 'hit') { const L = logs[Math.floor(Math.random() * logs.length)]; L.userData.knock = Math.min(1, L.userData.knock + 0.5); }
-      if (shot.boom === 'broken') breakBoom();
+    else if (shot.what === 'tower') {
+      if (shot.got === 'bounced') burst(b.clone().setY(3), '#f2e2a0', 8, 3);
+      else knock(shot.tower, shot.got === 'crumbled');
     } else if (shot.what === 'gun') {
       if (shot.quieted === 'wrecked') turretWrecked(bastions[shot.gun], b);
       else { burst(b.clone().setY(3), '#ffb85a', 14, 4); burst(b.clone().setY(2.5), '#d3c9b2', 12, 3.5); }
     } else if (shot.what === 'sloop' || shot.what === 'frigate') holedFx(ships[shot.what], DECK[shot.what], shot.what === 'frigate' ? 1.8 : 1);
     else burst(b.clone().setY(0.1), '#e8f4fa', 16, 4);   // (a splash)
   }
-  function breakBoom() {
-    brokeAt = 0;
-    blast(v3((c0 + c1) / 2, R, 0.6), 1.4, { bits: [{ mat: logM, n: 10, w: 0.25, h: 0.25, d: 1.0 }], ground: () => -0.5 });
-    logs.forEach((L, i) => { L.userData.v = new THREE.Vector3((Math.random() - 0.5) * 2, 0, (i % 2 ? 1 : -1) * (1 + Math.random() * 1.5)); });
-  }
+
 
   let on = false, clock = 0, told = { sloop: false, frigate: false };
   const place = (kind, dt) => {
@@ -199,13 +194,20 @@ export function twoShipsSea(ships, say = () => {}) {
       });
       course();
       flag.rotation.y = Math.sin(clock * 1.3) * 0.3;
-      for (const L of logs) {
-        const u = L.userData;
-        if (u.v) { L.position.addScaledVector(u.v, dt); u.v.multiplyScalar(1 - 0.4 * dt); L.position.y = 0.12 - Math.min(2, brokeAt * 0.25); L.rotation.y += dt * u.v.x * 0.2; continue; }
-        L.position.y = 0.12 + Math.sin(clock * 1.2 + u.ph) * 0.06 - u.knock * 0.25;
-        L.rotation.set(Math.sin(clock + u.ph) * 0.05, u.knock * 0.5 * (u.ph % 2 ? 1 : -1), u.knock * 0.25);
+      // (a tower just hit shudders)
+      sides.forEach((side, i) => { if (shake[i] > 0) { shake[i] = Math.max(0, shake[i] - dt); side.position.x = Math.sin(clock * 60) * shake[i] * 0.3; } });
+      // (a crumbled tower falling into the sea, and the arch with it)
+      sides.forEach((side, i) => {
+        if (fall[i] < 0 || !side.visible) return;
+        const u = Math.min(1, (fall[i] += dt) / 1.6);
+        side.position.y = -1.6 - 13 * u * u; side.rotation.z = (i ? 1 : -1) * 0.25 * u;
+        if (u >= 1) side.visible = false;
+      });
+      if (archFall >= 0 && arch.visible) {
+        const u = Math.min(1, (archFall += dt) / 1.1);
+        arch.position.y = -12 * u * u; arch.rotation.z = archWay * 0.3 * u;
+        if (u >= 1) arch.visible = false;
       }
-      if (brokeAt >= 0) brokeAt += dt;
       for (let i = flying.length - 1; i >= 0; i--) {
         const f = flying[i];
         f.t += dt;
@@ -228,8 +230,8 @@ export function twoShipsSea(ships, say = () => {}) {
     click(point) {
       const [c, r] = seaCR(point.x, point.z).map(Math.round), kind = t.active, got = t.drop(c, r);
       if (!got) return say(`${NAME[kind]} can't get anywhere near there.`, true);
-      if (got.short) say(kind === 'frigate' && !t.boom.broken()
-        ? 'Primates Rule can\'t get through: the gap\'s too narrow for her, and the imperial gate\'s boom is across the channel. Lie broadside to it and fire (Q or E).'
+      if (got.short) say(kind === 'frigate' && !t.gateOpen()
+        ? 'Primates Rule can\'t get through: the imperial gate\'s way is one square wide, and she needs two. Lie broadside to a tower and fire (Q or E) to crumble it.'
         : `${NAME[kind]} can't get there from here, so she'll go as near as she can.`, true);
     },
     key(k) {
@@ -248,7 +250,7 @@ export function twoShipsSea(ships, say = () => {}) {
       return {
         kind: t.active, name: NAME[t.active], h: s.h, moves, lit: h.lit(), mine: h.mine.length, guns: { L: s.guns.ready('L'), R: s.guns.ready('R') },
         load: { L: s.guns.wait.L / s.h.reload, R: s.guns.wait.R / s.h.reload }, holed: t.holed(t.active) ? t.patch[t.active] : 0,
-        boom: t.boom.hp, battery: t.battery.map((x) => (x.wrecked ? 'wrecked' : x.quiet > 0 ? 'quiet' : x.roused ? 'firing' : 'watching')), through: t.through(t.active),
+        towers: t.towers.map((x) => x.hp), battery: t.battery.map((x) => (x.wrecked ? 'wrecked' : x.quiet > 0 ? 'quiet' : x.roused ? 'firing' : 'watching')), through: t.through(t.active),
       };
     },
   };

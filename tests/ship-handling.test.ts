@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { SAIL, Sea, path, poseAt, pauseFor, type Move, type Pose } from '../src/den-sail';
 import { SLOOP_HANDLING as SL, FRIGATE_HANDLING as FR, HANDLING, ShipSea, ShipHelm, Guns, squares, shipPath, shipPose, drawnAt, broadside, groundSecs, type Handling } from '../src/ship-handling';
-import { TwoShips, TWO_SEA, Boom, seaXZ, seaCR } from '../src/two-ships';
+import { TwoShips, TWO_SEA, Tower, seaXZ, seaCR } from '../src/two-ships';
 import { TURRET } from '../src/den-turret';
 
 const MOVES: Move[] = ['F', 'L', 'R'];
@@ -98,53 +98,56 @@ describe('the same helm sailing each by her handling', () => {
   });
 });
 
-describe('the test sea: a narrow gap only the sloop fits, a boom only the frigate\'s broadside breaks', () => {
-  const S = TWO_SEA, beyond: [number, number] = [11, 13];
-  it('the sloop can get past the rocks, the frigate can\'t till the boom\'s broken', () => {
+describe('the test sea: an imperial gate whose one-square way only the sloop fits, till the frigate crumbles a tower (15 Nov: "the [war frig] needs two, it has to destroy and crumble the towers in order to get through")', () => {
+  const S = TWO_SEA, beyond: [number, number] = [11, 13], W = S.GATE.WAY;
+  it('the gate is the one way through the rocks, one square wide between its towers', () => {
     const t = new TwoShips();
+    for (let c = 0; c < S.COLS; c++) for (let r = S.WALL.r0; r <= S.WALL.r1; r++) expect(t.rocks.has(`${c},${r}`), `${c},${r}`).toBe(c !== W);
+    expect(S.GATE.TOWERS).toEqual([W - 1, W + 1]);
+    for (const tw of t.towers) for (const [c, r] of tw.squares) expect(t.stopAt('frigate', c, r)).toBe('tower');
+  });
+  it('the sloop runs straight through; the frigate can\'t till a tower\'s crumbled, then it\'s two wide', () => {
+    const t = new TwoShips(), fr = t.ships.frigate.sea;
     expect(t.ships.sloop.sea.plot(S.START.sloop, ...beyond)).not.toBeNull();
-    expect(t.ships.frigate.sea.plot(S.START.frigate, ...beyond)).toBeNull();
+    expect(fr.plot(S.START.frigate, ...beyond)).toBeNull();
+    for (let c = W - 1; c <= W + 1; c++) expect(fr.fits({ c, r: S.WALL.r0, d: 0 })).toBe(false);
+    t.towers[0].hp = 1;
+    t.ships.frigate.helm.moor({ c: W, r: 5, d: 1 });
+    expect(t.fire('L', 'frigate')!.shots.some((x) => x.got === 'crumbled')).toBe(true);
+    expect(t.gateOpen()).toBe(true);
+    expect(fr.fits({ c: W, r: S.WALL.r0, d: 0 })).toBe(true);
+    expect(fr.plot(t.ships.frigate.helm.pose, ...beyond)).not.toBeNull();
   });
-  it('the gap is too narrow for her even with the boom gone, and the channel\'s wide enough', () => {
-    const t = new TwoShips();
-    const fr = t.ships.frigate.sea;
-    for (let r = S.WALL.r0; r <= S.WALL.r1; r++) for (const d of [0, 2]) for (let c = S.GAP - 1; c <= S.GAP + 1; c++) expect(fr.fits({ c, r, d })).toBe(false);
-    expect(t.ships.sloop.sea.fits({ c: S.GAP, r: S.WALL.r0, d: 0 })).toBe(true);
-    t.boom.hp = 1; t.boom.hit('large');
-    for (const [c, r] of t.boom.squares) t.rocks.delete(`${c},${r}`);
-    fr.touch();
-    expect(fr.fits({ c: S.CHANNEL.c0 + 1, r: S.WALL.r0, d: 0 })).toBe(true);
-    expect(fr.plot(S.START.frigate, ...beyond)).not.toBeNull();
+  it('only large guns hurt a tower: the sloop\'s small ones bounce off', () => {
+    const tw = new Tower(W - 1);
+    expect(tw.hit('small')).toBe('bounced');
+    expect(tw.hp).toBe(S.TOWER_HP);
+    for (let i = 1; i < S.TOWER_HP; i++) expect(tw.hit('large')).toBe('hit');
+    expect(tw.hit('large')).toBe('crumbled');
+    expect(tw.down()).toBe(true);
+    expect(tw.has(W - 1, S.WALL.r0)).toBe(false);
   });
-  it('only large guns hurt the boom: the sloop\'s small ones bounce off', () => {
-    const b = new Boom();
-    expect(b.hit('small')).toBe('bounced');
-    expect(b.hp).toBe(S.BOOM.HP);
-    for (let i = 1; i < S.BOOM.HP; i++) expect(b.hit('large')).toBe('hit');
-    expect(b.hit('large')).toBe('broken');
-    expect(b.broken()).toBe(true);
-  });
-  it('lying broadside to the boom, two of the frigate\'s broadsides break it and open the channel', () => {
+  it('lying broadside to the gate, one shot of each of her broadsides lands on a tower: a shooting phase before she\'s in', () => {
     const t = new TwoShips(), f = t.ships.frigate;
-    // (put her along the rocks, her port side to the boom: facing right, port is out toward them)
-    f.helm.moor({ c: 16, r: 5, d: 1 });
-    const one = t.fire('L', 'frigate')!;
-    expect(one.shots).toHaveLength(2);
-    expect(one.shots.every((s) => s.what === 'boom')).toBe(true);
-    expect(t.fire('L', 'frigate')).toBeNull();   // (loading again)
-    run(f.helm, f.h.reload + 0.1); f.guns.tick(f.h.reload + 0.1);
-    const two = t.fire('L', 'frigate')!;
-    expect(two.shots.some((s) => s.boom === 'broken')).toBe(true);
-    expect(t.boom.broken()).toBe(true);
-    expect(f.sea.plot(f.helm.pose, ...beyond)).not.toBeNull();
+    // (along the rocks, her port side to the gate: facing right, port is out toward them; her guns either side of the way)
+    f.helm.moor({ c: W, r: 5, d: 1 });
+    let broadsides = 0;
+    while (!t.gateOpen() && broadsides < 20) {
+      const got = t.fire('L', 'frigate')!;
+      expect(got.shots).toHaveLength(2);
+      expect(got.shots.filter((x) => x.what === 'tower')).toHaveLength(1);
+      broadsides++;
+      run(f.helm, f.h.reload + 0.1); f.guns.tick(f.h.reload + 0.1);
+    }
+    expect(broadsides).toBe(S.TOWER_HP);
   });
-  it('the sloop\'s broadside on the boom bounces off and leaves it standing', () => {
+  it('the sloop\'s broadside on a tower bounces off and leaves it standing', () => {
     const t = new TwoShips(), s = t.ships.sloop;
-    s.helm.moor({ c: 16, r: 6, d: 1 });
+    s.helm.moor({ c: W - 1, r: 6, d: 1 });
     const got = t.fire('L', 'sloop')!;
     expect(got.shots).toHaveLength(1);
-    expect(got.shots[0].boom).toBe('bounced');
-    expect(t.boom.hp).toBe(S.BOOM.HP);
+    expect(got.shots[0].got).toBe('bounced');
+    expect(t.towers[0].hp).toBe(S.TOWER_HP);
   });
   it('each is in the other\'s way', () => {
     const t = new TwoShips(), f = t.ships.frigate;
@@ -160,7 +163,7 @@ describe('the test sea: a narrow gap only the sloop fits, a boom only the frigat
     expect(shot).toHaveLength(1);
     expect(shot[0]).toMatchObject({ hit: [14, 4], what: 'frigate' });
   });
-  it('sailing for the buoy, the sloop gets through the gap and the frigate stops short of the rocks', () => {
+  it('sailing for the buoy, the sloop gets through the gate and the frigate stops short of the rocks', () => {
     const t = new TwoShips();
     for (const k of ['sloop', 'frigate'] as const) t.drop(...S.GOAL, k);
     expect(t.drop(...S.GOAL, 'frigate')!.short).toBe(true);
@@ -323,11 +326,11 @@ describe('shooting (15 Nov: "just be able to shoot at the sloop"; "would it just
 
 describe('the imperial gate to shoot at (15 Nov: "put like a ... destructible. That Imperial Gate thing")', () => {
   const S = TWO_SEA;
-  it('its boom across the channel, a gun on a bastion either side', () => {
+  it('its towers either side of its way, a gun on a bastion either side of them', () => {
     const t = new TwoShips();
     expect(t.battery.map((g) => g.at)).toEqual(S.GATE.GUNS);
-    for (const [c, r] of [...S.GATE.GUNS, ...S.GATE.TOWERS]) expect(t.rocks.has(`${c},${r}`)).toBe(true);
-    for (const [c, r] of t.boom.squares) expect(t.stopAt('frigate', c, r)).toBe('boom');
+    for (const [c, r] of S.GATE.GUNS) expect(t.rocks.has(`${c},${r}`)).toBe(true);
+    for (const c of S.GATE.TOWERS) expect(t.rocks.has(`${c},${S.WALL.r0}`)).toBe(true);
     expect(t.stopAt('frigate', ...S.GATE.GUNS[0])).toBe('gun');
   });
   it('its guns leave her be till someone fires on the gate, then fire on her in reach', () => {
@@ -349,10 +352,10 @@ describe('the imperial gate to shoot at (15 Nov: "put like a ... destructible. T
     expect(hit).toBe(true);
     expect(t.holed('frigate')).toBe(true);
   });
-  it('any ship\'s shots quieten its guns, and the third wrecks one; only large guns break the boom', () => {
+  it('any ship\'s shots quieten its guns, and the third wrecks one; only large guns hurt its towers', () => {
     const t = new TwoShips(), g = t.battery[0];
     for (let i = 0; i < TURRET.WRECK; i++) expect(g.hit()).toBe(i < TURRET.WRECK - 1 ? 'quiet' : 'wrecked');
     expect(t.stopAt('sloop', ...g.at)).toBe('rock');
-    expect(t.boom.hit('small')).toBe('bounced');
+    expect(t.towers[0].hit('small')).toBe('bounced');
   });
 });

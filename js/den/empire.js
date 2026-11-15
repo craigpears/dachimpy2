@@ -61,12 +61,18 @@ export function tower(w, h, { merlon = 0.5, st = stone(), band = mat(CRIMSON, { 
     crimson banner down each tower's faces, a battlemented arch between them `archY` up (high enough for her
     mast), and the Empire's flag over it. As the checkpoint's; the sloop race's gate has a smaller one. */
 export function gatehouse({ xa, xb, z, archY = 6.4, tw = 3.4, bannerH = 3.6 }) {
-  const g = new THREE.Group(), st = stone();
+  // (its parts kept apart, so a gate that's shot down can crumble a tower and drop its arch: g.userData.sides, each
+  // tower with its banners, and g.userData.arch, the span, its battlements and its flag: two-ships.js)
+  const root = new THREE.Group(), st = stone(), sides = [], g = new THREE.Group();
   for (const x of [xa, xb]) {
-    const t = tower(tw, archY + 1.6); t.position.set(x, 0, z); g.add(t);
-    const b = banner(1.4 * tw / 3.4, bannerH); b.position.set(x, archY - 1.2, z + tw / 2 + 0.03); g.add(b);
-    const b2 = b.clone(); b2.position.z = z - tw / 2 - 0.03; b2.rotation.y = Math.PI; g.add(b2);
+    const side = new THREE.Group();
+    const t = tower(tw, archY + 1.6); t.position.set(x, 0, z); side.add(t);
+    const b = banner(1.4 * tw / 3.4, bannerH); b.position.set(x, archY - 1.2, z + tw / 2 + 0.03); side.add(b);
+    const b2 = b.clone(); b2.position.z = z - tw / 2 - 0.03; b2.rotation.y = Math.PI; side.add(b2);
+    sides.push(side); root.add(side);
   }
+  root.add(g);
+  root.userData = { sides, arch: g };
   const span = xb - xa - tw, mid = (xa + xb) / 2;
   const arch = mesh(new THREE.BoxGeometry(span, 1.6, tw * 0.8), st); arch.position.set(mid, archY + 0.8, z);
   // (its underside curved: two haunches)
@@ -74,7 +80,7 @@ export function gatehouse({ xa, xb, z, archY = 6.4, tw = 3.4, bannerH = 3.6 }) {
   g.add(arch);
   for (let i = 0; i < 4; i++) { const m = mesh(new THREE.BoxGeometry(0.5, 0.55, 0.5), st); m.position.set(xa + tw / 2 + 0.4 + i * (span - 0.8) / 3, archY + 1.87, z + tw * 0.4 - 0.25); g.add(m); }
   const fl = flagpole(3, flagMatImperial()); fl.scale.setScalar(1.6); fl.position.set(mid, archY + 1.6, z); g.add(fl);
-  return g;
+  return root;
 }
 
 /** A gun's bastion in the Empire's look, for a destructible turret (turret.js's turretMesh): its pale stone,
