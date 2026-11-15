@@ -43,10 +43,12 @@ const label = (text, col) => {
   return s;
 };
 
-/** The blockade: `you`, the ship you sail (its number; -1 to watch the bots alone), `say(text, bad)` what's said.
-    Returns { b (the rules), bots, g, you(), sail(id), tick(dt), click(point), key(k), focus(), hud() }. */
-export function blockadeSea({ you = 0, say = () => {} } = {}) {
-  const b = new Blockade(), bots = new Bots(b), g = new THREE.Group();
+/** The blockade: `you`, the ship you sail (its number; -1 to watch the bots alone), `say(text, bad)` what's said;
+    `brawl`, two war frigates put broadside to broadside to fight it out (Blockade.brawl), the rest going on round them.
+    Returns { b (the rules), bots, g, duel (the brawl's two ids, or null), you(), sail(id), tick(dt), click(point),
+    key(k), focus(), hud() }. */
+export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
+  const b = new Blockade(), duel = brawl ? b.brawl() : null, bots = new Bots(b, [], Math.random, duel), g = new THREE.Group();
   scene.add(g);
   let me = you, clock = 0;
 
@@ -174,7 +176,7 @@ export function blockadeSea({ you = 0, say = () => {} } = {}) {
   const action = [];
   const saw = (ship, what, weight) => { action.push({ at: clock, ship, what, weight }); if (action.length > 40) action.shift(); };
   return {
-    b, bots, g,
+    b, bots, g, duel,
     you: () => me,
     /** Sail another ship (her number), or none (-1: watch). Her bot takes the one you leave. */
     sail(id) { me = id; },

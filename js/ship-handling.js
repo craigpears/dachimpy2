@@ -199,21 +199,131 @@ export class ShipSea extends Sea {
     /** A berth she's to lie in exactly, her own square and heading (sailTo: lying broadside to a gate's tower, say),
         if the pin's on its square. */
     exact = null;
-    /** Her pilot's moves to a square as if the other ships weren't there (they'll have moved by then): how far it
-        is, for choosing where to go. */
-    plotPast(from, c, r) { return this.clearSea().plot(from, c, r); }
+    /** Her kind's chart (src/hull-chart.ts: every move of hers on this board worked out once, shared by every ship of
+        her kind, and how far anywhere is), if her sea has one: her pilot then works her way out on it, the other ships
+        in her way only within `near` squares of her. */
+    chart = null;
+    near = Infinity;
+    /** The squares a move sweeps (`got`, the move as made): where she bumped, the squares she's left on; else every
+        square she covers on the way, where she swings round, and on the winds that carry her. */
+    sweep(p, m, got = this.move(p, m)) {
+        const seen = new Set(), out = [];
+        const add = (q) => { for (const s of squares(this.ship, q)) {
+            const k = s[0] * 4096 + s[1];
+            if (!seen.has(k)) {
+                seen.add(k);
+                out.push(s);
+            }
+        } };
+        if (got.bump)
+            add(got.to);
+        else {
+            const { steps, swing } = shipPath(this.ship, p, m);
+            steps.forEach(add);
+            swing.forEach(add);
+        }
+        got.ride.forEach(add);
+        return out;
+    }
+    /** How far (squares, any way) from her own square a move of hers looks: every square it has to be clear on, before
+        any wind carries her (src/hull-chart.ts works out again only the poses this near a rock that's changed). */
+    reach() {
+        let most = 0;
+        for (let d = 0; d < 4; d++)
+            for (const m of ['F', 'L', 'R']) {
+                const p = { c: 0, r: 0, d }, { steps, swing } = shipPath(this.ship, p, m);
+                for (const q of [p, ...steps, ...swing])
+                    for (const [c, r] of squares(this.ship, q))
+                        most = Math.max(most, Math.abs(c), Math.abs(r));
+            }
+        return most;
+    }
+    /** The poses (numbered as the pilot's) she's there in for that square: any with it under her, or with `exact`
+        on it, lying just so. */
+    arrivals(c, r, exact = this.exact) {
+        if (exact && exact.c === c && exact.r === r)
+            return [(c * this.rows + r) * 4 + exact.d];
+        const out = [], n = Math.max(this.ship.long, this.ship.wide);
+        for (let x = c - n; x <= c + n; x++)
+            for (let y = r - n; y <= r + n; y++) {
+                if (x < 0 || y < 0 || x >= this.cols || y >= this.rows)
+                    continue;
+                for (let d = 0; d < 4; d++)
+                    if (squares(this.ship, { c: x, r: y, d }).some(([a, b]) => a === c && b === r))
+                        out.push((x * this.rows + y) * 4 + d);
+            }
+        return out;
+    }
+    /** What names a place on her chart: the square, or the square and the way she's to lie in it. */
+    placeKey(c, r, exact = this.exact) {
+        return exact && exact.c === c && exact.r === r ? `${c},${r},${exact.d}` : `${c},${r}`;
+    }
+    /** The pilot (Sea.plot's), on her chart if she has one: her quickest way as things are, round any ship near her. */
+    shipPlots = new Map();
+    plot(from, c, r, via = null, oars = false) {
+        const chart = this.chart;
+        if (!chart || via)
+            return super.plot(from, c, r, via, oars);
+        if (!this.open(c, r))
+            return null;
+        if (this.there(from, c, r))
+            return [];
+        const place = this.placeKey(c, r), memo = `${from.c},${from.r},${from.d}|${place}|${this.laid}|${chart.version()}`;
+        if (!this.shipPlots.has(memo)) {
+            if (this.shipPlots.size > 256)
+                this.shipPlots.clear();
+            const exact = this.exact;
+            this.shipPlots.set(memo, chart.plot(this, from, place, () => this.arrivals(c, r, exact), this.near));
+        }
+        const got = this.shipPlots.get(memo);
+        return got ? [...got] : null;
+    }
+    /** Her pilot's moves to a square as if the other ships weren't there (they'll have moved by then). */
+    plotPast(from, c, r) {
+        if (this.chart)
+            return this.chart.plot(this, from, `${c},${r}`, () => this.arrivals(c, r, null), -1);
+        return this.bare().plot(from, c, r);
+    }
     /** Her pilot's moves from `from` to lie exactly at `to` (as if the other ships weren't there), or null if she can't. */
     plotTo(from, to) {
-        const twin = this.clearSea(), was = twin.exact;
+        if (this.chart)
+            return this.chart.plot(this, from, this.placeKey(to.c, to.r, to), () => this.arrivals(to.c, to.r, to), -1);
+        const twin = this.bare(), was = twin.exact;
         twin.exact = { ...to };
         const got = twin.plot(from, to.c, to.r);
         twin.exact = was;
         return got;
     }
+    /** Her quickest way to the nearest of many places (`key` naming them: a gate's berths, say), past the other ships,
+        on her chart: her moves, and where she'll lie. */
+    plotAny(from, key, goals) {
+        if (!this.chart)
+            return null;
+        const moves = this.chart.plot(this, from, key, goals, -1);
+        if (!moves)
+            return null;
+        let p = from;
+        for (const m of moves) {
+            const k = this.chart.id(p) * 3 + ['F', 'L', 'R'].indexOf(m);
+            p = this.chart.pose(this.chart.end[k]);
+        }
+        return { moves, to: p };
+    }
+    /** Seconds to get there past the other ships, as she is (her drag): a look-up on her chart (Infinity: no way). */
+    eta(from, c, r, exact = null) {
+        if (this.chart)
+            return this.chart.field(this.placeKey(c, r, exact), () => this.arrivals(c, r, exact))[this.chart.id(from)] * this.drag;
+        const moves = exact ? this.plotTo(from, exact) : this.plotPast(from, c, r);
+        return moves ? moves.length * this.ship.move * this.drag : Infinity;
+    }
+    /** Seconds to the nearest of many places, past the other ships (as plotAny). */
+    etaAny(from, key, goals) {
+        return this.chart ? this.chart.field(key, goals)[this.chart.id(from)] * this.drag : Infinity;
+    }
     /** Her sea with no other ships on it, the same rocks and winds (its pilot's reckonings kept apart from hers, so
-        neither throws the other's away). */
+        neither throws the other's away; and her kind's chart is worked out on one). */
     twin = null;
-    clearSea() {
+    bare() {
         if (!this.twin) {
             this.twin = new ShipSea(this.ship, this.cols, this.rows, this.rocks);
             if (this.windy)
@@ -230,21 +340,7 @@ export class ShipSea extends Sea {
             return p.c === c && p.r === r && p.d === e.d;
         return squares(this.ship, p).some(([x, y]) => x === c && y === r);
     }
-    goalPoses(c, r) {
-        const e = this.exact;
-        if (e && e.c === c && e.r === r)
-            return new Set([(c * this.rows + r) * 4 + e.d]);
-        const out = new Set(), n = Math.max(this.ship.long, this.ship.wide);
-        for (let x = c - n; x <= c + n; x++)
-            for (let y = r - n; y <= r + n; y++) {
-                if (x < 0 || y < 0 || x >= this.cols || y >= this.rows)
-                    continue;
-                for (let d = 0; d < 4; d++)
-                    if (this.there({ c: x, r: y, d }, c, r))
-                        out.add((x * this.rows + y) * 4 + d);
-            }
-        return out;
-    }
+    goalPoses(c, r) { return new Set(this.arrivals(c, r)); }
 }
 /** The helm (src/den-sail.ts's, the den's own), sailing a ship by her handling: her moves a turn, and her
     wider turn drawn. */

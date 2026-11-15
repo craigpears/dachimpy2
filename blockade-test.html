@@ -52,6 +52,12 @@
   #say.on { opacity: 1; } #say.bad { border-color: #c8572a; }
   [hidden] { display: none !important; }
   @media (max-width: 700px) { .ui { top: auto; bottom: 12px; max-height: 45vh; } p { display: none; } }
+  /* the brawl, watched as a cinematic (?watch=brawl): the panel put away, a caption and a way back to the whole */
+  body.cinema .ui { display: none; }
+  #cinema { display: none; position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 8px 14px; text-align: center; }
+  body.cinema #cinema { display: block; }
+  #cinema b { display: block; font-size: 16px; }
+  #cinema span { display: block; font-size: 13px; opacity: .85; margin: 2px 0 6px; }
 </style>
 </head>
 <body>
@@ -76,6 +82,7 @@
   <div class="ships" id="ships"></div>
 </div>
 <div id="say"></div>
+<div id="cinema"><b id="cineTitle"></b><span id="cineLine"></span><button id="cineAll">Watch the whole blockade</button></div>
 <script src="js/engine.js"></script>
 <script type="importmap">
   { "imports": {
@@ -102,11 +109,22 @@ const say = (text, bad = false) => { const el = $('say'); el.textContent = text;
 // Spectating to start (the user, 15 Nov: "you should be able to just spectate and watch"), the director moving the
 // camera to whatever's happening; ?ship= a number to sail her.
 const start = params.has('ship') ? Math.max(0, Math.min(15, Number(params.get('ship')) || 0)) : -1;
-const bk = blockadeSea({ you: start, say });
+// ?watch=brawl: a cinematic (the user, 15 Nov: "I want to see two of the big ships really having a brawl and fighting it
+// out to see what that damage looks like"; "That needs to be like one of the shortcuts so people can actually see a
+// cinematic of the blockade"): two war frigates broadside to broadside, the camera slowly round them both.
+const brawling = start < 0 && params.get('watch') === 'brawl';
+const bk = blockadeSea({ you: start, say, brawl: brawling });
 
 const FOLLOW = { yaw: 0.35, pitch: 0.55, dist: 46 }, WHOLE = { yaw: 0, pitch: 1.05, dist: 205 };
-const cam = { yaw: 0.35, pitch: 0, dist: 0, at: new THREE.Vector3(), follow: true, director: start < 0, watching: 0, cut: 0 };
+const cam = { yaw: 0.35, pitch: 0, dist: 0, at: new THREE.Vector3(), follow: true, director: start < 0 && !brawling, watching: 0, cut: 0, cinema: brawling };
 Object.assign(cam, FOLLOW);
+// (the brawl: its caption, and the way out of it to the whole blockade, the director on)
+const cinema = (on) => {
+  cam.cinema = on; document.body.classList.toggle('cinema', on);
+  if (!on) { cam.director = true; $('director').classList.add('on'); Object.assign(cam, FOLLOW); params.delete('watch'); history.replaceState(null, '', params.toString() ? '?' + params : location.pathname); }
+};
+$('cineAll').onclick = () => cinema(false);
+if (brawling) { const [a, z] = bk.duel.map((id) => bk.b.ship(id).name); $('cineTitle').textContent = `${a} and ${z}: a brawl`; cinema(true); Object.assign(cam, { yaw: -0.9, pitch: 0.38, dist: 34 }); }
 const sail = (id) => {
   bk.sail(id);
   $('mine').hidden = id < 0;
@@ -201,7 +219,16 @@ function frame() {
   // camera drifting slowly round her.
   if (bk.you() < 0 && cam.director && (cam.cut -= dt) <= 0) { const id = bk.director(); if (id !== cam.watching) { cam.watching = id; cam.cut = 5; sig = ''; } }
   if (bk.you() < 0 && cam.director) cam.yaw += dt * 0.05;
-  if (cam.follow) cam.at.lerp(bk.focus(bk.you() >= 0 ? bk.you() : cam.watching).setY(2), Math.min(1, dt * 2.5));
+  if (cam.cinema) {
+    // (the brawl: between the two while they're close, else on whichever's knocked out, her crew at work; the camera
+    // drawn back to keep both in, and drifting slowly round)
+    const [a, z] = bk.duel.map((id) => bk.b.ship(id)), fa = bk.focus(a.id), fz = bk.focus(z.id), apart = fa.distanceTo(fz);
+    const out = a.dmg.out ? a : z.dmg.out ? z : null, mid = apart < 50 ? fa.clone().lerp(fz, 0.5) : bk.focus((out ?? a).id);
+    cam.at.lerp(mid.setY(2), Math.min(1, dt * 1.5));
+    cam.dist += ((apart < 50 ? Math.max(26, Math.min(64, 18 + apart * 0.85)) : 30) - cam.dist) * Math.min(1, dt * 0.8);
+    cam.yaw += dt * 0.06;
+    $('cineLine').textContent = [a, z].map((s) => `${s.name} ${s.dmg.out ? 'knocked out, her crew rebuilding her' : `${Math.round(s.dmg.share() * 100)}% damaged`}`).join(' · ');
+  } else if (cam.follow) cam.at.lerp(bk.focus(bk.you() >= 0 ? bk.you() : cam.watching).setY(2), Math.min(1, dt * 2.5));
   hud();
   if ((sayT -= dt) <= 0) $('say').classList.remove('on');
   camera.position.set(cam.at.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cam.at.y + Math.sin(cam.pitch) * cam.dist, cam.at.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist);

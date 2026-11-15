@@ -7,8 +7,8 @@
    shots". */
 import { describe, expect, it } from 'vitest';
 import { BLOCKADE, Blockade, inHeart, islandLand } from '../src/blockade';
-import { Bots, bombardBerths } from '../src/blockade-bots';
-import { squares } from '../src/ship-handling';
+import { Bot, Bots, bombardBerths } from '../src/blockade-bots';
+import { squares, alongs } from '../src/ship-handling';
 
 const B = BLOCKADE, prize: [number, number] = [21, 17];
 /** A seeded dice, so a game plays the same every run. */
@@ -131,6 +131,55 @@ describe('shooting each other: holes where she\'s shot, and dead in the water (1
     const s = sloop(b), sb = bombardBerths(b, s)[0];
     s.helm.moor(sb.pose);
     expect(b.fire(s.id, sb.side)!.shots.some((x) => x.got === 'bounced')).toBe(true);
+  });
+});
+
+describe('a raider snipes from off a frigate\'s bow or stern (15 Nov: "they snipe at the back or the front of the ship where they\'re safe, then they can\'t return a broadside")', () => {
+  it('she makes for a berth across the frigate\'s line past her end, from where her own broadside rakes her and none of the frigate\'s bears on her', () => {
+    const b = new Blockade(), raider = b.ships.find((s) => s.raider && s.team === 'gold')!, foe = frigate(b, 'crimson');
+    // (out on open water, the frigate heading along the board, the raider off to one side of her and astern)
+    b.ships.filter((s) => s !== raider && s !== foe).forEach((s, i) => s.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
+    foe.helm.moor({ c: 8, r: 10, d: 1 });
+    raider.helm.moor({ c: 2, r: 13, d: 1 });
+    b.notice();
+    const bot = new Bot(raider.id, dice(3));
+    bot.tick(b, 5);
+    expect(bot.goal?.kind).toBe('raid');
+    const g = bot.goal as { kind: 'raid'; on: number; pose?: { c: number; r: number; d: number } };
+    expect(g.on).toBe(foe.id);
+    const at = g.pose!, al = alongs(foe.h), fp = foe.helm.pose;
+    // (along the frigate's line, past one of her ends: her stern here, the nearer, not in her way)
+    const along = (at.c - fp.c) * [0, 1, 0, -1][fp.d] + (at.r - fp.r) * [1, 0, -1, 0][fp.d];
+    const across = (at.c - fp.c) * [0, 1, 0, -1][(fp.d + 1) % 4] + (at.r - fp.r) * [1, 0, -1, 0][(fp.d + 1) % 4];
+    expect(along).toBeLessThan(al[0]);
+    expect(Math.abs(across)).toBeLessThanOrEqual(1);
+    expect(at.d % 2).not.toBe(fp.d % 2);
+    // (lying there: her broadside lands on the frigate; neither of the frigate's reaches her)
+    raider.helm.moor(at); b.notice();
+    expect((['L', 'R'] as const).some((side) => b.aim(raider.id, side).some((x) => x.what?.what === 'ship' && x.what.id === foe.id))).toBe(true);
+    for (const side of ['L', 'R'] as const) expect(b.aim(foe.id, side).some((x) => x.what?.what === 'ship' && x.what.id === raider.id)).toBe(false);
+  });
+});
+
+describe('the brawl, to watch (15 Nov: "I want to see two of the big ships really having a brawl and fighting it out to see what that damage looks like")', () => {
+  it('two war frigates put broadside to broadside fight each other, manoeuvring, and both are holed', () => {
+    const b = new Blockade(), duel = b.brawl(), bots = new Bots(b, [], dice(5), duel);
+    expect(duel.map((id) => b.ship(id).name)).toEqual(B.BRAWL.map((x) => x.name));
+    const [a, z] = duel.map((id) => b.ship(id)), start = duel.map((id) => ({ ...b.ship(id).helm.pose }));
+    for (const s of [a, z]) for (const [c, r] of squares(s.h, s.helm.pose)) expect(b.rocks.has(`${c},${r}`)).toBe(false);
+    // (lying broadside to broadside: each one's broadside lands on the other)
+    const bears = (x: typeof a, y: typeof a) => (['L', 'R'] as const).some((side) => b.aim(x.id, side).every((q) => q.what?.what === 'ship' && q.what.id === y.id));
+    expect(bears(a, z)).toBe(true);
+    expect(bears(z, a)).toBe(true);
+    let moved = false;
+    for (let i = 0; i < 400; i++) {
+      bots.tick(b, 0.1); b.tick(0.1);
+      if (duel.some((id, k) => JSON.stringify(b.ship(id).helm.pose) !== JSON.stringify(start[k]))) moved = true;
+    }
+    for (const id of duel) expect(bots.doing(b, id), b.ship(id).name).toMatch(/fighting|knocked out/);
+    expect(moved).toBe(true);
+    expect(a.dmg.holes.length + (a.dmg.out ? 1 : 0)).toBeGreaterThan(0);
+    expect(z.dmg.holes.length + (z.dmg.out ? 1 : 0)).toBeGreaterThan(0);
   });
 });
 

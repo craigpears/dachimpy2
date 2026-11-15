@@ -2,9 +2,10 @@
 
 A proof of concept on the unlinked `blockade-test.html` (15 Nov). Its rules are `src/blockade.ts`, its bots
 `src/blockade-bots.ts`, every ship's damage `src/ship-damage.ts`, the imperial gate `src/imperial-gate.ts`, each
-ship's handling `src/ship-handling.ts`. Its 3D is `js/den/blockade.js`, the gate's `js/den/gate-look.js` and the
+ship's handling `src/ship-handling.ts`, each kind of ship's chart of the board (her moves worked out once, and how far
+to anywhere) `src/hull-chart.ts`. Its 3D is `js/den/blockade.js`, the gate's `js/den/gate-look.js` and the
 damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-damage.test.ts`,
-`tests/ship-handling.test.ts`.
+`tests/ship-handling.test.ts`, `tests/hull-chart.test.ts`.
 
 ## 1. What was asked (15 Nov)
 
@@ -90,12 +91,24 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     an open one, and inside, the heart's buoys are worth more to her;
   - a war frigate with an enemy close by (frigates first) lies off her side and fights her for it;
   - a sloop badly hurt runs for a cove (or her side's corner) and hides till she's patched;
-  - two raider sloops a side lurk in a cove, dart out at an enemy frigate, lie off her side, fire, and run back;
+  - two raider sloops a side lurk in a cove, dart out at an enemy frigate, snipe at her from across her line off her
+    stern (her bow if that's much quicker to get to: it's in her way), where none of her broadsides bears, fire, and run
+    back (15 Nov: "they snipe at the back or the front of the ship where they're safe, then they can't return a
+    broadside");
   - everyone fires a loaded side whenever it would hit an enemy and no friend, a tower she's come for, or a gate's
     gun firing on her; blocked by another ship, she makes a move of her own rather than wait for ever.
 - **Spectating** (the page's start): the camera's director moves to whatever's happening (a knockout, a tower coming
   down, a hit; else a raid or a fight), no more often than every five seconds, drifting slowly round her; or follow any
   ship by clicking her, or the whole board. Any ship's Sail button takes her helm (`?ship=` her number).
+- **The brawl** (`?watch=brawl`, on the front page's launch pad; 15 Nov: "I want to see two of the big ships really
+  having a brawl and fighting it out to see what that damage looks like"; "a cinematic of the blockade"): Primates
+  Rule and Iron Pride put broadside to broadside on open water between the south-west islands and the fort
+  (`BLOCKADE.BRAWL`), their bots set on each other alone, coming about for each other's side; everyone else leaves
+  them to it (never raids them, fights them or fires on them), the blockade going on round them. The camera between
+  the two, or on whichever's knocked out while her crew rebuild her, drifting round; a caption, and a way out to the
+  whole blockade.
+- **Knocked out, seen** (15 Nov: "a tiny bit clearer"): a thick black column of smoke off her middle, seen across the
+  board. Holes are drawn anywhere along the square they struck, so a still duel's don't stack.
 
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
@@ -104,11 +117,29 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
 - A frigate's big moves keep her middle on every other square (it moves two at a time), so she can only line up with
   half the gaps two squares wide. So the gate's towers are two wide: crumbled, the way's three wide, and any frigate
   fits. Any narrow way meant for a frigate wants three squares, or two placed for her.
-- Cost: sixteen ships' pilots on a big board. A round takes 9 to 19 s of computing for its six minutes (worst tick
-  under half a second): only the ships near one that moves work their ways out afresh; working out a way as if the
-  other ships had moved (choosing where to go) uses a twin of her sea with no ships on it, its reckonings kept; bots
-  look round every 3.5 s, as the crow flies, working out properly only what they pick; a place with no way to it is
-  left alone a while.
+- Cost, first pass: sixteen ships' pilots on a big board, a round 9 to 19 s of computing for its six minutes, each
+  pilot searching her own sea afresh whenever a ship near her moved, the bots guessing as the crow flies.
+- **Maps worked out once** (15 Nov, the user: "surely ... there's not that many ways you can move around ... a couple
+  of pre-computed maps ... one for small ships, one for big ... the only thing that can really change is ... the
+  destructible items ... And then ... the adversarial planning on the top ... so you can plan around other moving
+  ships"). `src/hull-chart.ts`:
+  - **a chart for each kind of ship**: from every square and heading, where each of her three moves takes her (the
+    winds carrying a sloop), its seconds, the squares it sweeps; rocks only, no ships. All the sloops share one, all
+    the frigates another, worked out when the board's set up (a frigate's half a second, a sloop's a sixth); when a
+    tower falls only the poses near it are worked out again (a fifth of the board), unless it's by a wind;
+  - **how far to anywhere**: a place's field, its seconds from every pose of hers, the chart worked backwards from it
+    once (a millisecond or two) and kept for every ship of her kind. A bot weighs every buoy, cove and gate by a
+    look-up, no guessing; a gate's berths are one place, her quickest way ending at whichever's nearest; a frigate's
+    shut out of the heart because there's no way in for her, not by a rule;
+  - **round the ships near her**: her way as things are is a search told exactly how far everything is past the
+    ships (A*, the field its guess), so with nobody near it goes straight down the field; a ship's in her way only
+    within 5 squares of her (`IN_WAY`: one further off will have moved by the time she's there).
+  - A round now takes 3 to 4 s of computing, worst tick under a tenth of a second; her way is as quick as the den's own
+    pilot finds (tested from all over the board, both kinds).
+- After the raiders' sniping, three seeded rounds: a gate down at 22 to 28 s, a frigate in the heart at 45, 215 and
+  344 s; raiders on a raid hit frigates mostly from off their ends (25 hits to 15 from the side, those on the way in),
+  frigates hitting raiders 9 to 22 times a round. The brawl: the two land 9 to 24 hits each in two minutes, one
+  knocked out at 37 s in one, at 111 s in another, neither in the third.
 
 ## 5. To shape with the user
 
@@ -122,3 +153,13 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
 - The styles' own mechanics (IDEAS.md): the Atlantean launching little craft (trikes, an octopus), the ghost ship
   gliding through rocks.
 - Frigates getting into the heart more often (two rounds in four), and the bots' fights round the gates.
+- **Ships that sink** (15 Nov: "eventually you do need ships to be able to [sink]. Because that's part of the joy of
+  blockading is, oh, look, we've lost control of the central area, we've got to get back in there again"): a sinking
+  blockade's way, a ship sunk coming back from her side's edge. TODO.md.
+- **The buoys' flags clear, and the bots as teams** (15 Nov: "the [war frigs] control that large open area and protect
+  the sloops ... the sloops ... help the [war frigs] cover more ground"). TODO.md.
+- **Admiral mode** (15 Nov: "give each ship a target or directive, where it's going, what it's doing ... then you
+  watch the things unfold and can ... update and tweak things or take over"): the bots' goals as your orders. IDEAS.md.
+- **Islands as the capture points** ("you're blockading not just one island, but ... having a fight around the whole
+  ocean"), **shallows a frigate scrapes through at a cost**, **carriers** (a middle class of ship launching little
+  craft), **a ramming specialist** (the Atlantean's sea creatures): IDEAS.md.

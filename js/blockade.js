@@ -1,4 +1,5 @@
 import { ShipSea, ShipHelm, Guns, broadside, squares, SLOOP_HANDLING, FRIGATE_HANDLING } from './ship-handling.js';
+import { HullChart } from './hull-chart.js';
 import { SLOOP, WAR_FRIGATE } from './ships.js';
 import { Gate } from './imperial-gate.js';
 import { Turret } from './den-turret.js';
@@ -76,8 +77,16 @@ export const BLOCKADE = {
     ],
     /** How near (squares) a ship has to be to another for her moving to make the other's pilot think again. */
     NEAR: 8,
+    /** How near (squares) another ship has to be to be in a ship's way, as her pilot works it out: one further off will
+        have moved by the time she's there (inside NEAR, so a ship in her way moving always makes her think again). */
+    IN_WAY: 5,
     /** The gates' guns' size. */
     GATE_GUNS: 'medium',
+    /** The brawl to watch (blockade-test.html?watch=brawl, 15 Nov: "I want to see two of the big ships really having a
+        brawl and fighting it out to see what that damage looks like"; "That needs to be like one of the shortcuts so
+        people can actually see a cinematic of the blockade"): two war frigates broadside to broadside on the open water
+        between the south-west islands and the fort, room to come about, the rest of the blockade going on round them. */
+    BRAWL: [{ name: 'Primates Rule', at: { c: 7, r: 10, d: 1 } }, { name: 'Iron Pride', at: { c: 7, r: 14, d: 1 } }],
 };
 const HANDLINGS = { sloop: SLOOP_HANDLING, frigate: FRIGATE_HANDLING };
 const CLASSES = { sloop: SLOOP, frigate: WAR_FRIGATE };
@@ -111,6 +120,8 @@ export class Blockade {
     seen = new Map();
     /** Each square a ship covers just now, and whose (kept as they move: notice). */
     taken = new Map();
+    /** Each kind of ship's chart of this board (src/hull-chart.ts): all the sloops share one, all the frigates another. */
+    charts = {};
     constructor() {
         const B = BLOCKADE, side = new Set(B.SIDEWAYS.map(([c, r]) => key(c, r))), ways = new Set(B.GATES.flatMap((x) => [key(x.way, x.r0), key(x.way, x.r1)]));
         for (const w of B.WALLS)
@@ -133,8 +144,13 @@ export class Blockade {
                 const sea = new ShipSea(h, B.COLS, B.ROWS, this.rocks, (c, r) => { const o = this.taken.get(key(c, r)); return o !== undefined && o !== me; });
                 if (s.kind === 'sloop')
                     sea.carriedBy(this.wind);
+                sea.chart = this.charts[s.kind] ??= new HullChart(sea.bare());
+                sea.near = B.IN_WAY;
                 this.ships.push({ id: me, name: s.name, team: team.id, kind: s.kind, h, cls: CLASSES[s.kind], raider: !!s.raider, sea, helm: new ShipHelm(sea, { ...s.at }), guns: new Guns(h.reload), dmg: new Damage(CLASSES[s.kind]) });
             }
+        // (the charts worked out now, while the board's being set up, rather than on the first move)
+        for (const c of Object.values(this.charts))
+            c.fresh();
         this.notice();
     }
     ship(id) { return this.ships[id]; }
@@ -237,8 +253,8 @@ export class Blockade {
     }
     /** Who's ahead (null while it's level). */
     leader() { return this.score.gold === this.score.crimson ? null : this.score.gold > this.score.crimson ? 'gold' : 'crimson'; }
-    /** What a shot of `from`'s stops at on this square. */
-    stopAt(from, c, r) {
+    /** What a shot of `from`'s stops at on this square (`ships` false: as if no ship were on the sea). */
+    stopAt(from, c, r, ships = true) {
         for (const [g, gate] of this.gates.entries()) {
             const t = gate.towerAt(c, r);
             if (t >= 0)
@@ -249,14 +265,16 @@ export class Blockade {
             return this.battery[g].wrecked ? { what: 'rock' } : { what: 'gun', i: g };
         if (this.rocks.has(key(c, r)))
             return { what: 'rock' };
+        if (!ships)
+            return null;
         const s = this.under(c, r);
         return s && s !== from ? { what: 'ship', id: s.id } : null;
     }
     /** Her broadside out of that side as it would fly now (or lying at `at`), without firing it (a bot's look
-        before it fires). */
-    aim(id, side, at) {
+        before it fires; `ships` false, as if no ship were in the way). */
+    aim(id, side, at, ships = true) {
         const s = this.ship(id), from = at ? { c: at.c, r: at.r, a: at.d } : s.helm.now();
-        return broadside(s.h, from, side, (c, r) => this.stopAt(s, c, r));
+        return broadside(s.h, from, side, (c, r) => this.stopAt(s, c, r, ships));
     }
     /** A ship struck by a shot of that size on that square, fired from `from`: her hole, there. */
     hurt(s, gun, at, from) {
@@ -304,6 +322,12 @@ export class Blockade {
     }
     drop(id, c, r) { return this.ship(id).helm.drop(c, r); }
     put(id, m) { return this.ship(id).helm.put(m); }
+    /** The brawl (BLOCKADE.BRAWL): its two frigates put broadside to broadside; their ids. */
+    brawl() {
+        const ids = BLOCKADE.BRAWL.map(({ name, at }) => { const s = this.ships.find((x) => x.name === name); s.helm.moor(at); return s.id; });
+        this.notice();
+        return [ids[0], ids[1]];
+    }
     /** In the heart of the board, inside the fort. */
     inHeart(s) { return inHeart(s.helm.pose.c, s.helm.pose.r); }
     /** Where a sloop of that side hides: the islands' coves, and her side's corner of the sea, far from the fighting. */

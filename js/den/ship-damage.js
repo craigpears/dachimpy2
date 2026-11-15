@@ -29,12 +29,16 @@ export function damageLook(g, hull, { deck, crew = [], dress = {} }) {
   let t = 0, smokeT = 0, sprayT = 0, turn = 0;
 
   function add(h, fx) {
-    const s = SIZE[h.gun] * (big ? 2 : 1), x = h.along * hull.len * 0.9;
+    // (anywhere along the square it struck, not its middle: two ships lying still and pounding each other put every
+    // ball on the same squares, and the holes would all be drawn on top of each other)
+    const s = SIZE[h.gun] * (big ? 2 : 1), lim = hull.len * 0.45;
+    const x = Math.max(-lim, Math.min(lim, h.along * hull.len * 0.9 + (Math.random() - 0.5) * Math.min(4, hull.len * 0.5) * 0.85));
     const o = new THREE.Group();
     if (h.side === 'deck') { o.position.set(x, deck + 0.02, (Math.random() - 0.5) * hull.beam * 0.5); o.rotation.x = -Math.PI / 2; }
     else {
-      const y = hull.deck * (0.62 + Math.random() * 0.25), side = h.side === 'R' ? 1 : -1;
-      o.position.set(x, y, side * (widthAt(hull, x, y) + 0.06)); o.rotation.y = side > 0 ? 0 : Math.PI;
+      // (each a hair further out than the last, so overlapping holes never flicker through each other)
+      const y = hull.deck * (0.6 + Math.random() * 0.28), side = h.side === 'R' ? 1 : -1;
+      o.position.set(x, y, side * (widthAt(hull, x, y) + 0.06 + (h.id % 16) * 0.004)); o.rotation.y = side > 0 ? 0 : Math.PI;
     }
     // (raw splintered wood round it, so it shows on any paint: Primates Rule's black, Iron Pride's crimson)
     const raw = mesh(new THREE.CircleGeometry(s * 1.45, 9), rawM, false); raw.rotation.z = Math.random() * 3; o.add(raw);
@@ -93,12 +97,19 @@ export function damageLook(g, hull, { deck, crew = [], dress = {} }) {
         const side = Math.random() < 0.5 ? -1 : 1, w = g.localToWorld(new THREE.Vector3((Math.random() - 0.5) * hull.len * 0.3, deck, side * (hull.beam / 2 + 0.1)));
         burst(w, '#cfe8f2', 6, 1.8);
       }
-      // Smoke off her as she's badly hurt; knocked out, more of it, and darker.
+      // Smoke off her as she's badly hurt, a wisp here and there; knocked out, a thick black column rising high off
+      // her middle, to be seen across the board (the user, 15 Nov: "I like the smoke, little smoke showing someone's
+      // been knocked out. I think it needs to be maybe a tiny bit clearer").
       const share = dmg.share();
       if ((share > 0.5 || dmg.out) && (smokeT -= dt) < 0) {
-        smokeT = dmg.out ? 0.25 : 0.7;
         g.updateMatrixWorld(true);
-        puff(g.localToWorld(new THREE.Vector3((Math.random() - 0.5) * hull.len * 0.6, deck + 0.4, (Math.random() - 0.5) * hull.beam * 0.5)), { size: big ? 1.4 : 0.8, life: 3.5, dark: dmg.out ? 0.85 : 0.5 });
+        if (dmg.out) {
+          smokeT = 0.3;   // (few and big: the smoke's pool is shared by everything on the board)
+          puff(g.localToWorld(new THREE.Vector3((Math.random() - 0.5) * hull.len * 0.25, deck + 0.6, (Math.random() - 0.5) * hull.beam * 0.3)), { size: big ? 3.2 : 1.8, life: 5.5, rise: big ? 2.2 : 1.6, dark: 0.97, drift: 0.15 });
+        } else {
+          smokeT = 0.7;
+          puff(g.localToWorld(new THREE.Vector3((Math.random() - 0.5) * hull.len * 0.6, deck + 0.4, (Math.random() - 0.5) * hull.beam * 0.5)), { size: big ? 1.4 : 0.8, life: 3.5, dark: 0.5 });
+        }
       }
       // Dead in the water, she turns slowly where she lies.
       turn = dmg.out ? turn + dt * 0.12 : turn * Math.max(0, 1 - dt * 0.8);

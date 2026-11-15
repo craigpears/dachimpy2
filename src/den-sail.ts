@@ -879,7 +879,7 @@ export class Sea {
   slow = new Map<string, number>();
   /** Bumped each time a field's laid (layField) or a square's opened or shut (touch), so the pilot works its
       moves out afresh. */
-  private laid = 0;
+  protected laid = 0;
   /** A square's been opened or shut by hand (the race's barrier cleared, its rocks blasted, each put back for
       a new race): the pilot's reckoning is worked out afresh. */
   touch() { this.laid++; }

@@ -2886,6 +2886,36 @@ small ships because of the narrower gaps. I think that would be a cool proof of 
   watchtower), flying the colours of whoever holds it; and maybe, held, it does a little for its side (a gun firing
   every so often on the other side's ships in its reach; a gate's guns turning on the other side). Not built: to talk
   over, keeping the dance round the buoys.
+- **Islands as the capture points: a fight across the whole ocean (15 Nov).** "I love that a capture point is an
+  island. That idea is brilliant. Like, you're blockading not just one island, but you're like having a fight around
+  the whole ocean. That sounds incredible." So: the board's islands each something to hold (its fort, its gun, its
+  harbour), the blockade a fight for many islands at once spread over a big sea, not one fort in the middle.
+- **Frigates squeezing through the shallows, at a cost (15 Nov).** "Potentially in thinner terrain, frigs could squeeze
+  through, but they take damage if they want to take a shortcut." And "not just in shallow water, because then surely
+  you could just jump into the middle and camp out there with minimal effect ... there should be those shallow zones,
+  and being in that, go through the rocks to [get through] those shallow zones should cost it and take some damage."
+  Maybe as a ghost ship's mode: "they can squeeze, but if they want to squeeze through and stay in, they have to stay
+  in ghost mode ... the downside of taking damage or something continually." So: shallows a frigate can scrape
+  through, taking damage every move she's in them, never a place to sit.
+- **A middle class of ship: carriers (15 Nov).** "Maybe you could have the Haunted Seas frigate ... or brig ... more
+  like a middle ship class, so it's not a big [brawling] fighter ... it's got medium cannonballs ... but it can spawn
+  the little [craft] ... spawn some haunted sloops that ... hang around for a set number of turns ... So you got the
+  small ones which are nimble, the sloops, the big ones that are the big brawlers that can really take a fight in the
+  big areas, and then you've got the medium ship types which ... do medium damage ... [and] act kind of more like troop
+  ... transports, where ... they can spawn these smaller ships around them." Three roles: nimble sloops, brawling
+  frigates, carriers between (a haunted brig's ghost sloops for a few turns; an Atlantean's sea creatures).
+- **A ramming specialist (15 Nov).** "I've always thought you need a ship that specialises at ramming, and that
+  certainly could be the [Atlantean war frig] ... with how it sends out little [tritons] and turtles to go and ram the
+  enemy ships from the distance, that would be incredible." So: the Atlantean frigate launching little sea creatures
+  that ram the other side's ships (ramming as a damage of its own, YPPedia's).
+- **Admiral mode: orders for every ship, then watch it unfold (15 Nov).** "Other than the watch mode, we're going to
+  need some kind of admiral mode where ... similar to the route planning thing ... you need to be able to give each
+  ship a target or directive, where it's going, what it's doing." And "you could give sloops orders like ... camping
+  somewhere, sniping ... being in kind of snipe mode ... starting from the middle, drawing up those sorts of plans, and
+  then you watch the things unfold and can ... update and tweak things or take over specific [ships] and detail." So:
+  like the race's plan (src/race-plan.ts), a plan for the fleet: each ship an order (hold this buoy, camp in that cove,
+  snipe frigates, escort her, shoot that gate down, start in the middle), the bots carrying them out (their goals,
+  src/blockade-bots.ts, are already orders in all but name); change any as it plays, or take any ship's helm.
 - **War frigates by style, each a config of her decoration (15 Nov).** "We should have a similar kind of layout for ...
   Atlantis types, where they have all come out with all Atlantean decorations ... a [war frig] should have a config for
   its decoration. Primates Rule ... should just be a config of this is all the cannons and the furniture where they're

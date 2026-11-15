@@ -160,6 +160,28 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   - And war frigates by style, "a config for its decoration ... an Atlantean type and a haunted seas type": Coral
     Throne and Eldritch Wail (src/den-frigate.ts). Their own mechanics (launching little craft, gliding through rocks)
     are in IDEAS.md.
+  - Pathfinding on maps worked out once (15 Nov): "a couple of pre-computed maps ... one for small ships, one for big
+    ... the only thing that can really change is ... the destructible items ... And then ... the adversarial planning
+    on the top". Done: a chart for each kind of ship (src/hull-chart.ts), "how far to anywhere" fields, the search
+    round the ships near her only; a round 3 to 4 s of computing, from 9 to 19 (BLOCKADE.md §4).
+  - Raiders sniping from a safe angle (15 Nov): "they're supposed to snipe at the war frigate from a safe ... angle ...
+    the back or the front of the ship where they're safe, then they can't return a broadside." Done: a raider lies
+    across the frigate's line off her stern (her bow if she must), her broadside raking her end.
+  - The brawl to watch (15 Nov): "I want to see two of the big ships really having a brawl ... That needs to be like
+    one of the shortcuts so people can actually see a cinematic of the blockade." Done: blockade-test.html?watch=brawl,
+    on the front page's launch pad. And holes spread along the square they struck (a still duel stacked them).
+  - Knocked out, clearer (15 Nov): "I like the smoke ... showing someone's been knocked out. I think it needs to be
+    maybe a tiny bit clearer." Done: a thick black column off her middle.
+  - **Ships that sink (15 Nov):** "while I do like the idea that ... a quick hit just requires a bit of patching,
+    eventually you do need ships to be able to [sink]. Because that's part of the joy of blockading is, oh, look, we've
+    lost control of the central area, we've got to get back in there again. And that sense of working your way back in
+    would be lost if you can't [sink] at all." To do: a ship knocked out and still shot (or damaged past it) sinks, and
+    comes back from her side's edge of the board (a sinking blockade's way). Today a knocked-out ship still takes hits
+    and holes (one took 106 in a test) with nothing more happening: that's where sinking goes.
+  - **The buoys' flags clear, and the bots as teams (15 Nov):** "you should see some flags in the middle of those
+    things ... the [war frigs] control that large open area and protect the sloops, but the sloops ... help the [war
+    frigs] cover more ground while the [war frigs] do the protecting." To do: the buoys' flags plainly seen from the
+    spectating camera; frigates holding the open water near their sloops, sloops spreading to the buoys round them.
 
 - **The wolf den on a phone (14 Nov):** "fix the controls on mobile ... I've clicked on [Multibella's]. I can't even
   see anything. Like, the menus and control instructions literally take the entire screen up." On a phone the wolf
