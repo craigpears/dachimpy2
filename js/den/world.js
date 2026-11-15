@@ -479,6 +479,20 @@ export function burst(at, color, n, speed) {
     sparks.push(s);
   }
 }
+/** The sparks flying, falling and fading, and gone once faded: every page that bursts them calls it each frame (the
+    blockade's page didn't, 15 Nov, and kept every spark of every shot, tens of thousands a minute, the frame rate
+    falling from 30 to 12 within the minute). */
+export function tickSparks(dt) {
+  for (let i = sparks.length - 1; i >= 0; i--) {
+    const s = sparks[i];
+    s.userData.v.y -= 7 * dt;
+    s.position.addScaledVector(s.userData.v, dt);
+    s.rotation.x += dt * 6; s.rotation.y += dt * 4;
+    s.userData.life -= dt;
+    s.scale.setScalar(Math.max(0, s.userData.life));
+    if (s.userData.life <= 0) { scene.remove(s); sparks.splice(i, 1); }
+  }
+}
 /* Shaders built ahead, in the background, so nothing drawn for the first time stalls the game while
    its shader's built (the user, 10 Nov: "it goes a bit laggy" running the checkpoint's gauntlet: its
    first shot, the splash and the hit each froze it a tenth of a second or more). `objs`: things made

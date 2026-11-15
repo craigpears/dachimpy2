@@ -112,7 +112,7 @@
 </script>
 <script type="module">
 import * as THREE from 'three';
-import { renderer, scene, camera, paintSky, pirate } from './js/den/world.js';
+import { renderer, scene, camera, paintSky, pirate, tickSparks } from './js/den/world.js';
 import { blockadeSea } from './js/den/blockade.js';
 import { BLOCKADE } from './js/blockade.js';
 
@@ -270,6 +270,7 @@ const clock = new THREE.Clock();
 function frame() {
   const dt = Math.min(0.05, clock.getDelta());
   bk.tick(dt);
+  tickSparks(dt);
   // Spectating with the director: on to whatever's happening, never cutting more often than every few seconds, the
   // camera drifting slowly round her.
   if (bk.you() < 0 && cam.director && (cam.cut -= dt) <= 0) { const id = bk.director(); if (id !== cam.watching) { cam.watching = id; cam.cut = 5; sig = ''; } }

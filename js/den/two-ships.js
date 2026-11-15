@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import { SAIL } from '../den-sail.js';
 import { TwoShips, TWO_SEA, KINDS, seaXZ, seaCR } from '../two-ships.js';
 import { squares, drawnAt } from '../ship-handling.js';
-import { scene, mat, mesh, burst, sparks } from './world.js';
+import { scene, mat, mesh, burst, tickSparks } from './world.js';
 import { blast, puff, blastTick } from './blast.js';
 import { turretView, turretWrecked, turretFire, turretLand, turretShotsTick } from './turret.js';
 import { gateLook } from './gate-look.js';
@@ -183,13 +183,7 @@ export function twoShipsSea(ships, say = () => {}) {
         f.m.position.lerpVectors(f.a, f.b, u); f.m.position.y += Math.sin(Math.PI * u) * 0.8;
         if (u >= 1) { land(f); g.remove(f.m); flying.splice(i, 1); }
       }
-      for (let i = sparks.length - 1; i >= 0; i--) {
-        const s = sparks[i];
-        s.userData.v.y -= 7 * dt; s.position.addScaledVector(s.userData.v, dt);
-        s.rotation.x += dt * 6; s.rotation.y += dt * 4;
-        s.userData.life -= dt; s.scale.setScalar(Math.max(0, s.userData.life));
-        if (s.userData.life <= 0) { scene.remove(s); sparks.splice(i, 1); }
-      }
+      tickSparks(dt);
       blastTick();
     },
     /** Steer the one you're steering by the square you've clicked. */
