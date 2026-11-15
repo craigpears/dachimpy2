@@ -12,7 +12,7 @@
 //   node tools/task.mjs stream <stream> "<where it got to>"
 //   node tools/task.mjs move <id> <stream>                into another stream
 //   node tools/task.mjs board                             draws tasks/board.html (add, set, note and stream draw it too)
-//   node tools/task.mjs serve [--port n]                  the board at http://localhost:8643/, cards dragged between
+//   node tools/task.mjs serve [--port n] [--pick-up no]   the board at http://localhost:8643/, cards dragged between
 //                                                         columns there (each drop is a `set`, by this script)
 //
 // npm run task -- <the same>. Ids are the card's file name, without .md; any unique part of one will do.
@@ -213,14 +213,17 @@ export function board({ streams, cards }, when = new Date()) {
   /* A card open: the board moves over beside it, still scrolled and used, the inbox's box too. */
   @media (min-width: 900px) { .panel { width: min(560px, 45vw); } body.reading { padding-right: min(560px, 45vw); } }
   .update .hint { flex-basis: 100%; color: var(--faint); font-size: 12px; }
-  .heard { flex-basis: 100%; color: var(--accent-text); font-size: 13px; font-style: italic; }
+  .heard { flex: 1 1 200px; align-self: center; color: var(--accent-text); font-size: 13px; font-style: italic; }
+  .wave { width: 120px; height: 18px; align-self: center; color: #e5484d; }
+  .update textarea { min-height: 9em; max-height: 45vh; }
+  .drop textarea { min-height: 3.2em; max-height: 40vh; }
   .update .send { padding: 4px 12px; font-size: 13px; }
   .update .gap { flex: 1; }
   @media (max-width: 640px) { .cols { flex-direction: column; } .col { flex: none; width: 100%; box-sizing: border-box; } }
 </style></head>
 <body data-port="${PORT}">
 <header><h1>Task board</h1><span class="made">Drawn ${esc(today(when))}, ${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')} from tasks/ by tools/task.mjs. Click a card to open it.</span></header>
-<form class="drop"><textarea name="text" rows="2" placeholder="Drop something in: a fix, an idea, a thought. Sorted onto the board for you."></textarea><button type="button" class="mic" data-for="inbox" hidden title="Dictate into the inbox, on M (say &quot;drop it in&quot; to send it)">Mic (M)</button><button>Drop it in</button><span class="heard" data-for="inbox" hidden></span><span class="sorting" hidden></span></form>
+<form class="drop"><textarea name="text" rows="2" placeholder="Drop something in: a fix, an idea, a thought. Sorted onto the board for you."></textarea><button type="button" class="mic" data-for="inbox" hidden title="Dictate into the inbox, on M (say &quot;drop it in&quot; to send it)">Mic (M)</button><button>Drop it in</button><canvas class="wave" data-for="inbox" width="240" height="36" hidden></canvas><span class="heard" data-for="inbox" hidden></span><span class="sorting" hidden></span></form>
 <div class="chips"><button class="chip on" data-stream="" style="--h:30">Every stream</button>${chips}</div>
 <details class="where"><summary>Where each stream's got to</summary><div class="streams">${notes}</div></details>
 <main class="cols">${cols}</main>
@@ -229,7 +232,7 @@ export function board({ streams, cards }, when = new Date()) {
   <div class="sts">${keys}</div>
   <div class="read"></div>
   <form class="update"><textarea name="text" placeholder="Say or type what's changed: &quot;that works now&quot;, &quot;still slow when you turn&quot;, &quot;split the guns off into their own card&quot;..."></textarea>
-    <span class="heard" data-for="card" hidden></span><button type="button" class="mic" data-for="card" hidden title="Dictate, on M (say &quot;next&quot; to send and go on)">Mic (M)</button><button type="button" class="toinbox" title="Not about this card: what's in the box to the inbox instead (say &quot;inbox&quot;)">To the inbox</button><span class="gap"></span>
+    <canvas class="wave" data-for="card" width="240" height="36" hidden></canvas><span class="heard" data-for="card" hidden></span><button type="button" class="mic" data-for="card" hidden title="Dictate, on M (say &quot;next&quot; to send and go on)">Mic (M)</button><button type="button" class="toinbox" title="Not about this card: what's in the box to the inbox instead (say &quot;inbox&quot;)">To the inbox</button><span class="gap"></span>
     <button type="submit" class="send" name="stay">Send</button><button type="submit" class="send" name="on">Send and next</button>
     <span class="hint">Keys, working while the mic's on: M the mic, N send and next, &larr; &rarr; go through, 1-${Object.keys(STATUSES).length} move it, I to the inbox, Esc close. To type instead, click in the box (Esc to leave it; Ctrl+Enter sends). What you send is logged on the card and a headless Claude acts on it (moves it, splits it, notes it).</span></form>
 </aside>
@@ -301,18 +304,27 @@ const TOOLS = ['Read', 'Grep', 'Glob', 'Edit', 'Bash(node tools/task.mjs:*)'].jo
 /** The cards a headless Claude is working on right now (the board shows them as updating). */
 export const busy = new Set();
 /** A headless Claude (Sonnet) given a prompt, allowed only the task script, reading and editing documents; done(why)
- *  when it's finished, why saying what went wrong, if anything did. */
+ *  when it's finished, why saying what went wrong, if anything did. Three at a time at most, the rest waiting their
+ *  turn (going through the board quickly sends many). */
+const MAX_RUNS = 3, waiting = [];
+let running = 0;
 function headless(id, prompt, done, run) {
-  let out = '', ended = false;
-  const end = (why) => { if (ended) return; ended = true; busy.delete(id); done(why, out); };
   busy.add(id);
-  const child = run('claude', ['-p', '--model', 'sonnet', '--allowedTools', TOOLS], { cwd: ROOT, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
-  child.on('error', (e) => end(`couldn't start Claude: ${e.message}`));
-  child.stdout?.on('data', (d) => { out += d; });
-  child.stderr?.on('data', (d) => { out += d; });
-  child.on('close', (code) => end(code ? `it failed (${code}): ${out.trim().slice(-300)}` : ''));
-  child.stdin?.end(prompt);
-  return child;
+  const go = () => {
+    running++;
+    let out = '', ended = false;
+    const end = (why) => { if (ended) return; ended = true; running--; busy.delete(id); done(why, out); waiting.shift()?.(); };
+    const child = run('claude', ['-p', '--model', 'sonnet', '--allowedTools', TOOLS], { cwd: ROOT, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
+    child.on('error', (e) => end(`couldn't start Claude: ${e.message}`));
+    child.stdout?.on('data', (d) => { out += d; });
+    child.stderr?.on('data', (d) => { out += d; });
+    child.on('close', (code) => end(code ? `it failed (${code}): ${out.trim().slice(-300)}` : ''));
+    child.stdin?.end(prompt);
+    return child;
+  };
+  if (running < MAX_RUNS) return go();
+  waiting.push(go);
+  return null;
 }
 const fill = (file, card, words = '') => readFileSync(file, 'utf8').replaceAll('{{card}}', `${card.stream}/${card.id}`)
   .replaceAll('{{id}}', card.id).replaceAll('{{words}}', words);
@@ -335,6 +347,10 @@ export function update(cards, id, text, run = spawn) {
   const words = String(text ?? '').replace(/\s+/g, ' ').trim();
   if (!words) throw new Error('Nothing said');
   const c = change(cards, id, undefined, { note: `you said: "${words}"` });
+  act(c, words, run);
+  return c;
+}
+function act(c, words, run) {
   console.log(`updating ${c.id}`);
   headless(c.id, fill(UPDATE, c, words), (why, out) => {
     // Done nothing to it? Say so, with what it said, rather than leave the card looking forgotten.
@@ -344,14 +360,26 @@ export function update(cards, id, text, run = spawn) {
     drawBoard();
     console.log(`updated ${c.id}${why ? ': ' + why : ''}`);
   }, run);
-  return c;
+}
+
+/** Anything left unanswered when the server stopped mid-run (restarted, closed), picked up again when it starts: a card
+ *  whose last line is still what you said, an inbox card not yet sorted. */
+export function resume(run = spawn, dir = TASKS) {
+  const picked = [];
+  for (const c of load(dir).cards) {
+    const last = c.body.trim().split('\n').pop();
+    const said = last.match(/^- [^:]+: you said: "(.*)"$/)?.[1];
+    if (said) { act(c, said, run); picked.push(c.id); }
+    else if (c.meta.status === 'inbox' && /^- [^:]+: added\.$/.test(last)) { triage(c, run); picked.push(c.id); }
+  }
+  return picked;
 }
 
 const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.woff2': 'font/woff2' };
 /** The board served from this machine only, drawn fresh on every look: a card moved by POST /api/move {id, status},
  *  something dropped in by POST /api/inbox {text}, what's said about a card by POST /api/update {id, text}. */
-export function serve(port = PORT) {
+export function serve(port = PORT, { pickUp = true } = {}) {
   const server = createServer((req, res) => {
     const url = new URL(req.url, 'http://localhost');
     if (req.method === 'POST' && url.pathname === '/api/move') {
@@ -409,7 +437,11 @@ export function serve(port = PORT) {
     if (!file.startsWith(ROOT + sep) || !existsSync(file) || !statSync(file).isFile()) { res.writeHead(404).end(); return; }
     res.writeHead(200, { 'content-type': TYPES[extname(file).toLowerCase()] || 'application/octet-stream' }).end(readFileSync(file));
   });
-  server.listen(port, '127.0.0.1', () => console.log(`The board: http://localhost:${port}/ (Ctrl+C to stop)`));
+  server.listen(port, '127.0.0.1', () => {
+    console.log(`The board: http://localhost:${port}/ (Ctrl+C to stop)`);
+    const picked = pickUp ? resume() : [];
+    if (picked.length) console.log(`picked up again, left unanswered when it last stopped: ${picked.join(', ')}`);
+  });
   return server;
 }
 
@@ -451,7 +483,7 @@ function main(argv) {
     renameSync(c.file, join(TASKS, pos[1], id + '.md'));
     console.log(`${c.stream}/${c.id} -> ${pos[1]}/${id}`);
   } else if (cmd === 'serve') {
-    serve(Number(opt.port) || PORT);
+    serve(Number(opt.port) || PORT, { pickUp: opt['pick-up'] !== 'no' });
     return;
   } else if (cmd === 'stream') {
     const s = all.streams.find((x) => x.id === pos[0]);

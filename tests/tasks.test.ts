@@ -2,7 +2,7 @@
 // column for; the board drawn from them, a script's work and no one else's (the user, 15 Nov: "more deterministic").
 import { describe, it, expect } from 'vitest';
 // @ts-expect-error: a plain .mjs tool, untyped
-import { load, board, parse, format, change, dropIn, triage, update, tidy, busy, STATUSES } from '../tools/task.mjs';
+import { load, board, parse, format, change, dropIn, triage, update, tidy, resume, busy, STATUSES } from '../tools/task.mjs';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -89,6 +89,19 @@ describe('the task board (the user, 14 Nov: "a clear list of things and what the
     expect(html).toContain('class="through"');
     expect(client).toMatch(/ArrowRight/);
     expect(client).toContain('/api/update');
+  });
+  it('what was left unanswered when the server stopped is picked up when it starts again', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'tasks-'));
+    try {
+      mkdirSync(join(dir, 'den'));
+      writeFileSync(join(dir, 'den', 'said.md'), format({ title: 'Said', status: 'idea' }, '\nA.\n\n## Log\n\n- 9 Nov: added.\n- 15 Nov: you said: "this is done"\n'));
+      writeFileSync(join(dir, 'den', 'answered.md'), format({ title: 'Answered', status: 'done' }, '\nB.\n\n## Log\n\n- 15 Nov: you said: "done"\n- 15 Nov: done: as said\n'));
+      const prompts: string[] = [];
+      const fake = () => ({ on() {}, stdout: { on() {} }, stderr: { on() {} }, stdin: { end: (p: string) => { prompts.push(p); } } });
+      expect(resume(fake, dir)).toEqual(['said']);
+      expect(prompts[0]).toContain('> this is done');
+      busy.delete('said');
+    } finally { rmSync(dir, { recursive: true, force: true }); }
   });
   it('a card tidied up: its text rewritten, its log kept (the user, 15 Nov: "can you tidy this idea card up just so it\'s a bit more concise")', () => {
     const dir = mkdtempSync(join(tmpdir(), 'tasks-'));

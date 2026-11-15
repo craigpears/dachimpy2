@@ -90,7 +90,7 @@
   }
   function openCard(id, keepOrder) {
     if (!keepOrder || !order.includes(id)) order = orderFrom(id);
-    if (open !== id) box.value = draft[id] || '';
+    if (open !== id) { box.value = draft[id] || ''; fit(box); }
     open = id; panel.hidden = false; document.body.classList.add('reading'); render();
   }
   function step(by) {
@@ -157,7 +157,7 @@
     if (!text) { if (goOn) step(1); return; }
     if (!served) { notServed('send updates'); return; }
     try { await post('/api/update', { id, text }); } catch (e) { served ? tell('Not sent: ' + e.message) : notServed('send updates'); return; }
-    box.value = ''; delete draft[id];
+    box.value = ''; fit(box); delete draft[id];
     cardEl(id)?.classList.add('busy'); watching.add(id);
     tell('Logged on the card; acting on it now.');
     if (goOn) step(1); else render();
@@ -200,10 +200,45 @@
   // lost with it (the user, 15 Nov: "it cuts off insanely quickly"). So what it's hearing is shown as it's said, kept
   // if it stops before it's sure, and it's started again at once.
   let heard = ''; // said, not yet settled
-  const showHeard = () => $$('.heard').forEach((h) => {
+  const showHeard = () => $$('.heard, .wave').forEach((h) => {
     const mine = !!rec && h.dataset.for === (into === box ? 'card' : 'inbox');
-    h.hidden = !mine; h.textContent = heard ? heard + ' ...' : 'Listening...';
+    h.hidden = !mine;
+    if (h.matches('.heard')) h.textContent = heard ? heard + ' ...' : 'Listening...';
   });
+  // A wave of your voice while it listens, so it's plain it's on (the user, 15 Nov: "it shows like the wavy ... line.
+  // It's a lot clearer that things are going"): the microphone's level, a bar a moment, scrolling. If the level can't be
+  // read, a gentle wave still shows it's on.
+  let meter = null;
+  async function waveOn() {
+    if (meter) return;
+    meter = { levels: [], stop: () => {} };
+    const m = meter;
+    let read = () => 0.25 + 0.2 * Math.sin(Date.now() / 180); // no level to read: a gentle wave
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (meter !== m) { stream.getTracks().forEach((t) => t.stop()); return; }
+      const ctx = new AudioContext(), an = ctx.createAnalyser();
+      an.fftSize = 512; ctx.createMediaStreamSource(stream).connect(an);
+      const buf = new Uint8Array(an.fftSize);
+      read = () => { an.getByteTimeDomainData(buf); let s = 0; for (const v of buf) s += ((v - 128) / 128) ** 2; return Math.min(1, Math.sqrt(s / buf.length) * 4); };
+      m.stop = () => { stream.getTracks().forEach((t) => t.stop()); ctx.close(); };
+    } catch (e) {}
+    const draw = () => {
+      if (meter !== m) return;
+      m.levels.push(read()); if (m.levels.length > 40) m.levels.shift();
+      const c = $$('.wave').find((w) => !w.hidden);
+      if (c) {
+        const g = c.getContext('2d'), w = c.width, h = c.height, bw = w / 40;
+        g.clearRect(0, 0, w, h); g.fillStyle = getComputedStyle(c).color;
+        m.levels.forEach((l, i) => { const bh = Math.max(2, l * h); g.fillRect(w - (m.levels.length - i) * bw + 1, (h - bh) / 2, bw - 2, bh); });
+      }
+      requestAnimationFrame(draw);
+    };
+    draw();
+  }
+  const waveOff = () => { meter?.stop(); meter = null; };
+  // The boxes grow with what's said, to most of the panel, then scroll.
+  const fit = (t) => { t.style.height = 'auto'; t.style.height = t.scrollHeight + 2 + 'px'; t.scrollTop = t.scrollHeight; };
   function said(text) {
     const words = text.trim(), word = words.toLowerCase().replace(/[.!?]$/, '');
     if (!words || !into) return;
@@ -212,13 +247,13 @@
     if (into === box && word === 'inbox') return box.value.trim() && dropIt(box);
     if (into === drop.text && (word === 'drop it in' || word === 'send')) return dropIt();
     into.value = (into.value ? into.value.replace(/\s*$/, ' ') : '') + words;
-    into.scrollTop = into.scrollHeight;
+    fit(into);
   }
   const keepHeard = () => { if (heard) { said(heard); heard = ''; } };
   const micOff = () => {
     keepHeard();
     if (rec) { rec.onend = null; rec.onresult = null; rec.abort(); }
-    rec = null; into = null; showMic(); showHeard();
+    rec = null; into = null; showMic(); showHeard(); waveOff();
   };
   function toggleMic(target) {
     if (rec && into === target) return micOff();
@@ -243,7 +278,7 @@
     };
     const again = () => { try { rec?.start(); } catch (e) { setTimeout(() => { try { rec?.start(); } catch (e2) {} }, 250); } };
     rec.onend = () => { keepHeard(); showHeard(); again(); }; // it stopped by itself: keep what it heard, listen again
-    rec.start(); showMic(); showHeard();
+    rec.start(); showMic(); showHeard(); waveOn();
   }
   if (Speech) mics.forEach((m) => {
     m.hidden = false;
@@ -258,6 +293,7 @@
   // board watches it, and once it's been put where it goes draws itself again, unless you're busy (a card open, the
   // mic on, something half written), when it says so instead.
   const drop = $('.drop'), sorting = $('.sorting', drop);
+  [box, drop.text].forEach((t) => t.addEventListener('input', () => fit(t)));
   const busyHere = () => !panel.hidden || !!rec || !!drop.text.value.trim();
   async function dropIt(from = drop.text) {
     const text = from.value.trim();
@@ -265,7 +301,7 @@
     if (!served) { notServed('drop things in'); return; }
     let id;
     try { id = (await post('/api/inbox', { text })).id; } catch (err) { served ? tell('Not dropped in: ' + err.message) : notServed('drop things in'); return; }
-    from.value = '';
+    from.value = ''; fit(from);
     if (from === box && open) delete draft[open];
     sorting.hidden = false; sorting.textContent = 'In the inbox. Sorting it...';
     tell('In the inbox. Sorting it...');
