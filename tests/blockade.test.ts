@@ -8,6 +8,7 @@
 import { describe, expect, it } from 'vitest';
 import { BLOCKADE, Blockade, inHeart, islandLand } from '../src/blockade';
 import { Bot, Bots, bombardBerths } from '../src/blockade-bots';
+import { orderAt, orderText, FREE } from '../src/blockade-orders';
 import { squares, alongs } from '../src/ship-handling';
 
 const B = BLOCKADE, prize: [number, number] = [21, 17];
@@ -178,6 +179,57 @@ describe('a sinking blockade (15 Nov: "that sense of working your way back in wo
     for (let i = 0; i < 300 && f.away <= 0; i++) { bot.tick(b, 0.1); b.fired.splice(0).forEach((x) => { if (x.ship === g.id) fired++; }); b.tick(0.1); }
     expect(fired).toBeGreaterThan(0);
     expect(f.away).toBeGreaterThan(0);
+  });
+});
+
+describe('admiral mode: an order for each ship (15 Nov: "you need to be able to give each ship a target or directive, where it\'s going, what it\'s doing")', () => {
+  it('a click on the board orders what\'s there: a buoy held, an enemy hunted, a friend escorted, a gate shot down, else camping on the nearest square she fits', () => {
+    const b = new Blockade(), f = frigate(b), sl = sloop(b), foe = frigate(b, 'crimson'), mate = b.ships.find((x) => x.team === 'gold' && x !== f && x !== sl)!;
+    expect(orderAt(b, sl, ...B.BUOYS[4].at)).toEqual({ kind: 'hold', buoy: 4 });
+    expect(orderAt(b, sl, foe.helm.pose.c, foe.helm.pose.r)).toEqual({ kind: 'hunt', ship: foe.id });
+    expect(orderAt(b, sl, mate.helm.pose.c, mate.helm.pose.r)).toEqual({ kind: 'escort', ship: mate.id });
+    expect(orderAt(b, sl, sl.helm.pose.c, sl.helm.pose.r)).toEqual(FREE);
+    const north = B.GATES[1];
+    expect(orderAt(b, f, north.way, north.r0)).toEqual({ kind: 'gate', g: 1 });
+    // (a sloop's guns can't hurt a tower: there, she camps)
+    expect(orderAt(b, sl, north.way, north.r0)?.kind).toBe('camp');
+    // (on a rock: the nearest square she fits)
+    const camp = orderAt(b, f, 18, 18)!;
+    expect(camp.kind).toBe('camp');
+    if (camp.kind === 'camp') expect(b.rocks.has(`${camp.at[0]},${camp.at[1]}`)).toBe(false);
+    expect(orderText(b, { kind: 'hold', buoy: 0 })).toBe('hold the three-pennant buoy in the heart');
+  });
+
+  it('the bots carry their orders out: a frigate to the far gate, not her nearest; a sloop to camp where she\'s told and stay; a sloop to hold a far buoy', () => {
+    const b = new Blockade(), bots = new Bots(b, [], dice(4)), f = frigate(b), sl = sloop(b), other = b.ships.find((x) => x.team === 'gold' && x.kind === 'sloop' && x !== sl && !x.raider)!;
+    bots.order(f.id, { kind: 'gate', g: 1 });
+    bots.order(sl.id, { kind: 'camp', at: [10, 11] });
+    bots.order(other.id, { kind: 'hold', buoy: 8 });
+    for (let i = 0; i < 2; i++) { bots.tick(b, 0.1); b.tick(0.1); }
+    const goal = (id: number) => bots.bots.find((x) => x.id === id)!.goal;
+    expect(goal(f.id)).toMatchObject({ kind: 'gate', g: 1 });
+    let camped = 0;
+    for (let i = 0; i < 900; i++) {
+      bots.tick(b, 0.1); b.tick(0.1);
+      if (i > 600 && sl.away <= 0 && !sl.dmg.out && squares(sl.h, sl.helm.pose).some(([c, r]) => c === 10 && r === 11)) camped++;
+    }
+    expect(camped).toBeGreaterThan(100);
+    expect(b.reaches(other, B.BUOYS[8]) || other.dmg.out || other.away > 0).toBe(true);
+    expect(bots.doing(b, sl.id)).toMatch(/camp|knocked|sunk/);
+  }, 60000);
+
+  it('hunting: after that enemy, broadside on (a sloop after a frigate, off her end); escorting: off her friend\'s side', () => {
+    const b = new Blockade(), bots = new Bots(b, [], dice(4)), f = frigate(b), foe = frigate(b, 'crimson');
+    const sl = b.ships.find((x) => x.team === 'gold' && x.kind === 'sloop' && !x.raider)!;
+    bots.order(f.id, { kind: 'hunt', ship: foe.id });
+    bots.order(sl.id, { kind: 'escort', ship: f.id });
+    const raider = b.ships.find((x) => x.team === 'gold' && x.raider)!;
+    bots.order(raider.id, { kind: 'hunt', ship: foe.id });
+    bots.tick(b, 0.1);
+    const goal = (id: number) => bots.bots.find((x) => x.id === id)!.goal;
+    expect(goal(f.id)).toMatchObject({ kind: 'fight', on: foe.id });
+    expect(goal(raider.id)).toMatchObject({ kind: 'raid', on: foe.id });
+    expect(goal(sl.id)?.kind === 'escort' || goal(sl.id)?.kind === 'fight').toBe(true);
   });
 });
 

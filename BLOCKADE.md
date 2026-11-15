@@ -116,6 +116,18 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   them to it (never raids them, fights them or fires on them), the blockade going on round them. The camera between
   the two, or on whichever's knocked out while her crew rebuild her, drifting round; a caption, and a way out to the
   whole blockade.
+- **Admiral mode** (`?admiral`, on the front page's launch pad; 15 Nov: "some kind of admiral mode where ... similar
+  to the route planning thing ... you need to be able to give each ship a target or directive, where it's going, what
+  it's doing"; "you could give sloops orders like ... camping somewhere, sniping ... drawing up those sorts of plans,
+  and then you watch the things unfold and can ... update and tweak things or take over specific [ships]"). You're
+  Dachimpy's admiral; the round waits while you plan. An order a ship (src/blockade-orders.ts), carried out by her bot
+  before anything she'd choose herself: her own choice; hold a buoy; camp on a square, firing on what comes by; snipe
+  (a raider's way); shoot a gate down (a war frigate's); escort a friend, off her side, fighting whoever comes at her;
+  hunt an enemy, broadside on (a sloop after a frigate, off her end). Drawn on the board: pick a ship (on the board or
+  in the list), then click what she's to do there (a buoy, open water, a gate, a friend, an enemy), the button for
+  Snipe or her own choice; a dashed line from each of your ships to her order, a ring where it ends. Start the round
+  and watch; change any order as it plays, or Sail to take her helm. A gate down, her order to shoot it is done and
+  she's her own again.
 - **Knocked out, seen** (15 Nov: "a tiny bit clearer"): a thick black column of smoke off her middle, seen across the
   board. Holes are drawn anywhere along the square they struck, so a still duel's don't stack.
 
@@ -169,8 +181,8 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   kept under fire can lie out for two minutes or more before she's finished or saved.
 - **The buoys' flags clear, and the bots as teams** (15 Nov: "the [war frigs] control that large open area and protect
   the sloops ... the sloops ... help the [war frigs] cover more ground"). TODO.md.
-- **Admiral mode** (15 Nov: "give each ship a target or directive, where it's going, what it's doing ... then you
-  watch the things unfold and can ... update and tweak things or take over"): the bots' goals as your orders. IDEAS.md.
+- **Admiral mode, further** (IDEAS.md): where each ship comes in ("starting from the middle"), saved plans, two
+  admirals, orders in sequence.
 - **Islands as the capture points** ("you're blockading not just one island, but ... having a fight around the whole
   ocean"), **shallows a frigate scrapes through at a cost**, **carriers** (a middle class of ship launching little
   craft), **a ramming specialist** (the Atlantean's sea creatures): IDEAS.md.

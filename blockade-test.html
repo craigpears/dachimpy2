@@ -56,6 +56,13 @@
   body.cinema .ui { display: none; }
   #cinema { display: none; position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 8px 14px; text-align: center; }
   body.cinema #cinema { display: block; }
+  /* the admiral's (?admiral): your side's ships each an order, picked and drawn on the board */
+  #admiral { display: none; margin: 8px 0; padding: 8px; border: 1px solid var(--edge); border-radius: 8px; }
+  body.admiral #admiral { display: block; }
+  #admiral b { display: block; }
+  #admiral p { display: block; font-size: 13px; margin: 4px 0; }
+  .ship .order { display: block; font-style: normal; font-size: 12px; opacity: .9; }
+  .ship.picked { outline: 2px solid var(--accent, #d9a441); }
   #cinema b { display: block; font-size: 16px; }
   #cinema span { display: block; font-size: 13px; opacity: .85; margin: 2px 0 6px; }
 </style>
@@ -79,6 +86,11 @@
     </div>
   </div>
   <div class="row"><button id="watch">Spectate</button><button id="director" title="The camera follows the action">Director</button><button id="whole">Whole board</button><button id="again">New round</button></div>
+  <div id="admiral">
+    <b>Admiral of Dachimpy's flag</b>
+    <p id="plan">Your plan: pick one of your ships below, then click on the board what she's to do. A buoy: hold it. Open water: camp there. A gate (a war frigate): shoot it down. A friend: escort her. An enemy: hunt her. Click one of your ships on the board to pick her, and her again when you're done with her.</p>
+    <div class="row"><button id="startRound">Start the round</button><button id="snipe" title="Hide in a cove, dart out at an enemy frigate's end, and back">Snipe</button><button id="own">Her own choice</button></div>
+  </div>
   <div class="ships" id="ships"></div>
 </div>
 <div id="say"></div>
@@ -113,10 +125,14 @@ const start = params.has('ship') ? Math.max(0, Math.min(15, Number(params.get('s
 // out to see what that damage looks like"; "That needs to be like one of the shortcuts so people can actually see a
 // cinematic of the blockade"): two war frigates broadside to broadside, the camera slowly round them both.
 const brawling = start < 0 && params.get('watch') === 'brawl';
-const bk = blockadeSea({ you: start, say, brawl: brawling });
+// ?admiral: you command Dachimpy's side, an order for each ship (the user, 15 Nov: "some kind of admiral mode where ...
+// you need to be able to give each ship a target or directive ... drawing up those sorts of plans, and then you watch
+// the things unfold and can ... update and tweak things or take over"). The round waits for your plan.
+const admiral = start < 0 && !brawling && params.has('admiral');
+const bk = blockadeSea({ you: start, say, brawl: brawling, admiral: admiral ? 'gold' : null });
 
 const FOLLOW = { yaw: 0.35, pitch: 0.55, dist: 46 }, WHOLE = { yaw: 0, pitch: 1.05, dist: 205 };
-const cam = { yaw: 0.35, pitch: 0, dist: 0, at: new THREE.Vector3(), follow: true, director: start < 0 && !brawling, watching: 0, cut: 0, cinema: brawling };
+const cam = { yaw: 0.35, pitch: 0, dist: 0, at: new THREE.Vector3(), follow: true, director: start < 0 && !brawling && !admiral, watching: 0, cut: 0, cinema: brawling };
 Object.assign(cam, FOLLOW);
 // (the brawl: its caption, and the way out of it to the whole blockade, the director on)
 const cinema = (on) => {
@@ -124,6 +140,16 @@ const cinema = (on) => {
   if (!on) { cam.director = true; $('director').classList.add('on'); Object.assign(cam, FOLLOW); params.delete('watch'); history.replaceState(null, '', params.toString() ? '?' + params : location.pathname); }
 };
 $('cineAll').onclick = () => cinema(false);
+// (the admiral's: the whole board to plan on; a ship picked, Snipe or her own choice for her; then start)
+if (admiral) {
+  document.body.classList.add('admiral');
+  Object.assign(cam, WHOLE); cam.follow = false; cam.at.set(0, 0, 0); $('whole').classList.add('on');
+  say('Your plan: pick a ship, then click on the board what she\'s to do');
+}
+const pickShip = (id) => { bk.pick(id); sig = ''; };
+$('startRound').onclick = () => { bk.start(); $('startRound').hidden = true; $('plan').textContent = 'Under way: pick a ship and click the board to change her orders, or Sail to take her helm.'; say('The round\'s begun: your orders are being carried out'); };
+$('snipe').onclick = () => { const id = bk.picked(); if (id < 0) return say('Pick one of your ships first', true); bk.order(id, { kind: 'snipe' }); say(`${bk.b.ship(id).name}: snipe at frigates from a cove`); sig = ''; };
+$('own').onclick = () => { const id = bk.picked(); if (id < 0) return say('Pick one of your ships first', true); bk.order(id, bk.free()); say(`${bk.b.ship(id).name}: her own choice`); sig = ''; };
 if (brawling) { const [a, z] = bk.duel.map((id) => bk.b.ship(id).name); $('cineTitle').textContent = `${a} and ${z}: a brawl`; cinema(true); Object.assign(cam, { yaw: -0.9, pitch: 0.38, dist: 34 }); }
 const sail = (id) => {
   bk.sail(id);
@@ -160,14 +186,14 @@ const hud = () => {
     for (const side of ['L', 'R']) { const b = $('gun' + side); b.classList.toggle('loading', s.me.load[side] > 0); b.querySelector('i').style.width = `${(1 - s.me.load[side]) * 100}%`; }
     $('toks').innerHTML = Array.from({ length: s.me.h.tokens }, (_, i) => `<div class="tok${i === s.me.lit ? ' lit' : ''}${s.me.lit < 0 && i < s.me.mine ? ' mine' : ''}">${s.me.moves[i] ? TOK[s.me.moves[i]] : '·'}</div>`).join('');
   }
-  const next = JSON.stringify([s.buoys.map((x) => x.hold), s.ships.map((x) => [Math.round(x.share * 20), Math.round(x.water * 20), x.out, x.doing]), bk.you(), s.gates.map((g) => g.towers), cam.watching]);
+  const next = JSON.stringify([s.buoys.map((x) => x.hold), s.ships.map((x) => [Math.round(x.share * 20), Math.round(x.water * 20), x.out, x.doing, x.order]), bk.you(), s.gates.map((g) => g.towers), cam.watching, bk.picked()]);
   if (next === sig) return;
   sig = next;
   $('buoys').innerHTML = s.buoys.map((x) => `<span class="${x.hold ?? ''}" title="${x.heart ? 'In the heart' : 'Out on the open sea'}">${P[x.pennants]}${x.heart ? '♥' : ''}</span>`).join('') + s.gates.map((g, i) => `<span title="The ${i ? 'north' : 'south'} gate's towers">${i ? 'N' : 'S'} ${g.open ? 'down' : g.towers.join('·')}</span>`).join('');
-  $('ships').innerHTML = s.ships.map((x) => `<div class="ship${x.id === bk.you() ? ' me' : ''}${x.id === cam.watching && bk.you() < 0 ? ' seen' : ''}" data-id="${x.id}"><b class="${x.team}">${x.name}</b>`
+  $('ships').innerHTML = s.ships.map((x) => `<div class="ship${x.id === bk.you() ? ' me' : ''}${x.id === cam.watching && bk.you() < 0 ? ' seen' : ''}${x.id === bk.picked() ? ' picked' : ''}" data-id="${x.id}"><b class="${x.team}">${x.name}</b>`
     + `<span class="meter" title="Damage, and water in her bilge"><span class="dmg" style="width:${x.share * 100}%"></span><span class="wat" style="width:${x.water * 100}%"></span></span>`
     + `<button data-sail="${x.id}" title="Take her helm">Sail</button>`
-    + `<i class="${x.out ? 'out' : ''}">${x.kind === 'frigate' ? 'War frigate' : 'Sloop'} · ${x.doing}</i></div>`).join('');
+    + `<i class="${x.out ? 'out' : ''}">${x.kind === 'frigate' ? 'War frigate' : 'Sloop'} · ${x.doing}${x.order ? `<span class="order">Orders: ${x.order}</span>` : ''}</i></div>`).join('');
 };
 // (a ship's row: follow her; its Sail button: take her helm)
 $('ships').addEventListener('click', (e) => {
@@ -176,6 +202,8 @@ $('ships').addEventListener('click', (e) => {
   const el = e.target.closest('[data-id]');
   if (!el) return;
   if (bk.you() >= 0) sail(-1);
+  // (the admiral's own ships: picked, to be given an order; the whole board kept while planning)
+  if (admiral && bk.b.ship(Number(el.dataset.id)).team === 'gold') { pickShip(Number(el.dataset.id)); if (bk.planning()) return; }
   cam.director = false; $('director').classList.remove('on');
   cam.watching = Number(el.dataset.id); cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on');
   sig = '';
@@ -191,7 +219,12 @@ canvas.addEventListener('pointerup', (e) => {
   if (down && down.n === 1 && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6) {
     ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), camera);
     const at = ray.ray.intersectPlane(water, new THREE.Vector3());
-    if (at) bk.click(at);
+    // (the admiral's, a ship picked and not sailing: what's clicked is her order)
+    const on = at && admiral && bk.you() < 0 ? bk.shipAt(at) : -1;
+    if (on >= 0 && on === bk.picked()) pickShip(-1);
+    else if (on >= 0 && bk.picked() < 0 && bk.b.ship(on).team === 'gold') { pickShip(on); say(`${bk.b.ship(on).name}: click on the board what she's to do`); }
+    else if (at && admiral && bk.you() < 0 && bk.picked() >= 0) { const o = bk.orderAt(bk.picked(), at); say(o ? `${bk.b.ship(bk.picked()).name}: ${o}` : 'Nowhere she can lie there', !o); sig = ''; }
+    else if (at) bk.click(at);
   }
   down = null;
 });

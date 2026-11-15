@@ -2916,6 +2916,9 @@ small ships because of the narrower gaps. I think that would be a cool proof of 
   like the race's plan (src/race-plan.ts), a plan for the fleet: each ship an order (hold this buoy, camp in that cove,
   snipe frigates, escort her, shoot that gate down, start in the middle), the bots carrying them out (their goals,
   src/blockade-bots.ts, are already orders in all but name); change any as it plays, or take any ship's helm.
+  First pass built the same day (blockade-test.html?admiral, BLOCKADE.md §3): free, hold, camp, snipe, gate, escort,
+  hunt, drawn on the board. Still to come: choosing where each ship comes in ("starting from the middle"), saved plans,
+  orders for the other side's admiral (two people), orders in sequence (shoot the gate down, then hold the heart).
 - **War frigates by style, each a config of her decoration (15 Nov).** "We should have a similar kind of layout for ...
   Atlantis types, where they have all come out with all Atlantean decorations ... a [war frig] should have a config for
   its decoration. Primates Rule ... should just be a config of this is all the cannons and the furniture where they're

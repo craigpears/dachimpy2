@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import { SAIL } from '../den-sail.js';
 import { Blockade, BLOCKADE, islandLand } from '../blockade.js';
 import { Bots } from '../blockade-bots.js';
+import { FREE, orderAt, orderText, orderTarget } from '../blockade-orders.js';
 import { drawnAt } from '../ship-handling.js';
 import { FRIGATES, WAR_FRIGATE_PLAN, deckY } from '../den-frigate.js';
 import { SLOOP_HULL } from '../ships.js';
@@ -44,13 +45,16 @@ const label = (text, col) => {
 };
 
 /** The blockade: `you`, the ship you sail (its number; -1 to watch the bots alone), `say(text, bad)` what's said;
-    `brawl`, two war frigates put broadside to broadside to fight it out (Blockade.brawl), the rest going on round them.
+    `brawl`, two war frigates put broadside to broadside to fight it out (Blockade.brawl), the rest going on round them;
+    `admiral`, a side ('gold' or 'crimson') you command (src/blockade-orders.ts): the round waits while you plan
+    (`start()` sets it going), each of her ships given an order (`order`, `orderAt` a click on the board), a line drawn
+    from each to what she's to do.
     Returns { b (the rules), bots, g, duel (the brawl's two ids, or null), you(), sail(id), tick(dt), click(point),
     key(k), focus(), hud() }. */
-export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
+export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = null } = {}) {
   const b = new Blockade(), duel = brawl ? b.brawl() : null, bots = new Bots(b, [], Math.random, duel), g = new THREE.Group();
   scene.add(g);
-  let me = you, clock = 0;
+  let me = you, clock = 0, planning = !!admiral, picked = -1;
 
   // ----- the board's squares, faintly -----
   const pts = [], x0 = -B.COLS / 2 * CELL, z0 = -B.ROWS / 2 * CELL;
@@ -132,7 +136,12 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
     const R = (B.INFLUENCE[s.kind] + (s.h.long - 1) / 2) * CELL;
     const ring = new THREE.Mesh(new THREE.RingGeometry(R - 0.25, R, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.32, depthWrite: false }));
     ring.renderOrder = 2; g.add(ring);
-    return { s, m, look, dl, name, ring, big, heel: 0, pending: new Set() };
+    // (the admiral's: a dashed line from her to what she's been ordered to do)
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineDashedMaterial({ color: col, dashSize: 1.2, gapSize: 0.8, transparent: true, opacity: 0.9 }));
+    line.visible = false; line.frustumCulled = false; g.add(line);
+    const mark = new THREE.Mesh(new THREE.RingGeometry(1.0, 1.5, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.85, depthWrite: false }));
+    mark.visible = false; mark.renderOrder = 3; g.add(mark);
+    return { s, m, look, dl, name, ring, line, mark, big, heel: 0, pending: new Set() };
   });
 
   // ----- your pin, the block of squares she'll lie on there, her course -----
@@ -191,8 +200,10 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
     /** Sail another ship (her number), or none (-1: watch). Her bot takes the one you leave. */
     sail(id) { me = id; },
     tick(dt) {
+      // (planning: the round waits, everything drawn where it is)
+      if (planning) dt = 0;
       clock += dt;
-      bots.tick(b, dt, me >= 0 ? [me] : []);
+      if (!planning) bots.tick(b, dt, me >= 0 ? [me] : []);
       // (the bots' broadsides: fired through the rules, seen here as they fly)
       const ev = b.tick(dt);
       for (const got of b.fired.splice(0)) show(got);
@@ -233,7 +244,16 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
         V.name.position.set(x, V.big ? 16 : 7.5, z);
         V.name.material.opacity = s.dmg.out ? 0.5 : 1;
         V.ring.position.set(x, 0.05, z); V.ring.visible = !s.dmg.out;
-        V.ring.material.opacity = s.id === me ? 0.55 : 0.28;
+        V.ring.material.opacity = s.id === me || s.id === picked ? 0.6 : 0.28;
+        // (her order's line, the admiral's side's ships)
+        const tgt = admiral && s.team === admiral && s.away <= 0 ? orderTarget(b, bots.orderOf(s.id)) : null;
+        V.line.visible = V.mark.visible = !!tgt;
+        if (tgt) {
+          V.mark.position.copy(v3(...tgt, 0.12)); V.mark.scale.setScalar(s.id === picked ? 1.3 + Math.sin(performance.now() / 250) * 0.15 : 1);
+          const p = V.line.geometry.attributes.position, z0 = v3(at.c, at.r, 0.4), z1 = v3(...tgt, 0.4);
+          p.setXYZ(0, z0.x, z0.y, z0.z); p.setXYZ(1, z1.x, z1.y, z1.z); p.needsUpdate = true;
+          V.line.computeLineDistances(); V.line.material.opacity = s.id === picked ? 1 : 0.55;
+        }
         // Sunk: she settles by the stern, bow lifting, and goes under (once the shot that did it has landed); then
         // she's gone till she comes back.
         if (s.away > 0) {
@@ -297,6 +317,21 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
       return false;
     },
     /** Where the camera looks: a ship (yours, or `id`), or the middle of the board. */
+    /** The admiral's: whether the round's waiting on your plan; set it going; pick a ship of yours to order (-1:
+        none); give her an order (FREE her own choice), or the order a click on the board gives her (what's there). */
+    planning: () => planning,
+    start() { planning = false; },
+    pick(id) { picked = id; },
+    picked: () => picked,
+    order(id, o) { bots.order(id, o); },
+    orderAt(id, point) {
+      const [c, r] = seaCR(point.x, point.z).map(Math.round), s = b.ship(id), o = orderAt(b, s, c, r);
+      if (o) bots.order(id, o);
+      return o && orderText(b, o);
+    },
+    free: () => FREE,
+    /** The ship on the square a point on the sea is over (-1: none). */
+    shipAt(point) { const [c, r] = seaCR(point.x, point.z).map(Math.round), s = b.under(c, r); return s ? s.id : -1; },
     focus(id = me) { if (id < 0) return v3(B.COLS / 2 - 0.5, B.ROWS / 2 - 0.5); const s = b.ship(id), at = drawnAt(s.h, s.helm.now()); return v3(at.c, at.r); },
     /** The ship most worth watching just now, spectating: the biggest thing that's happened lately (a knockout, a gate
         coming down, a hit), else a sloop darting out or a frigate fighting, else whoever's on the heart's prize. */
@@ -312,7 +347,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false } = {}) {
         score: { ...b.score }, clock: b.clock, turn: b.turnT, over: b.over, leader: b.leader(),
         buoys: B.BUOYS.map((x) => ({ pennants: x.pennants, hold: b.hold(x), heart: x.at[0] >= B.HEART.c0 && x.at[0] <= B.HEART.c1 && x.at[1] >= B.HEART.r0 && x.at[1] <= B.HEART.r1 })),
         gates: b.gates.map((x) => ({ towers: x.towers.map((t) => t.hp), open: x.open() })),
-        ships: b.ships.map((x) => ({ id: x.id, name: x.name, team: x.team, kind: x.kind, share: x.away > 0 ? 0 : x.dmg.share(), water: x.away > 0 ? 0 : x.dmg.water, out: x.dmg.out || x.away > 0, away: x.away > 0, doing: x.id === me ? (x.away > 0 ? `yours, sunk: back in ${Math.ceil(x.away)}s` : 'yours') : bots.doing(b, x.id) })),
+        ships: b.ships.map((x) => ({ id: x.id, name: x.name, team: x.team, kind: x.kind, order: admiral === x.team ? orderText(b, bots.orderOf(x.id)) : null, share: x.away > 0 ? 0 : x.dmg.share(), water: x.away > 0 ? 0 : x.dmg.water, out: x.dmg.out || x.away > 0, away: x.away > 0, doing: x.id === me ? (x.away > 0 ? `yours, sunk: back in ${Math.ceil(x.away)}s` : 'yours') : bots.doing(b, x.id) })),
         me: s && { name: s.name, team: s.team, h: s.h, moves: h.slot >= 0 ? h.turn : h.next(), lit: h.lit(), mine: h.mine.length, load: { L: s.guns.wait.L / s.h.reload, R: s.guns.wait.R / s.h.reload }, out: s.dmg.out },
       };
     },
