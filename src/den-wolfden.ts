@@ -15,8 +15,10 @@
    places, a chain's chart times its step. Here: the hut, the table, the moon (each window starts full, about 200
    charted points a werewolf in the next pack; each chart takes its points off, and as it wanes they turn back to
    wolf-kin, the guide's), and the lesson's boards, each laid for a part of the tutorial and the moves Multibella plays on
-   it. Not yet (to come, with the user): the rumbles, the den's Foraging, the funny cutscenes. */
-import { Navigation, type Mark, type NextStar } from './navigation.js';
+   it, and when she says what as they play (her cues, `stageCues`; the words are src/lines/multibella.ts's LESSON).
+   The deeper mechanics (15 Nov, after the user played the basics): a cascade making wild slots, the outer ring where
+   stars wait, a constellation charted by a cascade's last clear, and Umami's evil constellation. Not yet (to come, with the user): the rumbles, the den's Foraging, the funny cutscenes. */
+import { Navigation, bottomRow, type Mark, type NextStar, type Place, type Stage } from './navigation.js';
 import type { Plan, Piece } from './den-houses.js';
 
 // ---------------------------------------------------------------- the hut
@@ -84,8 +86,10 @@ export class Moon {
 /** A move Multibella plays: a ring turned (+1 clockwise, -1 anticlockwise), or the next star dropped. */
 export type Step = { turn: number; dir: 1 | -1 } | { drop: true };
 /** A board laid for the lesson: its stars ring by ring (0 the innermost, colours as COLOUR_NAMES: 0 yellow, 1 red,
-    2 orange, 3 white, 4 blue), the constellation's places, the next star waiting, and the moves she plays on it. */
-export interface Laid { rings: (number | null)[][]; marks: Mark[]; next?: Omit<NextStar, 'id'>; moves: Step[] }
+    2 orange, 3 white, 4 blue), the constellation's places, the next star waiting, and the moves she plays on it.
+    `plan`: the places her plan's about, ringed on the board while she says it, before she plays (RULES.md, "A
+    demonstration shows its plan before it builds"); `then`: the board she lays next, once this one's played. */
+export interface Laid { rings: (number | null)[][]; marks: Mark[]; next?: Omit<NextStar, 'id'>; moves: Step[]; plan?: Place[]; then?: string }
 const [Y, R, O, W, B] = [0, 1, 2, 3, 4];
 const _ = null;
 /** The lesson's boards, by name (a tutorial part's `shows.ref`, after its kind). Each is tested to do what its part
@@ -143,7 +147,116 @@ export const BOARDS: Readonly<Record<string, Laid>> = {
     next: { c: Y, spoke: 4 },
     moves: [{ turn: 1, dir: -1 }],
   },
+  /* A cascade, lines only (Single +3, Double +6, Triple +9): the red dropped makes a line round the third ring; the
+     blue parked above it in the fourth falls between two blues, a line; and the yellow parked above that falls onto two
+     yellows down their spoke. The Double's and the Triple's clears, in a combo, turn the slots beside them wild. */
+  cascade: {
+    rings: [
+      [B, W, Y, O, W, B, Y, R],
+      [R, O, Y, W, B, W],
+      [_, B, B, R, _, R],
+      [_, _, Y, B],
+    ],
+    marks: [{ ring: 0, spoke: 3, colour: B }, { ring: 0, spoke: 6, colour: R }, { ring: 0, spoke: 0, colour: O }, { ring: 1, spoke: 3, colour: Y }, { ring: 1, spoke: 6, colour: W }, { ring: 2, spoke: 4, colour: Y }],
+    next: { c: R, spoke: 4 },
+    moves: [{ drop: true }],
+    plan: [{ ring: 2, spoke: 3 }, { ring: 2, spoke: 5 }, { ring: 3, spoke: 3 }, { ring: 3, spoke: 2 }],
+  },
+  /* The outer ring, where stars wait: a yellow dropped onto a full spoke stays up in the fourth ring; the fourth ring
+     turned carries it round, still waiting, over the yellow slot's spoke; the third ring turned puts a white over two
+     whites; they go, the yellow falls into the slot, and it's charted on the second step. Then the next constellation
+     goes up, three, two and one, its centre wild. */
+  outer: {
+    rings: [
+      [O, R, W, B, Y, R, B, O],
+      [B, Y, W, O, R, W, Y, W],
+      [B, W, O, R, Y, B, O, R],
+      [],
+    ],
+    marks: [{ ring: 0, spoke: 2, colour: Y }, { ring: 0, spoke: 5, colour: R }, { ring: 0, spoke: 7, colour: O }, { ring: 1, spoke: 4, colour: R }, { ring: 1, spoke: 6, colour: Y }, { ring: 2, spoke: 5, colour: Y }],
+    next: { c: Y, spoke: 1 },
+    moves: [{ drop: true }, { turn: 3, dir: 1 }, { turn: 2, dir: 1 }],
+    plan: [{ ring: 0, spoke: 2 }, { ring: 1, spoke: 2 }, { ring: 2, spoke: 1 }],
+  },
+  /* The cascade's last clear charts it: the same cascade as `cascade`'s, on a constellation of the usual three, two and
+     one (its centre wild, from a chain before) with only the third ring's slot left, a blue in an orange slot. The
+     Double's clear takes the blue and turns the slot wild; the yellow parked above falls into it, and it's charted on
+     the third step: 125 times three, where a line is 3. Two clears before it: the next one's centre four wild. */
+  lastClear: {
+    rings: [
+      [B, W, Y, O, W, B, Y, R],
+      [R, O, Y, W, B, W],
+      [_, B, B, R, _, R],
+      [_, _, Y, B],
+    ],
+    marks: [{ ring: 0, spoke: 0, colour: R, wild: true }, { ring: 0, spoke: 4, colour: Y, wild: true }, { ring: 0, spoke: 6, colour: O, wild: true }, { ring: 1, spoke: 1, colour: O }, { ring: 1, spoke: 5, colour: W }, { ring: 2, spoke: 2, colour: O }],
+    next: { c: R, spoke: 4 },
+    moves: [{ drop: true }],
+    plan: [{ ring: 2, spoke: 2 }, { ring: 3, spoke: 2 }],
+  },
+  /* Umami's evil constellation (IDEAS.md, "The evil constellation"; the user's, 11 Nov), first a star at a time: six
+     reds side by side round the centre, four in, and the fifth dropped makes five in a row, a line, gone. */
+  evilTry: {
+    rings: [
+      [R, R, _, R, R, _, B, O],
+    ],
+    marks: bottomRow(R, 6),
+    next: { c: R, spoke: 2 },
+    moves: [{ drop: true }],
+    then: 'evil',
+  },
+  /* ...then by a combo, the user's way ("put 2 in there ... 2 of the first color in the ring above those 2, so that
+     when you do a combo ... it creates a gap and it falls down"): whites in the two gaps, a white over each in the
+     third ring and the reds waiting above them in the fourth; the middle ring turned puts a white under each, both
+     spokes go at once, and both reds land together: charted on the second step, 243 times two. */
+  evil: {
+    rings: [
+      [R, R, W, R, R, W],
+      [B, W, O, Y, W, B],
+      [_, _, W, _, _, W],
+      [_, _, R, _, _, R],
+    ],
+    marks: bottomRow(R, 6),
+    next: { c: O, spoke: 6 },
+    moves: [{ turn: 1, dir: 1 }],
+    plan: [{ ring: 0, spoke: 2 }, { ring: 0, spoke: 5 }, { ring: 1, spoke: 1 }, { ring: 1, spoke: 4 }, { ring: 2, spoke: 2 }, { ring: 2, spoke: 5 }, { ring: 3, spoke: 2 }, { ring: 3, spoke: 5 }],
+  },
 };
+/** A lesson's boards in turn: the one named, then each it says to lay next (`then`). */
+export function boardsOf(name: string): string[] {
+  const out: string[] = [];
+  for (let n: string | undefined = name; n && BOARDS[n] && !out.includes(n); n = BOARDS[n].then) out.push(n);
+  return out;
+}
+
+/* Her cues: when she says what as a board's moves play (the words are src/lines/multibella.ts's LESSON, a board's
+   lines keyed by its cues). 'set' as it's laid (its plan ringed), `move<n>` before its nth move (once the one before
+   it is shown), `step<n>` as the nth clear or chart of a move's cascade is shown, 'wild' as a clear turns slots wild,
+   'chart' as a constellation's charted, 'deal' as the next one goes up, 'end' once it's all been shown. Each is said
+   once a board, the first time it comes; the board waits while she talks. */
+export const CUES = ['set', 'wild', 'chart', 'deal', 'end'] as const;
+export const isCue = (key: string): boolean => (CUES as readonly string[]).includes(key) || /^(move|step)[1-9]$/.test(key);
+/** The cues a stage sets off as it's shown (`step`: its step in the move's cascade, a line's or a chart's), in the
+    order she says them. */
+export function stageCues(st: Pick<Stage, 'kind' | 'wilded'>, step = 0): string[] {
+  const out: string[] = [];
+  if ((st.kind === 'line' || st.kind === 'constellation') && step > 0) out.push(`step${step}`);
+  if (st.wilded?.length) out.push('wild');
+  if (st.kind === 'constellation') out.push('chart');
+  if (st.kind === 'deal') out.push('deal');
+  return out;
+}
+/** Every cue a board sets off, played from as it's laid: what the lesson can say on it. */
+export function cuesOn(name: string, random: () => number = Math.random): Set<string> {
+  const b = layBoard(name, random), out = new Set<string>(['set', 'end']);
+  if (!b) return out;
+  b.moves.forEach((step, i) => {
+    out.add(`move${i + 1}`);
+    let n = 0;
+    for (const st of playStep(b.game, step).stages) for (const c of stageCues(st, st.kind === 'line' || st.kind === 'constellation' ? ++n : 0)) out.add(c);
+  });
+  return out;
+}
 /** A lesson board laid on a den's Navigation of its own: the game, and the moves to play on it. Null if there's no
     such board. */
 export function layBoard(name: string, random: () => number = Math.random): { game: Navigation; moves: Step[] } | null {

@@ -2631,6 +2631,21 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - The cascade named over the stars as it goes: "Single! +3", "Double! +6", "Triple! Constellation! +18".
   - The moon: about 200 charted points a werewolf (a pack of four here); every chart takes its points off; she says
     when half are turned back and the last; then the next pack, the moon full again. Lesson boards don't count.
+  - **Her lesson talks you through each board (15 Nov),** after the user played the basics and asked to see the deeper
+    mechanics: the plan's places ringed in gold while she says it, before she plays (as every demonstration does);
+    then, as each stage shows, her line for it (a cascade's step, slots going wild, a chart, the next constellation
+    going up), the board waiting while she talks (Space moves her on). Her words are src/lines/multibella.ts's
+    `LESSON`, by board and cue; a slot turned wild by a clear is drawn wild only once that clear's shown. "How it
+    works" is four steps in order (`MECHANICS`), N or Next for the next one: a cascade, lines only, +3, +6, +9, its
+    combo clears leaving wild slots; the fourth ring, a star waiting up there, carried round, dropped in by a clear
+    under it (250), then the next constellation going up; the same cascade charting the last slot on its third clear
+    (375, a line's 3); and Umami's evil constellation (below), first a star at a time (the fifth red makes a line and
+    they go), then by her combo, both reds landing together (486).
+  - **"Wild slot"** in her words and the guide's: the Wolf Dens Guide's word, and the players' (the user's too). The
+    code still says wild places.
+  - **Umami's evil constellation at the wolf den (15 Nov):** the user's combo-only constellation (11 Nov, "The
+    starlit door"; IDEAS.md), made with Umami in mind, at last somewhere in the world: shown in her lesson, credited
+    to Umami in the changelog. Not yet dealt in play.
   - Not yet: the rumbles, the den's Foraging, Multibella at the table, the cutscenes, a way to it on the sea.
 - **Duty Navigation (11 Nov), built by the real puzzle.** The night sky in front of a hidden cliff door,
   each constellation lighting its stars on the rock ("The starlit door", below). One module, `src/navigation.ts`,

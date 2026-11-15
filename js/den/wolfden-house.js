@@ -7,16 +7,19 @@
 
    Multibella waits at the table, munching a cookie now and then. Walk up to it and Space (or the button) to chart: the camera comes over the table, and
    the board's yours, by its keys (Left / Right turn the ring, Up / Down pick one, Space drops) or the buttons along the
-   bottom. T for her lessons: pick a part, and she lays its board and plays its moves, then hands it to you. Each
+   bottom. T for her lessons: pick a part, and she lays its board and plays its moves, saying what each does as it
+   shows (her cues, src/den-wolfden.ts's stageCues; her words src/lines/multibella.ts's LESSON), the board waiting
+   while she talks (Space moves her on), then hands it to you; after a step of how it works, N (or Next) for the next
+   step (src/wolf-den-tutorial.ts's MECHANICS). Each
    constellation charted takes its points off the moon in the window; as it wanes, the werewolf's shadow at the window
    turns back to a wolf-kin's, and when it's gone the next pack comes. Esc, or Stop, to step back from the table. */
 import * as THREE from 'three';
 import { PIRATES } from '../den-look.js';
-import { PLAN, WALLS, BACK, ARRIVE, TABLE, atTable, WINDOW, FURNISH, Moon, layBoard, PACE_LESSON } from '../den-wolfden.js';
-import { WOLF_DEN_TUTORIAL } from '../wolf-den-tutorial.js';
+import { PLAN, WALLS, BACK, ARRIVE, TABLE, atTable, WINDOW, FURNISH, Moon, layBoard, PACE_LESSON, BOARDS, boardsOf, stageCues } from '../den-wolfden.js';
+import { WOLF_DEN_TUTORIAL, nextStep } from '../wolf-den-tutorial.js';
 import { Navigation } from '../navigation.js';
 import { blocksOf } from '../den-houses.js';
-import { WOLF_DEN, TUTOR } from '../lines/multibella.js';
+import { WOLF_DEN, TUTOR, LESSON } from '../lines/multibella.js';
 import { FURNITURE, place } from './furniture.js';
 import { navBoard } from './nav-board.js';
 import { person } from './props-people.js';
@@ -30,12 +33,14 @@ const bar = document.createElement('div');
 bar.className = 'wolf-bar'; bar.id = 'wolf-bar';
 bar.innerHTML = ['<button data-k="ArrowDown" title="Lower ring (Down)">Ring in</button>', '<button data-k="ArrowLeft" title="Turn anticlockwise (Left)">&#x27F2;</button>',
   '<button data-k=" " class="drop" title="Drop the star (Space)">Drop</button>', '<button data-k="ArrowRight" title="Turn clockwise (Right)">&#x27F3;</button>',
-  '<button data-k="ArrowUp" title="Higher ring (Up)">Ring out</button>', '<button data-k="t" title="Multibella\'s lessons (T)">Lessons</button>', '<button data-k="Escape" title="Step back (Esc)">Stop</button>'].join('');
+  '<button data-k="ArrowUp" title="Higher ring (Up)">Ring out</button>', '<button data-k="t" title="Multibella\'s lessons (T)">Lessons</button>', '<button data-k="n" class="next" title="Her next step (N)">Next</button>', '<button data-k="Escape" title="Step back (Esc)">Stop</button>'].join('');
 const style = document.createElement('style');
 style.textContent = `.wolf-bar { position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%); z-index: 30; display: none; gap: 6px; flex-wrap: wrap; justify-content: center; width: min(620px, calc(100vw - 32px)); }
 .wolf-bar.on { display: flex; }
 .wolf-bar button { min-width: 44px; min-height: 44px; padding: 0 12px; font: 700 16px 'Alegreya Sans', system-ui, sans-serif; color: #f6ead2; background: rgba(36, 23, 14, 0.92); border: 1px solid #c8a050; border-radius: 10px; cursor: pointer; }
 .wolf-bar button.drop { background: #6a4a14; }
+.wolf-bar button.next { display: none; background: #3a2a5a; border-color: #b8a0e0; }
+.wolf-bar.has-next button.next { display: inline-block; }
 .wolf-score { position: fixed; top: 64px; right: 16px; z-index: 30; display: none; font: 700 15px 'Alegreya Sans', system-ui, sans-serif; color: #f6ead2; background: rgba(20, 14, 30, 0.85); border: 1px solid #8a7ab0; border-radius: 10px; padding: 6px 12px; text-align: right; }
 .wolf-score.on { display: block; }`;
 const scoreEl = document.createElement('div');
@@ -100,7 +105,7 @@ function starTable() {
 export const WOLFDEN_HOUSE = {
   id: 'wolfden', plan: PLAN, arrive: ARRIVE, walls: WALLS,
   build(H) {
-    const R = H.root, G = { visited: false, tabled: false, playing: false, lesson: null, choice: null, moon: new Moon(), plainSaid: 0, rising: 0 };
+    const R = H.root, G = { visited: false, tabled: false, playing: false, lesson: null, next: null, choice: null, moon: new Moon(), plainSaid: 0, rising: 0 };
     for (const p of FURNISH) {
       const opts = { col: p.col };
       if (p.kind === 'table') { opts.cookies = true; opts.cup = false; }   // (a plate of chocolate chip cookies)
@@ -133,7 +138,7 @@ export const WOLFDEN_HOUSE = {
     // (turned to the room, the table at her side: she faces you as you come in)
     G.dig.g.rotation.y = Math.atan2(TABLE.x + 0.6 - ARRIVE.her.x, TABLE.z + 2.4 - ARRIVE.her.z);
     G.munch = 2.5;
-    const line = (text) => { H.hush(); H.talk(G.dig, [text]); };
+    const line = (...texts) => { H.hush(); H.talk(G.dig, texts); };
 
     // ---------- the board on the table ----------
     function setBoard(game) {
@@ -150,6 +155,8 @@ export const WOLFDEN_HOUSE = {
           else if (G.plainSaid++ % 3 === 0) line(WOLF_DEN.plain);
         },
         onBooch() { if (!G.lesson) line(WOLF_DEN.booch); },
+        // (her lesson's cues as each stage shows: a cascade's step, slots going wild, a chart, the next one dealt)
+        onStage(st) { if (G.lesson) say(stageCues(st, st.step ?? 0)); },
       });
       G.board.idle = !G.playing;
       R.add(G.board.group);
@@ -167,6 +174,7 @@ export const WOLFDEN_HOUSE = {
       G.playing = on;
       G.board.idle = !on;
       bar.classList.toggle('on', on);
+      showNext();
       if (!on) { G.choice?.close(); G.choice = null; }
       showScore();
     }
@@ -180,29 +188,53 @@ export const WOLFDEN_HOUSE = {
         onClose() { G.choice = null; },
       });
     }
+    const showNext = () => bar.classList.toggle('has-next', !!G.next && G.playing);
     function startLesson(part) {
-      const b = layBoard(part.shows.ref);
-      if (!b) return;
+      const chain = boardsOf(part.shows.ref);
+      if (!chain.length) return;
+      G.next = null; showNext();
+      G.lesson = { part, chain, first: true };
+      layNext();
+    }
+    // (her lesson's next board: laid, its plan ringed, her words as it's set, or the plain one when it has none)
+    function layNext() {
+      const L = G.lesson, name = L.chain.shift(), b = layBoard(name);
       setBoard(b.game);
       G.board.idle = false;
-      G.lesson = { moves: b.moves, t: PACE_LESSON.FIRST, done: false };
-      line(TUTOR.show.replace('{title}', part.title));
+      G.board.plan = BOARDS[name].plan ?? null;
+      Object.assign(L, { name, moves: b.moves, n: 0, t: PACE_LESSON.FIRST, said: new Set(), ended: false });
+      if (!say(['set']) && L.first) line(TUTOR.show.replace('{title}', L.part.title));
+      L.first = false;
+    }
+    /** Her words for the cues given, each once a board (src/lines/multibella.ts's LESSON); true if she said any. */
+    function say(cues) {
+      const L = G.lesson, words = LESSON[L.name] ?? {}, out = [];
+      for (const c of cues) if (words[c] && !L.said.has(c)) { L.said.add(c); out.push(words[c]); }
+      if (out.length) line(...out);
+      return out.length > 0;
     }
     function lessonTick(dt) {
       const L = G.lesson;
-      if (L.done || G.board.busy()) return;
+      if (H.talking() || G.board.busy()) return;
       if ((L.t -= dt) > 0) return;
-      const step = L.moves.shift();
-      if (step) {
+      if (L.n < L.moves.length) {
+        if (say([`move${L.n + 1}`])) return;
+        const step = L.moves[L.n++];
+        G.board.plan = null;
         if ('drop' in step) G.board.drop();
         else { G.board.game.ring = step.turn; G.board.turn(step.dir); }
         L.t = PACE_LESSON.MOVE;
         return;
       }
-      // (the lesson's moves played and shown: the board's yours, as it is)
-      L.done = true;
+      // (the board's moves played and shown: her last word on it, then the next board, or the board's yours as it is)
+      if (!L.ended) { L.ended = true; if (say(['end'])) return; }
+      if (L.chain.length) { layNext(); return; }
       G.lesson = null;
-      line(TUTOR.after);
+      G.board.plan = null;
+      G.next = nextStep(L.part.id);
+      showNext();
+      if (G.next) line(TUTOR.next.replace('{title}', G.next.title));
+      else line(TUTOR.after);
     }
 
     const inst = {
@@ -220,7 +252,9 @@ export const WOLFDEN_HOUSE = {
         return `Multibella: "${WOLF_DEN.bye}"`;
       },
       tick(dt) {
-        G.board.tick(dt);
+        // (in a lesson the board waits while she talks)
+        if (G.lesson && H.talking()) G.board.hold(dt);
+        else G.board.tick(dt);
         G.digP.tick?.(dt);
         // (munching her cookie: up to her mouth every few seconds, a little bob of the head)
         G.munch -= dt;
@@ -246,6 +280,8 @@ export const WOLFDEN_HOUSE = {
         if (!G.playing) return false;
         if (key === 'escape') { play(false); return true; }
         if (key === 't') { if (!e.repeat) lessons(); return true; }
+        if (key === 'n') { if (!e.repeat && G.next && !G.choice) startLesson(G.next); return true; }
+        if (G.lesson && key === ' ') { if (!e.repeat) H.skipLine?.(); return true; }
         if (G.lesson) return ['arrowleft', 'arrowright', 'arrowup', 'arrowdown', 'a', 'd', 'w', 's', ' '].includes(key);
         return G.board.key(ARROWS[key] ?? key, e);
       },
@@ -256,13 +292,15 @@ export const WOLFDEN_HOUSE = {
       },
       act() {
         if (G.playing) return true;
-        if (atTable(H.you)) { H.hush(); play(true); return true; }
+        // (charting counts as having come up to the table: its line never cuts into a lesson)
+        if (atTable(H.you)) { H.hush(); G.tabled = true; play(true); return true; }
         return false;
       },
       // (the bar's buttons are the keys)
       press(k) {
         if (k === 'Escape') return play(false);
         if (k === 't') return lessons();
+        if (k === 'n') return G.next && !G.choice && startLesson(G.next);
         if (!G.lesson) G.board.key(k, {});
       },
     };

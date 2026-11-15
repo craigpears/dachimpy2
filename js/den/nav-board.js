@@ -294,11 +294,14 @@ const DROP_PER_RING = 0.32, RING_W = RING_R[1] - RING_R[0];
    Hooks: `onMove(move)` after each turn or drop (the rules' Move: points, lines, done, booched...),
    as it's made; `onConstellation(done)` as a filled constellation is seen to go (done.marks are its
    places and colours, placeXY says where each is, starCanvas draws its star); `onBooch()` as a booch
-   is seen; `onDeal(constellation)` as a new one's shown.
+   is seen; `onDeal(constellation)` as a new one's shown; `onStage(stage)` as any stage begins to show (a line's or a
+   chart's `step` in its move's cascade on it: a teacher's cue, the wolf den's lesson).
    Returns the board: add `board.group` to the scene, call `tick(dt)` every frame, feed it `key`,
    `pointer` and `click`, and `dispose()` it when you're done. `game` is the rules' Navigation (its
    score, completed, moves, constellation...), `busy()` whether it's still showing what happened,
-   `idle` (set it) hides the selected ring's light when nobody's at it. */
+   `idle` (set it) hides the selected ring's light when nobody's at it, `plan` (set it: places, { ring, spoke })
+   rings them, a teacher's plan shown before it's played, and `hold(dt)` keeps the board still where it is, drawn
+   (while a teacher talks over it), in place of `tick`. */
 export function navBoard(o = {}) {
   const game = o.game ?? new Navigation(o.random ?? Math.random, o.options ?? {});
   /* A wolf den's board, four rings ("four-tier", 14 Nov): the wheel drawn a little smaller, its handles' rings the
@@ -324,7 +327,9 @@ export function navBoard(o = {}) {
 
   const b = {
     game, group, canvas: cv, size, sky, idle: false,
-    onMove: o.onMove ?? null, onConstellation: o.onConstellation ?? null, onBooch: o.onBooch ?? null, onDeal: o.onDeal ?? null,
+    onMove: o.onMove ?? null, onConstellation: o.onConstellation ?? null, onBooch: o.onBooch ?? null, onDeal: o.onDeal ?? null, onStage: o.onStage ?? null, plan: null,
+    /** Slots a move's clears turn wild, kept plain till that clear's shown ("ring,spoke"). */
+    wildLater: new Set(),
     queue: [], stage: null, t: 0,
     /** Stars as drawn: id -> { c, r, a, fr, fa, tr, ta } (radius and angle, from and to). */
     stars: new Map(),
@@ -379,6 +384,8 @@ export function navBoard(o = {}) {
     // (straight on from a turn just ended)
     b.prevTurn = st.kind === 'turn' && b.lastKind === 'turn' && b.time - (b.endedAt ?? -1) < 0.05;
     b.stage = st; b.t = 0; b.T = TIME[st.kind];
+    for (const m of st.wilded ?? []) b.wildLater.delete(`${m.ring},${m.spoke}`);
+    b.onStage?.(st);
     if (st.kind === 'turn') b.ringGlow[st.ring] = 1;
     if (st.kind === 'booch') {
       b.dropFrom.shift();
@@ -416,6 +423,8 @@ export function navBoard(o = {}) {
     if (!m.moved) return m;
     let step = 0;
     for (const st of m.stages) if (st.kind === 'line' || st.kind === 'constellation') st.step = ++step;
+    // (the rules turn a slot wild as the move's made; drawn wild only once the clear that did it is shown)
+    for (const st of m.stages) for (const w of st.wilded ?? []) b.wildLater.add(`${w.ring},${w.spoke}`);
     b.queue.push(...m.stages);
     b.onMove?.(m);
     return m;
@@ -523,14 +532,14 @@ export function navBoard(o = {}) {
       const grid = shownGrid();
       for (const m of con.marks) {
         const [x, y] = xy(radius(m.ring), ang(m.spoke)), here = grid.get(`${m.ring},${m.spoke}`);
-        if (m.wild) wildMedallion(g, x, y, here !== undefined, flare > 0 ? 1 + flare : 0, K * (1 + 0.3 * flare));
+        if (m.wild && !b.wildLater.has(`${m.ring},${m.spoke}`)) wildMedallion(g, x, y, here !== undefined, flare > 0 ? 1 + flare : 0, K * (1 + 0.3 * flare));
         else medallion(g, m.colour, x, y, here === m.colour || flare > 0, flare > 0 ? 1 + flare : 0, K * (1 + 0.3 * flare));
       }
       g.restore();
     }
     // The stars (on a place of the constellation's in its own colour, the coin shows it instead).
     const filled = new Set();
-    if (con) for (const m of con.marks) if (!m.wild) filled.add(`${m.ring},${m.spoke},${m.colour}`);
+    if (con) for (const m of con.marks) if (!m.wild || b.wildLater.has(`${m.ring},${m.spoke}`)) filled.add(`${m.ring},${m.spoke},${m.colour}`);
     for (const [id, s] of b.stars) {
       const [x, y] = xy(s.r, s.a);
       const rr = ringAt(s.r), sp = Math.round(((s.a + Math.PI / 2) / (2 * Math.PI / SPOKES) % SPOKES + SPOKES) % SPOKES);
@@ -545,6 +554,13 @@ export function navBoard(o = {}) {
       const R = SR * k;
       g.drawImage(starCanvas(s.c), x - R, y - R, 2 * R, 2 * R);
       g.globalAlpha = 1;
+    }
+    // A teacher's plan: its places ringed in gold, pulsing.
+    if (b.plan) {
+      g.save(); g.lineWidth = 6; g.setLineDash([14, 9]); g.lineDashOffset = -b.time * 30;
+      g.strokeStyle = `rgba(255,214,106,${0.7 + 0.3 * Math.sin(b.time * 4)})`; g.shadowColor = '#ffd66a'; g.shadowBlur = 14;
+      for (const p of b.plan) { const [x, y] = xy(radius(p.ring), ang(p.spoke)); g.beginPath(); g.arc(x, y, SR * 1.45, 0, Math.PI * 2); g.stroke(); }
+      g.restore();
     }
     // The next star, out on its spoke's handle, a pale halo round it (not while one's still dropping in).
     if (!b.dropFrom.length && !(b.stage?.kind === 'booch')) {
@@ -626,7 +642,9 @@ export function navBoard(o = {}) {
   };
   // Redraw every star where the game has it now, without animating (after changing the game behind
   // the board's back).
-  b.refresh = () => { b.queue = []; b.stage = null; b.dropFrom = []; b.lit = null; layNow(game.grid); b.shownCon = game.constellation; b.conFade = 1; };
+  // Still where it is, drawn (only the time goes on, for what pulses): while a teacher talks over it.
+  b.hold = (dt) => { b.time += dt; draw(); tex.needsUpdate = true; };
+  b.refresh = () => { b.queue = []; b.stage = null; b.dropFrom = []; b.lit = null; b.wildLater.clear(); layNow(game.grid); b.shownCon = game.constellation; b.conFade = 1; };
   b.dispose = () => {
     group.removeFromParent();
     face.geometry.dispose(); face.material.dispose(); tex.dispose();

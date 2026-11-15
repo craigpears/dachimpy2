@@ -1367,14 +1367,65 @@ Kind and practical, and encouraging ("You got this!"): the one who explained the
   - *asks:* "Want to start with what's different here?"
   - *then:* "What's different, then. Which bit?"
 - *Her second, and once it's picked:*
+  - *asks:* "Or how it all works underneath, a step at a time?"
+  - *then:* "Step by step, then. Top one first?"
+- *Her third, and once it's picked:*
   - *asks:* "Or the chains that pay?"
   - *then:* "Chains! Pick one."
-- *Her third, and once it's picked:*
+- *Her fourth, and once it's picked:*
   - *asks:* "Or shall I play you a run, start to finish?"
   - *then:* "A run, then. Watch closely."
-- *As a lesson's board is laid ({title} its name):* "This one's {title}. I'll set it up, you watch the board."
+- *As a lesson's board is laid, when it has no words of its own ({title} its name):* "This one's {title}. I'll set it up, you watch the board."
 - *Handing you the board:* "Your board now. I'll be right here with the cookies."
 - *Under it, in the bar:* "Chart what you can: each constellation turns werewolves back. T for her lessons again."
+- *Handing you the board after a step of how it works, with another to come ({title} its name):* "Next up: {title}. Hit Next when you're ready. I'll grab a cookie."
+- *Under it, in the bar:* "N, or Next, for her next step: {title}. T for her lessons."
+
+### Her lesson, as she plays each board at the star table: as it's laid, before a move, as each clear or chart of a cascade shows, as slots go wild, as the next constellation goes up, and at the end
+
+- *A cascade, lines only, making wild slots:*
+  - *set:* "Cascades first. See the two reds round the third ring, and the stars waiting up top? One red dropped, and watch what it sets off."
+  - *step1:* "Single! Three reds. And the blue that was waiting over them falls in..."
+  - *step2:* "...right between two blues. Double!"
+  - *wild:* "And see those slots go every colour? A clear in a combo turns the slots on it and beside it wild. Any star fills a wild slot."
+  - *step3:* "Triple! The yellow fell onto two yellows."
+  - *end:* "Three, six, nine. That's all lines are worth, even in a cascade. What pays is the constellation at the end of one."
+- *The fourth ring: a star waiting up there, carried round, dropped in by a clear under it:*
+  - *set:* "The fourth ring, out on the handles. It has no slots of its own: it's where stars wait. That yellow slot's the last one, under two whites."
+  - *move2:* "See? It stays up there, over a full spoke. And it turns with its ring, so I can carry it round."
+  - *move3:* "Now it's over the yellow slot's spoke. Turn the third ring, and its white lands on the two whites."
+  - *step1:* "Single! The whites go, and down comes the yellow..."
+  - *chart:* "...into its slot. Constellation! On the second step, so double: 250."
+  - *deal:* "And up goes the next one. Three in the centre, two in the middle, one in the third. Charted in a chain, so its centre's all wild."
+  - *end:* "Park a star up top, clear under it, and it drops in. The fourth ring's for setting that up."
+- *A constellation charted by a cascade's last clear:*
+  - *set:* "Same cascade as before, but now only one slot's left: that orange one in the third ring, with a blue in it. And the yellow waiting over it."
+  - *step1:* "Single..."
+  - *step2:* "Double! The blue's gone with them..."
+  - *wild:* "...and its slot went wild. The yellow will do."
+  - *chart:* "Triple! Constellation! 125, times three."
+  - *deal:* "Two clears before it, so the next one gets a fourth wild slot in the centre."
+  - *end:* "375 for one red dropped. A line's 3. So every cascade you build, end it on the constellation."
+- *Umami's evil constellation, a star at a time:*
+  - *set:* "Now, an evil one. Made with Umami in mind: six reds side by side, round the centre. Let's fill it a star at a time."
+  - *step1:* "Gone! Five reds in a row is a line, and lines go."
+  - *end:* "Any way you fill it one at a time, three end up side by side first, and poof. It only goes in a combo."
+- *Umami's evil constellation, filled by a combo:*
+  - *set:* "So: whites in the two gaps. A white over each in the third ring, reds waiting over those, and a white beside each in the middle. One turn of the middle ring."
+  - *step1:* "Both whites' spokes go at once..."
+  - *chart:* "...and both reds land together. Constellation! Double, too: 486."
+  - *end:* "Most people booch it trying. You didn't. Well, I didn't. Cookie?"
+- *The run from the screenshots:*
+  - *step1:* "Single! A red line round the third ring..."
+  - *step2:* "Double! The orange fell onto two oranges."
+  - *wild:* "And that slot's gone wild: the blue in it counts now."
+  - *chart:* "Triple! Constellation! That's the run from the screenshots."
+- *The Trapdoor:*
+  - *step1:* "The reds go..."
+  - *chart:* "...and the yellow waiting above drops into its slot. Double!"
+- *The Echo:*
+  - *chart:* "Charted first..."
+  - *step2:* "...then the blue falls between two blues. The next one's centre goes wild."
 
 ## Jazzmy
 

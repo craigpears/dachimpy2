@@ -2405,6 +2405,10 @@ two gaps at once). Kept in the puzzle's module, ready for anywhere (src/navigati
 6 goes of 40, with four 16 of 40, about 270 moves). Somewhere a long, deliberate challenge fits, not a race:
 a vault, a treasure's lock, a navigator's trial. Credit Umami in the changelog when it lands ("we should
 definitely credit that Umami ... I was just thinking of the change log being funny").
+**Shown at the wolf den (15 Nov):** a step of Multibella's lesson (RULES.md, "The wolf den"): filled a star at a
+time and lost to a line, then by her combo (whites in the gaps, reds waiting in the fourth ring), credited to Umami in
+the changelog. Still an idea: dealt in play somewhere, the long challenge above (a vault, a navigator's trial), or as
+a wolf den's rare constellation.
 
 **Balancing from what players do (11 Nov, for a full competitive version):** "Once we got to a full competitive
 version, if we got to that far, we would start recording times people took through different routes and

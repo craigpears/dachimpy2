@@ -139,4 +139,22 @@ screenshots). Every part's shown on one of the lesson's boards, `src/den-wolfden
 what its part says. Multibella's opening choice (she teaches it on her island, 14 Nov; it was Dignity at first): what's different, the chains, a run. Her lesson lays the part's board
 on the star table and plays its moves (js/den/wolfden-house.js), then hands it to you; the read version,
 `wolf-den-guide.html`, draws every board before and after its moves with the den's own board. Not yet: the plain,
-quick way as a choice beside the combo way, and the build's plan marked on the board as Tzz's lesson marks hers.
+quick way as a choice beside the combo way.
+
+### How it works, step by step (15 Nov)
+
+After the user played the basics: the deeper mechanics as steps of her lesson, each on a real board of its own and
+tested to do what it says (tests/den-wolfden.test.ts). A choice, "How it works" (her "Or how it all works underneath,
+a step at a time?"), covering `MECHANICS` in order: Cascades (board `cascade`: +3, +6, +9, lines only, its combo
+clears leaving wild slots), Four rings (`outer`: a star waiting in the fourth ring, carried round, dropped into its
+slot by a clear under it, then the next constellation going up), Why chains pay (`lastClear`: the cascade's third
+clear charts it, 375), and the scenario Umami's evil constellation (`evilTry`, then `evil`: a board's `then` lays the
+next). After each step N or Next plays the next (`nextStep`).
+
+- **She talks you through it:** a board's `plan` ringed in gold while she says her first line (the plan before the
+  build, RULES.md); her cues (`stageCues`: `set`, `move<n>`, `step<n>`, `wild`, `chart`, `deal`, `end`), her words
+  for each in src/lines/multibella.ts's `LESSON`, the board holding still while she talks (nav-board.js's `onStage`,
+  `hold`, `plan`). A test says every line she has for a board comes on it.
+- **The read version** draws each board before (its plan ringed) and after, and under them her words as she plays
+  it, from `LESSON`; a test says every ready part has its article there, showing the board the lesson plays.
+- Not yet: "Show me this" links from the guide into the lesson (`?at=wolfden&learn=<id>`, as Helium's).
