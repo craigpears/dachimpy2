@@ -174,6 +174,14 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     in all but their look (see-through, glowing green, as Eldritch Wail), holding buoys and firing, never hiding,
     gone after 40 s (four blockade turns: "a set number of turns"). A craft knocked out goes down at once, and her
     brig sunk, they fade; either way she's back aboard, never coming in at the edge;
+  - **her ground, the reef lagoons** (15 Nov: "Yeah, do it"; "she can get into the middle faster than a frig because
+    she doesn't have to break down the door ... they're kind of maybe 2 tiles long ... but they can still get in the
+    areas like the center at a medium speed"): round each of the four buoys by the islands a reef (`REEFS`), a ring
+    three squares out with a gap or two a square wide, a lagoon five across inside. A sloop or a brig gets in; a
+    frigate can't, her influence falls short of the buoy from outside the reef, and her broadsides stop on it. Those
+    buoys made two pennants, so they're worth the fight. The reefs close the way between each island and the fort,
+    so a frigate going from the south to the north goes the long way round past the islands, along the board's edge
+    (two rocks there taken out so she fits); drawn as coral heads over shallow water;
   - drawn from a war frigate's parts on her own plan (two masts, one row of ports, her stern's few sizes her own:
     `Plan.stern`), the turtles and ghost sloops by `js/den/sea-craft.js`; the admiral picks a strategy for her too
     (her own choice, hold the outside, run for the middle, hunt their frigates).
@@ -219,13 +227,17 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   sinking a ship), 1 to 12 craft sunk; the brigs out round the islands two thirds of the time and more, fighting
   sloops; a frigate still in the heart (seed 6's round). 2.9 to 4.4 s of computing a round: the turtles steer straight
   at their prey rather than have a way worked out to wherever she's got to (that was 9.7 s).
+- With the reef lagoons, three seeded rounds: the lagoon buoys held 25 to 55% of the time (at one pennant, a run
+  before, about a fifth to a third; at two with the turtles slower, 28 to 79%, contested now and then), sloops,
+  brigs and ghost sloops all in them, a contest there rare; a gate down at 31 to 103 s, a frigate in the heart in two
+  rounds of three (76 and 77 s); 2 to 16 rams a round, the turtles swimming quicker than a sloop sails (0.7 of her
+  time a move) so they catch something. 2.4 to 3.1 s of computing a round: a frigate whose exact berth had a ship
+  in the way was having her pilot try every square round it for somewhere else to go, a field each (one round took
+  26 s); now she waits for her next look.
 
 ## 5. To shape with the user
 
-- **The map's middle ground for the brigs** (15 Nov: "I don't know how the map would change around that ... Maybe need
-  like some middle ground somewhere"): her role is in her numbers and her bot so far, the board unchanged. A place
-  of her own would make it plain: reefs round the island buoys with gaps one square wide (a brig and a sloop get in, a
-  frigate can't, and can't reach the buoy over the reef), so the islands are where brig meets sloop.
+- The reef lagoons as played: whether the brigs fight the sloops in them enough, and the frigates' long way round.
 - Whether the frigate's handling feels right: as quick as the sloop over open water, clumsy (her turns of moves half
   as long again), the sloop's speed the winds'.
 - The sloop's full damage (6 small shots, not YPPedia's yet), and how long a knocked-out ship takes to rebuild.

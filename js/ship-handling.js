@@ -368,6 +368,12 @@ export class ShipHelm extends Helm {
         if (!this.sea.plotTo(this.after(), p))
             return null;
         this.sea.exact = { ...p };
+        // (a ship in her way there just now: she waits for a look later, rather than her pilot trying every square round
+        // it for somewhere else to go, a field each)
+        if (!this.sea.plot(this.after(), p.c, p.r)) {
+            this.sea.exact = null;
+            return null;
+        }
         const got = this.drop(p.c, p.r);
         if (!got || got[0] !== p.c || got[1] !== p.r) {
             this.sea.exact = null;

@@ -40,7 +40,8 @@ describe('a chart a kind of ship, shared (15 Nov: "a couple of pre-computed maps
     const b = new Blockade();
     for (const k of ['sloop', 'frigate'] as const) {
       const chart = b.charts[k], old = plain(b, k), s = kind(b, k);
-      const goals: [number, number][] = [B.BUOYS[3].at, B.BUOYS[7].at, B.ISLANDS[0].cove, [2, 33]];
+      // (the buoy off the south gate, open water west of the fort, a cove, a far corner: places both kinds can reach or not)
+      const goals: [number, number][] = [B.BUOYS[3].at, [6, 20], B.ISLANDS[0].cove, [2, 33]];
       let compared = 0;
       for (const from of poses(b, k, 7)) for (const [c, r] of goals) {
         const mine = s.sea.plotPast(from, c, r), theirs = old.plot(from, c, r);
@@ -111,7 +112,7 @@ describe('round the other ships, near her only (15 Nov: "the adversarial plannin
 
   it('a frigate bound for a gate goes to the nearest of its berths, and lies just so', () => {
     const b = new Blockade(), s = kind(b, 'frigate'), rows = s.sea.rows;
-    const berths: Pose[] = [{ c: 15, r: 9, d: 1 }, { c: 27, r: 9, d: 3 }];
+    const berths: Pose[] = [{ c: 17, r: 9, d: 1 }, { c: 26, r: 9, d: 3 }];
     const way = s.sea.plotAny(s.helm.pose, 'test-berths', () => berths.map((x) => (x.c * rows + x.r) * 4 + x.d))!;
     expect(way).not.toBeNull();
     const etas = berths.map((x) => s.sea.eta(s.helm.pose, x.c, x.r, x));

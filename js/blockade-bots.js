@@ -27,9 +27,9 @@ export const BOTS = {
     FINISH: 2, RESCUE: 1.6, SAVE: 7,
     /** A brig's: how much more the open sea's buoys are worth to her, and the heart's (less: the frigates' to take); how
         near an enemy has to be for her to launch her craft. */
-    BRIG: { OUT: 1.5, HEART: 0.35, LAUNCH: 10 },
+    BRIG: { OUT: 1.5, HEART: 0.35, LAUNCH: 14 },
     /** Seconds between a turtle's looks for whom to ram (quick: her prey moves), and how far she looks. */
-    RAM: { THINK: 0.8, REACH: 24, STUCK: 4 },
+    RAM: { THINK: 0.8, REACH: 24, STUCK: 1.6 },
 };
 const same = (a, z) => !!a && !!z && JSON.stringify(a) === JSON.stringify(z);
 /** The same thing to do, if not exactly (a raid on the same ship, wherever she's got to; hiding in the same cove). */

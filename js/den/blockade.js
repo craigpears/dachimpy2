@@ -9,7 +9,7 @@
 // course of the ship you sail. Everything else is the rules'.
 import * as THREE from 'three';
 import { SAIL } from '../den-sail.js';
-import { Blockade, BLOCKADE, islandLand } from '../blockade.js';
+import { Blockade, BLOCKADE, islandLand, reefSquares } from '../blockade.js';
 import { Bots } from '../blockade-bots.js';
 import { FREE, STRATEGIES, orderAt, orderText, orderTarget } from '../blockade-orders.js';
 import { drawnAt } from '../ship-handling.js';
@@ -69,10 +69,28 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
   // ----- the rocks, the fort's walls among them (its towers and bastions their own) -----
   const stoneM = mat('#6b6158', { flatShading: true, roughness: 0.95 }), stoneGeo = new THREE.DodecahedronGeometry(1, 0);
   const isleSq = new Set(BLOCKADE.ISLANDS.flatMap((i) => islandLand(i).map(([c, r]) => `${c},${r}`)));
+  // (the reefs round the island buoys: shallow water over sand, low coral heads breaking the surface, not rocks)
+  // (the fort's wall where a reef meets it, still wall)
+  const wall = (c, r) => B.WALLS.some((w) => c >= w.c0 && c <= w.c1 && r >= w.r0 && r <= w.r1);
+  const reefSq = new Set(BLOCKADE.REEFS.flatMap((x) => reefSquares(x).filter(([c, r]) => !wall(c, r)).map(([c, r]) => `${c},${r}`)));
+  const shallowM = new THREE.MeshStandardMaterial({ color: '#6fd0c4', roughness: 0.6, transparent: true, opacity: 0.75 });
+  const coralMs = ['#e8826e', '#f0b25c', '#d870a8', '#f2e2c4', '#b8d06a'].map((col) => mat(col, { flatShading: true, roughness: 0.85 }));
+  const coralGeo = new THREE.IcosahedronGeometry(1, 0), shallowGeo = new THREE.BoxGeometry(CELL, 0.5, CELL);
   for (const k of b.rocks) {
     const [c, r] = k.split(',').map(Number);
     if (isleSq.has(k) || b.gates.some((gate) => gate.towerAt(c, r) >= 0) || b.battery.some((x) => x.at[0] === c && x.at[1] === r)) continue;
     const roll = dice(c, r), at = v3(c, r);
+    if (reefSq.has(k)) {
+      const sh = mesh(shallowGeo, shallowM, false); sh.position.set(at.x, -0.12, at.z); g.add(sh);
+      for (let i = 0; i < 5; i++) {
+        const s = 0.6 + roll() * 0.7, m = mesh(coralGeo, coralMs[Math.floor(roll() * coralMs.length)]);
+        m.scale.set(s * (1 + roll() * 0.6), s * (0.35 + roll() * 0.45), s * (1 + roll() * 0.6));
+        m.position.set(at.x + (roll() - 0.5) * 2.8, s * 0.12, at.z + (roll() - 0.5) * 2.8);
+        m.rotation.set(roll() * 0.5, roll() * 3, roll() * 0.5);
+        g.add(m);
+      }
+      continue;
+    }
     for (let i = 0; i < 4; i++) {
       const s = 1.5 + roll() * 0.8, m = mesh(stoneGeo, stoneM);
       m.scale.set(s * (0.9 + roll() * 0.3), s * (0.8 + roll() * 0.9), s * (0.9 + roll() * 0.3));

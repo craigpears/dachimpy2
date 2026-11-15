@@ -21,6 +21,13 @@
      who lingers under them, and on anyone at all once their gate's fired on; and a side way through its west wall and its east, a one-square gap with a wind blowing
      in through it that carries a sloop through fast and that a frigate rides out ("sideways ... that only the sloops
      can really get to on those fast little winds");
+   - round each of the four buoys out by the islands, a reef: a ring of it three squares out from the buoy, with a
+     gap or two a square wide, a lagoon inside. A sloop or a brig, one square wide, gets in through a gap; a frigate
+     can't, and her influence doesn't reach the buoy from outside the reef, nor her broadsides through it. So the
+     islands are the brigs' and the sloops' to fight over, the middle ground between the open sea's frigates and the
+     heart (the user, 15 Nov, of the brig: "she can get into the middle faster than a frig because she doesn't have to
+     break down the door ... maybe 2 tiles long ... but they can still get in the areas"; "Maybe need like some middle
+     ground somewhere"; and of the reefs, "Yeah, do it");
    - islands out on the open sea, each with a cove in it a sloop can hide in, one square in by a narrow way no
      frigate fits, its rocks between her and anyone's guns;
    - a war brig a side between them (src/den-brig.ts; the user, 15 Nov: "a middle ship class, so it's not a big
@@ -57,6 +64,8 @@ export interface Buoy { at: [number, number]; pennants: 1 | 2 | 3 }
 export interface Rect { c0: number; c1: number; r0: number; r1: number }
 /** An island: its land, and the cove in it (`cove`, the square a sloop hides on, open to the sea by `way`). */
 export interface Island extends Rect { cove: [number, number]; way: [number, number][] }
+/** A reef round a buoy: the buoy's square, how far out the ring is (squares, any way), and its gaps. */
+export interface Reef { at: [number, number]; ring: number; gaps: [number, number][] }
 /** A ship of a side's fleet: her name, kind, where she comes in, (a sloop) whether her bot's a raider, and (a brig)
     what she launches. */
 export interface FleetShip { name: string; kind: Kind; at: Pose; raider?: boolean; craft?: CraftKind }
@@ -97,16 +106,26 @@ export const BLOCKADE = {
   ] as Island[],
   /** Each side's corner of the sea, where her sloops can lie out of the fighting too when the coves are full. */
   HOMES: { gold: [[0, 0], [3, 0], [0, 3]], crimson: [[43, 35], [40, 35], [43, 32]] } as Record<TeamId, [number, number][]>,
+  /** The reefs round the buoys by the islands, each a ring three squares out (any way) with a gap or two in it a
+      square wide, facing the open sea and the fort: a lagoon inside, five squares across. */
+  REEFS: [
+    { at: [11, 10], ring: 3, gaps: [[8, 10], [11, 13]] },
+    { at: [32, 10], ring: 3, gaps: [[35, 10], [32, 13]] },
+    { at: [11, 25], ring: 3, gaps: [[8, 25], [11, 22]] },
+    { at: [32, 25], ring: 3, gaps: [[35, 25], [32, 22]] },
+  ] as Reef[],
   /** Rocks about the open sea and the heart. */
   ROCKS: [
-    [12, 7], [13, 7], [30, 7], [31, 7], [12, 28], [13, 28], [30, 28], [31, 28], [21, 4], [22, 31], [2, 24], [41, 11],
+    // (none along the west and east edges: with the reefs, the way round past the islands is the frigates' only one
+    // from the south to the north, and two squares either side of a rock is too narrow for her, at her every other square)
+    [12, 7], [13, 7], [30, 7], [31, 7], [12, 28], [13, 28], [30, 28], [31, 28], [21, 4], [22, 31],
     [18, 20], [25, 15],
   ] as [number, number][],
   /** The buoys: in the heart two, and its prize three; out on the open sea, two off each gate and one by each island. */
   BUOYS: [
     { at: [21, 17], pennants: 3 }, { at: [18, 15], pennants: 2 }, { at: [25, 20], pennants: 2 },
     { at: [21, 8], pennants: 2 }, { at: [22, 27], pennants: 2 },
-    { at: [11, 10], pennants: 1 }, { at: [32, 10], pennants: 1 }, { at: [11, 25], pennants: 1 }, { at: [32, 25], pennants: 1 },
+    { at: [11, 10], pennants: 2 }, { at: [32, 10], pennants: 2 }, { at: [11, 25], pennants: 2 }, { at: [32, 25], pennants: 2 },
   ] as Buoy[],
   /** Squares from any of her squares a ship's influence reaches, by her size (YPPedia: "different sized ships
       have different sized influence circles"). */
@@ -162,17 +181,27 @@ export const BLOCKADE = {
   /** The brawl to watch (blockade-test.html?watch=brawl, 15 Nov: "I want to see two of the big ships really having a
       brawl and fighting it out to see what that damage looks like"; "That needs to be like one of the shortcuts so
       people can actually see a cinematic of the blockade"): two war frigates broadside to broadside on the open water
-      between the south-west islands and the fort, room to come about, the rest of the blockade going on round them. */
-  BRAWL: [{ name: 'Primates Rule', at: { c: 7, r: 10, d: 1 } }, { name: 'Iron Pride', at: { c: 7, r: 14, d: 1 } }] as { name: string; at: Pose }[],
+      west of the fort, between its reefs, room to come about, the rest of the blockade going on round them. */
+  BRAWL: [{ name: 'Primates Rule', at: { c: 7, r: 15, d: 1 } }, { name: 'Iron Pride', at: { c: 7, r: 19, d: 1 } }] as { name: string; at: Pose }[],
 };
 
 const HANDLINGS: Record<Kind, Handling> = { sloop: SLOOP_HANDLING, brig: BRIG_HANDLING, frigate: FRIGATE_HANDLING };
 const CLASSES: Record<Kind, ShipClass> = { sloop: SLOOP, brig: WAR_BRIG, frigate: WAR_FRIGATE };
 /** A brig's sea turtle: a sloop's size on the board, no guns, a couple of small shots and she's gone. */
 export const SEA_TURTLE: ShipClass = { ...SLOOP, name: 'Sea turtle', crew: 1, minCrew: 1, guns: 0, mainDeckGuns: 0, stations: { nav: 1, sailing: 0, carpentry: 0, bilge: 0, gunnery: 0 } };
+/** A sea turtle swims: quicker than a sloop sails (a move in 0.7 of her time), or she'd never catch anything. */
+export const TURTLE_HANDLING: Handling = { ...SLOOP_HANDLING, name: 'Sea turtle', pace: SLOOP_HANDLING.pace * 0.7, move: SLOOP_HANDLING.move * 0.7, turn: SLOOP_HANDLING.turn * 0.7 };
 const inRect = (x: Rect, c: number, r: number) => c >= x.c0 && c <= x.c1 && r >= x.r0 && r <= x.r1;
 /** A square in the heart. */
 export const inHeart = (c: number, r: number): boolean => inRect(BLOCKADE.HEART, c, r);
+/** A reef's squares: its ring but its gaps (a square already land, an island's or the fort's, still counted). */
+export function reefSquares(x: Reef): [number, number][] {
+  const out: [number, number][] = [], gaps = new Set(x.gaps.map(([c, r]) => key(c, r))), [bc, br] = x.at;
+  for (let c = bc - x.ring; c <= bc + x.ring; c++) for (let r = br - x.ring; r <= br + x.ring; r++) {
+    if (Math.max(Math.abs(c - bc), Math.abs(r - br)) === x.ring && !gaps.has(key(c, r))) out.push([c, r]);
+  }
+  return out;
+}
 /** Every island's land squares (not its cove nor the way into it). */
 export function islandLand(i: Island): [number, number][] {
   const out: [number, number][] = [], open = new Set([i.cove, ...i.way].map(([c, r]) => key(c, r)));
@@ -238,6 +267,7 @@ export class Blockade {
     for (const w of B.WALLS) for (let c = w.c0; c <= w.c1; c++) for (let r = w.r0; r <= w.r1; r++) if (!side.has(key(c, r)) && !ways.has(key(c, r))) this.rocks.add(key(c, r));
     for (const isle of B.ISLANDS) for (const [c, r] of islandLand(isle)) this.rocks.add(key(c, r));
     for (const [c, r] of B.ROCKS) this.rocks.add(key(c, r));
+    for (const reef of B.REEFS) for (const [c, r] of reefSquares(reef)) this.rocks.add(key(c, r));
     for (const { at: [c, r], d, n } of B.WINDS) for (let i = 0; i < n; i++) this.wind.set(key(c + [0, 1, 0, -1][d] * i, r + [1, 0, -1, 0][d] * i), d);
     let id = 0;
     for (const team of B.TEAMS) for (const s of team.ships) {
@@ -253,12 +283,12 @@ export class Blockade {
       if (!f.craft) continue;
       const by = this.ships.find((x) => x.name === f.name)!;
       for (const name of B.LAUNCH.CRAFT[f.craft]) {
-        const me = id++, cls = f.craft === 'ram' ? SEA_TURTLE : SLOOP;
-        const sea = new ShipSea(SLOOP_HANDLING, B.COLS, B.ROWS, this.rocks, (c, r) => { const o = this.taken.get(key(c, r)); return o !== undefined && o !== me; });
+        const me = id++, cls = f.craft === 'ram' ? SEA_TURTLE : SLOOP, h = f.craft === 'ram' ? TURTLE_HANDLING : SLOOP_HANDLING;
+        const sea = new ShipSea(h, B.COLS, B.ROWS, this.rocks, (c, r) => { const o = this.taken.get(key(c, r)); return o !== undefined && o !== me; });
         sea.carriedBy(this.wind);
         sea.chart = this.charts.sloop ??= new HullChart(sea.bare());
         sea.near = B.IN_WAY;
-        this.ships.push({ id: me, name, team: team.id, kind: 'sloop', h: SLOOP_HANDLING, cls, raider: false, sea, helm: new ShipHelm(sea, { ...by.start }), guns: new Guns(SLOOP_HANDLING.reload), dmg: new Damage(cls), start: { ...by.start }, away: Infinity, craft: { by: by.id, kind: f.craft, life: 0 }, launched: -Infinity });
+        this.ships.push({ id: me, name, team: team.id, kind: 'sloop', h, cls, raider: false, sea, helm: new ShipHelm(sea, { ...by.start }), guns: new Guns(SLOOP_HANDLING.reload), dmg: new Damage(cls), start: { ...by.start }, away: Infinity, craft: { by: by.id, kind: f.craft, life: 0 }, launched: -Infinity });
       }
     }
     // (the charts worked out now, while the board's being set up, rather than on the first move)
