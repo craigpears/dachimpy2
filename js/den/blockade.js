@@ -422,7 +422,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     key(k) {
       if (me < 0) return false;
       const s = b.ship(me), m = { w: 'F', arrowup: 'F', a: 'L', arrowleft: 'L', d: 'R', arrowright: 'R' }[k];
-      if (m) { if (!b.put(me, m)) say('That\'s a turn\'s worth put in already', true); return true; }
+      if (m) { if (!b.put(me, m)) say(b.anchored(s) ? 'She\'s at anchor while her craft are out: G to weigh it' : 'That\'s a turn\'s worth put in already', true); return true; }
       if (k === 'q' || k === 'e') {
         const side = k === 'q' ? 'L' : 'R';
         if (s.dmg.out) say('She\'s dead in the water: her crew are rebuilding her', true);
@@ -430,6 +430,8 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         return true;
       }
       if (k === 's' || k === 'backspace') { s.helm.unput(); return true; }
+      // (a brig at anchor, her craft out: G weighs it, calling them home)
+      if (k === 'g' && s.kind === 'brig') { say(b.weighAnchor(me) ? `Weighing anchor: ${s.name}'s craft called home` : b.anchored(s) ? 'She\'s weighing anchor already' : 'She\'s not at anchor', !b.anchored(s)); return true; }
       if (k === 'x') { s.helm.stop(); return true; }
       return false;
     },

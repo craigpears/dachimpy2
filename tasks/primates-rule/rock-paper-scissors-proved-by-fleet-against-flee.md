@@ -1,6 +1,6 @@
 ---
 title: Rock, paper, scissors proved by fleet-against-fleet balance tests
-status: review
+status: playtest
 asked: 15 Nov
 updated: 15 Nov
 ---
@@ -13,3 +13,4 @@ updated: 15 Nov
 
 - 15 Nov: added.
 - 15 Nov: for you to review: Skirmish harness and balance test in; rules removed, handling levers in. Frigates beat sloops 4/4; brigs v frigates and sloops v brigs not yet (to-dos in the test).
+- 15 Nov: for you to playtest: The triangle holds on open sea every fight; on the board but for frigates v sloops (lagoons shelter the sloops).

@@ -228,19 +228,25 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
 - **Proved fleet against fleet, not by rules** (15 Nov: "it feels a bit artificial ... turtles don't go for sloops at
   all, rather than it being a mechanical advantage. Certainly set some balance tests up ... a fight with all frigs ...
   versus all brigs, etc."). `src/blockade-skirmish.ts`: two fleets of the same points (`POINTS`: a frigate 3, a brig 3, a
-  sloop 1; six a side) on open sea, sunk ships staying sunk, each bot going for the nearest enemy as her kind best can
-  (a sloop off a big ship's end, hitting and running; a frigate or a brig broadside on, swinging her side round when
-  she's in range and no gun bears). Run by `tools/blockade-balance.mjs [seeds]`; `tests/blockade-balance.test.ts`.
-  - The rules taken out: a turtle goes for any enemy, a brig launches at any. What's left is handling: a turtle swims
-    slower than a sloop sails and faster than a frigate goes (`TURTLE_HANDLING`, 1.15 of a sloop's time a move); a
-    ram only lands on a ship lying still a second (`RAM.STILL`: a frigate trading broadsides, a ship on a buoy; a
-    sloop under way slips her); a brig's turn takes 1.6 of her move (`BRIG_TURN`: clumsy, so a sloop off her end has
-    time); with her craft out, a brig's guns load at half speed (`LAUNCH.CREWED`: her hands are in them; "they can't
-    just have the best of both worlds").
-  - Four fights a pairing (two seeds, both ways round): frigates beat sloops 4 of 4. Brigs and frigates 2 of 4 at a
-    brig's three points (at two, three brigs won all four, but crushed the sloops 0 of 4). Sloops beat brigs 1 of 4:
-    the turtle brigs still beat them, the phantom brigs about even. Two sides of the triangle still to find in the
-    handling (the test has them as to-dos): the turtles' edge over sloops, and a brig's price.
+  sloop 1; six a side) to the last ship, sunk ships staying sunk, each bot going for the nearest enemy as her kind best
+  can (a sloop off a big ship's end, hitting and running; a frigate or a brig broadside on, swinging her side round when
+  in range and no gun bears; a frigate leaving be an enemy in a lagoon or its shoals). On open sea, or on the blockade's
+  own board (`board: 'blockade'`: its lagoons, reefs, shoals, winds and walls; the gate guns silenced, or they'd decide a
+  fight by where it happens), the north fleet the south's turned round. Run by `tools/blockade-balance.mjs [seeds]
+  [open|blockade]`; `tests/blockade-balance.test.ts`.
+  - The rules taken out: a turtle goes for any enemy. What's left is handling and tactics: a turtle swims slower than
+    a sloop sails, faster than a frigate goes (`TURTLE_HANDLING`); a ram only lands on a ship lying still a second
+    (`RAM.STILL`); a brig's turn takes 1.6 of her move (`BRIG_TURN`); and **launching anchors a brig** (15 Nov: "she
+    has to stay anchored while they're out ... once a Brig's committed ... very difficult to ... raise the anchor. They
+    become a sitting duck"): she can't move while her craft are out, and weighing anchor early (`weighAnchor`, G when
+    you sail her) calls them home and takes 8 s (`LAUNCH.WEIGH`). So her bot launches only with a frigate or a brig in
+    reach and no enemy sloop within 7 squares (`BRIG.SAFE`), and on the board from inside a lagoon ("brigs being able to
+    use the terrain to launch from a protected position is very key").
+  - Three seeds, both ways round, six fights a pairing: on open sea, frigates beat sloops 6 of 6, brigs beat frigates 6
+    of 6, sloops beat brigs 6 of 6. On the board, brigs beat frigates 6 of 6 and sloops beat brigs 6 of 6; frigates and
+    sloops 3 of 6, every fight to the time limit: the sloops slip into the lagoons to hide and patch up where no frigate
+    can follow, a stand-off by design (in a blockade the buoys bring them out). Points: at a brig's two, three brigs
+    crushed the sloops; at three, the triangle holds.
 
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 

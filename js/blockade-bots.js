@@ -27,7 +27,7 @@ export const BOTS = {
     FINISH: 2, RESCUE: 1.6, SAVE: 7,
     /** A brig's: how much more the open sea's buoys are worth to her, and the heart's (less: the frigates' to take); how
         near an enemy has to be for her to launch her craft. */
-    BRIG: { OUT: 1.5, HEART: 0.35, LAUNCH: 14 },
+    BRIG: { OUT: 1.5, HEART: 0.35, LAUNCH: 14, SAFE: 7 },
     /** Seconds between a turtle's looks for whom to ram (quick: her prey moves), and how far she looks. */
     RAM: { THINK: 0.8, REACH: 24, STUCK: 1.6 },
     /** How near (squares, middle to middle) an enemy she's fighting has to be for her to swing her broadside round onto her. */
@@ -176,9 +176,18 @@ export class Bot {
             return;
         }
         // (a brig: her craft launched whenever an enemy's near)
-        // (her craft launched whenever an enemy's near)
-        if (s.kind === 'brig' && b.canLaunch(s) && b.ships.some((o) => o.team !== s.team && !o.craft && o.away <= 0 && !o.dmg.out && Math.hypot(o.helm.pose.c - s.helm.pose.c, o.helm.pose.r - s.helm.pose.r) <= BOTS.BRIG.LAUNCH))
-            b.launch(s.id);
+        // (a brig launches when there's a big ship for her craft in reach and no sloop near enough to catch her at anchor:
+        // launching anchors her, a sitting duck till they're home, so she does it from somewhere safe; at anchor she only
+        // fires)
+        if (s.kind === 'brig') {
+            const near = (o, d) => o.team !== s.team && !o.craft && o.away <= 0 && !o.dmg.out && Math.hypot(o.helm.pose.c - s.helm.pose.c, o.helm.pose.r - s.helm.pose.r) <= d;
+            if (b.canLaunch(s) && b.ships.some((o) => o.kind !== 'sloop' && near(o, BOTS.BRIG.LAUNCH)) && !b.ships.some((o) => o.kind === 'sloop' && near(o, BOTS.BRIG.SAFE)))
+                b.launch(s.id);
+            if (b.anchored(s)) {
+                this.shoot(b, s);
+                return;
+            }
+        }
         this.shoot(b, s);
         // (idle short of where she's going, she looks again sooner: but never more than twice a second)
         const idle = s.helm.slot < 0 && !s.helm.pin && (this.goal?.kind === 'buoy' ? !b.reaches(s, BLOCKADE.BUOYS[this.goal.i]) : this.goal?.kind === 'raid' || this.goal?.kind === 'fight');
@@ -241,7 +250,20 @@ export class Bot {
         // ship's end, where her broadsides can't bear, and broadside to another sloop (a sloop badly hurt hides, below).
         if (this.skirmish && !s.craft && !(s.kind === 'sloop' && s.dmg.share() >= BOTS.HIDE)) {
             const far = (o) => Math.hypot(o.helm.pose.c - s.helm.pose.c, o.helm.pose.r - s.helm.pose.r);
-            const t = b.ships.filter((o) => o.team !== s.team && o.away <= 0 && !o.craft).sort((a, z) => far(a) - far(z))[0];
+            // (a frigate leaves be an enemy in a lagoon or its shoals: she'd scrape her bottom chasing her there)
+            const sheltered = (o) => s.kind === 'frigate' && (b.shoals.has(`${o.helm.pose.c},${o.helm.pose.r}`) || BLOCKADE.REEFS.some((x) => Math.max(Math.abs(o.helm.pose.c - x.at[0]), Math.abs(o.helm.pose.r - x.at[1])) <= x.ring));
+            const t = b.ships.filter((o) => o.team !== s.team && o.away <= 0 && !o.craft && !sheltered(o)).sort((a, z) => far(a) - far(z))[0];
+            // (a brig on the blockade's board, with a big ship for her craft to go after, makes for a lagoon and lies in it, out
+            // of any frigate's reach, launching from there: the terrain's hers, her craft slipping out through its gaps. With
+            // only sloops against her, there's nothing to launch at: she fights in the open)
+            if (s.kind === 'brig' && !b.open && b.ships.some((o) => o.team !== s.team && !o.craft && o.away <= 0 && o.kind !== 'sloop')) {
+                const inside = BLOCKADE.REEFS.find((x) => Math.max(Math.abs(s.helm.pose.c - x.at[0]), Math.abs(s.helm.pose.r - x.at[1])) <= 2);
+                if (inside)
+                    return { goal: { kind: 'camp', at: [s.helm.pose.c, s.helm.pose.r] }, score: 9 };
+                const lagoon = BLOCKADE.REEFS.map((x) => ({ at: x.hide, eta: s.sea.eta(s.helm.pose, ...x.hide) })).filter((x) => x.eta < Infinity).sort((a, z) => a.eta - z.eta)[0];
+                if (lagoon)
+                    return { goal: { kind: 'camp', at: lagoon.at }, score: 9 };
+            }
             if (t) {
                 // (a sloop hits and runs: a few seconds away from her after each broadside, then back at her)
                 if (s.kind === 'sloop' && b.clock - this.firedAt < BOTS.RUN) {
@@ -703,6 +725,8 @@ export class Bots {
             return `sunk: back in ${Math.ceil(s.away)}s from her side's edge`;
         if (s.dmg.out)
             return 'knocked out: her crew rebuilding her';
+        if (b.anchored(s))
+            return (s.weigh ?? 0) > 0 ? 'weighing anchor' : 'at anchor, her craft out';
         const g = bot?.goal;
         if (!g)
             return 'looking round';

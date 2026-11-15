@@ -9,7 +9,8 @@
 
    - each kind of ship costs points (POINTS: a frigate three, a brig two, a sloop one), and each side brings the same:
      six points is two frigates, three brigs or six sloops;
-   - open sea, the board's size, no fort, gates, reefs, rocks or winds: only the ships;
+   - open sea, the board's size, no fort, gates, reefs, rocks or winds: only the ships; or the blockade's own board, its
+     lagoons, reefs, shoals, winds and walls (its gate guns silent: they'd decide a fight by where it happens);
    - a ship sunk stays sunk; every bot goes for the nearest enemy as her kind best can (src/blockade-bots.ts,
      `skirmish`);
    - a side's strength is its ships' points still afloat, each by how whole she is (knocked out, a quarter); the side
@@ -27,9 +28,10 @@ export const SKIRMISH = {
     turtles, Dalnoth's phantoms) unless `craft` says. */
 export function fleet(kind, team, points = SKIRMISH.BUDGET, craft) {
     const n = Math.floor(points / SKIRMISH.POINTS[kind]), south = team === 'gold';
-    const r = kind === 'frigate' ? (south ? 4 : BLOCKADE.ROWS - 5) : south ? 3 : BLOCKADE.ROWS - 4;
+    const r = kind === 'frigate' ? (south ? 3 : BLOCKADE.ROWS - 4) : south ? 3 : BLOCKADE.ROWS - 4;
     const ships = Array.from({ length: n }, (_, i) => {
-        const c = Math.round(6 + (i + 0.5) * (BLOCKADE.COLS - 12) / n), at = { c, r, d: south ? 0 : 2 };
+        // (Dalnoth's the mirror of Dachimpy's, turned round the board's middle, as the board is: neither side the better placed)
+        const c0 = Math.round(6 + (i + 0.5) * (BLOCKADE.COLS - 12) / n), c = south ? c0 : BLOCKADE.COLS - 1 - c0, at = { c, r, d: south ? 0 : 2 };
         return { name: `${team} ${kind} ${i + 1}`, kind, at, ...(kind === 'brig' ? { craft: craft ?? (south ? 'ram' : 'ghost') } : {}) };
     });
     return { id: team, name: team, ships };
@@ -42,7 +44,13 @@ export function strength(b, team) {
 /** Two fleets fight it out, `gold` of one kind against `crimson` of another, the dice seeded. */
 export function skirmish(gold, crimson, random, opts = {}) {
     const points = opts.points ?? SKIRMISH.BUDGET, secs = opts.secs ?? SKIRMISH.SECS;
-    const b = new Blockade({ open: true, skirmish: true, teams: [fleet(gold, 'gold', points, opts.goldCraft), fleet(crimson, 'crimson', points, opts.crimsonCraft)] });
+    // (on open sea, or on the blockade's own board, its fort, reefs, shoals, winds and gate guns: the brigs' lagoons theirs
+    // to launch from, the user, 15 Nov: "brigs being able to use the terrain to launch from a protected position is very
+    // key to the balance test")
+    const b = new Blockade({ open: opts.board !== 'blockade', skirmish: true, teams: [fleet(gold, 'gold', points, opts.goldCraft), fleet(crimson, 'crimson', points, opts.crimsonCraft)] });
+    // (the gate guns silenced: they fire on whoever lingers, so they'd decide a fight by where it happens, not by the ships)
+    for (const g of b.battery)
+        g.wrecked = true;
     const bots = new Bots(b, [], random, null, true), dt = 0.1;
     let t = 0;
     for (; t < secs; t += dt) {

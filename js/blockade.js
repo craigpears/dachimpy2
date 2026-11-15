@@ -82,7 +82,10 @@ export const BLOCKADE = {
         // too many frigs ... the other team having Atlantean war frigs. They'll just send in the turtles and crush your war
         // frigs")
         RAM: { gun: 'large', hits: 1, COOL: 4, STILL: 1 },
-        CREWED: 0.5,
+        /** Seconds weighing anchor takes a brig, her craft called home as she starts (the user, 15 Nov: "she has to stay
+            anchored while they're out ... once a Brig's committed ... very difficult to ... raise the anchor. They become a
+            sitting duck"). */
+        WEIGH: 8,
     },
     /** Seconds a blockade turn, scored at its end, and a round. */
     TURN: 10,
@@ -200,11 +203,13 @@ export class Blockade {
     gunOn = [];
     /** Each kind of ship's chart of this board (src/hull-chart.ts): all the sloops share one, all the frigates another. */
     charts = {};
-    /** Ships sunk stay sunk (a skirmish). */
+    /** Ships sunk stay sunk (a skirmish); and open sea, nothing on it but the ships. */
     skirmish = false;
+    open = false;
     constructor(setup = {}) {
         const B = BLOCKADE, teams = setup.teams ?? B.TEAMS, open = !!setup.open;
         this.skirmish = !!setup.skirmish;
+        this.open = open;
         if (open) {
             this.gates = [];
             this.battery = [];
@@ -318,10 +323,15 @@ export class Blockade {
             s.sea.drag = s.dmg.drag();
             out.damage.set(s.id, ev);
             out.sail.set(s.id, s.helm.tick(dt));
-            // (a brig with her craft out has fewer hands at her guns: they load at CREWED of the speed. Her craft are her strength
-            // against a frigate and her weakness against sloops: she can't have both, the user, 15 Nov: "they can't just have
-            // the best of both worlds")
-            s.guns.tick(s.kind === 'brig' && this.craftOf(s).some((x) => x.away <= 0) ? dt * BLOCKADE.LAUNCH.CREWED : dt);
+            s.guns.tick(dt);
+            // (a brig at anchor, her craft out: she lies where she is; weighing it, she's free once it's up)
+            if (s.kind === 'brig' && (s.weigh ?? 0) > 0 && (s.weigh = Math.max(0, s.weigh - dt)) === 0)
+                this.notice();
+            if (this.anchored(s) && (s.helm.pin || s.helm.mine.length)) {
+                s.helm.stop();
+                while (s.helm.mine.length)
+                    s.helm.unput();
+            }
             this.notice();
         }
         // (a turtle beside an enemy frigate or brig rams her: her holes where she struck; the turtle backs off a moment and
@@ -495,6 +505,19 @@ export class Blockade {
     }
     /** A brig's craft still aboard her. */
     craftOf(brig) { return this.ships.filter((x) => x.craft?.by === brig.id); }
+    /** A brig at anchor: her craft out, or her anchor still coming up. She can't move; her guns still bear as she lies. */
+    anchored(s) { return s.kind === 'brig' && ((s.weigh ?? 0) > 0 || this.craftOf(s).some((x) => x.away <= 0)); }
+    /** A brig weighs anchor: her craft called home at once (back aboard), and WEIGH seconds before she can move. */
+    weighAnchor(id) {
+        const s = this.ship(id);
+        if (s.kind !== 'brig' || !this.anchored(s) || (s.weigh ?? 0) > 0)
+            return false;
+        for (const x of this.craftOf(s))
+            if (x.away <= 0)
+                this.aboard(x);
+        s.weigh = BLOCKADE.LAUNCH.WEIGH;
+        return true;
+    }
     /** She can launch: a brig afloat and in action, her time since her last launch up, and her craft all aboard. */
     canLaunch(s) {
         const craft = this.craftOf(s);
@@ -531,8 +554,12 @@ export class Blockade {
             this.taken.set(key(...at), x.id);
             out.push(x.id);
         }
+        // (and she drops anchor: lying where she is till they're home)
         if (out.length) {
             s.launched = this.clock;
+            s.helm.stop();
+            while (s.helm.mine.length)
+                s.helm.unput();
             this.launches.push({ by: id, ids: out });
             this.notice();
         }
@@ -603,8 +630,8 @@ export class Blockade {
             this.fired.shift(); // (nobody drawing them: kept short)
         return got;
     }
-    drop(id, c, r) { return this.ship(id).helm.drop(c, r); }
-    put(id, m) { return this.ship(id).helm.put(m); }
+    drop(id, c, r) { return this.anchored(this.ship(id)) ? null : this.ship(id).helm.drop(c, r); }
+    put(id, m) { return !this.anchored(this.ship(id)) && this.ship(id).helm.put(m); }
     /** The brawl (BLOCKADE.BRAWL): its two frigates put broadside to broadside; their ids. */
     brawl() {
         const ids = BLOCKADE.BRAWL.map(({ name, at }) => { const s = this.ships.find((x) => x.name === name); s.helm.moor(at); return s.id; });

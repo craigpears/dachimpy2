@@ -522,6 +522,40 @@ describe('war brigs, the middle class (15 Nov: "a middle ship class, so it\'s no
     // (her brig sunk: her other turtles fade, if they've not faded already)
     if (z.away <= 0) { b.sink(t); expect(b.tick(0.1).faded).toContain(z.id); }
   });
+  it('launching anchors her: she can\'t move while her craft are out; weighing anchor calls them home and takes a while (15 Nov: "she has to stay anchored while they\'re out ... They become a sitting duck")', () => {
+    const b = new Blockade(), t = brig(b, 'gold');
+    clearAway(b, [t]);
+    t.helm.moor({ c: 20, r: 6, d: 1 }); b.notice();
+    expect(b.anchored(t)).toBe(false);
+    expect(b.launch(t.id).length).toBeGreaterThan(0);
+    expect(b.anchored(t)).toBe(true);
+    expect(b.put(t.id, 'F')).toBe(false);
+    expect(b.drop(t.id, 30, 6)).toBeNull();
+    const at = { ...t.helm.pose };
+    for (let i = 0; i < 50; i++) b.tick(0.1);
+    expect(t.helm.pose).toEqual(at);
+    // (weighing anchor: her craft home at once, and WEIGH seconds before she's free)
+    expect(b.weighAnchor(t.id)).toBe(true);
+    expect(b.craftOf(t).every((x) => x.away > 0)).toBe(true);
+    expect(b.anchored(t)).toBe(true);
+    for (let s = 0; s < B.LAUNCH.WEIGH - 0.5; s += 0.5) b.tick(0.5);
+    expect(b.anchored(t)).toBe(true);
+    b.tick(1);
+    expect(b.anchored(t)).toBe(false);
+    expect(b.put(t.id, 'F')).toBe(true);
+  });
+  it('a brig\'s bot won\'t anchor to launch with an enemy sloop close enough to catch her at it', () => {
+    const b = new Blockade(), t = brig(b, 'gold'), f = frigate(b, 'crimson'), sl = sloop(b, 'crimson');
+    clearAway(b, [t, f, sl]);
+    t.helm.moor({ c: 20, r: 6, d: 1 }); f.helm.moor({ c: 26, r: 14, d: 1 }); sl.helm.moor({ c: 23, r: 8, d: 1 }); b.notice();
+    const bots = new Bots(b, b.ships.filter((s) => s !== t && !s.craft).map((s) => s.id), dice(3));
+    for (let i = 0; i < 30; i++) { bots.tick(b, 0.1); b.tick(0.1); }
+    expect(b.anchored(t)).toBe(false);
+    // (the sloop gone off: she launches, and anchors)
+    sl.helm.moor({ c: 40, r: 30, d: 1 }); b.notice();
+    for (let i = 0; i < 30 && !b.anchored(t); i++) { bots.tick(b, 0.1); b.tick(0.1); }
+    expect(b.anchored(t)).toBe(true);
+  });
   it('a brig\'s bot launches her craft when an enemy frigate\'s near, and her turtles ram her', () => {
     const b = new Blockade(), t = brig(b, 'gold'), f = frigate(b, 'crimson');
     clearAway(b, [t, f]);
