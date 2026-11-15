@@ -201,25 +201,28 @@ export class ShipSea extends Sea {
     exact = null;
     /** Her pilot's moves to a square as if the other ships weren't there (they'll have moved by then): how far it
         is, for choosing where to go. */
-    plotPast(from, c, r) {
-        const was = this.blocked;
-        this.blocked = () => false;
-        this.touch();
-        const got = this.plot(from, c, r);
-        this.blocked = was;
-        this.touch();
-        return got;
-    }
-    /** Her pilot's moves from `from` to lie exactly at `to`, or null if she can't. */
+    plotPast(from, c, r) { return this.clearSea().plot(from, c, r); }
+    /** Her pilot's moves from `from` to lie exactly at `to` (as if the other ships weren't there), or null if she can't. */
     plotTo(from, to) {
-        const was = this.exact;
-        this.exact = { ...to };
-        this.touch();
-        const got = this.plot(from, to.c, to.r);
-        this.exact = was;
-        this.touch();
+        const twin = this.clearSea(), was = twin.exact;
+        twin.exact = { ...to };
+        const got = twin.plot(from, to.c, to.r);
+        twin.exact = was;
         return got;
     }
+    /** Her sea with no other ships on it, the same rocks and winds (its pilot's reckonings kept apart from hers, so
+        neither throws the other's away). */
+    twin = null;
+    clearSea() {
+        if (!this.twin) {
+            this.twin = new ShipSea(this.ship, this.cols, this.rows, this.rocks);
+            if (this.windy)
+                this.twin.carriedBy(this.wind);
+        }
+        return this.twin;
+    }
+    /** (an exact berth is part of what a plot hangs on) */
+    plotKey() { const e = this.exact; return e ? `${e.c},${e.r},${e.d}` : ''; }
     /** She's there with that square under any of hers (or, for an exact berth, lying in it). */
     there(p, c, r) {
         const e = this.exact;
@@ -260,7 +263,6 @@ export class ShipHelm extends Helm {
         if (!this.sea.plotTo(this.after(), p))
             return null;
         this.sea.exact = { ...p };
-        this.sea.touch();
         const got = this.drop(p.c, p.r);
         if (!got || got[0] !== p.c || got[1] !== p.r) {
             this.sea.exact = null;
@@ -272,10 +274,8 @@ export class ShipHelm extends Helm {
     /** Drop a pin as ever: an exact berth's forgotten. */
     drop(c, r) {
         const e = this.sea.exact;
-        if (e && (e.c !== c || e.r !== r)) {
+        if (e && (e.c !== c || e.r !== r))
             this.sea.exact = null;
-            this.sea.touch();
-        }
         return super.drop(c, r);
     }
     /** Her course ahead as poses: where this turn leaves her, then where each move of the course after it does. */

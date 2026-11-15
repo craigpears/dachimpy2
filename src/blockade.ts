@@ -2,23 +2,27 @@
    compiled to js/blockade.js; tested in tests/blockade.test.ts; its bots src/blockade-bots.ts; drawn by
    js/den/blockade.js on the unlinked blockade-test.html. BLOCKADE.md is its design.
 
-   The user (15 Nov): "go study blockading and how blockade boards look, because I think we're ready to do a nice kind
-   of blockading concept here, where you've got sideways for the sloops and you've got a few bots ... competing,
-   trying to get to the points. The [war frig] bots are there trying to blast their way through while the sloops are
-   more nimble, taking the shortcuts, taking those sideways in, just like winds and things now. Keep it like
-   relatively close. Don't do all like the new mechanics." So, as a blockade board is:
-   - a big sea board with rocks and winds, and buoys of one to three pennants. At the end of each blockade turn a
-     buoy inside the influence circle of one side's ships only scores that side its pennants; a buoy both sides
-     reach is contested and scores nobody. A bigger ship's circle is bigger. The side with the most points when the
-     round's out wins it;
-   - two sides, each a war frigate and two sloops (one of them yours to sail, the rest bots), coming in from the
-     sea's foot;
-   - the heart of the board, its best buoys, behind a wall of rocks across it with three ways in: the imperial gate
-     in the middle, one square wide, which a frigate has to crumble a tower of to get through (src/imperial-gate.ts;
-     "a way of naturally delaying the war [frigs]"), its bastion guns firing on anyone once it's fired on; and a
-     side way at each flank, a one-square gap with a wind blowing in through it that carries a sloop through fast
-     and that a frigate rides out ("sideways ... that only the sloops can really get to on those fast little
-     winds");
+   The user (15 Nov): "go study blockading and how blockade boards look ... where you've got sideways for the sloops and
+   you've got a few bots ... competing, trying to get to the points. The [war frig] bots are there trying to blast
+   their way through while the sloops are more nimble, taking the shortcuts, taking those sideways in, just like winds
+   and things now. Keep it like relatively close. Don't do all like the new mechanics." And then: "blockading is a bit
+   more epic. So you'd maybe have ... a good handful of sloops each side and ... three or four [war frigs] ... coming
+   from different directions ... Some ocean, some island ... you should see sloops hiding out, sometimes coming out ...
+   while [war frigs] are having a fight to land a few pot shots." So, as a blockade board is:
+   - a big sea board with rocks, islands and winds, and buoys of one to three pennants. At the end of each blockade
+     turn a buoy inside the influence circle of one side's ships only scores that side its pennants; a buoy both
+     sides reach is contested and scores nobody. A bigger ship's circle is bigger. The side with the most points
+     when the round's out wins it;
+   - two sides, three war frigates and five sloops each (one of them yours to sail if you like, the rest bots),
+     coming in from two edges each: Dachimpy's from the south and west, Dalnoth's from the north and east;
+   - the heart of the board, its best buoys, inside a walled fort in the middle: an imperial gate in its south wall
+     and another in its north, one square wide, which a frigate has to crumble a tower of to get through
+     (src/imperial-gate.ts: "a way of naturally delaying the war [frigs]"), their bastion guns firing on anyone once
+     their gate's fired on; and a side way through its west wall and its east, a one-square gap with a wind blowing
+     in through it that carries a sloop through fast and that a frigate rides out ("sideways ... that only the sloops
+     can really get to on those fast little winds");
+   - islands out on the open sea, each with a cove in it a sloop can hide in, one square in by a narrow way no
+     frigate fits, its rocks between her and anyone's guns;
    - every ship's damage as Puzzle Pirates keeps it (src/ship-damage.ts): holes where she's shot, water in her
      bilge slowing her, her crew patching and pumping; at full damage she's knocked out, dead in the water, till
      they've rebuilt her (a non-sinking blockade's way). */
@@ -35,70 +39,109 @@ export type Kind = 'sloop' | 'frigate';
 export type TeamId = 'gold' | 'crimson';
 export interface Lane { at: [number, number]; d: number; n: number }
 export interface Buoy { at: [number, number]; pennants: 1 | 2 | 3 }
+export interface Rect { c0: number; c1: number; r0: number; r1: number }
+/** An island: its land, and the cove in it (`cove`, the square a sloop hides on, open to the sea by `way`). */
+export interface Island extends Rect { cove: [number, number]; way: [number, number][] }
+/** A ship of a side's fleet: her name, kind, where she comes in, and (a sloop) whether her bot's a raider. */
+export interface FleetShip { name: string; kind: Kind; at: Pose; raider?: boolean }
 
-/** The board (c across, r out from the foot where both sides come in). */
+/** The board (c across, r up from the south edge). */
 export const BLOCKADE = {
-  COLS: 30,
-  ROWS: 28,
-  /** The wall of rocks across the board, two deep, between the open sea and its heart. */
-  WALL: { r0: 14, r1: 15 },
-  /** The imperial gate in the middle of it, its one-square way (its towers two wide either side: src/imperial-gate.ts),
-      and its bastion guns on the wall. */
-  GATE: { WAY: 15, GUNS: [[11, 14], [19, 14]] as [number, number][] },
-  /** The side ways: a one-square gap in the wall at each flank. */
-  SIDEWAYS: [2, 27],
-  /** The winds (the way each blows: 0 up the board, 1 right, 2 down, 3 left; n squares from `at`): one up through
-      each side way from the open sea into the heart, and one along the heart from each toward its middle. A sloop
-      on one is carried along it; a frigate rides them out. */
-  WINDS: [
-    { at: [2, 8], d: 0, n: 11 }, { at: [27, 8], d: 0, n: 11 },
-    { at: [3, 19], d: 1, n: 5 }, { at: [26, 19], d: 3, n: 5 },
-  ] as Lane[],
-  /** Rocks about the board (besides the wall). */
+  COLS: 44,
+  ROWS: 36,
+  /** The fort's walls, two deep, round the heart. */
+  WALLS: [
+    { c0: 14, c1: 29, r0: 12, r1: 13 }, { c0: 14, c1: 29, r0: 22, r1: 23 },
+    { c0: 14, c1: 15, r0: 12, r1: 23 }, { c0: 28, c1: 29, r0: 12, r1: 23 },
+  ] as Rect[],
+  /** The heart, inside them. */
+  HEART: { c0: 16, c1: 27, r0: 14, r1: 21 } as Rect,
+  /** The imperial gates: each one's way (its column), its wall's rows, its bastion guns on the wall. */
+  GATES: [
+    { way: 21, r0: 12, r1: 13, guns: [[16, 12], [26, 12]] as [number, number][] },
+    { way: 22, r0: 22, r1: 23, guns: [[17, 23], [27, 23]] as [number, number][] },
+  ],
+  /** The side ways: a one-square gap through the west wall and the east. */
+  SIDEWAYS: [[14, 18], [15, 18], [28, 17], [29, 17]] as [number, number][],
+  /** The winds (the way each blows: 0 up the board, 1 right, 2 down, 3 left; n squares from `at`): one in through
+      each side way from the open sea into the heart. A sloop on one is carried along it; a frigate rides them out. */
+  WINDS: [{ at: [5, 18], d: 1, n: 13 }, { at: [38, 17], d: 3, n: 13 }] as Lane[],
+  /** The islands, each with its cove. */
+  ISLANDS: [
+    { c0: 5, c1: 9, r0: 4, r1: 8, cove: [7, 6], way: [[7, 7], [7, 8]] },
+    { c0: 34, c1: 38, r0: 4, r1: 8, cove: [36, 6], way: [[36, 7], [36, 8]] },
+    { c0: 5, c1: 9, r0: 27, r1: 31, cove: [7, 29], way: [[7, 28], [7, 27]] },
+    { c0: 34, c1: 38, r0: 27, r1: 31, cove: [36, 29], way: [[36, 28], [36, 27]] },
+  ] as Island[],
+  /** Each side's corner of the sea, where her sloops can lie out of the fighting too when the coves are full. */
+  HOMES: { gold: [[0, 0], [3, 0], [0, 3]], crimson: [[43, 35], [40, 35], [43, 32]] } as Record<TeamId, [number, number][]>,
+  /** Rocks about the open sea and the heart. */
   ROCKS: [
-    [5, 4], [6, 4], [24, 4], [23, 4], [8, 9], [9, 9], [21, 9], [22, 9], [4, 11], [26, 11], [1, 12], [28, 12],
-    [11, 18], [19, 18], [6, 23], [7, 23], [23, 23], [22, 23], [14, 25], [16, 25], [1, 21], [28, 21],
+    [12, 7], [13, 7], [30, 7], [31, 7], [12, 28], [13, 28], [30, 28], [31, 28], [21, 4], [22, 31], [2, 24], [41, 11],
+    [18, 20], [25, 15],
   ] as [number, number][],
-  /** The buoys: out on the open sea, one or two pennants; in the heart, two, and the gate's prize, three. */
+  /** The buoys: in the heart two, and its prize three; out on the open sea, two off each gate and one by each island. */
   BUOYS: [
-    { at: [6, 8], pennants: 1 }, { at: [15, 9], pennants: 2 }, { at: [24, 8], pennants: 1 },
-    { at: [7, 20], pennants: 2 }, { at: [15, 22], pennants: 3 }, { at: [23, 20], pennants: 2 },
+    { at: [21, 17], pennants: 3 }, { at: [18, 15], pennants: 2 }, { at: [25, 20], pennants: 2 },
+    { at: [21, 8], pennants: 2 }, { at: [22, 27], pennants: 2 },
+    { at: [11, 10], pennants: 1 }, { at: [32, 10], pennants: 1 }, { at: [11, 25], pennants: 1 }, { at: [32, 25], pennants: 1 },
   ] as Buoy[],
   /** Squares from any of her squares a ship's influence reaches, by her size (YPPedia: "different sized ships
       have different sized influence circles"). */
   INFLUENCE: { sloop: 2, frigate: 3.5 } as Record<Kind, number>,
   /** Seconds a blockade turn, scored at its end, and a round. */
   TURN: 10,
-  ROUND: 300,
-  /** The sides, and their ships: where each comes in, bows up the board. */
+  ROUND: 360,
+  /** The sides, and their fleets: where each ship comes in (a frigate's config by her name: src/den-frigate.ts). */
   TEAMS: [
     { id: 'gold', name: 'Dachimpy\'s flag', ships: [
-      { name: 'Primates Rule', kind: 'frigate', at: { c: 8, r: 2, d: 0 } },
-      { name: 'Lucky Banana', kind: 'sloop', at: { c: 3, r: 1, d: 0 } },
-      { name: 'Grin and Bear It', kind: 'sloop', at: { c: 12, r: 1, d: 0 } },
+      { name: 'Primates Rule', kind: 'frigate', at: { c: 13, r: 2, d: 0 } },
+      { name: 'Coral Throne', kind: 'frigate', at: { c: 29, r: 2, d: 0 } },
+      { name: 'Golden Grin', kind: 'frigate', at: { c: 2, r: 14, d: 1 } },
+      { name: 'Lucky Banana', kind: 'sloop', at: { c: 4, r: 1, d: 0 }, raider: true },
+      { name: 'Grin and Bear It', kind: 'sloop', at: { c: 20, r: 1, d: 0 } },
+      { name: 'Cheeky Monkey', kind: 'sloop', at: { c: 24, r: 1, d: 0 } },
+      { name: 'Bananarama', kind: 'sloop', at: { c: 1, r: 21, d: 1 }, raider: true },
+      { name: 'Coconut Shy', kind: 'sloop', at: { c: 1, r: 10, d: 1 } },
     ] },
     { id: 'crimson', name: 'Dalnoth\'s flag', ships: [
-      { name: 'Iron Pride', kind: 'frigate', at: { c: 22, r: 2, d: 0 } },
-      { name: 'Red Wake', kind: 'sloop', at: { c: 26, r: 1, d: 0 } },
-      { name: 'Smoke and Mirrors', kind: 'sloop', at: { c: 18, r: 1, d: 0 } },
+      { name: 'Iron Pride', kind: 'frigate', at: { c: 14, r: 33, d: 2 } },
+      { name: 'Eldritch Wail', kind: 'frigate', at: { c: 30, r: 33, d: 2 } },
+      { name: 'Crimson Tide', kind: 'frigate', at: { c: 41, r: 21, d: 3 } },
+      { name: 'Red Wake', kind: 'sloop', at: { c: 39, r: 34, d: 2 }, raider: true },
+      { name: 'Smoke and Mirrors', kind: 'sloop', at: { c: 19, r: 34, d: 2 } },
+      { name: 'Scarlet Fever', kind: 'sloop', at: { c: 23, r: 34, d: 2 } },
+      { name: 'Blood Orange', kind: 'sloop', at: { c: 42, r: 14, d: 3 }, raider: true },
+      { name: 'Rust Bucket', kind: 'sloop', at: { c: 42, r: 26, d: 3 } },
     ] },
-  ] as { id: TeamId; name: string; ships: { name: string; kind: Kind; at: Pose }[] }[],
-  /** The gate's guns' size. */
+  ] as { id: TeamId; name: string; ships: FleetShip[] }[],
+  /** How near (squares) a ship has to be to another for her moving to make the other's pilot think again. */
+  NEAR: 8,
+  /** The gates' guns' size. */
   GATE_GUNS: 'medium' as const,
 };
 
 const HANDLINGS: Record<Kind, Handling> = { sloop: SLOOP_HANDLING, frigate: FRIGATE_HANDLING };
 const CLASSES: Record<Kind, ShipClass> = { sloop: SLOOP, frigate: WAR_FRIGATE };
+const inRect = (x: Rect, c: number, r: number) => c >= x.c0 && c <= x.c1 && r >= x.r0 && r <= x.r1;
+/** A square in the heart. */
+export const inHeart = (c: number, r: number): boolean => inRect(BLOCKADE.HEART, c, r);
+/** Every island's land squares (not its cove nor the way into it). */
+export function islandLand(i: Island): [number, number][] {
+  const out: [number, number][] = [], open = new Set([i.cove, ...i.way].map(([c, r]) => key(c, r)));
+  for (let c = i.c0; c <= i.c1; c++) for (let r = i.r0; r <= i.r1; r++) if (!open.has(key(c, r))) out.push([c, r]);
+  return out;
+}
 
 /** One ship in the blockade: her side, her handling, her own sea (her size, the winds if she's small enough,
     every other ship in her way), helm, guns and damage. */
 export interface Ship {
-  id: number; name: string; team: TeamId; kind: Kind; h: Handling; cls: ShipClass;
+  id: number; name: string; team: TeamId; kind: Kind; h: Handling; cls: ShipClass; raider: boolean;
   sea: ShipSea; helm: ShipHelm; guns: Guns; dmg: Damage;
 }
 
-/** What a broadside stopped at: a rock, a gate's tower, one of the gate's guns, or a ship (her id). */
-export type Stop = { what: 'rock' } | { what: 'tower'; i: number } | { what: 'gun'; i: number } | { what: 'ship'; id: number };
+/** What a broadside stopped at: a rock, a gate's tower (which gate, which tower), one of the gates' guns, or a ship. */
+export type Stop = { what: 'rock' } | { what: 'tower'; g: number; i: number } | { what: 'gun'; i: number } | { what: 'ship'; id: number };
 export interface FiredShot extends Shot<Stop> { got?: 'hit' | 'crumbled' | 'bounced' | 'quiet' | 'wrecked'; hole?: Hole; out?: boolean }
 export interface Fired { ship: number; side: Side; shots: FiredShot[] }
 /** A buoy's state just now: whose (the one side influencing it), contested, or nobody's. */
@@ -108,8 +151,10 @@ export type Ticked = { sail: Map<number, SailEvent[]>; damage: Map<number, Damag
 export class Blockade {
   rocks = new Set<string>();
   wind = new Map<string, number>();
-  gate = new Gate(BLOCKADE.GATE.WAY, BLOCKADE.WALL.r0, BLOCKADE.WALL.r1);
-  battery: Turret[] = BLOCKADE.GATE.GUNS.map((at) => new Turret({ at, alert: false }));
+  gates = BLOCKADE.GATES.map((x) => new Gate(x.way, x.r0, x.r1));
+  /** Every gate's bastion guns, and whose gate each is. */
+  battery: Turret[] = BLOCKADE.GATES.flatMap((x) => x.guns.map((at) => new Turret({ at, alert: false })));
+  gunGate: number[] = BLOCKADE.GATES.flatMap((x, i) => x.guns.map(() => i));
   ships: Ship[] = [];
   score: Record<TeamId, number> = { gold: 0, crimson: 0 };
   /** Seconds into the round, and into this blockade turn. */
@@ -123,8 +168,9 @@ export class Blockade {
   private taken = new Map<string, number>();
 
   constructor() {
-    const B = BLOCKADE;
-    for (let c = 0; c < B.COLS; c++) for (let r = B.WALL.r0; r <= B.WALL.r1; r++) if (c !== B.GATE.WAY && !B.SIDEWAYS.includes(c)) this.rocks.add(key(c, r));
+    const B = BLOCKADE, side = new Set(B.SIDEWAYS.map(([c, r]) => key(c, r))), ways = new Set(B.GATES.flatMap((x) => [key(x.way, x.r0), key(x.way, x.r1)]));
+    for (const w of B.WALLS) for (let c = w.c0; c <= w.c1; c++) for (let r = w.r0; r <= w.r1; r++) if (!side.has(key(c, r)) && !ways.has(key(c, r))) this.rocks.add(key(c, r));
+    for (const isle of B.ISLANDS) for (const [c, r] of islandLand(isle)) this.rocks.add(key(c, r));
     for (const [c, r] of B.ROCKS) this.rocks.add(key(c, r));
     for (const { at: [c, r], d, n } of B.WINDS) for (let i = 0; i < n; i++) this.wind.set(key(c + [0, 1, 0, -1][d] * i, r + [1, 0, -1, 0][d] * i), d);
     let id = 0;
@@ -132,7 +178,7 @@ export class Blockade {
       const h = HANDLINGS[s.kind], me = id++;
       const sea = new ShipSea(h, B.COLS, B.ROWS, this.rocks, (c, r) => { const o = this.taken.get(key(c, r)); return o !== undefined && o !== me; });
       if (s.kind === 'sloop') sea.carriedBy(this.wind);
-      this.ships.push({ id: me, name: s.name, team: team.id, kind: s.kind, h, cls: CLASSES[s.kind], sea, helm: new ShipHelm(sea, { ...s.at }), guns: new Guns(h.reload), dmg: new Damage(CLASSES[s.kind]) });
+      this.ships.push({ id: me, name: s.name, team: team.id, kind: s.kind, h, cls: CLASSES[s.kind], raider: !!s.raider, sea, helm: new ShipHelm(sea, { ...s.at }), guns: new Guns(h.reload), dmg: new Damage(CLASSES[s.kind]) });
     }
     this.notice();
   }
@@ -140,8 +186,10 @@ export class Blockade {
   ship(id: number): Ship { return this.ships[id]; }
   /** The ship on this square, if one is. */
   under(c: number, r: number): Ship | null { const o = this.taken.get(key(c, r)); return o === undefined ? null : this.ships[o]; }
+  /** A gate's down: the heart's open to a frigate. */
+  gateOpen(): boolean { return this.gates.some((g) => g.open()); }
 
-  /** Everything a tick on: each ship's helm and crew, the gate's guns, the blockade turn's scoring. */
+  /** Everything a tick on: each ship's helm and crew, the gates' guns, the blockade turn's scoring. */
   tick(dt: number): Ticked {
     const out: Ticked = { sail: new Map(), damage: new Map(), guns: [], scored: false };
     if (this.over) return out;
@@ -183,8 +231,14 @@ export class Blockade {
   notice() {
     let moved = false;
     for (const s of this.ships) {
-      const sig = [...s.helm.covers()].sort().join(' ');
-      if (sig !== this.seen.get(s.id)) { this.seen.set(s.id, sig); moved = true; for (const o of this.ships) if (o !== s) o.sea.touch(); }
+      // (where she is and where the move she's on takes her: what she covers, cheaply)
+      const p = s.helm.pose, to = s.helm.cur?.to, sig = `${p.c},${p.r},${p.d}${to ? `>${to.c},${to.r},${to.d}` : ''}`;
+      // (only the ships near enough for her to be in their way work their ways out afresh: one far off will have
+      // moved again by the time she's near, and a bump makes her pilot think again anyway)
+      if (sig !== this.seen.get(s.id)) {
+        this.seen.set(s.id, sig); moved = true;
+        for (const o of this.ships) if (o !== s && Math.max(Math.abs(o.helm.pose.c - p.c), Math.abs(o.helm.pose.r - p.r)) <= BLOCKADE.NEAR) o.sea.touch();
+      }
     }
     if (!moved && this.taken.size) return;
     this.taken.clear();
@@ -211,8 +265,7 @@ export class Blockade {
 
   /** What a shot of `from`'s stops at on this square. */
   stopAt(from: Ship, c: number, r: number): Stop | null {
-    const t = this.gate.towerAt(c, r);
-    if (t >= 0) return { what: 'tower', i: t };
+    for (const [g, gate] of this.gates.entries()) { const t = gate.towerAt(c, r); if (t >= 0) return { what: 'tower', g, i: t }; }
     const g = this.battery.findIndex((x) => x.at[0] === c && x.at[1] === r);
     if (g >= 0) return this.battery[g].wrecked ? { what: 'rock' } : { what: 'gun', i: g };
     if (this.rocks.has(key(c, r))) return { what: 'rock' };
@@ -222,7 +275,6 @@ export class Blockade {
   /** Her broadside out of that side as it would fly now (or lying at `at`), without firing it (a bot's look
       before it fires). */
   aim(id: number, side: Side, at?: Pose): Shot<Stop>[] {
-    this.notice();   // (where everyone is now, if they've been moved by hand)
     const s = this.ship(id), from = at ? { c: at.c, r: at.r, a: at.d } : s.helm.now();
     return broadside(s.h, from, side, (c, r) => this.stopAt(s, c, r));
   }
@@ -238,19 +290,22 @@ export class Blockade {
   fire(id: number, side: Side): Fired | null {
     const s = this.ship(id);
     if (s.dmg.out || !s.guns.fire(side)) return null;
+    this.notice();   // (where everyone is now, if they've been moved by hand)
+    const roused = new Set<number>();
     const shots: FiredShot[] = this.aim(id, side).map((shot) => {
       const w = shot.what;
       if (!w || w.what === 'rock') return shot;
       if (w.what === 'tower') {
-        const got = this.gate.towers[w.i].hit(s.h.guns);
-        if (got === 'crumbled') { for (const [c, r] of this.gate.towers[w.i].squares) this.rocks.delete(key(c, r)); for (const o of this.ships) o.sea.touch(); }
+        roused.add(w.g);
+        const tower = this.gates[w.g].towers[w.i], got = tower.hit(s.h.guns);
+        if (got === 'crumbled') { for (const [c, r] of tower.squares) this.rocks.delete(key(c, r)); for (const o of this.ships) o.sea.touch(); }
         return { ...shot, got: got ?? undefined };
       }
-      if (w.what === 'gun') return { ...shot, got: this.battery[w.i].hit() ?? undefined };
+      if (w.what === 'gun') { roused.add(this.gunGate[w.i]); return { ...shot, got: this.battery[w.i].hit() ?? undefined }; }
       const { hole, out } = this.hurt(this.ship(w.id), s.h.guns, shot.hit!, shot.from);
       return { ...shot, got: 'hit', hole, out };
     });
-    if (shots.some((x) => x.what?.what === 'tower' || x.what?.what === 'gun')) for (const g of this.battery) g.rouse();
+    this.battery.forEach((g, i) => { if (roused.has(this.gunGate[i])) g.rouse(); });
     const got = { ship: id, side, shots };
     this.fired.push(got);
     if (this.fired.length > 64) this.fired.shift();   // (nobody drawing them: kept short)
@@ -259,6 +314,8 @@ export class Blockade {
 
   drop(id: number, c: number, r: number): [number, number] | null { return this.ship(id).helm.drop(c, r); }
   put(id: number, m: Move): boolean { return this.ship(id).helm.put(m); }
-  /** In the heart of the board, past the wall. */
-  inHeart(s: Ship): boolean { return s.helm.pose.r > BLOCKADE.WALL.r1; }
+  /** In the heart of the board, inside the fort. */
+  inHeart(s: Ship): boolean { return inHeart(s.helm.pose.c, s.helm.pose.r); }
+  /** Where a sloop of that side hides: the islands' coves, and her side's corner of the sea, far from the fighting. */
+  coves(team?: TeamId): [number, number][] { return [...BLOCKADE.ISLANDS.map((i) => i.cove), ...(team ? BLOCKADE.HOMES[team] : [])]; }
 }

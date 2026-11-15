@@ -1237,7 +1237,7 @@ export class Sea {
   plot(from: Pose, c: number, r: number, via: [number, number] | null = null, oars = false): Move[] | null {
     if (!this.open(c, r)) return null;
     if (!via && this.there(from, c, r)) return [];
-    const memo = `${from.c},${from.r},${from.d}|${c},${r}|${via ?? ''}|${this.rocks.size},${this.wind.size},${this.laid}|${this.rig(oars)}`;
+    const memo = `${from.c},${from.r},${from.d}|${c},${r}|${via ?? ''}|${this.rocks.size},${this.wind.size},${this.laid}|${this.rig(oars)}|${this.plotKey()}`;
     if (!this.plots.has(memo)) {
       if (this.plots.size > 256) this.plots.clear();
       const up = this.canal(from.c, from.r) || this.canal(c, r);
@@ -1246,6 +1246,9 @@ export class Sea {
     const got = this.plots.get(memo);
     return got ? [...got] : null;
   }
+
+  /** Anything else a plot hangs on that a sea of another kind keeps (a ship's exact berth: src/ship-handling.ts). */
+  protected plotKey(): string { return ''; }
 
   /** Up off the sea: on the canal's water above it, or in a lock. */
   private canal(c: number, r: number): boolean { return this.level(c, r) > 0 || this.isLock(c, r); }

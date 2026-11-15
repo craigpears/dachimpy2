@@ -1,16 +1,17 @@
 // A blockade, in 3D: the proof of concept on the unlinked blockade-test.html (its rules src/blockade.ts, its bots
-// src/blockade-bots.ts; BLOCKADE.md). Drawn here: the board's squares faintly, its rocks and the wall across it, the
-// imperial gate in the wall (gate-look.js) and its bastion guns, the winds blowing up through the side ways and along
-// the heart, the buoys (their pennants, coloured by whose they are), every ship (Primates Rule and Iron Pride, the
-// sloops) with her name over her, her influence circle on the water and her damage (ship-damage.js: holes where
+// src/blockade-bots.ts; BLOCKADE.md). Drawn here: the board's squares faintly, its rocks, the fort round the heart,
+// its imperial gates (gate-look.js) and their bastion guns, the islands and their coves, the winds blowing in through
+// the side ways, the buoys (their pennants, coloured by whose they are), every ship (each war frigate by her config,
+// src/den-frigate.ts: Primates Rule, Coral Throne the Atlantean, Eldritch Wail the ghost ship...; the sloops) with
+// her crew at work and her name over her, her influence circle on the water and her damage (ship-damage.js: holes where
 // she's shot, her crew at work, sitting low, dead in the water), the shots between them, and the pin, berth and
 // course of the ship you sail. Everything else is the rules'.
 import * as THREE from 'three';
 import { SAIL } from '../den-sail.js';
-import { Blockade, BLOCKADE } from '../blockade.js';
+import { Blockade, BLOCKADE, islandLand } from '../blockade.js';
 import { Bots } from '../blockade-bots.js';
 import { drawnAt } from '../ship-handling.js';
-import { PRIMATES_RULE, IRON_PRIDE, WAR_FRIGATE_PLAN, deckY } from '../den-frigate.js';
+import { FRIGATES, WAR_FRIGATE_PLAN, deckY } from '../den-frigate.js';
 import { SLOOP_HULL } from '../ships.js';
 import { scene, mat, mesh, canvasTex, burst, makePirate } from './world.js';
 import { blastTick } from './blast.js';
@@ -28,7 +29,6 @@ export const seaXZ = (c, r) => [(c + 0.5 - B.COLS / 2) * CELL, -(r + 0.5 - B.ROW
 export const seaCR = (x, z) => [x / CELL + B.COLS / 2 - 0.5, -z / CELL + B.ROWS / 2 - 0.5];
 const v3 = (c, r, y = 0) => { const [x, z] = seaXZ(c, r); return new THREE.Vector3(x, y, z); };
 const dice = (c, r) => { let s = (c * 73856093) ^ (r * 19349663); return () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; }; };
-const FRIGATES = { gold: PRIMATES_RULE, crimson: IRON_PRIDE };
 const DRESS = { gold: { shirt: ['#f4efe4', '#1d1b20'], scarf: '#e0a92a' }, crimson: { shirt: ['#f4efe4', '#8a1f22'], scarf: '#d8b04e' } };
 
 /** A name over a ship, in her side's colour. */
@@ -57,11 +57,12 @@ export function blockadeSea({ you = 0, say = () => {} } = {}) {
   g.add(new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)),
     new THREE.LineBasicMaterial({ color: '#d9ecf5', transparent: true, opacity: 0.13, depthWrite: false })));
 
-  // ----- the rocks, the wall among them -----
+  // ----- the rocks, the fort's walls among them (its towers and bastions their own) -----
   const stoneM = mat('#6b6158', { flatShading: true, roughness: 0.95 }), stoneGeo = new THREE.DodecahedronGeometry(1, 0);
+  const isleSq = new Set(BLOCKADE.ISLANDS.flatMap((i) => islandLand(i).map(([c, r]) => `${c},${r}`)));
   for (const k of b.rocks) {
     const [c, r] = k.split(',').map(Number);
-    if (b.gate.towerAt(c, r) >= 0 || b.battery.some((x) => x.at[0] === c && x.at[1] === r)) continue;
+    if (isleSq.has(k) || b.gates.some((gate) => gate.towerAt(c, r) >= 0) || b.battery.some((x) => x.at[0] === c && x.at[1] === r)) continue;
     const roll = dice(c, r), at = v3(c, r);
     for (let i = 0; i < 4; i++) {
       const s = 1.5 + roll() * 0.8, m = mesh(stoneGeo, stoneM);
@@ -71,8 +72,23 @@ export function blockadeSea({ you = 0, say = () => {} } = {}) {
       g.add(m);
     }
   }
-  // ----- the imperial gate and its bastion guns -----
-  const gl = gateLook(g, b.gate, b.battery, v3), bastions = gl.bastions;
+  // ----- the islands: sand and grass, a palm or two, a rock or two, their coves open water -----
+  const sandM = mat('#d9c48e', { roughness: 1 }), grassM = mat('#6f9a46', { roughness: 1, flatShading: true }), trunkM = mat('#8a6a44', { roughness: 1 }), leafM = mat('#4f8a3a', { roughness: 1, side: THREE.DoubleSide });
+  for (const isle of BLOCKADE.ISLANDS) for (const [c, r] of islandLand(isle)) {
+    const at = v3(c, r), roll = dice(c, r);
+    const sand = mesh(new THREE.BoxGeometry(CELL * 1.02, 0.9, CELL * 1.02), sandM); sand.position.set(at.x, 0.2, at.z); g.add(sand);
+    const edge = c === isle.c0 || c === isle.c1 || r === isle.r0 || r === isle.r1;
+    if (!edge) { const hill = mesh(new THREE.DodecahedronGeometry(CELL * 0.62, 0), grassM); hill.scale.set(1, 0.45 + roll() * 0.3, 1); hill.position.set(at.x, 0.7, at.z); g.add(hill); }
+    if (roll() < 0.35) {
+      const palm = new THREE.Group(), h = 3 + roll() * 1.5, lean = (roll() - 0.5) * 0.4;
+      const trunk = mesh(new THREE.CylinderGeometry(0.13, 0.2, h, 6), trunkM); trunk.position.y = h / 2; palm.add(trunk);
+      for (let i = 0; i < 6; i++) { const leaf = mesh(new THREE.PlaneGeometry(0.5, 2.2), leafM, false); leaf.position.set(0, h, 0); leaf.rotation.set(-1.1, i / 6 * Math.PI * 2, 0); leaf.translateY(1); palm.add(leaf); }
+      palm.position.set(at.x + (roll() - 0.5) * 2, 0.6, at.z + (roll() - 0.5) * 2); palm.rotation.z = lean; g.add(palm);
+    }
+  }
+  // ----- the imperial gates and their bastion guns -----
+  const gls = b.gates.map((gate, gi) => gateLook(g, gate, b.battery.filter((_, i) => b.gunGate[i] === gi), v3));
+  const bastions = b.battery.map((_, i) => { const gi = b.gunGate[i], k = b.battery.slice(0, i).filter((__, j) => b.gunGate[j] === gi).length; return gls[gi].bastions[k]; });
 
   // ----- the winds: chevrons blowing along each, quick -----
   const chevron = canvasTex(64, 64, (c, w, h) => {
@@ -101,7 +117,7 @@ export function blockadeSea({ you = 0, say = () => {} } = {}) {
 
   // ----- the ships: each her own look, her name, her influence circle, her crew and her damage -----
   const ships = b.ships.map((s) => {
-    const big = s.kind === 'frigate', look = big ? frigateMesh(FRIGATES[s.team]) : null, m = big ? look.g : sloopMesh(), col = TEAM_COL[s.team];
+    const big = s.kind === 'frigate', look = big ? frigateMesh(FRIGATES[s.name] ?? FRIGATES['Primates Rule']) : null, m = big ? look.g : sloopMesh(), col = TEAM_COL[s.team];
     g.add(m);
     const hull = big ? WAR_FRIGATE_PLAN.hull : SLOOP_HULL, deck = big ? deckY(WAR_FRIGATE_PLAN, 'waist') : SLOOP_DECK;
     const crew = big
@@ -130,6 +146,8 @@ export function blockadeSea({ you = 0, say = () => {} } = {}) {
   /** A broadside fired (anyone's, from the rules' list), set flying. */
   function show(got) {
     const s = b.ship(got.ship), V = ships[got.ship], size = s.h.guns === 'large' ? 0.26 : 0.15;
+    const hit = got.shots.find((x) => x.what?.what === 'ship'), tower = got.shots.find((x) => x.what?.what === 'tower' && x.got !== 'bounced');
+    saw(got.ship, hit ? 'hit' : tower ? 'gate' : 'fire', hit?.out ? 6 : tower?.got === 'crumbled' ? 6 : hit || tower ? 3 : 1);
     got.shots.forEach((shot, i) => {
       const end = shot.hit ?? shot.cells[shot.cells.length - 1], w = shot.what?.what;
       const a = v3(...shot.from, V.big ? 2.2 : 1.1), z = v3(...end, w === 'rock' ? 1.2 : w === 'tower' ? 4 : w === 'gun' ? 2.6 : w === 'ship' ? 1 : 0.1);
@@ -142,16 +160,19 @@ export function blockadeSea({ you = 0, say = () => {} } = {}) {
   function land({ shot, z }) {
     const w = shot.what?.what;
     if (w === 'rock') burst(z, '#9a9088', 14, 4);
-    else if (w === 'tower') { if (shot.got === 'bounced') burst(z, '#f2e2a0', 8, 3); else gl.knock(shot.what.i, shot.got === 'crumbled'); }
+    else if (w === 'tower') { if (shot.got === 'bounced') burst(z, '#f2e2a0', 8, 3); else gls[shot.what.g].knock(shot.what.i, shot.got === 'crumbled'); }
     else if (w === 'gun') { if (shot.got === 'wrecked') turretWrecked(bastions[shot.what.i], z); else burst(z, '#ffb85a', 14, 4); }
     else if (w === 'ship') {
       const V = ships[shot.what.id];
       if (shot.hole) V.pending.delete(shot.hole.id);
-      if (shot.out) say(`${V.s.name} is knocked out: dead in the water till her crew rebuild her`, V.s.id === me);
+      if (shot.out) { say(`${V.s.name} is knocked out: dead in the water till her crew rebuild her`, V.s.id === me); saw(V.s.id, 'out', 5); }
     } else { burst(z.clone().setY(0.1), '#e8f4fa', 16, 4); burst(z.clone().setY(0.1), '#9cc8d4', 8, 2.5); }
   }
 
   const SAY_GUN = { L: 'port', R: 'starboard' };
+  /** What's just happened worth a look (for the camera's director, spectating): { at (clock), ship, what, weight }. */
+  const action = [];
+  const saw = (ship, what, weight) => { action.push({ at: clock, ship, what, weight }); if (action.length > 40) action.shift(); };
   return {
     b, bots, g,
     you: () => me,
@@ -177,7 +198,7 @@ export function blockadeSea({ you = 0, say = () => {} } = {}) {
         const gun = b.battery[i], near = b.ships.map((s) => drawnAt(s.h, s.helm.now())).filter((p) => gun.reaches(Math.round(p.c), Math.round(p.r)));
         turretView(V, gun, dt, near.length ? v3(near[0].c, near[0].r) : v3(gun.at[0], gun.at[1] - 3));
       });
-      gl.tick(dt);
+      for (const gl of gls) gl.tick(dt);
       // Each ship where her helm has her, riding the swell, heeling into her turns, her damage drawn on her.
       for (const V of ships) {
         const s = V.s, h = s.helm, at = drawnAt(s.h, h.now()), turning = h.cur && (h.cur.m === 'L' || h.cur.m === 'R') && !h.cur.bump && h.t < h.cur.secs;
@@ -224,8 +245,8 @@ export function blockadeSea({ you = 0, say = () => {} } = {}) {
       if (s.dmg.out) return say('She\'s dead in the water: her crew are rebuilding her', true);
       const got = b.drop(me, c, r);
       if (!got) say(`${s.name} can't get anywhere near there`, true);
-      else if (Math.hypot(got[0] - c, got[1] - r) > 1.5) say(s.kind === 'frigate' && !b.gate.open() && r > B.WALL.r1
-        ? 'She can\'t get into the heart: the gate\'s way is one square wide. Lie broadside to a tower and fire (Q or E) to bring it down.'
+      else if (Math.hypot(got[0] - c, got[1] - r) > 1.5) say(s.kind === 'frigate' && !b.gateOpen() && c >= B.HEART.c0 && c <= B.HEART.c1 && r >= B.HEART.r0 && r <= B.HEART.r1
+        ? 'She can\'t get into the heart: a gate\'s way is one square wide. Lie broadside to a tower and fire (Q or E) to bring it down.'
         : `${s.name} can't get there from here, so she'll go as near as she can`, true);
     },
     key(k) {
@@ -242,14 +263,22 @@ export function blockadeSea({ you = 0, say = () => {} } = {}) {
       if (k === 'x') { s.helm.stop(); return true; }
       return false;
     },
-    /** Where the camera looks: your ship, or the middle of the board. */
-    focus() { if (me < 0) return v3(B.COLS / 2 - 0.5, B.ROWS / 2 - 0.5); const s = b.ship(me), at = drawnAt(s.h, s.helm.now()); return v3(at.c, at.r); },
+    /** Where the camera looks: a ship (yours, or `id`), or the middle of the board. */
+    focus(id = me) { if (id < 0) return v3(B.COLS / 2 - 0.5, B.ROWS / 2 - 0.5); const s = b.ship(id), at = drawnAt(s.h, s.helm.now()); return v3(at.c, at.r); },
+    /** The ship most worth watching just now, spectating: the biggest thing that's happened lately (a knockout, a gate
+        coming down, a hit), else a sloop darting out or a frigate fighting, else whoever's on the heart's prize. */
+    director(now = clock) {
+      const recent = action.filter((x) => now - x.at < 6).sort((a, z) => z.weight - a.weight || z.at - a.at)[0];
+      if (recent) return recent.ship;
+      const busy = b.ships.find((x) => /darting|fighting|shooting/.test(bots.doing(b, x.id)));
+      return busy?.id ?? b.ships.find((x) => !x.dmg.out)?.id ?? 0;
+    },
     hud() {
       const s = me >= 0 ? b.ship(me) : null, h = s?.helm;
       return {
         score: { ...b.score }, clock: b.clock, turn: b.turnT, over: b.over, leader: b.leader(),
-        buoys: B.BUOYS.map((x) => ({ pennants: x.pennants, hold: b.hold(x), heart: x.at[1] > B.WALL.r1 })),
-        gate: { towers: b.gate.towers.map((x) => x.hp), open: b.gate.open() },
+        buoys: B.BUOYS.map((x) => ({ pennants: x.pennants, hold: b.hold(x), heart: x.at[0] >= B.HEART.c0 && x.at[0] <= B.HEART.c1 && x.at[1] >= B.HEART.r0 && x.at[1] <= B.HEART.r1 })),
+        gates: b.gates.map((x) => ({ towers: x.towers.map((t) => t.hp), open: x.open() })),
         ships: b.ships.map((x) => ({ id: x.id, name: x.name, team: x.team, kind: x.kind, share: x.dmg.share(), water: x.dmg.water, out: x.dmg.out, doing: x.id === me ? 'yours' : bots.doing(b, x.id) })),
         me: s && { name: s.name, team: s.team, h: s.h, moves: h.slot >= 0 ? h.turn : h.next(), lit: h.lit(), mine: h.mine.length, load: { L: s.guns.wait.L / s.h.reload, R: s.guns.wait.R / s.h.reload }, out: s.dmg.out },
       };

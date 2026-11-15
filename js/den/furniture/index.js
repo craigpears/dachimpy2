@@ -43,6 +43,11 @@ import * as stillFile from './still.js'; export * from './still.js';
 import * as cookiePlateFile from './cookie-plate.js'; export * from './cookie-plate.js';
 import * as shelfFile from './shelf.js'; export * from './shelf.js';
 import * as simModelFile from './sim-model.js'; export * from './sim-model.js';
+import * as clamFile from './clam.js'; export * from './clam.js';
+import * as coralFile from './coral.js'; export * from './coral.js';
+import * as tridentFile from './trident.js'; export * from './trident.js';
+import * as bronzeCannonFile from './bronze-cannon.js'; export * from './bronze-cannon.js';
+import * as ghostFile from './ghost.js'; export * from './ghost.js';
 export { place } from './parts.js';
 
 const FILES = [
@@ -52,6 +57,7 @@ const FILES = [
   skeletonFile, skeletonChairFile, skeletalCannonFile, gibbetFile, armourFile, grandPianoFile, anchorChairFile, jarFile, toolChestFile,
   crateFile, barrelFile, tarpPileFile, rowboatFile, stillFile,
   cookiePlateFile, shelfFile, simModelFile,
+  clamFile, coralFile, tridentFile, bronzeCannonFile, ghostFile,
 ];
 
 /** The catalogue's sections, in order. */
@@ -62,6 +68,7 @@ export const GROUPS = [
   { id: 'skeleton', name: 'The skeleton set and its company', blurb: 'Bone white on black, as Puzzle Pirates has them, and what else is on Primates Rule\'s deck.' },
   { id: 'cargo', name: 'Cargo, and outdoors', blurb: 'Crates, barrels and a rowboat for a beach, and a copper still.' },
   { id: 'museum', name: 'A museum\'s things', blurb: 'Dachimpy\'s: their trinkets, the old sim\'s board in miniature, and cookies.' },
+  { id: 'styles', name: 'Ships\' styles', blurb: 'What decks a war frigate of a style of her own: an Atlantean\'s clams, coral, trident and green guns; a Phantom\'s ghost.' },
 ];
 
 /** Every piece, in order: { id, name, group, about, where, make, sample?, onWall?, small? }. `sample`: the

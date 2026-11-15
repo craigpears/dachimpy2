@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Blockade test</title>
-<!-- A blockade, a proof of concept, unlinked like frigate-test.html (BLOCKADE.md): two sides, a war frigate and
-     two sloops each, fighting for the buoys of a blockade board, the best of them in its heart behind a wall with
-     an imperial gate the frigates shoot their way through and side ways the sloops' winds carry them through. You
-     sail one ship (Primates Rule to start; ?ship= any of them by number, or ?watch for the bots alone); bots sail
-     the rest. Rules src/blockade.ts, bots src/blockade-bots.ts, damage src/ship-damage.ts; its 3D
+<!-- A blockade, a proof of concept, unlinked like frigate-test.html (BLOCKADE.md): two sides, three war frigates and
+     five sloops each, coming in from two edges each, fighting for the buoys of a blockade board, the best of them in
+     a walled fort in its heart with imperial gates the frigates shoot their way through and side ways the sloops'
+     winds carry them through, islands with coves for the sloops to hide in. You spectate (the camera following the
+     action, or any ship you click), or sail any of them (its Sail button; ?ship= its number); bots sail the rest. Rules src/blockade.ts, bots src/blockade-bots.ts, damage src/ship-damage.ts; its 3D
      js/den/blockade.js. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,8 +29,9 @@
   .bar { height: 5px; background: #241810; border-radius: 3px; overflow: hidden; margin: 2px 0 8px; }
   .bar i { display: block; height: 100%; background: var(--gold); }
   .ships { font-size: 13px; color: var(--dim); }
-  .ship { display: grid; grid-template-columns: 1fr 70px; gap: 0 8px; padding: 3px 0; border-top: 1px solid rgba(201, 163, 92, 0.18); cursor: pointer; }
-  .ship b { color: var(--ink); } .ship.me b { text-decoration: underline; }
+  .ship { display: grid; grid-template-columns: 1fr 70px 38px; gap: 0 8px; padding: 3px 0; border-top: 1px solid rgba(201, 163, 92, 0.18); cursor: pointer; }
+  .ship b { color: var(--ink); } .ship.me b { text-decoration: underline; } .ship.seen { background: rgba(224, 169, 42, 0.12); }
+  .ship button { font-size: 11px; padding: 0 4px; }
   .ship i { grid-column: 1 / -1; font-style: normal; font-size: 12px; }
   .meter { position: relative; height: 7px; background: #241810; border-radius: 3px; overflow: hidden; align-self: center; }
   .meter .dmg { position: absolute; left: 0; top: 0; bottom: 0; background: #c8572a; }
@@ -56,7 +57,7 @@
 <body>
 <div class="ui">
   <h1>Blockade</h1>
-  <p>Hold the buoys: each turn, a buoy only your side's ships reach scores its pennants. The best are in the heart, behind the wall: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of the imperial gate down. Click the sea to sail; W A D moves, Q E broadsides, X stops. Click a ship below to sail her instead.</p>
+  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants. The best are in the fort in the middle: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. Sloops hide in the islands' coves and dart out. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops.</p>
   <div class="score"><span class="gold" id="sg">0</span><span id="clock">5:00</span><span class="crimson" id="sc">0</span></div>
   <div class="bar" title="This blockade turn: scored when it fills"><i id="turn"></i></div>
   <div class="buoys" id="buoys"></div>
@@ -71,7 +72,7 @@
       <button data-key="e" class="gun" id="gunR" title="Starboard broadside (E)">Fire ▶<i></i></button>
     </div>
   </div>
-  <div class="row"><button id="watch">Watch the bots</button><button id="whole">Whole board</button><button id="again">New round</button></div>
+  <div class="row"><button id="watch">Spectate</button><button id="director" title="The camera follows the action">Director</button><button id="whole">Whole board</button><button id="again">New round</button></div>
   <div class="ships" id="ships"></div>
 </div>
 <div id="say"></div>
@@ -98,22 +99,26 @@ scene.add(sea);
 
 let sayT = 0;
 const say = (text, bad = false) => { const el = $('say'); el.textContent = text; el.classList.add('on'); el.classList.toggle('bad', bad); sayT = 3 + text.length / 30; };
-const start = params.has('watch') ? -1 : Math.max(0, Math.min(5, Number(params.get('ship') ?? 0) || 0));
+// Spectating to start (the user, 15 Nov: "you should be able to just spectate and watch"), the director moving the
+// camera to whatever's happening; ?ship= a number to sail her.
+const start = params.has('ship') ? Math.max(0, Math.min(15, Number(params.get('ship')) || 0)) : -1;
 const bk = blockadeSea({ you: start, say });
 
-const FOLLOW = { yaw: 0.35, pitch: 0.62, dist: 52 }, WHOLE = { yaw: 0, pitch: 1.1, dist: 150 };
-const cam = { yaw: 0, pitch: 0, dist: 0, at: new THREE.Vector3(), follow: true };
-Object.assign(cam, start < 0 ? WHOLE : FOLLOW);
+const FOLLOW = { yaw: 0.35, pitch: 0.55, dist: 46 }, WHOLE = { yaw: 0, pitch: 1.05, dist: 205 };
+const cam = { yaw: 0.35, pitch: 0, dist: 0, at: new THREE.Vector3(), follow: true, director: start < 0, watching: 0, cut: 0 };
+Object.assign(cam, FOLLOW);
 const sail = (id) => {
   bk.sail(id);
   $('mine').hidden = id < 0;
   $('watch').classList.toggle('on', id < 0);
-  if (id >= 0) { cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on'); say(`You're sailing ${bk.b.ship(id).name}`); }
-  params.delete('watch'); params.delete('ship'); if (id < 0) params.set('watch', ''); else params.set('ship', id);
-  history.replaceState(null, '', '?' + params.toString().replace('watch=', 'watch'));
+  if (id >= 0) { cam.director = false; cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on'); say(`You're sailing ${bk.b.ship(id).name}`); }
+  $('director').classList.toggle('on', cam.director);
+  params.delete('ship'); if (id >= 0) params.set('ship', id);
+  history.replaceState(null, '', params.toString() ? '?' + params : location.pathname);
 };
 sail(start);
-$('watch').onclick = () => sail(-1);
+$('watch').onclick = () => { sail(-1); cam.director = true; $('director').classList.add('on'); };
+$('director').onclick = () => { cam.director = !cam.director; $('director').classList.toggle('on', cam.director); if (cam.director && !cam.follow) { cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on'); } };
 $('whole').onclick = () => {
   cam.follow = !cam.follow; $('whole').classList.toggle('on', !cam.follow);
   Object.assign(cam, cam.follow ? FOLLOW : WHOLE); if (!cam.follow) cam.at.set(0, 0, 0);
@@ -137,15 +142,26 @@ const hud = () => {
     for (const side of ['L', 'R']) { const b = $('gun' + side); b.classList.toggle('loading', s.me.load[side] > 0); b.querySelector('i').style.width = `${(1 - s.me.load[side]) * 100}%`; }
     $('toks').innerHTML = Array.from({ length: s.me.h.tokens }, (_, i) => `<div class="tok${i === s.me.lit ? ' lit' : ''}${s.me.lit < 0 && i < s.me.mine ? ' mine' : ''}">${s.me.moves[i] ? TOK[s.me.moves[i]] : '·'}</div>`).join('');
   }
-  const next = JSON.stringify([s.buoys.map((x) => x.hold), s.ships.map((x) => [Math.round(x.share * 20), Math.round(x.water * 20), x.out, x.doing]), bk.you(), s.gate.open]);
+  const next = JSON.stringify([s.buoys.map((x) => x.hold), s.ships.map((x) => [Math.round(x.share * 20), Math.round(x.water * 20), x.out, x.doing]), bk.you(), s.gates.map((g) => g.towers), cam.watching]);
   if (next === sig) return;
   sig = next;
-  $('buoys').innerHTML = s.buoys.map((x) => `<span class="${x.hold ?? ''}" title="${x.heart ? 'In the heart' : 'Out on the open sea'}">${P[x.pennants]}${x.heart ? '♥' : ''}</span>`).join('') + `<span title="The imperial gate">${s.gate.open ? 'gate down' : `gate ${s.gate.towers.join('·')}`}</span>`;
-  $('ships').innerHTML = s.ships.map((x) => `<div class="ship${x.id === bk.you() ? ' me' : ''}" data-id="${x.id}"><b class="${x.team}">${x.name}</b>`
+  $('buoys').innerHTML = s.buoys.map((x) => `<span class="${x.hold ?? ''}" title="${x.heart ? 'In the heart' : 'Out on the open sea'}">${P[x.pennants]}${x.heart ? '♥' : ''}</span>`).join('') + s.gates.map((g, i) => `<span title="The ${i ? 'north' : 'south'} gate's towers">${i ? 'N' : 'S'} ${g.open ? 'down' : g.towers.join('·')}</span>`).join('');
+  $('ships').innerHTML = s.ships.map((x) => `<div class="ship${x.id === bk.you() ? ' me' : ''}${x.id === cam.watching && bk.you() < 0 ? ' seen' : ''}" data-id="${x.id}"><b class="${x.team}">${x.name}</b>`
     + `<span class="meter" title="Damage, and water in her bilge"><span class="dmg" style="width:${x.share * 100}%"></span><span class="wat" style="width:${x.water * 100}%"></span></span>`
+    + `<button data-sail="${x.id}" title="Take her helm">Sail</button>`
     + `<i class="${x.out ? 'out' : ''}">${x.kind === 'frigate' ? 'War frigate' : 'Sloop'} · ${x.doing}</i></div>`).join('');
 };
-$('ships').addEventListener('click', (e) => { const el = e.target.closest('[data-id]'); if (el) sail(Number(el.dataset.id)); });
+// (a ship's row: follow her; its Sail button: take her helm)
+$('ships').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-sail]');
+  if (b) { sail(Number(b.dataset.sail)); return; }
+  const el = e.target.closest('[data-id]');
+  if (!el) return;
+  if (bk.you() >= 0) sail(-1);
+  cam.director = false; $('director').classList.remove('on');
+  cam.watching = Number(el.dataset.id); cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on');
+  sig = '';
+});
 
 // ----- the camera: drag to turn, wheel or pinch to zoom; a click on the sea sails your ship there -----
 const canvas = renderer.domElement, pts = new Map();
@@ -181,7 +197,11 @@ const clock = new THREE.Clock();
 function frame() {
   const dt = Math.min(0.05, clock.getDelta());
   bk.tick(dt);
-  if (cam.follow) cam.at.lerp(bk.focus().setY(2), Math.min(1, dt * 3));
+  // Spectating with the director: on to whatever's happening, never cutting more often than every few seconds, the
+  // camera drifting slowly round her.
+  if (bk.you() < 0 && cam.director && (cam.cut -= dt) <= 0) { const id = bk.director(); if (id !== cam.watching) { cam.watching = id; cam.cut = 5; sig = ''; } }
+  if (bk.you() < 0 && cam.director) cam.yaw += dt * 0.05;
+  if (cam.follow) cam.at.lerp(bk.focus(bk.you() >= 0 ? bk.you() : cam.watching).setY(2), Math.min(1, dt * 2.5));
   hud();
   if ((sayT -= dt) <= 0) $('say').classList.remove('on');
   camera.position.set(cam.at.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cam.at.y + Math.sin(cam.pitch) * cam.dist, cam.at.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist);

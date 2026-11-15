@@ -1327,7 +1327,7 @@ export class Sea {
             return null;
         if (!via && this.there(from, c, r))
             return [];
-        const memo = `${from.c},${from.r},${from.d}|${c},${r}|${via ?? ''}|${this.rocks.size},${this.wind.size},${this.laid}|${this.rig(oars)}`;
+        const memo = `${from.c},${from.r},${from.d}|${c},${r}|${via ?? ''}|${this.rocks.size},${this.wind.size},${this.laid}|${this.rig(oars)}|${this.plotKey()}`;
         if (!this.plots.has(memo)) {
             if (this.plots.size > 256)
                 this.plots.clear();
@@ -1337,6 +1337,8 @@ export class Sea {
         const got = this.plots.get(memo);
         return got ? [...got] : null;
     }
+    /** Anything else a plot hangs on that a sea of another kind keeps (a ship's exact berth: src/ship-handling.ts). */
+    plotKey() { return ''; }
     /** Up off the sea: on the canal's water above it, or in a lock. */
     canal(c, r) { return this.level(c, r) > 0 || this.isLock(c, r); }
     /** What the moves hang on besides the rocks: under sail, the way the wind blows and how hard; at

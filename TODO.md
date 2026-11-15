@@ -152,6 +152,14 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     damage that shows ("see a hole ... appear where I've shot it"; crew "slowly repairing or bilging out"; the sloop
     "dead in the water ... sit there and rebuild"). Done as a proof of concept: blockade-test.html (BLOCKADE.md).
     To playtest.
+  - Then: "this should be like the race where you see ... the little pirates on each ship ... a good handful of sloops
+    each side and ... three or four [war frigs] ... coming from different directions ... Some ocean, some island ...
+    spectate and watch ... sloops hiding out, sometimes coming out ... while [war frigs] are having a fight to land a
+    few pot shots." Done: three frigates and five sloops a side from two edges each, a fort with two gates, islands
+    with coves, crews aboard, sloops hiding and raiding, frigates fighting, spectating with a director. To playtest.
+  - And war frigates by style, "a config for its decoration ... an Atlantean type and a haunted seas type": Coral
+    Throne and Eldritch Wail (src/den-frigate.ts). Their own mechanics (launching little craft, gliding through rocks)
+    are in IDEAS.md.
 
 - **The wolf den on a phone (14 Nov):** "fix the controls on mobile ... I've clicked on [Multibella's]. I can't even
   see anything. Like, the menus and control instructions literally take the entire screen up." On a phone the wolf

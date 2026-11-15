@@ -53,7 +53,7 @@
     <button data-mode="look">At anchor</button>
   </div>
   <div id="look" hidden>
-    <h1>Primates Rule</h1>
+    <h1 id="name">Primates Rule</h1>
     <p>Dachimpy's war frigate beside your sloop, sized by YPPedia's numbers. Drag to turn round them, the wheel or a pinch to zoom.</p>
     <div class="row">
       <button data-view="side">Side</button>
@@ -63,6 +63,7 @@
       <button id="sails" class="on">Sails</button>
     </div>
     <div class="row" id="curves"></div>
+    <div class="row" id="styles" title="Her style: each a config of her decoration (src/den-frigate.ts)"></div>
     <div id="stats"></div>
   </div>
   <div id="sail" hidden>
@@ -100,7 +101,7 @@ import { renderer, scene, camera, paintSky, pirate, makePirate } from './js/den/
 import { sloopMesh, SLOOP_DECK } from './js/den/sloop.js';
 import { frigateMesh } from './js/den/frigate.js';
 import { twoShipsSea } from './js/den/two-ships.js';
-import { PRIMATES_RULE, WAR_FRIGATE_PLAN, deckY } from './js/den-frigate.js';
+import { PRIMATES_RULE, FRIGATES, WAR_FRIGATE_PLAN, deckY } from './js/den-frigate.js';
 import { SLOOP, WAR_FRIGATE, SLOOP_HULL, SHAPES, SHIP_SHAPE } from './js/ships.js';
 
 const $ = (id) => document.getElementById(id);
@@ -114,7 +115,16 @@ scene.add(sea);
 // (what every ship's drawn with), round.
 const params = new URLSearchParams(location.search), curve = SHAPES[params.get('curve')] ? params.get('curve') : Object.keys(SHAPES).find((k) => SHAPES[k] === SHIP_SHAPE);
 const shaped = (h) => ({ ...h, shape: SHAPES[curve] });
-const her = frigateMesh(PRIMATES_RULE, { ...WAR_FRIGATE_PLAN, hull: shaped(WAR_FRIGATE_PLAN.hull) });
+// (which war frigate: Primates Rule, or one of another style, ?frigate= her name: Coral Throne the Atlantean, Eldritch
+// Wail the ghost ship)
+const style = FRIGATES[params.get('frigate')] ?? PRIMATES_RULE;
+const her = frigateMesh(style, { ...WAR_FRIGATE_PLAN, hull: shaped(WAR_FRIGATE_PLAN.hull) });
+document.getElementById('name').textContent = style.name;
+for (const name of ['Primates Rule', 'Coral Throne', 'Eldritch Wail']) {
+  const b = document.createElement('button'); b.textContent = name; b.classList.toggle('on', style.name === name);
+  b.onclick = () => { params.set('frigate', name); location.search = params.toString(); };
+  document.getElementById('styles').append(b);
+}
 scene.add(her.g);
 const sloop = sloopMesh(shaped(SLOOP_HULL));
 for (const k of Object.keys(SHAPES)) {

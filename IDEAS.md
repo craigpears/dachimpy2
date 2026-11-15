@@ -2876,6 +2876,16 @@ small ships because of the narrower gaps. I think that would be a cool proof of 
   way you can clear enough space for your big ship." A race or a run for frigates, the gate too narrow until
   it's blown open.
 - **Racing in either (14 Nov):** pick a war frigate or a sloop for the sloop race, each opening routes of its own: the frigate battling through, the sloop nimble (RACE.md §11).
+- **Buoys that mean something (15 Nov, thinking out loud).** "I don't want to say control points with the flags, because
+  I do like, yeah, people do like how you have to dance and fight around them ... having it look a bit more
+  meaningful ... even not necessarily in the game play, but just the scenery, like ... if you've got a flag, like,
+  there's actually something there to control. And maybe ... having it in your influence means you've captured a gun
+  turret or something that then starts shooting at enemy ships every so often ... maybe I think that would undermine
+  the gameplay a bit too much, but it would still be cool if you could like capture gun turret emplacements ... or
+  capture the gates." So: each buoy beside something to hold (a gun emplacement on a rock, a gate, a lighthouse, a
+  watchtower), flying the colours of whoever holds it; and maybe, held, it does a little for its side (a gun firing
+  every so often on the other side's ships in its reach; a gate's guns turning on the other side). Not built: to talk
+  over, keeping the dance round the buoys.
 - **War frigates by style, each a config of her decoration (15 Nov).** "We should have a similar kind of layout for ...
   Atlantis types, where they have all come out with all Atlantean decorations ... a [war frig] should have a config for
   its decoration. Primates Rule ... should just be a config of this is all the cannons and the furniture where they're
