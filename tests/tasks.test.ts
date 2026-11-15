@@ -90,6 +90,15 @@ describe('the task board (the user, 14 Nov: "a clear list of things and what the
     expect(client).toMatch(/ArrowRight/);
     expect(client).toContain('/api/update');
   });
+  it('a brain-dump dictated, and dropped in with a card open (the user, 15 Nov: "I should be able to brain dump while I\'ve got this side task open")', () => {
+    const html: string = board(all);
+    const client = readFileSync(join(__dirname, '..', 'tools', 'board-client.js'), 'utf8');
+    expect(html).toContain('class="mic" data-for="inbox"');
+    expect(html).toContain('class="mic" data-for="card"');
+    expect(html).toContain('class="toinbox"');
+    expect(html).toMatch(/body\.reading \{ padding-right/);
+    expect(client).toContain("classList.add('reading')");
+  });
   it('what\'s said about a card is logged on it at once, then a headless Claude acts on it', () => {
     const dir = mkdtempSync(join(tmpdir(), 'tasks-'));
     try {

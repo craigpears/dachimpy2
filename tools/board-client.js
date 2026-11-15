@@ -91,7 +91,7 @@
   function openCard(id, keepOrder) {
     if (!keepOrder || !order.includes(id)) order = orderFrom(id);
     if (open !== id) box.value = draft[id] || '';
-    open = id; panel.hidden = false; render();
+    open = id; panel.hidden = false; document.body.classList.add('reading'); render();
   }
   function step(by) {
     if (!open) return;
@@ -102,7 +102,7 @@
   }
   function shut() {
     if (open) draft[open] = box.value;
-    panel.hidden = true; open = null;
+    panel.hidden = true; open = null; document.body.classList.remove('reading');
     $$('.cols .card.open').forEach((x) => x.classList.remove('open'));
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
   }
@@ -116,13 +116,16 @@
     if (first) openCard(first.dataset.id); else tell('Nothing in that column.');
   }));
   document.addEventListener('keydown', (e) => {
-    if (panel.hidden) return;
-    // M (Alt+M while writing): the mic on or off.
-    if (e.code === 'KeyM' && (e.altKey || (e.target !== box && !e.ctrlKey && !e.metaKey && !e.target.closest?.('input, textarea, select')))) {
+    // M (Alt+M while writing): the mic on or off, into the open card's box, or the inbox's when no card's open.
+    const writing = e.target.closest?.('input, textarea, select');
+    if (e.code === 'KeyM' && (e.altKey || (!writing && !e.ctrlKey && !e.metaKey))) {
       e.preventDefault();
-      if (mic.hidden) tell("This browser can't listen: open the board in Chrome or Edge, or use Win+H."); else mic.click();
+      if (!Speech) tell("This browser can't listen: open the board in Chrome or Edge, or use Win+H.");
+      else toggleMic(e.target === drop.text || panel.hidden ? drop.text : box);
       return;
     }
+    if (e.target === drop.text && e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); dropIt(); return; }
+    if (panel.hidden) return;
     if (e.target === box) {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(true); }
       else if (e.key === 'Escape') box.blur();
@@ -152,6 +155,8 @@
     if (goOn) step(1); else render();
   }
   form.addEventListener('submit', (e) => { e.preventDefault(); send(e.submitter?.name === 'on'); });
+  // Something that isn't about this card, thought of while going through: the same box, into the inbox instead.
+  $('.toinbox', panel).addEventListener('click', () => { if (box.value.trim()) dropIt(box); else tell('Say or type it first, then send it to the inbox.'); });
   const watching = new Set();
   setInterval(async () => {
     for (const id of watching) {
@@ -172,61 +177,82 @@
     }
   }, 3000);
 
-  // Dictating, where the browser can (Chrome, Edge): words go into the box as you say them; saying "next" on its own
-  // sends what's there and goes on to the next card. Windows' own dictation (Win+H) types into the box anywhere.
-  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition, mic = $('.mic', panel);
-  if (Speech) {
-    mic.hidden = false;
-    let rec = null;
-    const off = () => { if (rec) { rec.onend = null; rec.stop(); } rec = null; mic.classList.remove('on'); mic.textContent = 'Mic (M)'; };
-    mic.addEventListener('click', () => {
-      if (rec) return off();
-      rec = new Speech(); rec.continuous = true; rec.interimResults = false; rec.lang = 'en-GB';
-      rec.onresult = (e) => {
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          if (!e.results[i].isFinal) continue;
-          const said = e.results[i][0].transcript.trim();
-          if (/^(next|next card)[.!]?$/i.test(said)) { send(true); continue; }
-          if (/^(back|previous)[.!]?$/i.test(said)) { step(-1); continue; }
-          box.value = (box.value ? box.value.replace(/\s*$/, ' ') : '') + said;
-        }
-      };
-      rec.onerror = (e) => {
-        if (e.error === 'no-speech' || e.error === 'aborted') return; // a quiet spell: it carries on
-        off(); // refused, no microphone, no network: it's off, not trying again and again
-        tell(e.error === 'not-allowed' || e.error === 'service-not-allowed'
-          ? "The mic isn't allowed here: allow it in the browser's address bar, or use Win+H." : 'The mic stopped: ' + e.error);
-      };
-      rec.onend = () => { try { rec?.start(); } catch (e) {} }; // it stops by itself after a pause; keep it on
-      rec.start(); mic.classList.add('on'); mic.textContent = 'Mic on (M)';
-    });
+  // Dictating, where the browser can (Chrome, Edge; the user, 15 Nov: "Definitely need that [mic] thing for ... that
+  // brain dump thing as well"): one mic, into whichever box it was put on for, the open card's or the inbox's. Said on
+  // its own: "next" sends the card's and goes on, "back" goes back, "inbox" sends what's in the box to the inbox;
+  // "drop it in" or "send" sends the inbox's. Windows' own dictation (Win+H) types into any box.
+  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const mics = $$('.mic');
+  let rec = null, into = null;
+  const showMic = () => mics.forEach((m) => {
+    const on = !!rec && m.dataset.for === (into === box ? 'card' : 'inbox');
+    m.classList.toggle('on', on); m.textContent = on ? 'Mic on (M)' : 'Mic (M)';
+  });
+  const micOff = () => { if (rec) { rec.onend = null; rec.stop(); } rec = null; into = null; showMic(); };
+  function toggleMic(target) {
+    if (rec && into === target) return micOff();
+    into = target; showMic();
+    if (rec) return; // already listening: now into the other box
+    rec = new Speech(); rec.continuous = true; rec.interimResults = false; rec.lang = 'en-GB';
+    rec.onresult = (e) => {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (!e.results[i].isFinal) continue;
+        const said = e.results[i][0].transcript.trim(), word = said.toLowerCase().replace(/[.!?]$/, '');
+        if (into === box && (word === 'next' || word === 'next card')) { send(true); continue; }
+        if (into === box && (word === 'back' || word === 'previous')) { step(-1); continue; }
+        if (into === box && word === 'inbox') { if (box.value.trim()) dropIt(box); continue; }
+        if (into === drop.text && (word === 'drop it in' || word === 'send')) { dropIt(); continue; }
+        into.value = (into.value ? into.value.replace(/\s*$/, ' ') : '') + said;
+        into.scrollTop = into.scrollHeight;
+      }
+    };
+    rec.onerror = (e) => {
+      if (e.error === 'no-speech' || e.error === 'aborted') return; // a quiet spell: it carries on
+      micOff(); // refused, no microphone, no network: it's off, not trying again and again
+      tell(e.error === 'not-allowed' || e.error === 'service-not-allowed'
+        ? "The mic isn't allowed here: allow it in the browser's address bar, or use Win+H." : 'The mic stopped: ' + e.error);
+    };
+    rec.onend = () => { try { rec?.start(); } catch (e) {} }; // it stops by itself after a pause; keep it on
+    rec.start();
   }
-
+  if (Speech) mics.forEach((m) => {
+    m.hidden = false;
+    m.addEventListener('click', () => toggleMic(m.dataset.for === 'card' ? box : drop.text));
+  });
   // A card linked to (#its-id) opens.
   const follow = () => { const id = decodeURIComponent(location.hash.slice(1)); if (id && id !== open && cardEl(id)) openCard(id); };
   follow();
   window.addEventListener('hashchange', follow);
 
   // The inbox: what's dropped in is a card at once, then sorted by a headless Claude (tools/inbox-triage.md); the
-  // board watches it and draws itself again once it's been put where it goes.
+  // board watches it, and once it's been put where it goes draws itself again, unless you're busy (a card open, the
+  // mic on, something half written), when it says so instead.
   const drop = $('.drop'), sorting = $('.sorting', drop);
-  drop.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const text = drop.text.value.trim();
+  const busyHere = () => !panel.hidden || !!rec || !!drop.text.value.trim();
+  async function dropIt(from = drop.text) {
+    const text = from.value.trim();
     if (!text) return;
     if (!served) { notServed('drop things in'); return; }
     let id;
     try { id = (await post('/api/inbox', { text })).id; } catch (err) { served ? tell('Not dropped in: ' + err.message) : notServed('drop things in'); return; }
-    drop.text.value = '';
+    from.value = '';
+    if (from === box && open) delete draft[open];
     sorting.hidden = false; sorting.textContent = 'In the inbox. Sorting it...';
+    tell('In the inbox. Sorting it...');
     const started = Date.now();
     const watch = setInterval(async () => {
       try {
         const c = await (await fetch('/api/card?id=' + encodeURIComponent(id))).json();
-        const last = (c.log || '').split('\n').pop();
-        if (!c.busy && (c.status !== 'inbox' || /left in the inbox|failed|couldn't start/.test(last))) { clearInterval(watch); sorting.textContent = last.replace(/^- /, ''); setTimeout(() => location.reload(), 2500); }
-        else if (Date.now() - started > 10 * 60e3) { clearInterval(watch); sorting.textContent = 'Still sorting; it will be on the board when you reload.'; }
+        const last = (c.log || '').split('\n').pop().replace(/^- /, '');
+        if (!c.busy && (c.status !== 'inbox' || /left in the inbox|failed|couldn't start/.test(last))) {
+          clearInterval(watch);
+          if (busyHere()) {
+            sorting.replaceChildren(last + ' ', Object.assign(document.createElement('a'), { href: location.href, textContent: 'Reload to see it on the board' }));
+            tell('Sorted: ' + last);
+          } else { sorting.textContent = last; setTimeout(() => location.reload(), 2500); }
+        } else if (Date.now() - started > 10 * 60e3) { clearInterval(watch); sorting.textContent = 'Still sorting; it will be on the board when you reload.'; }
       } catch (err) {}
     }, 3000);
-  });
+  }
+  drop.addEventListener('submit', (e) => { e.preventDefault(); dropIt(); });
 })();
