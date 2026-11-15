@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blockade test</title>
+<!-- A blockade, a proof of concept, unlinked like frigate-test.html (BLOCKADE.md): two sides, a war frigate and
+     two sloops each, fighting for the buoys of a blockade board, the best of them in its heart behind a wall with
+     an imperial gate the frigates shoot their way through and side ways the sloops' winds carry them through. You
+     sail one ship (Primates Rule to start; ?ship= any of them by number, or ?watch for the bots alone); bots sail
+     the rest. Rules src/blockade.ts, bots src/blockade-bots.ts, damage src/ship-damage.ts; its 3D
+     js/den/blockade.js. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #f6ead2; --dim: #cbb894; --gold: #e0a92a; --crimson: #e2564a; --panel: rgba(28, 19, 12, 0.86); --edge: #5a412a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0e1a24; font: 500 16px/1.4 'Alegreya Sans', system-ui, sans-serif; color: var(--ink); }
+  canvas { display: block; touch-action: none; }
+  .ui { position: fixed; left: 12px; top: 12px; width: min(320px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 10px 12px; }
+  h1 { font: 700 22px 'Alegreya', serif; color: var(--gold); margin: 0 0 4px; }
+  p { margin: 0 0 8px; color: var(--dim); font-size: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  button { font: 700 14px 'Alegreya Sans', sans-serif; color: var(--ink); background: #3b2a1b; border: 1px solid #c9a35c; border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+  button.on { background: #6a4a1a; }
+  .score { display: flex; justify-content: space-between; align-items: baseline; font: 700 18px 'Alegreya', serif; margin-bottom: 4px; }
+  .gold { color: var(--gold); } .crimson { color: var(--crimson); }
+  .bar { height: 5px; background: #241810; border-radius: 3px; overflow: hidden; margin: 2px 0 8px; }
+  .bar i { display: block; height: 100%; background: var(--gold); }
+  .ships { font-size: 13px; color: var(--dim); }
+  .ship { display: grid; grid-template-columns: 1fr 70px; gap: 0 8px; padding: 3px 0; border-top: 1px solid rgba(201, 163, 92, 0.18); cursor: pointer; }
+  .ship b { color: var(--ink); } .ship.me b { text-decoration: underline; }
+  .ship i { grid-column: 1 / -1; font-style: normal; font-size: 12px; }
+  .meter { position: relative; height: 7px; background: #241810; border-radius: 3px; overflow: hidden; align-self: center; }
+  .meter .dmg { position: absolute; left: 0; top: 0; bottom: 0; background: #c8572a; }
+  .meter .wat { position: absolute; left: 0; bottom: 0; height: 2px; background: #6fb9d8; }
+  .out { color: #e8875a; }
+  .toks { display: flex; gap: 4px; margin: 2px 0 8px; }
+  .tok { width: 30px; height: 30px; border: 1px solid var(--edge); border-radius: 6px; display: grid; place-items: center; font: 700 18px 'Alegreya Sans', sans-serif; background: #241810; color: var(--dim); }
+  .tok.lit { background: #6a4a1a; color: var(--ink); border-color: var(--gold); }
+  .tok.mine { color: var(--gold); }
+  .pad button { min-width: 40px; }
+  .gun { position: relative; overflow: hidden; }
+  .gun i { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--gold); width: 100%; }
+  .gun.loading { color: var(--dim); }
+  .buoys { display: flex; gap: 5px; margin-bottom: 8px; font-size: 12px; }
+  .buoys span { border: 1px solid var(--edge); border-radius: 5px; padding: 1px 5px; color: var(--dim); }
+  .buoys span.gold { border-color: var(--gold); color: var(--gold); } .buoys span.crimson { border-color: var(--crimson); color: var(--crimson); } .buoys span.contested { color: var(--ink); border-color: var(--ink); }
+  #say { position: fixed; left: 50%; top: 14px; transform: translateX(-50%); width: max-content; max-width: min(560px, calc(100vw - 32px)); background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; padding: 6px 12px; font-size: 15px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  #say.on { opacity: 1; } #say.bad { border-color: #c8572a; }
+  [hidden] { display: none !important; }
+  @media (max-width: 700px) { .ui { top: auto; bottom: 12px; max-height: 45vh; } p { display: none; } }
+</style>
+</head>
+<body>
+<div class="ui">
+  <h1>Blockade</h1>
+  <p>Hold the buoys: each turn, a buoy only your side's ships reach scores its pennants. The best are in the heart, behind the wall: sloops ride the winds in by the side ways; a war frigate has to shoot a tower of the imperial gate down. Click the sea to sail; W A D moves, Q E broadsides, X stops. Click a ship below to sail her instead.</p>
+  <div class="score"><span class="gold" id="sg">0</span><span id="clock">5:00</span><span class="crimson" id="sc">0</span></div>
+  <div class="bar" title="This blockade turn: scored when it fills"><i id="turn"></i></div>
+  <div class="buoys" id="buoys"></div>
+  <div id="mine">
+    <div class="toks" id="toks"></div>
+    <div class="row pad">
+      <button data-key="a" title="Turn left (A)">↰</button>
+      <button data-key="w" title="Forward (W)">↑</button>
+      <button data-key="d" title="Turn right (D)">↱</button>
+      <button data-key="x" title="Stop (X)">Stop</button>
+      <button data-key="q" class="gun" id="gunL" title="Port broadside (Q)">◀ Fire<i></i></button>
+      <button data-key="e" class="gun" id="gunR" title="Starboard broadside (E)">Fire ▶<i></i></button>
+    </div>
+  </div>
+  <div class="row"><button id="watch">Watch the bots</button><button id="whole">Whole board</button><button id="again">New round</button></div>
+  <div class="ships" id="ships"></div>
+</div>
+<div id="say"></div>
+<script src="js/engine.js"></script>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { renderer, scene, camera, paintSky, pirate } from './js/den/world.js';
+import { blockadeSea } from './js/den/blockade.js';
+
+const $ = (id) => document.getElementById(id), params = new URLSearchParams(location.search);
+paintSky('#4f8fd0', '#cfe2ee');
+camera.far = 500; camera.updateProjectionMatrix();
+scene.fog.near = 140; scene.fog.far = 340;
+pirate.g.visible = false;
+const sea = new THREE.Mesh(new THREE.CircleGeometry(260, 48).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#2f78a8', roughness: 0.35, metalness: 0.1 }));
+sea.receiveShadow = true;
+scene.add(sea);
+
+let sayT = 0;
+const say = (text, bad = false) => { const el = $('say'); el.textContent = text; el.classList.add('on'); el.classList.toggle('bad', bad); sayT = 3 + text.length / 30; };
+const start = params.has('watch') ? -1 : Math.max(0, Math.min(5, Number(params.get('ship') ?? 0) || 0));
+const bk = blockadeSea({ you: start, say });
+
+const FOLLOW = { yaw: 0.35, pitch: 0.62, dist: 52 }, WHOLE = { yaw: 0, pitch: 1.1, dist: 150 };
+const cam = { yaw: 0, pitch: 0, dist: 0, at: new THREE.Vector3(), follow: true };
+Object.assign(cam, start < 0 ? WHOLE : FOLLOW);
+const sail = (id) => {
+  bk.sail(id);
+  $('mine').hidden = id < 0;
+  $('watch').classList.toggle('on', id < 0);
+  if (id >= 0) { cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on'); say(`You're sailing ${bk.b.ship(id).name}`); }
+  params.delete('watch'); params.delete('ship'); if (id < 0) params.set('watch', ''); else params.set('ship', id);
+  history.replaceState(null, '', '?' + params.toString().replace('watch=', 'watch'));
+};
+sail(start);
+$('watch').onclick = () => sail(-1);
+$('whole').onclick = () => {
+  cam.follow = !cam.follow; $('whole').classList.toggle('on', !cam.follow);
+  Object.assign(cam, cam.follow ? FOLLOW : WHOLE); if (!cam.follow) cam.at.set(0, 0, 0);
+};
+$('again').onclick = () => location.reload();
+document.querySelectorAll('[data-key]').forEach((b) => { b.onclick = () => bk.key(b.dataset.key); });
+addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (bk.key(e.key.toLowerCase())) e.preventDefault();
+});
+
+// ----- the panel: the score and the clock, the buoys, your moves and guns, every ship -----
+const TOK = { F: '↑', L: '↰', R: '↱' }, P = ['', 'I', 'II', 'III'];
+let sig = '';
+const hud = () => {
+  const s = bk.hud(), left = Math.max(0, 300 - s.clock);
+  $('sg').textContent = `Dachimpy's ${s.score.gold}`; $('sc').textContent = `${s.score.crimson} Dalnoth's`;
+  $('clock').textContent = s.over ? (s.leader ? `${s.leader === 'gold' ? 'Dachimpy\'s' : 'Dalnoth\'s'} win` : 'A draw') : `${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`;
+  $('turn').style.width = `${(s.turn / 10) * 100}%`;
+  if (s.me) {
+    for (const side of ['L', 'R']) { const b = $('gun' + side); b.classList.toggle('loading', s.me.load[side] > 0); b.querySelector('i').style.width = `${(1 - s.me.load[side]) * 100}%`; }
+    $('toks').innerHTML = Array.from({ length: s.me.h.tokens }, (_, i) => `<div class="tok${i === s.me.lit ? ' lit' : ''}${s.me.lit < 0 && i < s.me.mine ? ' mine' : ''}">${s.me.moves[i] ? TOK[s.me.moves[i]] : '·'}</div>`).join('');
+  }
+  const next = JSON.stringify([s.buoys.map((x) => x.hold), s.ships.map((x) => [Math.round(x.share * 20), Math.round(x.water * 20), x.out, x.doing]), bk.you(), s.gate.open]);
+  if (next === sig) return;
+  sig = next;
+  $('buoys').innerHTML = s.buoys.map((x) => `<span class="${x.hold ?? ''}" title="${x.heart ? 'In the heart' : 'Out on the open sea'}">${P[x.pennants]}${x.heart ? '♥' : ''}</span>`).join('') + `<span title="The imperial gate">${s.gate.open ? 'gate down' : `gate ${s.gate.towers.join('·')}`}</span>`;
+  $('ships').innerHTML = s.ships.map((x) => `<div class="ship${x.id === bk.you() ? ' me' : ''}" data-id="${x.id}"><b class="${x.team}">${x.name}</b>`
+    + `<span class="meter" title="Damage, and water in her bilge"><span class="dmg" style="width:${x.share * 100}%"></span><span class="wat" style="width:${x.water * 100}%"></span></span>`
+    + `<i class="${x.out ? 'out' : ''}">${x.kind === 'frigate' ? 'War frigate' : 'Sloop'} · ${x.doing}</i></div>`).join('');
+};
+$('ships').addEventListener('click', (e) => { const el = e.target.closest('[data-id]'); if (el) sail(Number(el.dataset.id)); });
+
+// ----- the camera: drag to turn, wheel or pinch to zoom; a click on the sea sails your ship there -----
+const canvas = renderer.domElement, pts = new Map();
+let pinch = 0, down = null;
+const ray = new THREE.Raycaster(), water = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+canvas.addEventListener('pointerdown', (e) => { pts.set(e.pointerId, [e.clientX, e.clientY]); canvas.setPointerCapture(e.pointerId); down = { x: e.clientX, y: e.clientY, n: pts.size }; });
+canvas.addEventListener('pointerup', (e) => {
+  pts.delete(e.pointerId); pinch = 0;
+  if (down && down.n === 1 && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6) {
+    ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), camera);
+    const at = ray.ray.intersectPlane(water, new THREE.Vector3());
+    if (at) bk.click(at);
+  }
+  down = null;
+});
+canvas.addEventListener('pointercancel', (e) => { pts.delete(e.pointerId); pinch = 0; down = null; });
+canvas.addEventListener('pointermove', (e) => {
+  const p = pts.get(e.pointerId);
+  if (!p) return;
+  if (pts.size === 2) {
+    const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+    if (pinch) cam.dist = Math.min(220, Math.max(6, cam.dist * pinch / d));
+    pinch = d;
+  } else {
+    cam.yaw -= (e.clientX - p[0]) * 0.006;
+    cam.pitch = Math.min(1.45, Math.max(0.05, cam.pitch + (e.clientY - p[1]) * 0.005));
+  }
+  p[0] = e.clientX; p[1] = e.clientY;
+});
+canvas.addEventListener('wheel', (e) => { e.preventDefault(); cam.dist = Math.min(220, Math.max(6, cam.dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+
+const clock = new THREE.Clock();
+function frame() {
+  const dt = Math.min(0.05, clock.getDelta());
+  bk.tick(dt);
+  if (cam.follow) cam.at.lerp(bk.focus().setY(2), Math.min(1, dt * 3));
+  hud();
+  if ((sayT -= dt) <= 0) $('say').classList.remove('on');
+  camera.position.set(cam.at.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cam.at.y + Math.sin(cam.pitch) * cam.dist, cam.at.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist);
+  camera.lookAt(cam.at);
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+frame();
+window.bk = bk; window.cam = cam;   // (for poking at it from the console)
+</script>
+</body>
+</html>

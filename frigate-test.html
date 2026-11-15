@@ -163,7 +163,7 @@ const pick = (kind) => {
   two.swap(kind);
   document.querySelectorAll('[data-ship]').forEach((b) => b.classList.toggle('on', b.dataset.ship === kind));
   const h = two.hud().h, sq = (n) => `${n} square${n > 1 ? 's' : ''}`;
-  $('handling').innerHTML = `<b>${h.tokens}</b> moves a turn, <b>${h.pace}</b> s a square, turns <b>${sq(h.radius)}</b> wide in <b>${+h.turn.toFixed(1)}</b> s; ` +
+  $('handling').innerHTML = `<b>${h.tokens}</b> moves a turn, each <b>${+h.move.toFixed(1)}</b> s: forward <b>${sq(h.stride)}</b>, or a turn <b>${sq(h.radius)}</b> wide; ` +
     `takes <b>${h.long} × ${h.wide}</b> ${h.long * h.wide > 1 ? 'squares' : 'square'}; <b>${h.shots}</b> ${h.guns} shot${h.shots > 1 ? 's' : ''} a side, loading in <b>${h.reload}</b> s.`;
   if (!cam.follow) { cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on'); }
 };
@@ -205,7 +205,7 @@ const hud = () => {
   const s = two.hud(), n = s.h.tokens, sig = `${s.kind}|${s.moves.join('')}|${s.lit}|${s.mine}`;
   for (const side of ['L', 'R']) { const b = $('gun' + side); b.classList.toggle('loading', !s.guns[side]); b.querySelector('i').style.width = `${(1 - s.load[side]) * 100}%`; }
   const st = (s.holed ? `<span class="bad">Holed: patched in <b>${Math.ceil(s.holed)}</b> s.</span> ` : '') +
-    `The gate: ${s.towers.some((h) => h <= 0) ? 'a tower <b>crumbled</b>, its way two wide' : `its towers <b>${s.towers.join('</b> and <b>')}</b> large shots from crumbling`}; its guns ${s.battery.map((g) => GATE_GUN[g]).join(' and ')}.`;
+    `The gate: ${s.towers.some((h) => h <= 0) ? 'a tower <b>crumbled</b>, its way three wide' : `its towers <b>${s.towers.join('</b> and <b>')}</b> large shots from crumbling`}; its guns ${s.battery.map((g) => GATE_GUN[g]).join(' and ')}.`;
   if (st !== stSig) { stSig = st; $('status').innerHTML = st; }
   if (sig === hudSig) return;
   hudSig = sig;

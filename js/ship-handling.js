@@ -7,16 +7,24 @@
    force option ... The sloop will have its nimble [ways] through." So the same helm (src/den-sail.ts: the
    pin, the pilot, your own moves, the turn's clock) sails any ship, handed her handling:
    - moves a turn: Battle Navigation's tokens, by YPPedia (src/ships.ts: the sloop 4, a war frigate 3);
-   - her pace: the seconds a square takes (the sloop the den's SAIL.MOVE; a war frigate a fifth as long again,
-     heavier to drive: FRIGATE_PACE, so the sloop stays a little quicker everywhere, never by miles);
+   - her pace: the seconds a square takes (the sloop the den's SAIL.MOVE; a war frigate FRIGATE_PACE);
+   - her moves as big as her turn (the user, 15 Nov: "to go forward on the [war frig], I think proportionately you
+     want to be going like [her turn's squares], so it's equivalent movement to the turn, otherwise it looks really
+     weird"): forward `stride` squares, her turn's `radius` (the sloop 1, the frigate 2), and every move of hers
+     takes as long as any other (`move`). So she's as quick as the sloop over open water but clumsy: she plays her
+     turn of moves in half as long again as the sloop plays hers, slower to react ("the sloop gets like two turns
+     for every ... [one] of the [war frig] ... that'll then show, yeah, the [war frig]'s slower to react, and
+     that's how it would equal them out"; "I want the big ships to feel clumsy. They're powerful but clumsy").
+     The sloop's speed is the sea's: the winds she rides that a big ship rides out (ShipSea's `windy`: "getting in
+     there faster comes from the opportunities you have to go take [winds] that the [war frig] doesn't have access
+     to");
    - how wide she turns: a quarter circle `radius` squares round (her middle `radius` squares ahead, then
      `radius` across, ending facing that way), half her length (the sloop 1, as Battle Navigation's turn;
      the frigate 2). Drawn, her middle sails round the quarter circle, bows leading: never pivoting;
    - how long a turn takes: in proportion, as the sloop's (the user, 15 Nov: "be proportionate, similar to how
-     the sloop is"): Battle Navigation's (the sloop's) a move's, a turn `radius` wide `radius` of her moves, so
-     each kind of move of hers covers the ground at the same share of the sloop's speed. Her wide turn needs
-     room and is never a shortcut past the sloop (15 Nov, the first go: "a turn is making it cover a lot more
-     space than you would in a sloop, so that actually is making it faster");
+     the sloop is"): a move's, like any of hers, so each kind of move covers the ground at the same share of the
+     sloop's speed. Her wide turn needs room and is never a shortcut past the sloop (15 Nov, the first go: "a turn
+     is making it cover a lot more space than you would in a sloop, so that actually is making it faster");
    - her size on the squares, from her hull against SAIL.CELL (4 m): her length rounded (her ends can
      overhang a square a little), her beam rounded up (her sides mustn't scrape the rocks). The sloop, 4.4 m
      by 2.3, takes one square; Primates Rule, 15 m by 4.6, four along and two across, so a one-square gap is
@@ -36,32 +44,27 @@ const DC = [0, 1, 0, -1], DR = [1, 0, -1, 0];
 const key = (c, r) => `${c},${r}`;
 /** The numbers that aren't YPPedia's (RACE.md §11, "Racing in a frigate or a sloop"). */
 export const HANDLING = {
-    /** A war frigate's seconds a square, against the sloop's SAIL.MOVE. */
-    FRIGATE_PACE: 1.2,
+    /** A war frigate's seconds a square, against the sloop's SAIL.MOVE: as quick as the sloop over open water, all
+        told, her moves twice as big and her turns of moves half as long again (her fewer moves, each paused after). */
+    FRIGATE_PACE: 1.3,
     /** Seconds a side's guns take to load again, by their size. */
     RELOAD: { small: 2, medium: 2.5, large: 3 },
 };
 /** Seconds of the clock a square straight on takes her, all told: the move, the pause after it, and her
     share of the breather between turns (SAIL.BREAK over her moves a turn). */
 export const groundSecs = (pace, tokens) => pace + pauseFor(pace) + SAIL.BREAK / tokens;
-/** Seconds a turn takes, in proportion, as the sloop's (15 Nov: "be proportionate, similar to how the sloop
-    is"): Battle Navigation's, a square ahead and one across (the sloop's), is a move's time; a turn `radius`
-    wide takes her, all told (groundSecs: its pause and her share of the breather counted once), as long as
-    `radius` of her moves. So a frigate's turn is to her as the sloop's is to the sloop: the same handful of
-    squares for each square she'd go straight on, never more. (Before, 15 Nov's first go, a wide turn took as
-    long as all its squares straight on, and she was half as quick as the sloop round a course.) */
-export function turnSecs(pace, tokens, radius) {
-    if (radius <= 1)
-        return pace;
-    const each = groundSecs(pace, tokens), extra = each - pace;
-    return radius * each - extra;
-}
+/** Seconds one move of hers takes, forward or a turn: `stride` squares' pace. The sloop's, a square's (the den's
+    SAIL.MOVE); a big ship's, a big move's. A turn is a move like any (Battle Navigation's), in proportion to her
+    size: the frigate's quarter circle two ahead and two across takes what her two squares forward do, as the
+    sloop's one ahead and one across takes what her one square does (15 Nov: "be proportionate, similar to how the
+    sloop is"). */
+export const moveTime = (pace, stride) => pace * stride;
 /** A ship's handling, from her class and her hull: `pace` her seconds a square. */
 export function handlingFor(ship, hull, pace = SAIL.MOVE) {
     const long = Math.max(1, Math.round(hull.len / SAIL.CELL)), wide = Math.max(1, Math.ceil(hull.beam / SAIL.CELL));
-    const radius = Math.max(1, Math.ceil(long / 2));
+    const radius = Math.max(1, Math.ceil(long / 2)), stride = radius, move = moveTime(pace, stride);
     return {
-        name: ship.name, tokens: ship.tokens, pace, radius, turn: turnSecs(pace, ship.tokens, radius), long, wide,
+        name: ship.name, tokens: ship.tokens, pace, radius, stride, move, turn: move, long, wide,
         shots: ship.shotsPerSide, guns: ship.gunSize, reload: HANDLING.RELOAD[ship.gunSize],
     };
 }
@@ -102,8 +105,8 @@ const poseOf = (h, mc, mr, d) => {
     are den-sail.ts's path exactly. */
 export function shipPath(h, p, m) {
     if (m === 'F') {
-        const to = { c: p.c + DC[p.d], r: p.r + DR[p.d], d: p.d };
-        return { steps: [to], to, swing: [] };
+        const steps = Array.from({ length: h.stride }, (_, i) => ({ c: p.c + DC[p.d] * (i + 1), r: p.r + DR[p.d] * (i + 1), d: p.d }));
+        return { steps, to: steps[steps.length - 1], swing: [] };
     }
     const R = h.radius, d = (p.d + (m === 'L' ? 3 : 1)) % 4, steps = [], M = drawnAt(h, { c: p.c, r: p.r, a: p.d });
     for (let k = 1; k <= R; k++)
@@ -134,7 +137,7 @@ export function shipPose(h, p, m, u, bump = false, to) {
     const M = drawnAt(h, { c: p.c, r: p.r, a: p.d }), lurch = 0.22 * Math.sin(Math.PI * Math.min(1, Math.max(0, u)));
     const own = (c, r, a) => ownAt(h, { c, r, a });
     if (m === 'F' || (bump && to && to.d === p.d)) {
-        const k = bump ? lurch : smooth(u);
+        const k = bump ? lurch : h.stride > 1 ? h.stride * glide(u) : smooth(u);
         return own(M.c + DC[p.d] * k, M.r + DR[p.d] * k, p.d);
     }
     const R = h.radius, e = R > 1 && !bump ? glide(u) : smooth(u), s = m === 'L' ? -1 : 1, a = p.d + s * e;
@@ -150,6 +153,10 @@ export function shipPose(h, p, m, u, bump = false, to) {
 export class ShipSea extends Sea {
     ship;
     blocked;
+    /** `windy`: the winds on this sea (`wind`, as the den's lanes) carry her, a ship of one square (the sloop);
+        a bigger ship rides them out, never carried (15 Nov: the sloop's speed is "the opportunities you have to go
+        take [winds] that the [war frig] doesn't have access to"). */
+    windy = false;
     constructor(ship, cols, rows, rocks, blocked = () => false) {
         super(1, false, true);
         this.ship = ship;
@@ -158,6 +165,8 @@ export class ShipSea extends Sea {
         this.rows = rows;
         this.rocks = rocks; // (shared with the other ships' seas: a rock broken is gone for all)
     }
+    /** The winds she's carried by, if she's small enough (windy), shared with the other ships' seas. */
+    carriedBy(wind) { this.wind = wind; this.windy = this.ship.long * this.ship.wide === 1; return this; }
     open(c, r) { return super.open(c, r) && !this.blocked(c, r); }
     /** Every square she'd cover at this pose is open. */
     fits(p) { return squares(this.ship, p).every(([c, r]) => this.open(c, r)); }
@@ -169,7 +178,9 @@ export class ShipSea extends Sea {
     /** A move by her handling: through only if she's room for all of it. Blocked, the sloop's turn turns her
         where she is (the den's); a bigger ship's leaves her as she was, never pivoting (15 Nov), unless she can't
         move at all: then she's warped round on the spot, about her middle, if there's room. */
-    move(p, m) {
+    move(p, m, oars = false, whirls = false) {
+        if (this.windy)
+            return super.move(p, m, oars, whirls); // (a sloop on a sea of winds: the den's own, carried)
         const h = this.ship, { to } = shipPath(h, p, m);
         if (this.clear(p, m))
             return { to, bump: false, ride: [] };
@@ -179,11 +190,47 @@ export class ShipSea extends Sea {
         const M = drawnAt(h, { c: p.c, r: p.r, a: p.d }), spun = poseOf(h, M.c, M.r, to.d);
         return { to: stuck && this.fits(spun) ? spun : { ...p }, bump: true, ride: [] };
     }
-    /** Her pace: a square's, or a turn's (turnSecs). */
-    moveSecs(_oars = false, _p, m) { return m && m !== 'F' ? this.ship.turn : this.ship.pace; }
-    /** She's there with that square under any of hers. */
-    there(p, c, r) { return squares(this.ship, p).some(([x, y]) => x === c && y === r); }
+    /** Her pace: a move's, forward or a turn (moveTime). */
+    moveSecs(_oars = false, _p, m) { return (m && m !== 'F' ? this.ship.turn : this.ship.move) * this.drag; }
+    /** How much longer her moves take than her handling's (water in her bilge: src/ship-damage.ts, drag). */
+    drag = 1;
+    /** Every wind square's way, for a big ship to ride out: none (Sea.windAt's, read by the helm's pushes). */
+    windAt(c, r) { return this.windy ? super.windAt(c, r) : undefined; }
+    /** A berth she's to lie in exactly, her own square and heading (sailTo: lying broadside to a gate's tower, say),
+        if the pin's on its square. */
+    exact = null;
+    /** Her pilot's moves to a square as if the other ships weren't there (they'll have moved by then): how far it
+        is, for choosing where to go. */
+    plotPast(from, c, r) {
+        const was = this.blocked;
+        this.blocked = () => false;
+        this.touch();
+        const got = this.plot(from, c, r);
+        this.blocked = was;
+        this.touch();
+        return got;
+    }
+    /** Her pilot's moves from `from` to lie exactly at `to`, or null if she can't. */
+    plotTo(from, to) {
+        const was = this.exact;
+        this.exact = { ...to };
+        this.touch();
+        const got = this.plot(from, to.c, to.r);
+        this.exact = was;
+        this.touch();
+        return got;
+    }
+    /** She's there with that square under any of hers (or, for an exact berth, lying in it). */
+    there(p, c, r) {
+        const e = this.exact;
+        if (e && e.c === c && e.r === r)
+            return p.c === c && p.r === r && p.d === e.d;
+        return squares(this.ship, p).some(([x, y]) => x === c && y === r);
+    }
     goalPoses(c, r) {
+        const e = this.exact;
+        if (e && e.c === c && e.r === r)
+            return new Set([(c * this.rows + r) * 4 + e.d]);
         const out = new Set(), n = Math.max(this.ship.long, this.ship.wide);
         for (let x = c - n; x <= c + n; x++)
             for (let y = r - n; y <= r + n; y++) {
@@ -207,6 +254,29 @@ export class ShipHelm extends Helm {
         if (!cur || cur.m === 'W')
             return super.now();
         return shipPose(this.sea.ship, cur.from, cur.m, Math.min(1, this.t / cur.secs), cur.bump, cur.to);
+    }
+    /** Sail her to lie exactly so (a pose, not just a square under her): where it went, or null if she can't. */
+    sailTo(p) {
+        if (!this.sea.plotTo(this.after(), p))
+            return null;
+        this.sea.exact = { ...p };
+        this.sea.touch();
+        const got = this.drop(p.c, p.r);
+        if (!got || got[0] !== p.c || got[1] !== p.r) {
+            this.sea.exact = null;
+            this.stop();
+            return null;
+        }
+        return got;
+    }
+    /** Drop a pin as ever: an exact berth's forgotten. */
+    drop(c, r) {
+        const e = this.sea.exact;
+        if (e && (e.c !== c || e.r !== r)) {
+            this.sea.exact = null;
+            this.sea.touch();
+        }
+        return super.drop(c, r);
     }
     /** Her course ahead as poses: where this turn leaves her, then where each move of the course after it does. */
     route() {

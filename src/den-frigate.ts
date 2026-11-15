@@ -168,6 +168,21 @@ export const PRIMATES_RULE: Frigate = {
   ],
 };
 
+/** Iron Pride, Dalnoth's war frigate in the blockade (src/blockade.ts): a proud ship, crimson and gold, her deck
+    plainer than Primates Rule's. */
+export const IRON_PRIDE: Frigate = {
+  name: 'Iron Pride',
+  paint: { hull: '#5b1619', sideboard: '#d8b04e', railing: '#ead9a6', bottom: '#8f6a45', deck: '#b98e5e', sails: '#efe2d2', gold: '#e2b23a' },
+  figurehead: { kind: 'beast', col: '#7a1d20' },
+  guns: PRIMATES_RULE.guns,
+  gunKind: 'skeletalCannon',
+  furniture: [
+    { kind: 'table', x: -2.95, z: 0, opts: { cup: true, bottles: 2 } },
+    { kind: 'toolChest', x: 0.95, z: -0.75, yaw: Math.PI },
+    { kind: 'toolChest', x: 4.25, z: -0.6, yaw: 0 },
+  ],
+};
+
 /** Everything standing on her decks (masts, stairs, hatches, the wheel, the guns and the furniture),
     each where it is and how far it reaches: for checking nothing's in anything else's way. */
 export function onDeck(p: Plan, f: Frigate): { what: string; x: number; z: number; r: number; deck: Deck }[] {

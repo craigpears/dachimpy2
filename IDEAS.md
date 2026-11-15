@@ -2876,6 +2876,14 @@ small ships because of the narrower gaps. I think that would be a cool proof of 
   way you can clear enough space for your big ship." A race or a run for frigates, the gate too narrow until
   it's blown open.
 - **Racing in either (14 Nov):** pick a war frigate or a sloop for the sloop race, each opening routes of its own: the frigate battling through, the sloop nimble (RACE.md §11).
+- **War frigates by style, each a config of her decoration (15 Nov).** "We should have a similar kind of layout for ...
+  Atlantis types, where they have all come out with all Atlantean decorations ... a [war frig] should have a config for
+  its decoration. Primates Rule ... should just be a config of this is all the cannons and the furniture where they're
+  placed, the same with an Atlantean type and a haunted seas type. So you should be able to go play in a haunted seas
+  ghost-like frigate." (YPPedia: the Atlantean class war frigate, sea-themed and sold ready painted; the Phantom class
+  war frigate, a ghost aboard for good; a Haunted class war brig.) And, later, mechanics of their own: "the Atlantean
+  one can send out little trikes and the octopus, so ... they can be little launch platforms, and the haunted seas one
+  can ... glide ... go through the rocks like they do." Not built: the looks first.
 - **Unequal turns: the frigate slow to react, not slow (15 Nov).** "Maybe you could have unequal turns ... the [war
   frig] can move every for every X seconds, the sloop gets like two turns for every two kind of cycles of turns for
   the [war frig] ... that'll then show, yeah, the [war frig]'s slower to react, and that's how it would equal them

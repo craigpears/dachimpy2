@@ -12,8 +12,8 @@ import { TwoShips, TWO_SEA, KINDS, seaXZ, seaCR } from '../two-ships.js';
 import { squares, drawnAt } from '../ship-handling.js';
 import { scene, mat, mesh, burst, sparks } from './world.js';
 import { blast, puff, blastTick } from './blast.js';
-import { gatehouse, bastionLook } from './empire.js';
-import { turretMesh, turretView, turretWrecked, turretFire, turretLand, turretShotsTick } from './turret.js';
+import { turretView, turretWrecked, turretFire, turretLand, turretShotsTick } from './turret.js';
+import { gateLook } from './gate-look.js';
 import { holedLook, holedTick, holedFx } from './holed.js';
 import { SLOOP_DECK } from './sloop.js';
 import { WAR_FRIGATE_PLAN, deckY } from '../den-frigate.js';
@@ -60,29 +60,8 @@ export function twoShipsSea(ships, say = () => {}) {
     }
   }
 
-  // ----- the imperial gate: the Empire's gatehouse over its one-square way, its arch high enough for her masts,
-  // each tower on its column of the wall (sitting lower with each large shot, crumbling at the last, the arch
-  // coming down with it), and its two bastion guns (src/den-turret.ts's rules, turret.js's look) -----
-  const W = TWO_SEA.GATE.WAY, [ta, tb] = TWO_SEA.GATE.TOWERS, R = TWO_SEA.WALL.r0, gz = v3(0, R + 0.5).z, stoneM2 = mat('#d8cdb8', { flatShading: true, roughness: 0.95 });
-  const gh = gatehouse({ xa: v3(ta, 0).x, xb: v3(tb, 0).x, z: gz, archY: 11, tw: 3.6, bannerH: 4.5 });
-  g.add(gh);
-  const { sides, arch } = gh.userData, shake = [0, 0], fall = [-1, -1];
-  let archFall = -1, archWay = 1;
-  // (a tower's foot: the wall's two squares of it, a plinth of the Empire's stone under it)
-  for (const c of TWO_SEA.GATE.TOWERS) { const p = mesh(new THREE.BoxGeometry(CELL * 0.95, 1.2, CELL * 2), stoneM2); p.position.set(v3(c, 0).x, 0.3, gz); g.add(p); }
-  const bastions = t.battery.map((gun) => { const V = turretMesh(bastionLook()); V.g.position.copy(v3(...gun.at)); g.add(V.g); return V; });
-  /** A tower knocked: it shudders and sits a little lower; its last shot brings it down, and the arch with it. */
-  function knock(i, crumbled) {
-    const side = sides[i], at = v3(TWO_SEA.GATE.TOWERS[i], R + 0.5, 4);
-    burst(at, '#d8cdb8', 22, 6); burst(at.clone().setY(7), '#9a9088', 12, 4);
-    shake[i] = 0.5;
-    if (!crumbled) { side.position.y = -1.6 * (1 - t.towers[i].hp / TWO_SEA.TOWER_HP); return; }
-    blast(at.clone().setY(5), 2, { bits: [{ mat: stoneM2, n: 18, w: 0.9, h: 0.7, d: 0.9 }], ground: () => 0.2 });
-    fall[i] = 0;
-    if (archFall < 0) { archFall = 0; archWay = i ? -1 : 1; }
-    // (rubble heaped low on its squares, open water over them)
-    for (let k = 0; k < 5; k++) { const m = mesh(stoneGeo, stoneM2); const s = 0.6 + Math.random() * 0.5; m.scale.set(s, s * 0.5, s); m.position.set(at.x + (Math.random() - 0.5) * 3, -0.1, gz + (Math.random() - 0.5) * 6); m.rotation.set(Math.random() * 3, Math.random() * 3, 0); g.add(m); }
-  }
+  // ----- the imperial gate over its one-square way, and its two bastion guns (gate-look.js) -----
+  const gl = gateLook(g, t.gate, t.battery, v3), bastions = gl.bastions, knock = gl.knock;
 
   // ----- the buoy to make for -----
   const goal = new THREE.Group(), gold = mat('#e0a92a', { metalness: 0.4, roughness: 0.4 }), red = mat('#c8372a', { roughness: 0.6 }), white = mat('#f3ecdc');
@@ -194,20 +173,7 @@ export function twoShipsSea(ships, say = () => {}) {
       });
       course();
       flag.rotation.y = Math.sin(clock * 1.3) * 0.3;
-      // (a tower just hit shudders)
-      sides.forEach((side, i) => { if (shake[i] > 0) { shake[i] = Math.max(0, shake[i] - dt); side.position.x = Math.sin(clock * 60) * shake[i] * 0.3; } });
-      // (a crumbled tower falling into the sea, and the arch with it)
-      sides.forEach((side, i) => {
-        if (fall[i] < 0 || !side.visible) return;
-        const u = Math.min(1, (fall[i] += dt) / 1.6);
-        side.position.y = -1.6 - 13 * u * u; side.rotation.z = (i ? 1 : -1) * 0.25 * u;
-        if (u >= 1) side.visible = false;
-      });
-      if (archFall >= 0 && arch.visible) {
-        const u = Math.min(1, (archFall += dt) / 1.1);
-        arch.position.y = -12 * u * u; arch.rotation.z = archWay * 0.3 * u;
-        if (u >= 1) arch.visible = false;
-      }
+      gl.tick(dt);   // (a tower hit shuddering, a crumbled one falling, the arch with it)
       for (let i = flying.length - 1; i >= 0; i--) {
         const f = flying[i];
         f.t += dt;

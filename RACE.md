@@ -1495,9 +1495,9 @@ check, a share link, and the den's own race for 3D.
     handling, what fits where; the helm and sea subclassed, `ShipSea`, `ShipHelm`) and src/two-ships.ts (the test
     sea); its 3D js/den/two-ships.js; tests/ship-handling.test.ts. The handling, as decided for it:
     - **Moves a turn:** YPPedia's tokens, the sloop 4, a war frigate 3.
-    - **Pace:** the sloop the den's 1 s a square; a war frigate 1.2 s (`HANDLING.FRIGATE_PACE`, not YPPedia's: in
-      Battle Navigation a token is a token; here she's heavier to drive; 1.5 s till 15 Nov's second pass). With her
-      fewer moves, about 1.2 times as long over a distance, every kind of move alike.
+    - **Pace:** the sloop the den's 1 s a square; a war frigate 1.3 s (`HANDLING.FRIGATE_PACE`, not YPPedia's: in
+      Battle Navigation a token is a token; 1.5 s, then 1.2, through 15 Nov's passes), her moves two squares each.
+      All told she's as quick as the sloop over open water, every kind of move alike.
     - **Size on the squares, from her hull** against the den's 4 m square: her length rounded (her ends can
       overhang), her beam rounded up (her sides mustn't scrape). The sloop 1 by 1; Primates Rule (15 m by 4.6) 4
       along and 2 across, so a one-square gap is too narrow for her: no special rule, just her beam.
@@ -1527,6 +1527,19 @@ check, a share link, and the den's own race for 3D.
       sloop would need three moves (forward, turn, forward), so on a leg that wants exactly that corner she's no
       slower. Drawn, the frigate gathers way into a turn and eases off out of it (a glide, not the den's quick
       ease), so she's always under way.
+    - **Powerful but clumsy: big moves, fewer turns (15 Nov, the third pass).** "Maybe you could have unequal turns
+      ... the sloop gets like two turns for every two kind of cycles of turns for the [war frig] ... that'll then
+      show, yeah, the [war frig]'s slower to react, and that's how it would equal them out"; "to go forward on the [war
+      frig], I think proportionately you want to be going like 4 squares, so it's equivalent movement to the turn,
+      otherwise it looks really weird"; "I want the big ships to feel clumsy. They're powerful but clumsy"; and the
+      sloop's speed "more in the map mechanics ... getting in there faster comes from the opportunities you have to
+      go take [winds] that the [war frig] doesn't have access to." So: her forward move is as big as her turn
+      (`stride`, two squares; her turn two ahead and two across), every move of hers takes as long as any other
+      (`move`, her pace over two squares), and she plays her turn of moves (three) in half as long again as the
+      sloop plays hers (four): as quick over open water, round a course about even, but committed to a longer plan
+      and slow to answer a sloop that darts in. The sloop's speed is the sea's: winds carry her (ShipSea `windy`) and
+      a big ship rides them out. Her big moves keep her middle on every other square, so a gap two wide lets only
+      half of a frigate's positions through: a way meant for her is three wide (the imperial gate's, crumbled).
     - **Drawn moving forward (15 Nov: "it should always be moving forward. It seems to be more like rotating on
       the spot when it turns").** Her middle sails round the quarter circle, her heading always along it, bows
       leading, never pivoting: her own square (half a square aft and to port of her middle) follows it, so her
@@ -1573,10 +1586,8 @@ check, a share link, and the den's own race for 3D.
       out to turn round. Three old hulks lie about her anchorage, in her way, two large shots sinking one; they're
       there again each time she's taken out. Back by your sloop, Space takes you aboard her again and Primates
       Rule's crew take her back to her anchorage. Nothing shoots back yet.
-    To try with the user: whether her speed is right now (0.85 of the sloop's, the sloop 12% quicker round a
-    course: kept small, the sloop's edges the gaps and her tight turn; or none at all, "removing that as a sloop's
-    advantage and giving it more the ability to get through gaps": `HANDLING.FRIGATE_PACE` 1 makes her about 0.94
-    of it); what her bigger broadside trades against it (two large shots a side, holing for longer, the only guns
+    To try with the user: whether she feels powerful but clumsy now (as quick as the sloop over open water, her
+    big moves and slow turns of moves; the sloop's speed the winds'); what her bigger broadside trades against it (two large shots a side, holing for longer, the only guns
     that break the gate); whether the pace and the turn feel right in a frigate, now in the den; the obstacles in the real race
     (the imperial gate as the frigate's boom, §12; the narrow ways as the sloop's); whether the frigate also rides
     out the winds and whirlpools ("Bigger ships ride out the winds", IDEAS.md), not built.

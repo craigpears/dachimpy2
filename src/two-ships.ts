@@ -11,8 +11,8 @@
    the heart and center of the board"):
    - its way under the arch is one square wide: the sloop runs straight through; a war frigate, two squares
      abeam, can't;
-   - so she crumbles a tower either side of it, its column of the wall, with her large guns (TOWER_HP shots: one a
-     broadside lands on it, the other goes down the way or on the rocks), and then the way's two wide for anyone.
+   - so she crumbles a tower either side of it, two columns of the wall, with her large guns (TOWER_HP shots, both
+     of a broadside landing on it lying along it: src/imperial-gate.ts), and then the way's three wide for anyone.
      The sloop's small guns bounce off the towers;
    - its bastion guns are the den's destructible gun (src/den-turret.ts): they leave you be till someone fires on
      the gate, then fire on whoever's in reach; any gun's hits quieten them, three wreck one. So the frigate pays
@@ -25,6 +25,8 @@
 import { SAIL, type Move, type Pose } from './den-sail.js';
 import { ShipSea, ShipHelm, Guns, broadside, SLOOP_HANDLING, FRIGATE_HANDLING, type Handling, type Shot, type Side, type GunSize } from './ship-handling.js';
 import { Turret, type TurretEvent } from './den-turret.js';
+import { Gate, Tower, TOWER_HP } from './imperial-gate.js';
+export { Tower };
 import type { SailEvent } from './den-sail.js';
 
 const key = (c: number, r: number) => `${c},${r}`;
@@ -36,11 +38,11 @@ export const TWO_SEA = {
   /** The line of rocks across it, two deep. */
   WALL: { r0: 8, r1: 9 },
   /** The imperial gate, the one way through: its way under the arch (a column, one square wide), its gatehouse's
-      towers either side of it (each its column of the wall, both rows), and its bastion guns beyond them (the
-      den's destructible gun: src/den-turret.ts). */
-  GATE: { WAY: 16, TOWERS: [15, 17], GUNS: [[13, 8], [19, 8]] as [number, number][] },
-  /** Large shots that crumble a tower. */
-  TOWER_HP: 4,
+      towers either side of it (each two columns of the wall, both rows: src/imperial-gate.ts), and its bastion
+      guns beyond them (the den's destructible gun: src/den-turret.ts). */
+  GATE: { WAY: 16, GUNS: [[12, 8], [20, 8]] as [number, number][] },
+  /** Large shots that crumble a tower (src/imperial-gate.ts). */
+  TOWER_HP,
   /** Seconds a ship's holed by a hit, by the gun's size, while her crew patch her. */
   HOLED: { small: 3, medium: 4, large: 5 } as Record<GunSize, number>,
   /** The gate's guns' size (what a hit from one holes her for). */
@@ -56,24 +58,6 @@ export const TWO_SEA = {
 export type Kind = 'sloop' | 'frigate';
 export const KINDS: Kind[] = ['sloop', 'frigate'];
 export const HANDLINGS: Record<Kind, Handling> = { sloop: SLOOP_HANDLING, frigate: FRIGATE_HANDLING };
-
-/** A tower of the gate: its squares (its column of the wall: rocks to sail by till it's crumbled), and what's
-    left of it. Only large guns hurt it. */
-export class Tower {
-  squares: [number, number][] = [];
-  hp: number = TWO_SEA.TOWER_HP;
-  constructor(public c: number) { for (let r = TWO_SEA.WALL.r0; r <= TWO_SEA.WALL.r1; r++) this.squares.push([c, r]); }
-  down(): boolean { return this.hp <= 0; }
-  has(c: number, r: number): boolean { return !this.down() && this.squares.some(([x, y]) => x === c && y === r); }
-  /** A shot on it: a large gun's knocks a piece off ('hit', or 'crumbled' with the last); anything less
-      'bounces'. */
-  hit(guns: Handling['guns']): 'hit' | 'crumbled' | 'bounced' | null {
-    if (this.down()) return null;
-    if (guns !== 'large') return 'bounced';
-    this.hp--;
-    return this.down() ? 'crumbled' : 'hit';
-  }
-}
 
 /** What a broadside stopped at: a rock, a gate's tower, one of the gate's guns, or the other ship. */
 export type Stop = 'rock' | 'tower' | 'gun' | Kind;
@@ -92,8 +76,9 @@ export type Ticked = Record<Kind, SailEvent[]> & { guns: GunEvent[] };
     the rocks and the gate shared. */
 export class TwoShips {
   rocks = new Set<string>();
-  /** The gate's towers either side of its way. */
-  towers: Tower[] = TWO_SEA.GATE.TOWERS.map((c) => new Tower(c));
+  /** The gate (src/imperial-gate.ts), its towers either side of its way. */
+  gate = new Gate(TWO_SEA.GATE.WAY, TWO_SEA.WALL.r0, TWO_SEA.WALL.r1);
+  towers: Tower[] = this.gate.towers;
   /** The gate's bastion guns. */
   battery: Turret[] = TWO_SEA.GATE.GUNS.map((at) => new Turret({ at, alert: false }));
   ships: Record<Kind, { h: Handling; sea: ShipSea; helm: ShipHelm; guns: Guns }>;
@@ -168,9 +153,9 @@ export class TwoShips {
   }
 
   /** The gate's tower standing on this square, if one is (its number), else -1. */
-  towerAt(c: number, r: number): number { return this.towers.findIndex((t) => t.has(c, r)); }
+  towerAt(c: number, r: number): number { return this.gate.towerAt(c, r); }
   /** A tower's down: the way's two wide. */
-  gateOpen(): boolean { return this.towers.some((t) => t.down()); }
+  gateOpen(): boolean { return this.gate.open(); }
 
   /** The gate's gun on this square, if it's one's (standing or wrecked). */
   gunAt(c: number, r: number): number { return this.battery.findIndex((g) => g.at[0] === c && g.at[1] === r); }

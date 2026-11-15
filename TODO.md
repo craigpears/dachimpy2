@@ -141,6 +141,17 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     the war frig on a test run, even if it's just to go shoot some nearby things and destructible obstacles, or sail
     out into the ocean through some rocks." Done: Space by her at anchor, `?at=primates` (src/den-frigate-run.ts).
     To playtest.
+  Then (15 Nov), on the pictures and after:
+  - The gate: "the sloop can run through it ... the war frig ... has to destroy and crumble the towers in order to get
+    through ... a way of naturally delaying the war [frigs]." Done: one-square way, towers two wide (src/imperial-gate.ts).
+  - Unequal turns: "the sloop gets like two turns for every ... [one] of the [war frig] ... slower to react"; her forward
+    "equivalent movement to the turn"; "I want the big ships to feel clumsy. They're powerful but clumsy." Done: her
+    moves two squares, her turn of moves half as long again as the sloop's, as quick over open water; the sloop's
+    speed the winds she rides that a frigate rides out.
+  - A blockade: "go study blockading ... sideways for the sloops ... a few bots ... competing ... to get to the points";
+    damage that shows ("see a hole ... appear where I've shot it"; crew "slowly repairing or bilging out"; the sloop
+    "dead in the water ... sit there and rebuild"). Done as a proof of concept: blockade-test.html (BLOCKADE.md).
+    To playtest.
 
 - **The wolf den on a phone (14 Nov):** "fix the controls on mobile ... I've clicked on [Multibella's]. I can't even
   see anything. Like, the menus and control instructions literally take the entire screen up." On a phone the wolf

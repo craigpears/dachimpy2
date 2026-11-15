@@ -49,7 +49,9 @@ describe('each ship\'s handling, from YPPedia\'s numbers and her hull', () => {
       const end = shipPose(FR, p0, m, 1);
       expect(end.c).toBeCloseTo(to.c); expect(end.r).toBeCloseTo(to.r); expect(end.a).toBeCloseTo(m === 'L' ? -1 : 1);
     }
-    expect(shipPath(FR, p0, 'F').to).toEqual({ c: 8, r: 9, d: 0 });
+    // And her forward move as big as her turn: two squares (15 Nov: "it's equivalent movement to the turn").
+    expect(shipPath(FR, p0, 'F').to).toEqual({ c: 8, r: 10, d: 0 });
+    expect(shipPath(FR, p0, 'F').steps).toHaveLength(FR.stride);
   });
   it('is drawn at the middle of her squares', () => {
     expect(drawnAt(SL, { c: 3, r: 4, a: 0 })).toEqual({ c: 3, r: 4, a: 0 });
@@ -78,14 +80,15 @@ describe('the same helm sailing each by her handling', () => {
       expect(helm.mine.length).toBeLessThanOrEqual(n);
     }
   });
-  it('the frigate gets there more slowly than the sloop', () => {
+  it('over open water they\'re about as quick: her moves twice as big, and twice as long', () => {
     const time = (h: typeof SL) => {
       const helm = new ShipHelm(new ShipSea(h, 20, 20, open()), { c: 10, r: 4, d: 0 });
       helm.drop(10, 16);
       for (let t = 0; t < 60; t += 0.05) if (helm.tick(0.05).some((e) => e.kind === 'arrive')) return t;
       return Infinity;
     };
-    expect(time(FR)).toBeGreaterThan(time(SL) * 1.05);   // (a little slower: 15 Nov, "be proportionate")
+    expect(time(FR) / time(SL)).toBeGreaterThan(0.85);
+    expect(time(FR) / time(SL)).toBeLessThan(1.15);
   });
   it('the frigate needs room to turn: a turn she\'s no room for leaves her as she was', () => {
     // Two squares out from a line of rocks, facing it: a sloop turns along it, the frigate can't.
@@ -103,14 +106,14 @@ describe('the test sea: an imperial gate whose one-square way only the sloop fit
   it('the gate is the one way through the rocks, one square wide between its towers', () => {
     const t = new TwoShips();
     for (let c = 0; c < S.COLS; c++) for (let r = S.WALL.r0; r <= S.WALL.r1; r++) expect(t.rocks.has(`${c},${r}`), `${c},${r}`).toBe(c !== W);
-    expect(S.GATE.TOWERS).toEqual([W - 1, W + 1]);
+    expect(t.towers.map((x) => x.cols)).toEqual([[W - 2, W - 1], [W + 1, W + 2]]);
     for (const tw of t.towers) for (const [c, r] of tw.squares) expect(t.stopAt('frigate', c, r)).toBe('tower');
   });
   it('the sloop runs straight through; the frigate can\'t till a tower\'s crumbled, then it\'s two wide', () => {
     const t = new TwoShips(), fr = t.ships.frigate.sea;
     expect(t.ships.sloop.sea.plot(S.START.sloop, ...beyond)).not.toBeNull();
     expect(fr.plot(S.START.frigate, ...beyond)).toBeNull();
-    for (let c = W - 1; c <= W + 1; c++) expect(fr.fits({ c, r: S.WALL.r0, d: 0 })).toBe(false);
+    for (let c = W - 2; c <= W + 2; c++) expect(fr.fits({ c, r: S.WALL.r0, d: 0 })).toBe(false);
     t.towers[0].hp = 1;
     t.ships.frigate.helm.moor({ c: W, r: 5, d: 1 });
     expect(t.fire('L', 'frigate')!.shots.some((x) => x.got === 'crumbled')).toBe(true);
@@ -119,27 +122,28 @@ describe('the test sea: an imperial gate whose one-square way only the sloop fit
     expect(fr.plot(t.ships.frigate.helm.pose, ...beyond)).not.toBeNull();
   });
   it('only large guns hurt a tower: the sloop\'s small ones bounce off', () => {
-    const tw = new Tower(W - 1);
+    const tw = new Tower([W - 2, W - 1], S.WALL.r0, S.WALL.r1);
     expect(tw.hit('small')).toBe('bounced');
     expect(tw.hp).toBe(S.TOWER_HP);
     for (let i = 1; i < S.TOWER_HP; i++) expect(tw.hit('large')).toBe('hit');
     expect(tw.hit('large')).toBe('crumbled');
     expect(tw.down()).toBe(true);
     expect(tw.has(W - 1, S.WALL.r0)).toBe(false);
+    // (crumbled, the way's three wide: a frigate fits whichever square of her big moves she's on)
   });
-  it('lying broadside to the gate, one shot of each of her broadsides lands on a tower: a shooting phase before she\'s in', () => {
+  it('lying broadside to the gate, both shots of each of her broadsides land on a tower: a shooting phase before she\'s in', () => {
     const t = new TwoShips(), f = t.ships.frigate;
     // (along the rocks, her port side to the gate: facing right, port is out toward them; her guns either side of the way)
-    f.helm.moor({ c: W, r: 5, d: 1 });
+    f.helm.moor({ c: W - 1, r: 5, d: 1 });
     let broadsides = 0;
     while (!t.gateOpen() && broadsides < 20) {
       const got = t.fire('L', 'frigate')!;
       expect(got.shots).toHaveLength(2);
-      expect(got.shots.filter((x) => x.what === 'tower')).toHaveLength(1);
+      expect(got.shots.filter((x) => x.what === 'tower')).toHaveLength(2);
       broadsides++;
       run(f.helm, f.h.reload + 0.1); f.guns.tick(f.h.reload + 0.1);
     }
-    expect(broadsides).toBe(S.TOWER_HP);
+    expect(broadsides).toBe(Math.ceil(S.TOWER_HP / 2));
   });
   it('the sloop\'s broadside on a tower bounces off and leaves it standing', () => {
     const t = new TwoShips(), s = t.ships.sloop;
@@ -152,10 +156,10 @@ describe('the test sea: an imperial gate whose one-square way only the sloop fit
   it('each is in the other\'s way', () => {
     const t = new TwoShips(), f = t.ships.frigate;
     // (the sloop sat in the frigate's way: the frigate can't go forward onto her)
-    t.ships.sloop.helm.moor({ c: 15, r: 6, d: 0 });
+    t.ships.sloop.helm.moor({ c: 2, r: 2, d: 0 });
     t.tick(0.01);
     expect(f.sea.move(f.helm.pose, 'F').bump).toBe(false);
-    f.helm.moor({ c: 15, r: 4, d: 0 });
+    t.ships.sloop.helm.moor({ c: 15, r: 6, d: 0 });
     t.tick(0.01);
     expect(f.sea.move(f.helm.pose, 'F').bump).toBe(true);
     // A broadside stops at the other ship.
@@ -183,50 +187,54 @@ describe('the test sea: an imperial gate whose one-square way only the sloop fit
 });
 
 /* Primates Rule as played on frigate-test.html (the user, 15 Nov): "It looks really cool", and the next pass. */
-describe('her turn in proportion, as the sloop\'s (15 Nov: "be proportionate, similar to how the sloop is"; and before, "a turn is making it cover a lot more space than you would in a sloop, so that actually is making it faster")', () => {
+describe('powerful but clumsy (15 Nov: "be proportionate, similar to how the sloop is"; "the sloop gets like two turns for every ... [one] of the [war frig] ... that\'ll then show, yeah, the [war frig]\'s slower to react"; "I want the big ships to feel clumsy")', () => {
   // Seconds of the clock all told for a move (its pause, and her share of the breather between turns), and the
   // squares of ground it covers.
   const allTold = (h: Handling, m: Move) => { const secs = new ShipSea(h, 20, 20, open()).moveSecs(false, { c: 9, r: 9, d: 0 }, m); return secs + pauseFor(secs) + SAIL.BREAK / h.tokens; };
-  const ground = (h: Handling, m: Move) => (m === 'F' ? 1 : 2 * h.radius);
+  const ground = (h: Handling, m: Move) => (m === 'F' ? h.stride : 2 * h.radius);
   const perSquare = (h: Handling, m: Move) => allTold(h, m) / ground(h, m);
-  it('her turn takes `radius` of her moves all told, as the sloop\'s takes one', () => {
-    expect(allTold(FR, 'L')).toBeCloseTo(FR.radius * allTold(FR, 'F'));
-    expect(allTold(FR, 'R')).toBeCloseTo(FR.radius * allTold(FR, 'F'));
-    expect(allTold(SL, 'L')).toBeCloseTo(allTold(SL, 'F'));
+  const cycle = (h: Handling) => h.tokens * (h.move + pauseFor(h.move)) + SAIL.BREAK;
+  it('every move of hers takes as long as any other, forward as far as her turn\'s radius, as the sloop\'s does', () => {
+    for (const h of [SL, FR]) { expect(allTold(h, 'L')).toBeCloseTo(allTold(h, 'F')); expect(h.stride).toBe(h.radius); }
     expect(SL.turn).toBe(SAIL.MOVE);
-    expect(allTold(FR, 'F')).toBeCloseTo(groundSecs(FR.pace, FR.tokens));
+    expect(FR.move).toBeCloseTo(FR.pace * FR.stride);
   });
-  it('each kind of move of hers covers the ground at the same share of the sloop\'s speed, a little slower', () => {
+  it('each kind of move covers the ground at about the sloop\'s speed: neither quicker over open water', () => {
     const share = (m: Move) => perSquare(FR, m) / perSquare(SL, m);
-    expect(share('L')).toBeCloseTo(share('F'));
-    expect(share('R')).toBeCloseTo(share('F'));
-    expect(share('F')).toBeGreaterThan(1.05);
-    expect(share('F')).toBeLessThan(1.3);
+    expect(share('L')).toBeCloseTo(share('F'), 1);
+    expect(share('F')).toBeGreaterThan(0.9);
+    expect(share('F')).toBeLessThan(1.1);
   });
-  it('sailing both round the same course, the sloop is ahead at every mark, but not by miles', () => {
+  it('but she plays her turn of moves half as long again as the sloop plays hers: slower to react', () => {
+    expect(cycle(FR) / cycle(SL)).toBeGreaterThan(1.4);
+    expect(cycle(FR) / cycle(SL)).toBeLessThan(2.1);
+  });
+  it('round the same open-water course they\'re about even: the sloop\'s edge is the winds, not her moves', () => {
     const course: [number, number][] = [[14, 12], [26, 18], [28, 30], [16, 26], [6, 30]];
     const marks = (h: Handling) => {
       const helm = new ShipHelm(new ShipSea(h, 34, 34, open()), { c: 6, r: 3, d: 0 }), at: number[] = [];
-      let t = 0, i = 0, turns = 0;
+      let t = 0, i = 0;
       helm.drop(...course[0]);
       while (t < 400 && i < course.length) {
         const ev = helm.tick(0.05); t += 0.05;
-        turns += ev.filter((e) => e.kind === 'move' && e.m !== 'F').length;
         if (ev.some((e) => e.kind === 'arrive')) { at.push(t); if (++i < course.length) helm.drop(...course[i]); }
       }
-      return { at, turns };
+      return at;
     };
     const sloop = marks(SL), frigate = marks(FR);
-    expect(sloop.at).toHaveLength(course.length);
-    expect(frigate.at).toHaveLength(course.length);
-    expect(frigate.turns).toBeGreaterThan(3);   // (she does turn on the way)
-    sloop.at.forEach((t, i) => expect(t).toBeLessThan(frigate.at[i]));
-    expect(frigate.at[course.length - 1]).toBeLessThan(sloop.at[course.length - 1] * 1.25);
-    // As she turned at first (a turn her `radius` squares' seconds, its squares for nothing), she was first to
-    // the first mark; and as she turned next (as long as all its squares straight on), half as quick round it.
-    expect(marks({ ...FR, turn: FR.pace * FR.radius }).at[0]).toBeLessThan(sloop.at[0]);
-    const each = groundSecs(FR.pace, FR.tokens), slow = marks({ ...FR, turn: 2 * FR.radius * each - (each - FR.pace) });
-    expect(slow.at[course.length - 1]).toBeGreaterThan(frigate.at[course.length - 1] * 1.2);
+    expect(frigate).toHaveLength(course.length);
+    const ratio = frigate[course.length - 1] / sloop[course.length - 1];
+    expect(ratio).toBeGreaterThan(0.8);
+    expect(ratio).toBeLessThan(1.25);
+  });
+  it('the winds carry the sloop; the frigate rides them out', () => {
+    const wind = new Map<string, number>([['5,5', 1], ['6,5', 1], ['7,5', 1], ['8,5', 1]]);
+    const sl = new ShipSea(SL, 20, 20, open()).carriedBy(wind), fr = new ShipSea(FR, 20, 20, open()).carriedBy(wind);
+    const got = sl.move({ c: 5, r: 4, d: 0 }, 'F');
+    expect(got.ride.length).toBeGreaterThan(0);
+    expect(got.ride[got.ride.length - 1].c).toBeGreaterThan(8);
+    expect(fr.windy).toBe(false);
+    expect(fr.move({ c: 6, r: 2, d: 0 }, 'F').ride).toHaveLength(0);
   });
 });
 
@@ -330,7 +338,7 @@ describe('the imperial gate to shoot at (15 Nov: "put like a ... destructible. T
     const t = new TwoShips();
     expect(t.battery.map((g) => g.at)).toEqual(S.GATE.GUNS);
     for (const [c, r] of S.GATE.GUNS) expect(t.rocks.has(`${c},${r}`)).toBe(true);
-    for (const c of S.GATE.TOWERS) expect(t.rocks.has(`${c},${S.WALL.r0}`)).toBe(true);
+    for (const [c, r] of t.gate.squares()) expect(t.rocks.has(`${c},${r}`)).toBe(true);
     expect(t.stopAt('frigate', ...S.GATE.GUNS[0])).toBe('gun');
   });
   it('its guns leave her be till someone fires on the gate, then fire on her in reach', () => {
