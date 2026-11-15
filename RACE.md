@@ -1512,6 +1512,19 @@ check, a share link, and the den's own race for 3D.
     To try with the user: whether the pace and the turn feel right in a frigate; the obstacles in the real race
     (the imperial gate as the frigate's boom, §12; the narrow ways as the sloop's); whether the frigate also rides
     out the winds and whirlpools ("Bigger ships ride out the winds", IDEAS.md), not built.
+- **Primates Rule racing the sloops, as a rival (15 Nov, an idea the user loves).** "I still really want the [war
+  frig] in the sloop race. That would just be brilliant ... it takes a slow, difficult route. It'd be so incredible to
+  see the sloops race the [war frig] and getting blown up. It tries to blow through the gate, has to try and blow
+  through the gate while they try and run through it or around it. It would be so amazing." Not you picking a ship
+  (above), but the war frigate in the field against the sloops: one rival, slower (the frigate's 1.5 s a square, wide
+  turns, no squeezing through the sloops' narrow ways), on a route of her own that's the long, hard way round, and
+  brute force where the sloops are clever: she blasts the imperial gate (§12's decision; the boom on
+  frigate-test.html, which only large guns hurt) while the sloops try to slip through after her, or round it, under
+  her broadsides (two large guns a side) and getting blown up. A spectacle as much as a racer: best seen in the race
+  watched (§10). Needs her on the real sea first (her handling, src/ship-handling.ts; Primates Rule's controls and
+  guns, being built), then a `RACER` for her (whose frigate she is: Dachimpy's, `PRIMATES_RULE`), her route in
+  race-plan.ts, and the sloops' hits from large guns (race-field.js). To shape with the user: who sails her, whether
+  you can race her yourself too, and how often she's in the field.
 
 ## 12. Open questions
 

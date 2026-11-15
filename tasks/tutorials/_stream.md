@@ -3,4 +3,4 @@ name: Tutorials
 hue: 200
 ---
 
-Ideas for the tutorials: each puzzle's teacher and lesson (15 Nov)
+Tutorials: each puzzle's animated lesson and its static read version, kept in sync (15 Nov)
