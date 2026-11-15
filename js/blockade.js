@@ -60,6 +60,10 @@ export const BLOCKADE = {
         // south to the north, and two squares either side of a rock is too narrow for her, at her every other square)
         [12, 7], [13, 7], [30, 7], [31, 7], [12, 28], [13, 28], [30, 28], [31, 28], [21, 4], [22, 31],
         [18, 20], [25, 15],
+        // (a rock off each end of a frigate lying on the heart's prize: a sloop in her blind spot ducks behind it when she
+        // turns; the user, 15 Nov: "even tweak the map if it makes these situations easier ... the [war frig] could be
+        // sitting in the middle and a sloop can jump out into those blind spots ... camping should not be rewarded")
+        [18, 16], [25, 19],
     ],
     /** The buoys: in the heart, its prize four and two of two, eight in all; in each lagoon five; off each gate two, the
         sloops' quick spots (a frigate sniping at whoever sits on them). Holding the heart and contesting a lagoon beats

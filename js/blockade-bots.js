@@ -10,6 +10,9 @@ export const BOTS = {
     STICK: 1.3,
     /** How much more the heart's buoys are worth to a frigate; and to a sloop, once the enemy's frigates are in it. */
     HEART: 1.6, FLEE: 0.3,
+    /** A sloop's dodge: how near (squares) a frigate has to be to be watched, how nearly loaded (seconds) her side has to
+        be to count, and the longest she keeps at getting to the cover she picked. */
+    DODGE: { NEAR: 7, LOADED: 1.5, SECS: 2.5 },
     /** How near (squares) an enemy frigate has to be to a buoy for a sloop to leave it be. */
     WARY: 5,
     /** A sloop hurt this badly runs to hide and be patched; and comes out again patched to this. */
@@ -169,6 +172,11 @@ export class Bot {
         }
         if (b.over)
             return;
+        // (a sloop dips, ducks and dodges: out of a frigate's broadside before it bears, firing as she goes)
+        if (s.kind === 'sloop' && !s.craft && this.dodge(b, s)) {
+            this.shoot(b, s);
+            return;
+        }
         // (a turtle: no guns, only her prey, looked for often)
         if (s.craft?.kind === 'ram') {
             if ((this.t -= dt) > 0)
@@ -625,6 +633,72 @@ export class Bot {
         s.helm.put(turn);
         return true;
     }
+    /** Dip, duck and dodge (the user, 15 Nov: "in the open water, it would be suicide, but in there are ways to dip and
+        dodge"): a sloop on a square an enemy frigate's broadside reaches, from where she lies or where the move she's on
+        will leave her (her turn the warning: two and a half seconds of it, a sloop's move one), with that side loaded or
+        nearly, gets off it to the nearest square none of them reach, a square behind a rock among them (shots stop at
+        rocks). Whether she's dodging. */
+    dodge(b, s) {
+        const p = s.helm.pose, here = `${p.c},${p.r}`;
+        // (still on her way to cover she chose: keep at it a moment)
+        if (b.clock < this.dodging && this.goal?.kind === 'camp') {
+            if (!(p.c === this.goal.at[0] && p.r === this.goal.at[1]))
+                return true;
+        }
+        const danger = new Set();
+        for (const f of b.ships) {
+            if (f.team === s.team || f.kind !== 'frigate' || f.away > 0 || f.dmg.out || Math.max(Math.abs(f.helm.pose.c - p.c), Math.abs(f.helm.pose.r - p.r)) > BOTS.DODGE.NEAR)
+                continue;
+            const poses = [f.helm.pose, f.helm.after()];
+            for (const side of ['L', 'R']) {
+                if (f.guns.wait[side] > BOTS.DODGE.LOADED)
+                    continue;
+                for (const at of poses)
+                    for (const shot of b.aim(f.id, side, at, false))
+                        for (const [c, r] of shot.cells)
+                            danger.add(`${c},${r}`);
+            }
+        }
+        if (!danger.has(here))
+            return false;
+        // (a duck: whichever of her moves next ends her out of it, one ending beside a rock first, straight on before a turn)
+        const cover = (c, r) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([x, y]) => b.rocks.has(`${c + x},${r + y}`));
+        if (s.helm.slot < 0 || !s.helm.cur) {
+            const ducks = ['F', 'L', 'R'].filter((m) => s.sea.clear(p, m)).map((m) => {
+                const got = s.sea.move(p, m), to = got.ride.length ? got.ride[got.ride.length - 1] : got.to;
+                return { m, to, score: (danger.has(`${to.c},${to.r}`) ? 10 : 0) - (cover(to.c, to.r) ? 1 : 0) + (m === 'F' ? 0 : 0.5) };
+            }).filter((x) => x.score < 10).sort((a, z) => a.score - z.score);
+            if (ducks.length) {
+                if (s.helm.pin)
+                    s.helm.stop();
+                while (s.helm.mine.length)
+                    s.helm.unput();
+                s.helm.put(ducks[0].m);
+                this.goal = { kind: 'camp', at: [ducks[0].to.c, ducks[0].to.r] };
+                this.dodging = b.clock + BOTS.DODGE.SECS;
+                return true;
+            }
+        }
+        const sea = s.sea.bare(), spots = [];
+        for (let dc = -2; dc <= 2; dc++)
+            for (let dr = -2; dr <= 2; dr++) {
+                const c = p.c + dc, r = p.r + dr;
+                if ((!dc && !dr) || danger.has(`${c},${r}`) || !sea.open(c, r) || b.under(c, r))
+                    continue;
+                const near = cover(c, r);
+                spots.push({ at: [c, r], d: Math.hypot(dc, dr) - (near ? 0.4 : 0), cover: near });
+            }
+        spots.sort((a, z) => a.d - z.d);
+        const to = spots.find((x) => !this.blocked(b, x.at));
+        if (!to)
+            return false;
+        this.goal = { kind: 'camp', at: to.at };
+        this.dodging = b.clock + BOTS.DODGE.SECS;
+        this.steer(b, s);
+        return true;
+    }
+    /** Till when she's on her way to the cover she dodged to. */
+    dodging = -1;
     /** She found no way there as things are a little while ago (another ship in the way): left alone a while. */
     blocked(b, at) {
         const when = this.noway.get(`${at[0]},${at[1]}`);

@@ -615,3 +615,36 @@ describe('reefs round the island buoys, the brigs\' and the sloops\' middle grou
     }
   });
 });
+
+describe('dip, duck and dodge (15 Nov: "in the open water, it would be suicide, but in there are ways to dip and dodge")', () => {
+  /** The squares a frigate's loaded broadsides reach, from where she lies and where the move she's on leaves her. */
+  const reach = (b: Blockade, f: ReturnType<typeof frigate>) => {
+    const out = new Set<string>();
+    for (const at of [f.helm.pose, f.helm.after()]) for (const side of ['L', 'R'] as const) for (const x of b.aim(f.id, side, at, false)) for (const [c, r] of x.cells) out.add(`${c},${r}`);
+    return out;
+  };
+  it('a sloop in an enemy frigate\'s broadside gets out of it before it bears, and fires as she goes', () => {
+    const b = new Blockade(), f = frigate(b, 'crimson'), sl = sloop(b, 'gold');
+    clearAway(b, [f, sl]);
+    f.helm.moor({ c: 20, r: 6, d: 1 }); b.notice();
+    // (two squares off her side, square in her broadside)
+    const [c, r] = [...reach(b, f)].map((k) => k.split(',').map(Number)).find(([x, y]) => x === 20)!;
+    sl.helm.moor({ c, r, d: 0 }); b.notice();
+    expect(reach(b, f).has(`${sl.helm.pose.c},${sl.helm.pose.r}`)).toBe(true);
+    const bot = new Bot(sl.id, dice(1));
+    for (let i = 0; i < 25; i++) { bot.tick(b, 0.1); b.tick(0.1); }
+    expect(reach(b, f).has(`${sl.helm.pose.c},${sl.helm.pose.r}`)).toBe(false);
+  });
+  it('she ducks behind a rock if one\'s near: her shot stops on it', () => {
+    const b = new Blockade(), f = frigate(b, 'crimson'), sl = sloop(b, 'gold');
+    clearAway(b, [f, sl]);
+    // (the frigate on open water south of the fort, a rock by the sloop, the rock square off her side)
+    f.helm.moor({ c: 21, r: 1, d: 1 }); b.notice();
+    expect(b.rocks.has('21,4')).toBe(true);
+    sl.helm.moor({ c: 20, r: 4, d: 0 }); b.notice();
+    const bot = new Bot(sl.id, dice(1));
+    let safe = false;
+    for (let i = 0; i < 30 && !safe; i++) { bot.tick(b, 0.1); b.tick(0.1); safe = !reach(b, f).has(`${sl.helm.pose.c},${sl.helm.pose.r}`); }
+    expect(safe).toBe(true);
+  });
+});

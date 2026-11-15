@@ -286,6 +286,8 @@ function frame() {
     cam.yaw += dt * 0.06;
     $('cineLine').textContent = [a, z].map((s) => `${s.name} ${s.away > 0 ? `sunk, back in ${Math.ceil(s.away)}s` : s.dmg.out ? 'knocked out, her crew rebuilding her' : `${Math.round(s.dmg.share() * 100)}% damaged`}`).join(' · ');
   } else if (cam.follow) cam.at.lerp(bk.focus(bk.you() >= 0 ? bk.you() : cam.watching).setY(2), Math.min(1, dt * 2.5));
+  // (the frigate you follow or sail: her broadside reach shaded, her blind spots plain)
+  bk.showReach(bk.you() >= 0 ? bk.you() : cam.follow ? cam.watching : -1);
   hud();
   if ((sayT -= dt) <= 0) $('say').classList.remove('on');
   camera.position.set(cam.at.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cam.at.y + Math.sin(cam.pitch) * cam.dist, cam.at.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist);

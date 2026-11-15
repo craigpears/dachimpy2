@@ -191,6 +191,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
   });
 
   // ----- the ships: each her own look, her name, her influence circle, her crew and her damage -----
+  const sqGeoReach = new THREE.PlaneGeometry(CELL * 0.92, CELL * 0.92).rotateX(-Math.PI / 2);
   // (a turtle's damage isn't drawn on her: two hits and she's gone)
   const NO_DAMAGE = { tick: () => ({ low: 0, list: 0, turn: 0 }), reset() {} };
   const ships = b.ships.map((s) => {
@@ -223,6 +224,11 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     return { s, m, look, dl, name, ring, line, mark, big, brig, craft, heel: 0, pending: new Set(), fadeT: craft ? 99 : undefined };
   });
 
+  // ----- a frigate's broadside reach, shaded red on the water (the one you're following): her blind spots plain, off her
+  // bow and stern and behind rocks (15 Nov: "dip, duck and dodge") -----
+  const reachM = new THREE.MeshBasicMaterial({ color: '#e0412e', transparent: true, opacity: 0.4, depthWrite: false });
+  const reachSq = Array.from({ length: 40 }, () => { const q = new THREE.Mesh(sqGeoReach, reachM); q.renderOrder = 2; q.visible = false; g.add(q); return q; });
+  let reachOf = -1;
   // ----- your pin, the block of squares she'll lie on there, her course -----
   const pin = new THREE.Group(); pin.add(mesh(new THREE.CylinderGeometry(0.3, 0.42, 0.7, 12).translate(0, 0.2, 0), mat('#c8372a')), mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.5, 6).translate(0, 1.2, 0), mat('#4a2f1a')));
   pin.visible = false; g.add(pin);
@@ -389,6 +395,12 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
       });
       for (const t of lanes) t.offset.y -= dt * 2.2;
       for (const q of reefSheets) q.material.opacity = 0.92 + Math.sin(clock * 0.9) * 0.08;   // (the surf, breathing)
+      // The followed frigate's reach: where her loaded sides' broadsides fall from where she lies and where her move
+      // leaves her; nothing off her ends, nothing past a rock.
+      const rf = reachOf >= 0 ? b.ship(reachOf) : null, cells = new Set();
+      if (rf && rf.kind === 'frigate' && rf.away <= 0 && !rf.dmg.out) for (const at of [rf.helm.pose, rf.helm.after()]) for (const side of ['L', 'R']) for (const x of b.aim(rf.id, side, at, false)) for (const [c, r] of x.cells) cells.add(`${c},${r}`);
+      const list = [...cells];
+      reachSq.forEach((q, i) => { q.visible = i < list.length; if (q.visible) { const [c, r] = list[i].split(',').map(Number); q.position.copy(v3(c, r, 0.2)); } });
       // Your pin, your berth there, your course.
       const mine = me >= 0 ? b.ship(me) : null;
       pin.visible = !!mine?.helm.pin;
@@ -458,6 +470,8 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
       return st;
     },
     /** The ship on the square a point on the sea is over (-1: none). */
+    /** Shade a frigate's broadside reach on the water (-1: none). */
+    showReach(id) { reachOf = id; },
     shipAt(point) { const [c, r] = seaCR(point.x, point.z).map(Math.round), s = b.under(c, r); return s ? s.id : -1; },
     focus(id = me) { if (id < 0) return v3(B.COLS / 2 - 0.5, B.ROWS / 2 - 0.5); const s = b.ship(id), at = drawnAt(s.h, s.helm.now()); return v3(at.c, at.r); },
     /** The ship most worth watching just now, spectating: the biggest thing that's happened lately (a knockout, a gate

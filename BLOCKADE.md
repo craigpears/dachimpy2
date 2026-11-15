@@ -296,6 +296,17 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   water none: room to dip, duck and dodge (the user's words for it). The gate guns too: a painted target, a slow shot,
   moving the answer. On design.html's blockading tab.
 
+- **Dip, duck and dodge, built and shown** (15 Nov: "the [war frig] could be sitting in the middle and a sloop can jump
+  out into those blind spots ... the classic PPE trap, is frigs just like to camp and sit in the middle ... camping
+  should not be rewarded. There are blind spots, there are vulnerabilities"):
+  - a sloop bot reads every enemy frigate within 7 squares whose side is loaded (or within 1.5 s of it): the squares
+    her broadsides reach from where she lies and where her move leaves her; on one, the sloop takes a single move out
+    of them, a square beside a rock first, firing as she goes (`dodge` in `blockade-bots.ts`; tested);
+  - two rocks in the heart, (18,16) and (25,19), one off each end of a frigate lying on the prize, to tuck in by;
+  - following a frigate (or sailing one) shades her reach red on the water, her blind spots plain;
+  - the balance as before: the dodge measured head-on and in whole blockades with no change, and the balance tests
+    passing with the two rocks in.
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of
