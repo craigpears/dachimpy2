@@ -287,6 +287,15 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     (400 to 100), being six hulls on seven buoys; one of each kind beat six sloops 3 of 4 with the sloops wary, at 5, so 5
     it stays. In a blockade, numbers of hulls tell: the open question.
 
+- **Blind spots, a design principle** (15 Nov: "the odd couple of rocks in the middle ... sloops or brigs can still
+  have a role in the middle because of those blind spots ... if they were in the open water, it would be suicide, but in
+  there are ways to dip and dodge"; "make those blind spots an explicit part of the design"): a broadside reaches three
+  squares out from a ship's side, never off her bow or stern; to bring her side round, a frigate has to turn, one of her
+  big moves (2.6 s, in plain view), while a sloop moves in a second, so a turn is a warning a sloop can act on, out of the
+  line or behind a rock (shots stop at rocks); a brig's clumsy turn the same. The heart's rocks and walls are cover, open
+  water none: room to dip, duck and dodge (the user's words for it). The gate guns too: a painted target, a slow shot,
+  moving the answer. On design.html's blockading tab.
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of
