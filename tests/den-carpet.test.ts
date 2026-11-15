@@ -34,7 +34,7 @@ const diver = (ids: number[], [c, r]: [number, number]) => (f: Flight) => {
   const T = pointAt(c, r), a = FLIGHT.G + FLIGHT.DIVE, fall = (f.w + Math.sqrt(f.w * f.w + 2 * a * Math.max(0, f.h - 1))) / a;
   return Math.abs(f.z - T.z) <= 9 && f.x + f.u * fall >= T.x - 1;
 };
-const ROUTE: Record<'helium' | 'decorum' | 'race', [number[], [number, number]]> = { helium: [[0], [22.5, 28.5]], decorum: [[1, 2], [12.5, 29]], race: [[0, 3, 4, 5], [22, 41]] };
+const ROUTE: Record<'helium' | 'decorum' | 'smugglers' | 'race', [number[], [number, number]]> = { helium: [[0], [22.5, 28.5]], decorum: [[1, 2], [12.5, 29]], smugglers: [[1, 3], [16.5, 31.5]], race: [[0, 4, 5, 6], [22, 41]] };
 const flyTo = (to: keyof typeof ROUTE, v: number, g: Ground) => {
   const [ids, at] = ROUTE[to];
   return flyOut(v, g, pilot(ids, at), LAUNCH_X, CARPET.DECK_H, diver(ids, at)).landed!.where;
@@ -119,7 +119,7 @@ describe("Jazzmy's carpet ride", () => {
     expect(me.hat).toBe('tricorne');
   });
   it('every ending has its card', () => {
-    for (const e of ['short', 'rocks', 'sea', 'helium', 'decorum', 'island', 'race', 'over'] as const) expect(ENDINGS[e].title).toBeTruthy();
+    for (const e of ['short', 'rocks', 'sea', 'helium', 'decorum', 'smugglers', 'race', 'over'] as const) expect(ENDINGS[e].title).toBeTruthy();
   });
 });
 
@@ -142,6 +142,18 @@ describe('her flight over the real sea (the user, 14 Nov: "depending on how far 
       }
       for (const v of [7.5, 8, 9, 10, 11, 12]) expect(flyTo('decorum', v, g)).toBe('decorum');
     }
+  });
+  it('the smugglers\' beach is somewhere ahead of her to land, not behind (the user, 14 Nov: "how exactly am I supposed to land on somebody else\'s island? ... all the islands are behind you"): left through Port Decorum\'s first gust, then the one round its back, on every sea', () => {
+    for (const seed of [9, ...SEEDS]) {
+      const g = seaGround(seed);
+      for (const v of [8, 9, 10, 11, 12]) expect(flyTo('smugglers', v, g)).toBe('smugglers');
+    }
+    for (const [c, r] of LAY.SMUGGLERS.BEACH) expect(seaGround(9)(c, r)).toBe('smugglers');
+    expect(GUSTS.filter((g) => g.to === 'smugglers').every((g) => g.x > pointAt(LAY.JAZZMY.RUN.c, LAY.JAZZMY.RUN.r1).x)).toBe(true);
+  });
+  it('every other island\'s land is as hard as rock: no ending she can\'t reach', () => {
+    const sea = new Sea(9), g = groundOf(sea);
+    for (const k of sea.works) { const [c, r] = k.split(',').map(Number); expect(['rocks', 'helium', 'decorum', 'smugglers']).toContain(g(c, r)); }
   });
   it('down in the water right off Helium\'s or Port Decorum is arriving there, in its harbour', () => {
     const g = seaGround(9), [c, r] = LAY.EMPIRE.LAND.find(([a, b]) => g(a + 1, b) === 'sea' && g(a + 2, b) === 'sea')!;

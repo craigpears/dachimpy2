@@ -1392,6 +1392,8 @@ She wanted her name to sound like Jasmine. In the den she needs a quick lift to 
 >
 > "I don't think she'd want the "my name's not even Jasmine" thing on there. That seems a bit personal" (the user, 14 Nov)
 >
+> "how exactly am I supposed to land on somebody else's island? ... all the islands are behind you" (the user, 14 Nov)
+>
 > "we need more creative, just a few varied endings, like she crashes on the rocks and nothing really happens. Same with the water, yeah, that's very anticlimactic" (the user, 14 Nov)
 
 ### On her jetty, as you come alongside, and once she's on the carpet
@@ -1442,7 +1444,7 @@ She wanted her name to sound like Jasmine. In the den she needs a quick lift to 
 - *In the open sea past the reef:* "Bit short. Bit wet. Lovely view, though."
 - *On Helium's island, after they've said hello:* "Rum! Right. Now, that blockade."
 - *In Port Decorum, after the guard's had his say:* "Fine. I'll fly back out, then."
-- *On someone else's island:* "Not Helium's. Nice, though."
+- *In the smugglers' cove round the back of Port Decorum, on their beach by the crates or afloat off it:* "Ooh. Crates. I didn't see a thing."
 - *On the race course, past the far reef:* "Is this the race? Am I winning?"
 
 ## Gravee

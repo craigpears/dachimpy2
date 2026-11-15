@@ -89,7 +89,7 @@ export const ENDINGS: Record<Ending, { title: string; blurb: string }> = {
   sea: { title: 'A splash', blurb: 'Over the reef and into the sea. Steer through the gusts to keep her up.' },
   helium: { title: 'Rum, collected', blurb: 'Down on Helium\'s island, rum in hand. Just right.' },
   decorum: { title: 'Port Decorum', blurb: 'Over the Empire\'s harbour, and down in it. They weren\'t pleased.' },
-  island: { title: 'Somewhere else', blurb: 'A lovely island. Not the one with the rum.' },
+  smugglers: { title: 'The smugglers\' beach', blurb: 'Round the back of Port Decorum, where the guards can\'t see. Nobody saw a thing.' },
   race: { title: 'The race course', blurb: 'All the way past the far reef. That\'s a long way for a carpet.' },
   over: { title: 'Off the map', blurb: 'Clean off the edge of the sea. She\'ll turn up.' },
 };

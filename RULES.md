@@ -3972,7 +3972,7 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   course. An island catches her if she's low enough over it. Where she comes down is the ending, each its own little
   scene (the user: "different little cutscenes depending on which kind of area she lands in"): short of the reef;
   into rocks (a seagulls' nest, the carpet draped over them); the open sea; Helium's island (Helium's hello, rum);
-  Port Decorum (the guard: no permit); another island; the race course; off the edge of the sea (a twinkle).
+  Port Decorum (the guard: no permit); the smugglers' beach round its back (left through its first gust, then the one past it; the one other island ahead of her: the rest are behind her and count as rock); the race course; off the edge of the sea (a twinkle).
 - The name joke is the carpet's alone: "JASMINE" embroidered, crossed out, "Jazzmy" stitched over. Nothing said
   about it, ever (the user: "I don't think she'd want the 'my name's not even Jasmine' thing on there. That seems a
   bit personal"); a test holds it.

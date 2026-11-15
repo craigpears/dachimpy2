@@ -42,7 +42,7 @@ export const WHERE_SHE_ENDS_UP = {
   sea: 'Bit short. Bit wet. Lovely view, though.',
   helium: 'Rum! Right. Now, that blockade.',
   decorum: 'Fine. I\'ll fly back out, then.',
-  island: 'Not Helium\'s. Nice, though.',
+  smugglers: 'Ooh. Crates. I didn\'t see a thing.',
   race: 'Is this the race? Am I winning?',
 } as const;
 
@@ -55,6 +55,7 @@ export const CHARACTER: Character = {
     { on: '14 Nov', said: 'kind of exasperating at the end. It\'s like, oh, my name\'s not really Jasmine. It\'s like, I have this sad face' },
     { on: '14 Nov', said: 'I think the crossing out Jasmine with Jasmine works enough. I don\'t think you need a constant correction in the dialogue' },
     { on: '14 Nov', said: 'I don\'t think she\'d want the "my name\'s not even Jasmine" thing on there. That seems a bit personal' },
+    { on: '14 Nov', said: 'how exactly am I supposed to land on somebody else\'s island? ... all the islands are behind you' },
     { on: '14 Nov', said: 'we need more creative, just a few varied endings, like she crashes on the rocks and nothing really happens. Same with the water, yeah, that\'s very anticlimactic' },
   ],
   lines: [
@@ -70,7 +71,7 @@ export const CHARACTER: Character = {
     { when: 'In the air', says: IN_THE_AIR, each: { gust: 'Through a gust', low: 'Dropping low, heading down' } },
     {
       when: 'Where she comes down', says: WHERE_SHE_ENDS_UP,
-      each: { short: 'In the sea short of the reef, afloat on the carpet, paddling with her goblet, a seagull landing on her head', rocks: 'Into rocks: in a seagulls\' nest on top, the carpet draped over them, the seagulls cross', sea: 'In the open sea past the reef', helium: 'On Helium\'s island, after they\'ve said hello', decorum: 'In Port Decorum, after the guard\'s had his say', island: 'On someone else\'s island', race: 'On the race course, past the far reef' },
+      each: { short: 'In the sea short of the reef, afloat on the carpet, paddling with her goblet, a seagull landing on her head', rocks: 'Into rocks: in a seagulls\' nest on top, the carpet draped over them, the seagulls cross', sea: 'In the open sea past the reef', helium: 'On Helium\'s island, after they\'ve said hello', decorum: 'In Port Decorum, after the guard\'s had his say', smugglers: 'In the smugglers\' cove round the back of Port Decorum, on their beach by the crates or afloat off it', race: 'On the race course, past the far reef' },
     },
   ],
 };

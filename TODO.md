@@ -58,6 +58,11 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     like she's demanding it." She needs a quick lift to Helium's for the blockade's rum; the carpet's your idea.
   - The ropes over the carpet flickering: "It's really distracting ... over like the boxes ... it kind of appears and
     disappears. Like the rope or the strap". The lashings sat level with the cloth, which ripples through them.
+  - "Somewhere else" can't be reached: "how exactly am I supposed to land on somebody else's island? ... all the
+    islands are behind you." Every other island's land counted as rock, and none is ahead of her. Agreed: make it
+    the smugglers' beach behind Port Decorum, a gust curving round to it, a little scene and a line of its own.
+    Done 15 Nov. A scenic flight over Tzz's and Kikkit's islands (taking off at her jetty) was weighed and dropped:
+    "Don't worry about the scenic thing."
   Done the same evening: five endings (paddle, skip, hammock, rocks, over the horizon), no Jasmine line, the meter from
   the wind's own pace; her island right behind the ride's jetty (her palms and stall shared, js/den/jazzmy-props.js);
   her hair long tumbling waves past the shoulders, after her classic portrait.

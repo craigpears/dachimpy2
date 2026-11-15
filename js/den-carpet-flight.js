@@ -11,7 +11,7 @@
    down the sea), with a lift in proportion (`w`), falling back under a floaty gravity. You steer her across (left,
    right), and hold Space to dive, bringing her down where you want her. Gusts hang over the sea in trails, the way
    to Helium's, to Port Decorum and on past both: fly through one and she's lifted again and pushed on. Where she comes down is the ending: short of the reef, into its rocks (or any
-   rocks), the open sea, Helium's island, Port Decorum, another island, the race course beyond the far reef, or off
+   rocks), the open sea, Helium's island, Port Decorum, the smugglers' beach round its back, the race course beyond the far reef, or off
    the edge of the sea altogether.
 
    Its frame: metres from the middle of the trade wind's first square (LAY.JAZZMY.RUN), `x` on down the sea (the way
@@ -45,6 +45,12 @@ export const FLIGHT = {
 const key = (c, r) => `${c},${r}`;
 const HELIUM_LAND = new Set(LAY.HELIUM.LAND.map(([c, r]) => key(c, r)));
 const EMPIRE_LAND = new Set(LAY.EMPIRE.LAND.map(([c, r]) => key(c, r)));
+/** The smugglers' beach behind Port Decorum, and the cove off it (the user, 14 Nov, of another island: "how exactly am I
+    supposed to land on somebody else's island? ... all the islands are behind you"): the one other landing ahead of her,
+    round Port Decorum's back where the guards can't see. */
+const SMUGGLERS_LAND = new Set([...LAY.SMUGGLERS.BEACH, ...LAY.SMUGGLERS.COVE].map(([c, r]) => key(c, r)));
+/** Its sand, as against its cove's water. */
+export const onSmugglersSand = (c, r) => LAY.SMUGGLERS.BEACH.some(([a, b]) => a === c && b === r);
 /** The ground of a sea (its rocks, and its islands' land, `works`). */
 export function groundOf(sea) {
     return (c, r) => {
@@ -53,10 +59,10 @@ export function groundOf(sea) {
             return 'helium';
         if (EMPIRE_LAND.has(k))
             return 'decorum';
-        if (sea.rocks.has(k))
+        if (SMUGGLERS_LAND.has(k))
+            return 'smugglers';
+        if (sea.rocks.has(k) || sea.works.has(k))
             return 'rocks';
-        if (sea.works.has(k))
-            return 'island';
         return 'sea';
     };
 }
@@ -71,6 +77,8 @@ export const GUSTS = [
     // (off to her left, curving round to Port Decorum, high over the smugglers' rocks)
     { x: 64, z: -8, to: 'decorum' },
     { x: 82, z: -25, to: 'decorum' },
+    // (or on from the first of those, round Port Decorum's back high over the smugglers' rocks, and down into their cove)
+    { x: 88, z: -12, to: 'smugglers' },
     // (on past Helium's, off to her right of it, over the far reef to the race course)
     { x: 82, z: 8, to: 'race' },
     { x: 98, z: 11, to: 'race' },

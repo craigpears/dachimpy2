@@ -19,7 +19,7 @@
 // runs) and its +z across it, columns increasing: the flight's own frame (src/den-carpet-flight.ts's pointAt).
 import * as THREE from 'three';
 import { Ride, CARPET, LAUNCH_X, METER, moodAt, meterAt, ENDINGS, SECS, dressedForIt } from '../den-carpet.js';
-import { GUSTS, FLIGHT, groundOf, pointAt } from '../den-carpet-flight.js';
+import { GUSTS, FLIGHT, groundOf, pointAt, onSmugglersSand } from '../den-carpet-flight.js';
 import { LAY } from '../den-sail.js';
 import { puff, blastTick } from './blast.js';
 import * as LOOK from '../den-look.js';
@@ -447,14 +447,23 @@ function afterwards(L) {
     carpet.gulls.forEach((gl, i) => { gl.visible = true; gl.userData.on = { kind: 'circle', t: i * 2.1, at: carpet.nest.position.clone() }; });
   }
 }
+/** The top of the smugglers' sand (js/den/smugglers.js), where she stands if she comes down on it. */
+const SMUGGLERS_SAND_Y = 0.2;
 function landed(L) {
   const J = carpet.jazz, rug = carpet.rug, at = rug.position, e = L.where;
   carpet.landed = true;
   ripple(rug, 0, 0);
   rug.rotation.set(0, 0, 0);
   at.set(L.x, L.h + 0.04, L.z);
-  // (into the water: short of the reef, the open sea, the race course, or a harbour, Helium's or Port Decorum's)
-  if (e === 'short' || e === 'sea' || e === 'race' || L.h <= 0) { splash(at.x, at.z, e === 'short' ? 0.5 : 1); at.y = 0.03; J.at = 'afloat'; }
+  // (into the water: short of the reef, the open sea, the race course, a harbour, Helium's or Port Decorum's, or the
+  // smugglers' cove off their beach)
+  const cove = e === 'smugglers' && !onSmugglersSand(L.c, L.r);
+  carpet.cove = cove;
+  if (e === 'short' || e === 'sea' || e === 'race' || L.h <= 0 || cove) {
+    splash(at.x, at.z, e === 'short' ? 0.5 : 1); at.y = 0.03; J.at = 'afloat';
+    // (in the smugglers' cove, turned side on to it, her back to their beach, so you see her and their crates)
+    if (cove) rug.rotation.y = -Math.PI / 2;
+  }
   else if (e === 'rocks') {
     // Smack into the rocks: dust, the carpet left draped over them, her flung up into a seagulls' nest on top.
     worldLets.shake = 0.6;
@@ -472,10 +481,11 @@ function landed(L) {
     carpet.twinkle.position.set(at.x, at.y + 0.5, at.z);
     carpet.twinkle.visible = true; carpet.twinkle.userData.t = 0;
   } else {
-    // (down on an island: Helium's, Port Decorum, another; stood up on it)
+    // (down on an island: Helium's, Port Decorum, the smugglers' sand, lower than an island's ground; stood up on it)
+    J.ground = e === 'smugglers' ? SMUGGLERS_SAND_Y : FLIGHT.LAND_H;
     const w = local(J.g);
-    root().add(J.g); J.g.position.set(w.x, FLIGHT.LAND_H, w.z + 0.6); J.g.rotation.set(0, 0, 0); J.seated = false;
-    at.y = FLIGHT.LAND_H + 0.02;
+    root().add(J.g); J.g.position.set(w.x, J.ground, w.z + 0.6); J.g.rotation.set(0, 0, 0); J.seated = false;
+    at.y = J.ground + 0.02;
     J.at = 'ashore';
   }
   carpet.found.add(e);
@@ -660,7 +670,7 @@ function poseJazz(J, P, R, dt, t) {
     return;
   }
   if (J.at === 'nest') { IDLES[P === 'punch' || P === 'card' ? 'shrug' : 'cower'](J, t, P === 'punch'); sitPose(J); J.g.position.y = FLIGHT.ROCK_TOP + 0.25; faceCam(J, dt); return; }
-  if (J.at === 'ashore') { J.legs.forEach((l) => l.rotation.set(0, 0, 0)); IDLES[P === 'punch' ? 'talk' : 'tada'](J, t, P === 'punch'); J.g.position.y = FLIGHT.LAND_H; faceCam(J, dt); return; }
+  if (J.at === 'ashore') { J.legs.forEach((l) => l.rotation.set(0, 0, 0)); IDLES[P === 'punch' ? 'talk' : 'tada'](J, t, P === 'punch'); J.g.position.y = J.ground ?? FLIGHT.LAND_H; faceCam(J, dt); return; }
   if (J.seated) {
     const m = moodAt(R.v), F = R.flight;
     const idle = carpet.landed ? (P === 'punch' ? 'talk' : 'stand')
@@ -706,6 +716,8 @@ export function carpetCam() {
     // (down on an island, from the way she came in, over the water: whatever's on it behind her, not in the way)
     const at = carpet.jazz.at, far = { nest: 6.5, ashore: 6.5 }[at] ?? 4.8;
     C = { look: [J.x, J.y + 0.9, J.z], dist: tall ? far * 1.35 : far, tilt: at === 'nest' ? 0.2 : 0.16, yaw: at === 'ashore' ? -1.3 : -0.55 };
+    // (afloat in the smugglers' cove: from its open water, her and their beach behind her)
+    if (at === 'afloat' && carpet.cove) C = { look: [J.x, J.y + 0.7, J.z - 1.5], dist: tall ? 8 : 6.5, tilt: 0.18, yaw: 0.35 };
   }
   else C = { look: [J.x - 3, 1.2, J.z], dist: 13, tilt: 0.35, yaw: -0.8 };
   camK.yaw = C.yaw + YAW;
