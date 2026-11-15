@@ -26,7 +26,7 @@ import { ROUTINES, clear, isJunk, junkTarget, playDrags } from './distill-routin
 import { routesInto } from './distill-path.js';
 import { PHASES } from './distill-phase.js';
 import { teach } from './distill-teach.js';
-import { AFTER, BEST, GOAL, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, MAKE_WAY, PLAN, PRAISE, SPOT, STEP_ONE, TEACH, TELL, WATCH } from './lines/helium.js';
+import { AFTER, BEST, GOAL, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, MAKE_WAY, PLAN, PRAISE, SPOT, STEP_ONE, TEACH, TELL, TUTOR, WATCH } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 const H = LAY.HELIUM;
 export const HELIUM = {
@@ -173,6 +173,32 @@ function clearFireSide(b, most = 16) {
     }
     return drags;
 }
+/** Where pieces end up once some drags are played on board `cols`: each place in `at` followed swap by swap (a
+    dragged piece along its way, a piece it swaps with a place back). For ringing them again once a move's done. */
+export function follow(cols, drags, at) {
+    const b = copy(cols);
+    let out = at.map(([x, y]) => [x, y]);
+    for (const d of drags) {
+        let here = [d.x, d.y];
+        for (const w of d.ways) {
+            const n = neighbourOn(b, here[0], here[1], w);
+            if (!n)
+                break;
+            out = out.map(([x, y]) => (x === here[0] && y === here[1] ? [n[0], n[1]] : x === n[0] && y === n[1] ? [here[0], here[1]] : [x, y]));
+            [b[here[0]][here[1]], b[n[0]][n[1]]] = [b[n[0]][n[1]], b[here[0]][here[1]]];
+            here = n;
+        }
+    }
+    return out;
+}
+/** Step one's whites (those on the fire's side of `cols`) where its drags leave them: ringed again as they say why. */
+const whitesMoved = (cols, drags) => {
+    const ws = [];
+    cols.forEach((col, x) => { if (fireSide(x))
+        col.forEach((p, y) => { if (p === WHITE || p === BURNT)
+            ws.push([x, y]); }); });
+    return follow(cols, drags, ws);
+};
 /** The lesson's board just before their opening's bang: its first column, all junk, burned, the next (a white in
     it) at the fire. The read version (distilling-guide.html) draws it. */
 export const beforeBang = () => { const g = lessonGame(); if (g.cols[COLS - 1].every(isJunk))
@@ -188,7 +214,7 @@ export const afterOpening = () => { const g = lessonGame(); opening(g); return g
     bang, and they've no eyebrows left); then it's yours, step one the goal. */
 export function lessonPlan(game = afterOpening()) {
     const g = game, S = STEPS[0], marks = COLS - S.cols, beats = [];
-    const drags = clearFireSide(copy(g.cols));
+    const before = copy(g.cols), drags = clearFireSide(copy(g.cols));
     beats.push({ name: 'step', says: S.says, note: S.note, act: { kind: 'none' }, step: S.n, marks });
     if (drags.length) {
         for (const d of drags) {
@@ -197,7 +223,9 @@ export function lessonPlan(game = afterOpening()) {
         }
         beats.push({ name: 'clear', says: S.clear, note: S.note, act: { kind: 'drags', drags }, step: S.n, marks });
     }
-    beats.push({ name: 'why', says: S.why, note: S.note, act: { kind: 'none' }, step: S.n });
+    beats.push({ name: 'why', says: S.why, note: S.note, act: { kind: 'none' }, step: S.n, ...(drags.length ? { rings: whitesMoved(before, drags) } : {}) });
+    // (what else they can show you, said once, beside the lesson, never a question in front of it: the user, 15 Nov)
+    beats.push({ name: 'else', says: TUTOR.else, note: S.note, act: { kind: 'none' }, step: S.n });
     beats.push({ name: 'burner', ...LESSON.burner, act: { kind: 'none' }, step: S.n });
     beats.push({ name: 'yours', ...LESSON.yours, act: { kind: 'none' }, step: S.n });
     return beats;

@@ -42,7 +42,7 @@ export const LESSON = {
 export const STEP_ONE = {
     says: 'Right. First things first. See all these whites on the right? Next in the fire, every one.',
     clear: 'So out of the way they go. Left, away from the fire, swap by swap.',
-    why: 'Otherwise, silly mishaps. Bang. And I\'ve already got no eyebrows.',
+    why: 'There: not a white left in those three. Otherwise, silly mishaps. Bang. And I\'ve already got no eyebrows.',
     note: 'Step 1: get every white (ringed) out of the three right-hand columns, the next to burn.',
 };
 /** Sending you on to other pirates (the user, 13 Nov: "the greatest love of the game is talking to other
@@ -68,8 +68,13 @@ export const TUTOR = {
     higher: { asks: 'Trying to get your CC higher?', then: 'Longer chains. That\'s banking, then the chain. Pick one.' },
     end: { asks: 'The end game?', then: 'The end game. A gamble, that. Pick one.' },
     chooseNote: 'Helium\'s island. Pick what to see: arrows and Enter, a number, or tap. Esc: back.',
-    show: '{title}. Here, on a real board.',
-    after: 'That\'s the one. Your go now. T if you want another.',
+    /** Said once in their lesson, as step one's done (the user, 15 Nov: the choice beside the lesson, never in front
+        of it: "I don't want to have to ask 3 questions to see something happen"). */
+    else: 'Something else you\'re after? T, any time, and I\'ll show you.',
+    /** The button beside their lesson and at the still, and the bar's word for T while their lesson plays. */
+    button: 'Show me something else (T)',
+    barKey: 'T: something else',
+    after: 'Your go now. T if you want another.',
     afterNote: 'Your still: a fresh board. T: Helium shows you something else. H: Help, Helium. G: a hint. W: watch Helium play.',
     notNow: 'Suit yourself. The still\'s yours. T if you change your mind.',
 };
@@ -296,6 +301,41 @@ export const SPOT = {
     many: 'Plenty more like that. Here\'s a few. Find them.',
     note: 'Blue rings: the same trick works there too',
 };
+/** Each part of their tutorial they play on a board of its own (src/distill-tutorial.ts, src/den-helium-tutor.ts), by
+    its id: what's wrong or wanted on that board, said as it's laid, the pieces it's about ringed (`before`); then,
+    the move played, what it did, ringed again (`after`). The user (15 Nov): "when I look at the tricks, like pulling
+    the rounds down, like, that was cool, but... It just kind of jumped into it without any context of what it was
+    doing, what it was achieving, what the point was." The read guide (distilling-guide.html) shows the same two
+    beside each part, so the lesson and the page say the same; where a line of theirs already says it (a phase's
+    first line, a trick's why, step one's), it's that line. Each is about the board the guide draws for it. */
+export const POINT = {
+    white: { before: 'That white, ringed, is in the column at the fire. Watch.', after: 'Bang. A white burned is a white lost, and every second one comes back burnt. So: never.' },
+    danger: { before: 'These two, low in the column next to burn. Can\'t get out on their own. Hardest to reach, so first.', after: 'One drag, and there\'s a white fewer in it to lose. Easy work elsewhere can wait.' },
+    edge: { before: 'Whites on the edges by the fire. Few ways out, and they close as the board slides.', after: 'Junk raced in from far off, into a white\'s place. Fewer walled in now.' },
+    climb: { before: 'This white\'s got blacks just above it.', after: TEACH.climb.why },
+    sink: { before: 'This white\'s got browns just below it.', after: TEACH.sink.why },
+    lift: { before: 'This brown\'s got whites just above it.', after: TEACH.lift.why },
+    drop: { before: 'This black\'s got whites just below it.', after: TEACH.drop.why },
+    weave: { before: 'This white\'s in among junk: a brown below, a black above.', after: TEACH.weave.why },
+    ladder: { before: 'This black\'s got browns just above it. Junk the wrong way up.', after: TEACH.ladder.why },
+    makeWay: { before: 'Nothing plain gets this white out yet. So first, a move to make way.', after: TEACH.makeWay.why },
+    leapfrog: { before: 'This brown wants to go along the row, through junk and whites alike.', after: 'Down past a black, up past a white, down past a black. Along the row, one drag.' },
+    fire: { before: PHASE.fire.first, after: 'Not a white left in the three by the fire. Nothing there can burn now.' },
+    fill: { before: PHASE.fill.first, after: 'Ringed, the gaps in the column being filled. Junk into each, then the next column in.' },
+    block: { before: PHASE.block.first, after: 'One long drag, carried on till it joins the junk. Big drags now, no fiddling.' },
+    chain: { before: PHASE.chain.first, after: 'A white from the far left, woven right, towards the columns going up next.' },
+    sweep: { before: 'Early on: plenty of junk, plenty of time. Grab a brown, drag it right.', after: 'Right across to the fire in one drag. Rough\'s fine this early. Next.' },
+    diamond: { before: 'This black\'s on the left, among whites. It belongs over on the right, with the blacks.', after: 'Down across the whites, then up past a brown to the blacks. Junk right, whites left.' },
+    turnOver: { before: 'The end column\'s the wrong way up: browns on top, blacks under.', after: 'A black zigzagged up through the browns. Turn it all over, and the whites can hook in.' },
+    linePull: { before: 'A line of browns to shift, and a black beside them. One drag pulls the lot.', after: 'Round it looped, and every brown it climbed past dropped a place. The line moved.' },
+    hook: { before: 'Not many pieces left about, and junk to get in past the whites.', after: 'The brown nudged first, then the black down and round the corner past it. Together.' },
+    stepOne: { before: STEP_ONE.says, after: STEP_ONE.why },
+    p2: { before: 'Two whites walled in at the top, by the fire. Free them first, the worst first.', after: 'The worst one\'s got a way out now, left, up over a black. Then the other.' },
+    p8: { before: 'The two by the fire are the wrong way up, and the end one goes in a second.', after: 'A brown sunk down through the blacks. The pair\'s a step nearer blacks over browns.' },
+    p10: { before: 'Junk stranded among the whites, ringed. Cracks. Stop filling and fix them.', after: 'A first crack worked on. The browns in the middle stay put: tools for the rest.' },
+    p7: { before: 'Five whites by the fire, and no time to save them all. Fill the gaps, quickest first.', after: 'A brown raced into a white\'s place, the quickest there was. Then the next gap.' },
+    p27: { before: 'Same trouble by the fire, and the junk\'s the wrong way up: browns high, blacks low.', after: 'A brown sunk through the blacks, lifting them. Swept off top right, it\'d have split them.' },
+};
 /** Their rum run (src/den-rumrun.ts; the user, 13 Nov, IDEAS.md "Helium's rum run"): once you've filled some casks
     at their still, they ask you to help get it where it's going, hop aboard your sloop with the barrels, and play it
     all innocent past the Empire: "nothing suspicious at all", whistling "whoop-de-doop-de-doop-de-doo". Still
@@ -403,9 +443,10 @@ export const CHARACTER = {
         { when: 'Your first batch at the still done, the goal met, after their "done": the rest is from other pirates', says: [ONWARD] },
         { when: 'The last thing they say when a lesson ends, always, after the other pirates', says: [TELL] },
         {
-            when: 'Their opening choice, after their opening or on T at the still: their question (opening, then each choice\'s asks), their line over its list once it\'s picked (then); the part picked played on a real board (show as it\'s laid, after once it\'s played, afterNote in the bar), or not now',
+            when: 'Their choice of what to show you, on T (or its button) during their lesson or at the still: their question (opening, then each choice\'s asks), their line over its list once it\'s picked (then); said once in their lesson as step one\'s done (else), the button and the bar\'s word for T (button, barKey); the part picked played on a real board (its point, below), then your go (after, afterNote in the bar), or not now',
             says: TUTOR,
         },
+        { when: 'A part of their tutorial played on a board of its own, by its id: as it\'s laid, what\'s wrong or wanted there (before), and once the move\'s played, what it did (after)', says: POINT },
         {
             when: 'The end of their lesson: in their bubble (says) and in the bar at the foot of the screen (note)', says: LESSON,
             each: { burner: 'Before handing you the board: they hold the burner, the fire held to start', yours: 'Handing you the board: step one first, then your goal' },

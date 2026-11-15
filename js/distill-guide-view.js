@@ -4,7 +4,8 @@
 // page. It fills the page's slots: [data-phase], [data-technique], [data-trick] and [data-level] sections, and the
 // rules' [data-rules] figures. The sticky nav along the top is the one every read guide has (js/tutorial-nav.js), drawn
 // from Distilling's tutorial (src/distill-tutorial.ts), and each part it links to gets a "Show me this" link into
-// Helium's lesson on that part (den.html?at=helium&learn=<id>: js/den/helium-isle.js).
+// Helium's lesson on that part (den.html?at=helium&learn=<id>: js/den/helium-isle.js), and what the part's for on its
+// board in Helium's words, the same two lines their lesson says round the move (its `point`, src/lines/helium.ts).
 import { guide } from './distill-guide.js';
 import { tutorialNav } from './tutorial-nav.js';
 import { SECTIONS, anchorOf, partsOf } from './tutorial.js';
@@ -301,7 +302,22 @@ function draw() {
   document.body.classList.add('drawn');
 }
 
-/** The sticky nav, and a "Show me this" on each part it links to, into Helium's lesson on that part. */
+/** A part's point (RULES.md, "Every trick shown says what it's for", 15 Nov): what's wrong or wanted on its board, and
+    what the move did, in Helium's words, as their lesson says them; a line the place already shows (a phase's quote,
+    a trick's rule) not twice. */
+function pointFor(p, shown, heading = false) {
+  const lines = [['Here', p.point.before], ['Then', p.point.after]].filter(([, line]) => !shown.includes(line));
+  if (!lines.length) return null;
+  const q = html('p', { className: heading ? 'intro point' : 'point' });
+  lines.forEach(([label, line], i) => {
+    if (i) q.appendChild(document.createTextNode(' '));
+    q.appendChild(html('b', {}, `${label}: `));
+    q.appendChild(document.createTextNode(`“${line}”`));
+  });
+  return q;
+}
+
+/** The sticky nav, and on each part it links to its point and a "Show me this", into Helium's lesson on that part. */
 function nav() {
   tutorialNav(DISTILL_TUTORIAL, { mount: document.querySelector('[data-failed]'), links: [{ title: 'Learn it from Helium', href: 'den.html?at=helium', target: '_blank' }] });
   for (const s of SECTIONS) for (const p of partsOf(DISTILL_TUTORIAL, s)) {
@@ -309,8 +325,13 @@ function nav() {
     if (!at || at.querySelector(':scope .show-me')) continue;
     const a = html('a', { className: 'show-me', href: `den.html?at=helium&learn=${encodeURIComponent(p.id)}` }, 'Show me this');
     a.title = `${DISTILL_TUTORIAL.teacher} shows you ${p.title.toLowerCase()} on a real board`;
-    if (/^H[1-6]$/.test(at.tagName)) at.appendChild(a);
-    else (at.matches('article.board-side') ? at.lastElementChild : at.tagName === 'FIGURE' ? at.querySelector('figcaption') : at).appendChild(a);
+    const heading = /^H[1-6]$/.test(at.tagName);
+    const box = heading ? at : at.matches('article.board-side') ? at.lastElementChild : at.tagName === 'FIGURE' ? at.querySelector('figcaption') : at;
+    // (a phase's heading: its point under it, the article after it showing its board)
+    const point = p.point ? pointFor(p, `${at.textContent} ${heading ? at.nextElementSibling?.textContent ?? '' : ''}`, heading) : null;
+    if (point && heading) at.after(point);
+    else if (point) box.appendChild(point);
+    box.appendChild(a);
   }
 }
 
