@@ -7,49 +7,56 @@ import { Damage, struck } from './ship-damage.js';
 const key = (c, r) => `${c},${r}`;
 /** The board (c across, r up from the south edge). */
 export const BLOCKADE = {
-    COLS: 44,
-    ROWS: 36,
+    COLS: 56,
+    ROWS: 48,
+    /** Open sea added round the board on every side, squares (the user, 15 Nov: "the whole board's a bit small ... brigs and
+        frigs are spawning very close to the action. Like there needs to be a bit of a buffer travel zone"): a ship that
+        sinks has a way to sail back, the sloops riding the edge winds in quickly. */
+    PAD: 6,
     /** The fort's walls, two deep, round the heart. */
     WALLS: [
-        { c0: 14, c1: 29, r0: 12, r1: 13 }, { c0: 14, c1: 29, r0: 22, r1: 23 },
-        { c0: 14, c1: 15, r0: 12, r1: 23 }, { c0: 28, c1: 29, r0: 12, r1: 23 },
+        { c0: 20, c1: 35, r0: 18, r1: 19 }, { c0: 20, c1: 35, r0: 28, r1: 29 },
+        { c0: 20, c1: 21, r0: 18, r1: 29 }, { c0: 34, c1: 35, r0: 18, r1: 29 },
     ],
     /** The heart, inside them. */
-    HEART: { c0: 16, c1: 27, r0: 14, r1: 21 },
+    HEART: { c0: 22, c1: 33, r0: 20, r1: 27 },
     /** The imperial gates: each one's way (its column), its wall's rows, its bastion guns on the wall, four, doubled up
         (15 Nov: "I do love watching the imperial [cannons] ... training on people's positions, especially punishing people
         camping. I almost partly think that we need to double up on the [cannons] ... stop people camping. And provide
         more of a barrier to the war frigates"): two by the gate's towers, two further along. */
     GATES: [
-        { way: 21, r0: 12, r1: 13, guns: [[16, 12], [18, 12], [24, 12], [26, 12]] },
-        { way: 22, r0: 22, r1: 23, guns: [[17, 23], [19, 23], [25, 23], [27, 23]] },
+        { way: 27, r0: 18, r1: 19, guns: [[22, 18], [24, 18], [30, 18], [32, 18]] },
+        { way: 28, r0: 28, r1: 29, guns: [[23, 29], [25, 29], [31, 29], [33, 29]] },
     ],
     /** Seconds a gate gun's shot is coming down on the square it painted: a sloop on the move is gone from it (a move a
         second or so), a frigate in the middle of hers (two and a half) and a ship lying still aren't. Camping by a gate,
         or lying broadside to its tower, is punished by it; moving through isn't. */
     GATE_AIM: 2.4,
     /** The side ways: a one-square gap through the west wall and the east. */
-    SIDEWAYS: [[14, 18], [15, 18], [28, 17], [29, 17]],
+    SIDEWAYS: [[20, 24], [21, 24], [34, 23], [35, 23]],
+    /** A postern by each of the heart's two corners no way out runs through: a one-square gap through the wall from the
+        open sea into the corner (the user, 15 Nov: "we've created a bit of a corner for [brigs] to hide ... we also need to
+        balance that with another kind of gap coming from the outside"). A sloop slips in at a brig at anchor there, a
+        frigate outside fires in through it; no frigate gets through. (The other two corners have the ways out.) */
+    POSTERNS: [[20, 20], [21, 20], [34, 27], [35, 27]],
     /** The winds (the way each blows: 0 up the board, 1 right, 2 down, 3 left; n squares from `at`): one a side, from its
         own edge in through its lagoon and its side way into the heart. A sloop on one is carried along it; a frigate rides
         them out. */
-    WINDS: [{ at: [0, 18], d: 1, n: 18 }, { at: [43, 17], d: 3, n: 18 }],
+    WINDS: [{ at: [0, 24], d: 1, n: 24 }, { at: [55, 23], d: 3, n: 24 }],
     /** The ways out of the heart, one to each lagoon: a wind blowing out through a gap in the fort's wall and on into the
         lagoon by a gap in its reef, carrying a sloop from the heart to its buoy in one move. */
     EXITS: [
-        [{ at: [16, 20], d: 3, n: 10 }],
-        [{ at: [27, 15], d: 1, n: 10 }],
+        [{ at: [22, 26], d: 3, n: 10 }],
+        [{ at: [33, 21], d: 1, n: 10 }],
     ],
-    /** Each side's corner of the sea, where her sloops can lie out of the fighting too when the lagoons are full. */
-    HOMES: { gold: [[0, 0], [3, 0], [0, 3]], crimson: [[43, 35], [40, 35], [43, 32]] },
     /** The lagoons, one on each side's wind: a reef round each, a ring three squares out (any way) from its middle with
         gaps a square wide (the side's wind in and on, the wind out of the heart, one to the north and one to the south),
         a lagoon five across inside, its buoy in the middle (so no frigate, even in the shoals, reaches it), a tiny island
         by it and the sloops' hiding place in a corner; and shoals `shoal` squares wide round the reef. The east's the
         west's turned round the board's middle. */
     REEFS: [
-        { at: [6, 19], ring: 3, gaps: [[3, 18], [9, 18], [9, 20], [6, 22], [6, 16]], islet: [7, 17], hide: [4, 21], shoal: 3 },
-        { at: [37, 16], ring: 3, gaps: [[40, 17], [34, 17], [34, 15], [37, 13], [37, 19]], islet: [36, 18], hide: [39, 14], shoal: 3 },
+        { at: [12, 25], ring: 3, gaps: [[9, 24], [15, 24], [15, 26], [12, 28], [12, 22]], islet: [13, 23], hide: [11, 26], shoal: 3 },
+        { at: [43, 22], ring: 3, gaps: [[46, 23], [40, 23], [40, 21], [43, 19], [43, 25]], islet: [42, 24], hide: [44, 21], shoal: 3 },
     ],
     /** A frigate in the shoals: every SCRAPE seconds she's in them she scrapes her bottom (a hole, as a shot of that size
         on the square she's in them), and her pilot's toll, the seconds a move through them is reckoned to cost her more. */
@@ -58,12 +65,15 @@ export const BLOCKADE = {
     ROCKS: [
         // (none along the west and east edges: with the reefs, the way round past them is the frigates' only one from the
         // south to the north, and two squares either side of a rock is too narrow for her, at her every other square)
-        [12, 7], [13, 7], [30, 7], [31, 7], [12, 28], [13, 28], [30, 28], [31, 28], [21, 4], [22, 31],
-        [18, 20], [25, 15],
+        [18, 13], [19, 13], [36, 13], [37, 13], [18, 34], [19, 34], [36, 34], [37, 34], [27, 10], [28, 37],
+        [24, 26], [31, 21],
         // (a rock off each end of a frigate lying on the heart's prize: a sloop in her blind spot ducks behind it when she
         // turns; the user, 15 Nov: "even tweak the map if it makes these situations easier ... the [war frig] could be
         // sitting in the middle and a sloop can jump out into those blind spots ... camping should not be rewarded")
-        [18, 16], [25, 19],
+        [24, 22], [31, 25],
+        // (and one beside each of those, so every corner of the heart is a nook a brig can lie in out of any frigate's reach
+        // there, to launch from: the user, 15 Nov, "an enclosed launching spot for a brig ... one rock in each corner")
+        [32, 25], [23, 22],
     ],
     /** The buoys: in the heart, its prize four and two of two, eight in all; in each lagoon five; off each gate two, the
         sloops' quick spots (a frigate sniping at whoever sits on them). Holding the heart and contesting a lagoon beats
@@ -71,9 +81,9 @@ export const BLOCKADE = {
         the centre and then you're at least contesting one of the lagoons, you should win ... the two lagoons together
         should beat the centre ... centre's worth 8, a lagoon is worth 5". */
     BUOYS: [
-        { at: [21, 17], pennants: 4 }, { at: [18, 15], pennants: 2 }, { at: [25, 20], pennants: 2 },
-        { at: [21, 8], pennants: 2 }, { at: [22, 27], pennants: 2 },
-        { at: [6, 19], pennants: 5 }, { at: [37, 16], pennants: 5 },
+        { at: [27, 23], pennants: 4 }, { at: [24, 21], pennants: 2 }, { at: [31, 26], pennants: 2 },
+        { at: [27, 14], pennants: 2 }, { at: [28, 33], pennants: 2 },
+        { at: [12, 25], pennants: 5 }, { at: [43, 22], pennants: 5 },
     ],
     /** Squares from any of her squares a ship's influence reaches, by her size (YPPedia: "different sized ships
         have different sized influence circles"). */
@@ -100,27 +110,27 @@ export const BLOCKADE = {
     ROUND: 360,
     /** The sides, and their fleets: where each ship comes in (a frigate's config by her name: src/den-frigate.ts). */
     TEAMS: [
-        { id: 'gold', name: 'Dachimpy\'s flag', ships: [
-                { name: 'Primates Rule', kind: 'frigate', at: { c: 17, r: 2, d: 0 } },
-                { name: 'Coral Throne', kind: 'frigate', at: { c: 27, r: 2, d: 0 } },
-                { name: 'Lucky Banana', kind: 'sloop', at: { c: 1, r: 10, d: 1 }, raider: true },
-                { name: 'Grin and Bear It', kind: 'sloop', at: { c: 1, r: 16, d: 1 }, far: true },
-                { name: 'Cheeky Monkey', kind: 'sloop', at: { c: 1, r: 20, d: 1 } },
-                { name: 'Bananarama', kind: 'sloop', at: { c: 1, r: 26, d: 1 }, raider: true, far: true },
-                { name: 'Coconut Shy', kind: 'sloop', at: { c: 1, r: 13, d: 1 } },
-                { name: 'Tidecaller', kind: 'brig', at: { c: 2, r: 23, d: 1 }, craft: 'ram' },
-                { name: 'Pearl Diver', kind: 'brig', at: { c: 2, r: 7, d: 1 }, craft: 'ram', far: true },
+        { id: 'gold', name: "Dachimpy's flag", ships: [
+                { name: 'Primates Rule', kind: 'frigate', at: { c: 23, r: 2, d: 0 }, other: { c: 26, r: 45, d: 2 } },
+                { name: 'Coral Throne', kind: 'frigate', at: { c: 33, r: 2, d: 0 }, other: { c: 16, r: 45, d: 2 } },
+                { name: 'Lucky Banana', kind: 'sloop', at: { c: 1, r: 16, d: 1 }, raider: true },
+                { name: 'Grin and Bear It', kind: 'sloop', at: { c: 1, r: 22, d: 1 }, far: true },
+                { name: 'Cheeky Monkey', kind: 'sloop', at: { c: 1, r: 26, d: 1 } },
+                { name: 'Bananarama', kind: 'sloop', at: { c: 1, r: 32, d: 1 }, raider: true, far: true },
+                { name: 'Coconut Shy', kind: 'sloop', at: { c: 1, r: 19, d: 1 } },
+                { name: 'Tidecaller', kind: 'brig', at: { c: 2, r: 29, d: 1 }, craft: 'ram' },
+                { name: 'Pearl Diver', kind: 'brig', at: { c: 2, r: 13, d: 1 }, craft: 'ram', far: true },
             ] },
-        { id: 'crimson', name: 'Dalnoth\'s flag', ships: [
-                { name: 'Iron Pride', kind: 'frigate', at: { c: 26, r: 33, d: 2 } },
-                { name: 'Eldritch Wail', kind: 'frigate', at: { c: 16, r: 33, d: 2 } },
-                { name: 'Red Wake', kind: 'sloop', at: { c: 42, r: 25, d: 3 }, raider: true },
-                { name: 'Smoke and Mirrors', kind: 'sloop', at: { c: 42, r: 19, d: 3 }, far: true },
-                { name: 'Scarlet Fever', kind: 'sloop', at: { c: 42, r: 15, d: 3 } },
-                { name: 'Blood Orange', kind: 'sloop', at: { c: 42, r: 9, d: 3 }, raider: true, far: true },
-                { name: 'Rust Bucket', kind: 'sloop', at: { c: 42, r: 22, d: 3 } },
-                { name: 'Grave Lantern', kind: 'brig', at: { c: 41, r: 12, d: 3 }, craft: 'ghost' },
-                { name: 'Wraith\'s Wake', kind: 'brig', at: { c: 41, r: 28, d: 3 }, craft: 'ghost', far: true },
+        { id: 'crimson', name: "Dalnoth's flag", ships: [
+                { name: 'Iron Pride', kind: 'frigate', at: { c: 32, r: 45, d: 2 }, other: { c: 17, r: 2, d: 0 } },
+                { name: 'Eldritch Wail', kind: 'frigate', at: { c: 22, r: 45, d: 2 }, other: { c: 27, r: 2, d: 0 } },
+                { name: 'Red Wake', kind: 'sloop', at: { c: 54, r: 31, d: 3 }, raider: true },
+                { name: 'Smoke and Mirrors', kind: 'sloop', at: { c: 54, r: 25, d: 3 }, far: true },
+                { name: 'Scarlet Fever', kind: 'sloop', at: { c: 54, r: 21, d: 3 } },
+                { name: 'Blood Orange', kind: 'sloop', at: { c: 54, r: 15, d: 3 }, raider: true, far: true },
+                { name: 'Rust Bucket', kind: 'sloop', at: { c: 54, r: 28, d: 3 } },
+                { name: 'Grave Lantern', kind: 'brig', at: { c: 53, r: 18, d: 3 }, craft: 'ghost' },
+                { name: "Wraith's Wake", kind: 'brig', at: { c: 53, r: 34, d: 3 }, craft: 'ghost', far: true },
             ] },
     ],
     /** How near (squares) a ship has to be to another for her moving to make the other's pilot think again. */
@@ -139,7 +149,7 @@ export const BLOCKADE = {
         people can actually see a cinematic of the blockade"): two war frigates broadside to broadside on the open water
         in the south-west corner, room to come about and for the camera to go round them clear of the fort, the rest of the
         blockade going on beyond them. */
-    BRAWL: [{ name: 'Primates Rule', at: { c: 6, r: 3, d: 1 } }, { name: 'Iron Pride', at: { c: 6, r: 7, d: 1 } }],
+    BRAWL: [{ name: 'Primates Rule', at: { c: 12, r: 9, d: 1 } }, { name: 'Iron Pride', at: { c: 12, r: 13, d: 1 } }],
 };
 const HANDLINGS = { sloop: SLOOP_HANDLING, brig: BRIG_HANDLING, frigate: FRIGATE_HANDLING };
 const CLASSES = { sloop: SLOOP, brig: WAR_BRIG, frigate: WAR_FRIGATE };
@@ -223,7 +233,7 @@ export class Blockade {
             this.battery = [];
             this.gunGate = [];
         }
-        const side = new Set([...B.SIDEWAYS, ...B.EXITS.flat().flatMap(laneSquares)].map(([c, r]) => key(c, r))), ways = new Set(B.GATES.flatMap((x) => [key(x.way, x.r0), key(x.way, x.r1)]));
+        const side = new Set([...B.SIDEWAYS, ...B.POSTERNS, ...B.EXITS.flat().flatMap(laneSquares)].map(([c, r]) => key(c, r))), ways = new Set(B.GATES.flatMap((x) => [key(x.way, x.r0), key(x.way, x.r1)]));
         if (!open) {
             for (const w of B.WALLS)
                 for (let c = w.c0; c <= w.c1; c++)
@@ -258,7 +268,8 @@ export class Blockade {
                 // (a sloop or a brig on the blockade's board can come in by either side's edge: her own, or the same place on the
                 // far one; the user, 15 Nov: "for the smaller ships, they should ... be able to spawn ... on any side that they
                 // want to ... island and oceanside spawns", so no side's lagoon is a safe home for its brigs)
-                const entries = s.kind !== 'frigate' && !setup.open && !setup.skirmish ? [{ ...s.at }, farSide(s.at)] : [{ ...s.at }], entry = s.far && entries.length > 1 ? 1 : 0;
+                const both = !setup.open && !setup.skirmish;
+                const entries = both && s.kind !== 'frigate' ? [{ ...s.at }, farSide(s.at)] : both && s.other ? [{ ...s.at }, { ...s.other }] : [{ ...s.at }], entry = s.far && entries.length > 1 ? 1 : 0;
                 const at = entries[entry];
                 this.ships.push({ id: me, name: s.name, team: team.id, kind: s.kind, h, cls: CLASSES[s.kind], raider: !!s.raider, sea, helm: new ShipHelm(sea, { ...at }), guns: new Guns(h.reload), dmg: new Damage(CLASSES[s.kind]), start: { ...at }, away: 0, launched: -Infinity, entries, entry });
             }
@@ -600,7 +611,14 @@ export class Blockade {
         last time, then her own again: so she's in the fight at both ends of the board): whether she is. */
     comeBack(s) {
         const n = s.entries.length, free = (p) => s.sea.bare().fits(p) && !squares(s.h, p).some(([c, r]) => this.taken.has(key(c, r)));
-        const k = Array.from({ length: n }, (_, i) => (s.entry + 1 + i) % n).find((i) => free(s.entries[i]));
+        // (a frigate by whichever end she's quicker into the heart from, through a gate that's down if one is: where she's
+        // needed; a sloop or a brig the other edge from last time)
+        const order = Array.from({ length: n }, (_, i) => (s.entry + 1 + i) % n);
+        if (s.kind === 'frigate') {
+            const [pc, pr] = BLOCKADE.BUOYS[0].at;
+            order.sort((x, z) => s.sea.eta(s.entries[x], pc, pr) - s.sea.eta(s.entries[z], pc, pr));
+        }
+        const k = order.find((i) => free(s.entries[i]));
         if (k === undefined)
             return false;
         s.entry = k;
@@ -664,5 +682,13 @@ export class Blockade {
     inHeart(s) { return inHeart(s.helm.pose.c, s.helm.pose.r); }
     /** Where a sloop of that side hides: each lagoon's far corner, and her side's corner of the sea, far from the
         fighting. */
-    coves(team) { return [...BLOCKADE.REEFS.map((x) => x.hide), ...(team ? BLOCKADE.HOMES[team] : [])]; }
+    // (inside a lagoon's reef only: no corners of the sea any more, far from every buoy, where a sloop went to be patched
+    // and a frigate after her, both out of the fight; the user, 15 Nov: "there should be no reason for them to really be
+    // venturing over there. Why are they?")
+    coves(_team) { return BLOCKADE.REEFS.map((x) => x.hide); }
+    /** Whether a ship's sheltering where a frigate won't follow: in a lagoon, or the shoals round it. */
+    sheltered(o) {
+        const p = o.helm.pose;
+        return this.shoals.has(`${p.c},${p.r}`) || BLOCKADE.REEFS.some((x) => Math.max(Math.abs(p.c - x.at[0]), Math.abs(p.r - x.at[1])) <= x.ring);
+    }
 }

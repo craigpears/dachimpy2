@@ -8,7 +8,7 @@
    two seeded dice: four fights. tools/blockade-balance.mjs runs more. Where it stands is BLOCKADE.md §4. */
 import { describe, expect, it } from 'vitest';
 import { skirmish, SKIRMISH, fleet, blockadeGame, blockadeFleet } from '../src/blockade-skirmish';
-import { Blockade } from '../src/blockade';
+import { Blockade, BLOCKADE } from '../src/blockade';
 import type { Kind } from '../src/blockade';
 
 const dice = (seed: number) => () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
@@ -27,7 +27,7 @@ describe('rock, paper, scissors, fleet against fleet (15 Nov: "set some balance 
     for (const [k, n] of [['frigate', 2], ['brig', 3], ['sloop', 6]] as [Kind, number][]) {
       expect(fleet(k, 'gold').ships.length * SKIRMISH.POINTS[k]).toBe(SKIRMISH.BUDGET);
       expect(fleet(k, 'gold').ships).toHaveLength(n);
-      expect(fleet(k, 'crimson').ships.map((x) => [43 - x.at.c, 35 - x.at.r]).sort()).toEqual(fleet(k, 'gold').ships.map((x) => [x.at.c, x.at.r]).sort());
+      expect(fleet(k, 'crimson').ships.map((x) => [BLOCKADE.COLS - 1 - x.at.c, BLOCKADE.ROWS - 1 - x.at.r]).sort()).toEqual(fleet(k, 'gold').ships.map((x) => [x.at.c, x.at.r]).sort());
     }
   });
   it('head-on, on open sea: frigates beat sloops (weight of shot), brigs beat frigates (their craft), brigs beat sloops (a brig\'s hull, 15 Nov: "consistent with Puzzle Pirates")', () => {

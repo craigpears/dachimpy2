@@ -69,14 +69,15 @@ export function blockadeFleet(makeup, team) {
     const ships = [];
     const nf = makeup.frigate ?? 0;
     // (spread along the edge, clear of the rock off the gate)
+    const P = BLOCKADE.PAD, way = BLOCKADE.GATES[0].way, wind = BLOCKADE.WINDS[0].at[1];
     for (let i = 0; i < nf; i++) {
-        const c0 = Math.round(10 + (i + 0.5) * 24 / nf), [c, r] = turn(c0 >= 20 && c0 <= 23 ? 25 : c0, 3);
+        const c0 = P + Math.round(10 + (i + 0.5) * 24 / nf), [c, r] = turn(c0 >= way - 1 && c0 <= way + 2 ? way + 4 : c0, 3);
         ships.push({ name: `${team} frigate ${i + 1}`, kind: 'frigate', at: { c, r, d: south ? 0 : 2 } });
     }
     // (the brigs and sloops down the side, a square in from the edge, spread either side of the wind)
     const small = [...Array(makeup.brig ?? 0).fill('brig'), ...Array(makeup.sloop ?? 0).fill('sloop')], n = small.length;
     small.forEach((kind, i) => {
-        const row = Math.round(5 + (i + 0.5) * 26 / n), r0 = row === 18 ? 17 : row, [c, r] = turn(kind === 'brig' ? 2 : 1, r0);
+        const row = P + Math.round(5 + (i + 0.5) * 26 / n), r0 = row === wind ? wind - 1 : row, [c, r] = turn(kind === 'brig' ? 2 : 1, r0);
         ships.push({ name: `${team} ${kind} ${i + 1}`, kind, at: { c, r, d: south ? 1 : 3 }, ...(kind === 'brig' ? { craft: south ? 'ram' : 'ghost' } : {}) });
     });
     return { id: team, name: team, ships };

@@ -345,6 +345,29 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   - a ship sunk spins down, three turns, faster and faster, the sea swirling white round her;
   - spectating, W A S D move the camera and Q E turn it.
 
+- **A bigger board, the points first, posterns** (15 Nov: "the whole board's a bit small ... there needs to be a bit of a
+  buffer travel zone"; "Ocean Island matters for the [war frigs] as well"; "this is a game about the points ... you
+  never hide"; "an enclosed launching spot for a brig ... balance that with another kind of gap coming from the
+  outside"; "three sloops ... right on the corner of the map ... no reason for them to really be venturing over there";
+  "The focus is definitely switching too fast"):
+  - the board 56 by 48 (`PAD` 6 squares of open sea all round, every place shifted by it), the edge winds lengthened
+    to the edge so the sloops still come in fast; the fleets at the new edges;
+  - every frigate a second entry at the other end (`other`), by the other gate; sunk, she comes back by whichever end
+    she's quicker into the heart from; sloops and brigs the other side's edge from last time;
+  - no ship hides: no home corners, the hiding spots moved onto their lagoon's buoy and unused by the bots; a ship's
+    nerve (`nerve`, 1 + 1.5 times his damage less hers) weighs her fights and a sloop's raids, and a hurt sloop keeps
+    further from enemy frigates; a frigate never goes after a ship sheltering in a lagoon or its shoals;
+  - two more rocks, (32,25) and (23,22), so all four corners of the heart are out of any frigate's reach inside it (a
+    brig there hit from no frigate pose in the heart); posterns through the wall by the two corners no way out runs
+    through, (20-21,20) and (34-35,27), a frigate outside reaching the corner square through one, a sloop slipping in;
+    a brig may launch from a corner as well as a lagoon, whichever's nearer; she launches only at frigates (not at a
+    brig: both anchored by the edge, ramming each other, once the sides came in from both edges);
+  - the director keeps a ship 12 seconds at least, and while she's still in the thick of it, unless something big
+    happens elsewhere;
+  - after, two games: brigs at their spots, but turtles ramming frigates only 3 or 4 times a game (36 to 60 before
+    this pass): the frigates fight each other far more now (up to 345 s a game) and a frigate on the move can't be
+    rammed. To look into next.
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of

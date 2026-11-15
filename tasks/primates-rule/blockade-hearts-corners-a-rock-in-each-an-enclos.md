@@ -1,6 +1,6 @@
 ---
 title: Blockade heart's corners: a rock in each, an enclosed launching spot for a brig out of the frigates' reach
-status: idea
+status: playtest
 asked: 15 Nov
 updated: 15 Nov
 ---
@@ -10,3 +10,6 @@ updated: 15 Nov
 ## Log
 
 - 15 Nov: added.
+- 15 Nov: being done
+- 15 Nov: The user, 15 Nov: 'we've created a bit of a corner for [brigs] to hide ... we also need to balance that with another kind of gap coming from the outside, so that even though it gives them a tiny bit of extra inside protection, it balances that with vulnerability from the outside.'
+- 15 Nov: for you to playtest

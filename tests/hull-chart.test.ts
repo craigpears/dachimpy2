@@ -9,7 +9,7 @@ import { bombardBerths } from '../src/blockade-bots';
 import { ShipSea, squares } from '../src/ship-handling';
 import type { Pose } from '../src/den-sail';
 
-const B = BLOCKADE, prize: [number, number] = [21, 17];
+const B = BLOCKADE, prize: [number, number] = [27, 23];
 const kind = (b: Blockade, k: 'sloop' | 'frigate', team = 'gold') => b.ships.find((s) => s.kind === k && s.team === team)!;
 /** Her kind's sea as the den's pilot has it, no chart (Sea.plot's own search), the same rocks and winds. */
 const plain = (b: Blockade, k: 'sloop' | 'frigate') => {
@@ -43,7 +43,7 @@ describe('a chart a kind of ship, shared (15 Nov: "a couple of pre-computed maps
       const chart = b.charts[k], old = plain(b, k), s = kind(b, k);
       // (the buoy off the south gate, open water west of the fort, a lagoon's hiding place, a far corner: places both
       // kinds can reach or not)
-      const goals: [number, number][] = [B.BUOYS[3].at, [6, 20], B.REEFS[0].hide, [2, 33]];
+      const goals: [number, number][] = [B.BUOYS[3].at, [12, 26], B.REEFS[0].hide, [8, 39]];
       let compared = 0;
       for (const from of poses(b, k, 7)) for (const [c, r] of goals) {
         const mine = s.sea.plotPast(from, c, r), theirs = old.plot(from, c, r);
@@ -93,26 +93,26 @@ describe('round the other ships, near her only (15 Nov: "the adversarial plannin
     const b = new Blockade(), s = kind(b, 'sloop');
     const others = b.ships.filter((o) => o !== s);
     // (the sloop on open water along the south edge, heading east along it; everyone else well away, but one)
-    others.forEach((o, i) => o.helm.moor({ c: 30 + (i % 8), r: 26 + Math.floor(i / 8) * 4, d: 1 }));
-    s.helm.moor({ c: 2, r: 3, d: 1 });
+    others.forEach((o, i) => o.helm.moor({ c: 36 + (i % 8), r: 32 + Math.floor(i / 8) * 4, d: 1 }));
+    s.helm.moor({ c: 8, r: 9, d: 1 });
     b.notice();
     const block = kind(b, 'frigate', 'crimson');
-    const straight = s.sea.plot(s.helm.pose, 12, 3)!;
+    const straight = s.sea.plot(s.helm.pose, 18, 9)!;
     expect(straight.every((m) => m === 'F')).toBe(true);
     // (a frigate lying across her way, three squares ahead: round her)
-    block.helm.moor({ c: 6, r: 3, d: 0 });
+    block.helm.moor({ c: 12, r: 9, d: 0 });
     b.notice(); s.sea.touch();
-    expect(squares(block.h, block.helm.pose).some(([c, r]) => c === 5 && r === 3)).toBe(true);
-    const round = s.sea.plot(s.helm.pose, 12, 3)!;
+    expect(squares(block.h, block.helm.pose).some(([c, r]) => c === 11 && r === 9)).toBe(true);
+    const round = s.sea.plot(s.helm.pose, 18, 9)!;
     expect(round).not.toBeNull();
     expect(round.some((m) => m !== 'F')).toBe(true);
     let p = s.helm.pose;
     for (const m of round) { p = s.sea.sail(p, m).to; expect(b.under(p.c, p.r)?.id ?? s.id, JSON.stringify(p)).toBe(s.id); }
     // (the same frigate further along, beyond her pilot's reckoning: straight on, for now)
-    block.helm.moor({ c: 11, r: 3, d: 0 });
+    block.helm.moor({ c: 17, r: 9, d: 0 });
     b.notice(); s.sea.touch();
     expect(s.sea.near).toBeLessThan(8);
-    expect(s.sea.plot(s.helm.pose, 18, 3)!.slice(0, 4).every((m) => m === 'F')).toBe(true);
+    expect(s.sea.plot(s.helm.pose, 24, 9)!.slice(0, 4).every((m) => m === 'F')).toBe(true);
   });
 
   it('a frigate bound for a gate goes to the nearest of its berths, and lies just so', () => {

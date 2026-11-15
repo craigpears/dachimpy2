@@ -5,12 +5,12 @@
      less if a friend's on it already), and holds it.
    - A war frigate with no gate down yet weighs shooting one down instead (worth all the heart's pennants): she lies
      broadside to a tower and fires till it crumbles. Inside, the heart's buoys are worth more to her: what she's for.
-   - A sloop badly hurt runs for a cove to be patched, out of everyone's guns.
-   - A raider sloop (two a side) hides in a cove, then darts out at an enemy frigate, snipes at her from off her bow
-     or her stern, where none of her broadsides can bear, and runs back to hide: "you should see sloops hiding out,
+   - No ship hides: a hurt one is patched where she is, on the points, and takes fewer risks (her nerve).
+   - A raider sloop (two a side) darts out at an enemy brig or frigate, snipes at her from off her bow or her stern,
+     where none of her broadsides can bear, and back to the buoys a while (till 15 Nov, back to hide: "you should see sloops hiding out,
      sometimes coming out ... while [war frigs] are having a fight to land a few pot shots"; "they're supposed to snipe
      at the war frigate from a safe ... angle ... the back or the front of the ship where they're safe, then they
-     can't return a broadside" (the user, 15 Nov).
+     can't return a broadside" (the user, 15 Nov); never since: "you never hide").
    - A war frigate with an enemy close by, in her way or on a buoy she wants, lies off her side and fights her for
      it: "[war frigs] ... having a fight to land a few pot shots".
    - Every ship fires a loaded side whenever it would hit an enemy and no friend, a tower she's come for, or one of a
@@ -58,8 +58,10 @@ export const BOTS = {
   DODGE: { NEAR: 7, LOADED: 1.5, SECS: 2.5 },
   /** How near (squares) an enemy frigate has to be to a buoy for a sloop to leave it be. */
   WARY: 5,
-  /** A sloop hurt this badly runs to hide and be patched; and comes out again patched to this. */
-  HIDE: 0.5, HEALED: 0.1,
+  /** A ship's nerve against an enemy, by how damaged each is (`nerve`): 1 + K times his damage less hers, between MIN and
+      MAX; a sloop raids only with GO or more. No ship hides (the user, 15 Nov: "this is a game about the points ... You
+      die practically on the points"; "you never hide"): her crew patch her where she is. */
+  NERVE: { K: 1.5, MIN: 0.3, MAX: 2, GO: 0.8 },
   /** Seconds a raider lies hidden before she darts out again, and the longest a raid lasts. */
   LURK: [8, 14] as [number, number], RAID: 25,
   /** How near an enemy frigate has to be (squares) for a raider to dart out at her, and how far off her side she lies. */
@@ -90,7 +92,7 @@ export const BOTS = {
 };
 
 export type Goal = { kind: 'buoy'; i: number } | { kind: 'gate'; g: number; tower: number; pose: Pose; side: Side }
-  | { kind: 'hide'; cove: [number, number] } | { kind: 'raid'; on: number; at: [number, number]; pose?: Pose } | { kind: 'fight'; on: number; at: [number, number] }
+  | { kind: 'raid'; on: number; at: [number, number]; pose?: Pose } | { kind: 'fight'; on: number; at: [number, number] }
   | { kind: 'camp'; at: [number, number] } | { kind: 'escort'; on: number; at: [number, number] }
   | { kind: 'guns'; g: number; i: number; pose: Pose; side: Side } | { kind: 'ram'; on: number; at: [number, number] };
 
@@ -108,7 +110,8 @@ function worth(b: Blockade, s: Ship, buoy: Buoy, i: number, mates: Goal[]): numb
   if (s.kind === 'sloop' && inHeart(...buoy.at) && b.ships.some((o) => o.team !== s.team && o.kind === 'frigate' && o.away <= 0 && !o.dmg.out && b.inHeart(o))) w *= BOTS.FLEE;
   // (a sloop, wary: a buoy an enemy frigate's close to is a sloop sunk, so she leaves it to her and goes where she isn't;
   // the user, 15 Nov, of sloops "hanging around in the middle being blown up by [war frigs], foolishly")
-  if (s.kind === 'sloop' && !s.craft && b.ships.some((o) => o.team !== s.team && o.kind === 'frigate' && o.away <= 0 && !o.dmg.out && Math.hypot(o.helm.pose.c - buoy.at[0], o.helm.pose.r - buoy.at[1]) <= BOTS.WARY)) w *= BOTS.FLEE;
+  // (further off, the more damaged she is: fewer risks)
+  if (s.kind === 'sloop' && !s.craft && b.ships.some((o) => o.team !== s.team && o.kind === 'frigate' && o.away <= 0 && !o.dmg.out && Math.hypot(o.helm.pose.c - buoy.at[0], o.helm.pose.r - buoy.at[1]) <= BOTS.WARY * (1 + s.dmg.share()))) w *= BOTS.FLEE;
   // (a brig: the lagoons' buoys before the heart's)
   if (s.kind === 'brig') w *= inHeart(...buoy.at) ? BOTS.BRIG.HEART : BOTS.BRIG.OUT;
   return w;
@@ -223,7 +226,9 @@ export class Bot {
       // (making for her launching spot by a lagoon: not till she's there, never anchored in the open on the way)
       const spot = !this.skirmish && this.order.kind === 'free' && !b.open ? this.station(b, s) : null;
       const placed = !spot || Math.max(Math.abs(spot[0] - s.helm.pose.c), Math.abs(spot[1] - s.helm.pose.r)) <= 1;
-      if (placed && b.canLaunch(s) && b.ships.some((o) => o.kind !== 'sloop' && near(o, BOTS.BRIG.LAUNCH)) && !b.ships.some((o) => o.kind === 'sloop' && near(o, BOTS.BRIG.SAFE))) b.launch(s.id);
+      // (at a frigate: her craft's work, rock, paper, scissors; not at another brig, both anchored by the edge ramming
+      // each other, once the sides came in from both edges, 15 Nov)
+      if (placed && b.canLaunch(s) && b.ships.some((o) => o.kind === 'frigate' && near(o, BOTS.BRIG.LAUNCH)) && !b.ships.some((o) => o.kind === 'sloop' && near(o, BOTS.BRIG.SAFE))) b.launch(s.id);
       if (b.anchored(s)) { this.shoot(b, s); return; }
     }
     this.shoot(b, s);
@@ -262,7 +267,7 @@ export class Bot {
     if (!g) return;
     if (g.goal.kind !== 'gate' && s.sea.exact) s.sea.exact = null;
     // (when her hiding or her raid started: not again just because the ship she's raiding has moved)
-    if (!sameAim(this.goal, g.goal) && (g.goal.kind === 'hide' || g.goal.kind === 'raid')) this.since = b.clock;
+    if (!sameAim(this.goal, g.goal) && g.goal.kind === 'raid') this.since = b.clock;
     this.goal = g.goal; this.score = g.score;
     this.steer(b, s);
   }
@@ -281,11 +286,11 @@ export class Bot {
       }
     }
     // A skirmish: the nearest enemy, as her kind best can fight her: a frigate or a brig broadside on; a sloop off a big
-    // ship's end, where her broadsides can't bear, and broadside to another sloop (a sloop badly hurt hides, below).
-    if (this.skirmish && !s.craft && !(s.kind === 'sloop' && s.dmg.share() >= BOTS.HIDE)) {
+    // ship's end, where her broadsides can't bear, and broadside to another sloop.
+    if (this.skirmish && !s.craft) {
       const far = (o: Ship) => Math.hypot(o.helm.pose.c - s.helm.pose.c, o.helm.pose.r - s.helm.pose.r);
       // (a frigate leaves be an enemy in a lagoon or its shoals: she'd scrape her bottom chasing her there)
-      const sheltered = (o: Ship) => s.kind === 'frigate' && (b.shoals.has(`${o.helm.pose.c},${o.helm.pose.r}`) || BLOCKADE.REEFS.some((x) => Math.max(Math.abs(o.helm.pose.c - x.at[0]), Math.abs(o.helm.pose.r - x.at[1])) <= x.ring));
+      const sheltered = (o: Ship) => s.kind === 'frigate' && b.sheltered(o);
       const t = b.ships.filter((o) => o.team !== s.team && o.away <= 0 && !o.craft && !sheltered(o)).sort((a, z) => far(a) - far(z))[0];
       // (a brig on the blockade's board, with a big ship for her craft to go after, makes for a lagoon and lies in it, out
       // of any frigate's reach, launching from there: the terrain's hers, her craft slipping out through its gaps. With
@@ -327,7 +332,8 @@ export class Bot {
       const there = this.station(b, s);
       if (there) return { goal: { kind: 'camp', at: there }, score: 9 };
     }
-    // A sloop badly hurt hides till she's patched; a raider lurks a while, then darts out at a frigate, and back.
+    // A raider darts out at an enemy brig or frigate's end, and back to the buoys a while; never hiding (the user, 15 Nov:
+    // "you never hide. There's just no tactical reason or benefit to. You lose coverage of points").
     const raider = this.order.kind === 'snipe' || (this.order.kind === 'free' && s.raider);
     // A phantom sloop darts at anything slow or sat still (a frigate first, a brig, a ship that's lain still a while),
     // again and again: she's only a while, nothing can hurt her, no hiding.
@@ -335,26 +341,19 @@ export class Bot {
       const raid = this.raid(b, s, Infinity);
       if (raid) return { goal: raid, score: 8 };
     }
-    if (s.kind === 'sloop' && !s.craft) {
-      const share = s.dmg.share(), hiding = this.goal?.kind === 'hide';
-      if (share >= BOTS.HIDE || (hiding && share > BOTS.HEALED) || (hiding && raider && b.clock - this.since < this.lurk)) {
-        const cove = this.cove(b, s, mates);
-        if (cove) return { goal: { kind: 'hide', cove }, score: 9 };
-      }
-      if (raider) {
-        const raiding = this.goal?.kind === 'raid', done = raiding && (this.firedAt > this.since || b.clock - this.since > BOTS.RAID);
-        if (done) { this.lurk = BOTS.LURK[0] + this.random() * (BOTS.LURK[1] - BOTS.LURK[0]); const cove = this.cove(b, s, mates); if (cove) return { goal: { kind: 'hide', cove }, score: 9 }; }
-        // (a brig before a frigate: rock, paper, scissors, the sloops' to beat)
-        const raid = this.raid(b, s, BOTS.REACH, false, undefined, 'brig');
-        if (raid) return { goal: raid, score: 8 };
-      }
+    if (s.kind === 'sloop' && !s.craft && raider) {
+      const raiding = this.goal?.kind === 'raid', done = raiding && (this.firedAt > this.since || b.clock - this.since > BOTS.RAID);
+      if (done) this.rest = b.clock + BOTS.LURK[0] + this.random() * (BOTS.LURK[1] - BOTS.LURK[0]);
+      // (a brig before a frigate: rock, paper, scissors, the sloops' to beat; only with the nerve for it)
+      const raid = b.clock < this.rest ? null : this.raid(b, s, BOTS.REACH, false, undefined, 'brig');
+      if (raid && this.nerve(s, b.ship(raid.on)) >= BOTS.NERVE.GO) return { goal: raid, score: 8 };
     }
     // A sloop with an enemy brig close by goes for her, off her end where the brig's broadsides can't bear: too quick
     // for a brig (rock, paper, scissors, 15 Nov: "sloops beat war brigs ... because of how they can just dart around
     // and evade them").
     if (s.kind === 'sloop' && !s.craft && this.order.kind === 'free') {
       const raid = this.raid(b, s, BOTS.ENGAGE, false, undefined, 'brig');
-      if (raid && b.ship(raid.on).kind === 'brig') return { goal: raid, score: 7 };
+      if (raid && b.ship(raid.on).kind === 'brig' && this.nerve(s, b.ship(raid.on)) >= BOTS.NERVE.GO) return { goal: raid, score: 7 };
     }
     const best: { goal: Goal; score: number }[] = [], p = s.helm.pose, post = this.order.kind;
     // (a strategy's weights: the heart's buoys, the gates, the fights)
@@ -403,7 +402,8 @@ export class Bot {
         // (to finish her off, or to drive her off a friend who's knocked out)
         const why = (o.dmg.out ? BOTS.FINISH : 1) * (b.ships.some((x) => x.team === s.team && x !== s && x.dmg.out && x.away <= 0 && near(x)) ? BOTS.RESCUE : 1);
         const big = s.kind === 'brig' ? (o.kind === 'brig' ? 1.5 : 0.25) : o.kind === 'sloop' ? 1.6 : o.kind === 'frigate' ? 1.3 : 0.8;
-        best.push({ goal: { kind: 'fight', on: fight.on, at: was && this.goal?.kind === 'fight' ? this.goal.at : fight.at }, score: fightW * BOTS.FIGHT * big * why / (4 + eta) });
+        // (more for one more damaged than she is, less for one she'd lose to: her nerve)
+        best.push({ goal: { kind: 'fight', on: fight.on, at: was && this.goal?.kind === 'fight' ? this.goal.at : fight.at }, score: fightW * BOTS.FIGHT * big * why * this.nerve(s, o) / (4 + eta) });
       }
     }
     // Best first.
@@ -495,30 +495,32 @@ export class Bot {
   }
 
   /** A brig's launching spot, while an enemy frigate's in the heart: the square inside a lagoon nearest the heart's
-      middle, the lagoon she gets to soonest (none: no enemy frigate in there, or no way to one). */
+      middle, or a corner of the heart itself (out of the reach of any frigate in there, a postern or a way out by it:
+      the user, 15 Nov, "an enclosed launching spot for a brig"), whichever she gets to soonest (none: no enemy frigate
+      in there, or no way to one). */
   private station(b: Blockade, s: Ship): [number, number] | null {
     const frigate = b.ships.some((o) => o.team !== s.team && o.kind === 'frigate' && o.away <= 0 && !o.dmg.out && b.inHeart(o));
     if (!frigate) return null;
-    const [hc, hr] = BLOCKADE.BUOYS[0].at, sea = s.sea.bare();
+    const [hc, hr] = BLOCKADE.BUOYS[0].at, sea = s.sea.bare(), H = BLOCKADE.HEART;
     const spots = BLOCKADE.REEFS.map((x) => {
       const inside: [number, number][] = [];
       for (let dc = 1 - x.ring; dc < x.ring; dc++) for (let dr = 1 - x.ring; dr < x.ring; dr++) if (sea.open(x.at[0] + dc, x.at[1] + dr)) inside.push([x.at[0] + dc, x.at[1] + dr]);
       return inside.sort((a, z) => Math.hypot(a[0] - hc, a[1] - hr) - Math.hypot(z[0] - hc, z[1] - hr))[0];
-    }).filter(Boolean).map((at) => ({ at, eta: at[0] === s.helm.pose.c && at[1] === s.helm.pose.r ? 0 : s.sea.eta(s.helm.pose, ...at) }))
+    }).concat(([[H.c0, H.r1], [H.c1, H.r1], [H.c0, H.r0], [H.c1, H.r0]] as [number, number][]).filter(([c, r]) => sea.open(c, r))).filter(Boolean).map((at) => ({ at, eta: at[0] === s.helm.pose.c && at[1] === s.helm.pose.r ? 0 : s.sea.eta(s.helm.pose, ...at) }))
       .filter((x) => x.eta < Infinity && !this.blocked(b, x.at)).sort((a, z) => a.eta - z.eta);
     return spots[0]?.at ?? null;
   }
 
-  /** The nearest cove nobody else is in or making for. */
-  private cove(b: Blockade, s: Ship, mates: Goal[]): [number, number] | null {
-    const mine = this.goal?.kind === 'hide' ? this.goal.cove : null;
-    if (mine) return mine;
-    // (the quickest to get to, off her chart)
-    const free = b.coves(s.team).filter(([c, r]) => !mates.some((m) => m.kind === 'hide' && m.cove[0] === c && m.cove[1] === r) && !(b.under(c, r) && b.under(c, r) !== s))
-      .map((at) => ({ at, eta: s.sea.eta(s.helm.pose, ...at) })).filter((x) => x.eta < Infinity && !this.blocked(b, x.at));
-    free.sort((a, z) => a.eta - z.eta);
-    return free[0]?.at ?? null;
+  /** Her nerve against an enemy: more than 1 if he's more damaged than she is (she presses in), less if she's the more
+      damaged (she takes fewer risks); the user, 15 Nov: "being more or less aggressive depending on your damage level ...
+      if you know the person next to you is more damaged than you are, you get more aggressive. If you're damaged, you
+      might kind of take fewer risks". */
+  nerve(s: Ship, o: Ship): number {
+    const d = (o.dmg.out ? 1 : o.dmg.share()) - s.dmg.share();
+    return Math.max(BOTS.NERVE.MIN, Math.min(BOTS.NERVE.MAX, 1 + BOTS.NERVE.K * d));
   }
+  /** Till when a raider's back on the buoys after a raid. */
+  private rest = -1;
 
   /** A raid (or a frigate's fight): the nearest enemy frigate in reach (`any`: any enemy ship, frigates first), and
       where to fire from: a raider's, lying across her line off her bow or her stern, her broadside raking her end
@@ -530,7 +532,9 @@ export class Bot {
     const camped = (o: Ship) => phantom(s) && (b.still.get(o.id) ?? 0) >= BOTS.CAMPED && !o.craft;
     // (a big ship never goes after a brig's craft of her own choosing: too quick to catch and only a while, she shoots
     // them as they come in reach and keeps to what she's at)
-    const chase = (o: Ship) => !(o.craft && any && only === undefined && (s.kind === 'frigate' || s.kind === 'brig'));
+    // (nor a ship sheltering in a lagoon or its shoals, for a frigate: she'd scrape her bottom going in after her, and
+    // there are no points in chasing her there)
+    const chase = (o: Ship) => !(any && only === undefined && ((o.craft && (s.kind === 'frigate' || s.kind === 'brig')) || (s.kind === 'frigate' && b.sheltered(o))));
     const foes = b.ships.filter((o) => o.team !== s.team && !phantom(o) && chase(o) && (any || o.kind === 'frigate' || o.kind === 'brig' || camped(o)) && o.away <= 0 && (any && BLOCKADE.SINKING ? true : !o.dmg.out) && (only === undefined ? !this.spare.has(o.id) : o.id === only))
       .map((o) => ({ o, m: drawnAt(o.h, { c: o.helm.pose.c, r: o.helm.pose.r, a: o.helm.pose.d }) }))
       .filter(({ m }) => Math.hypot(m.c - p.c, m.r - p.r) <= reach)
@@ -699,7 +703,7 @@ export class Bot {
       if (s.helm.sailTo(g.pose)) return;
     }
     if (g.kind === 'buoy' && b.reaches(s, BLOCKADE.BUOYS[g.i])) { if (s.helm.pin) s.helm.stop(); return; }
-    const at = g.kind === 'buoy' ? BLOCKADE.BUOYS[g.i].at : g.kind === 'hide' ? g.cove : g.at;
+    const at = g.kind === 'buoy' ? BLOCKADE.BUOYS[g.i].at : g.at;
     // (lying off her, or where she's camped, or by the friend she's escorting: firing as they bear)
     if ((g.kind === 'fight' || g.kind === 'camp' || g.kind === 'escort') && squares(s.h, s.helm.pose).some(([c, r]) => c === at[0] && r === at[1])) { if (s.helm.pin && g.kind !== 'fight') s.helm.stop(); return; }
     if (s.helm.pose.c === at[0] && s.helm.pose.r === at[1]) return;
@@ -752,7 +756,6 @@ export class Bots {
     if (!g) return 'looking round';
     if (g.kind === 'gate') return `shooting down the ${BLOCKADE.GATES[g.g].r0 < BLOCKADE.HEART.r0 ? 'south' : 'north'} gate's tower`;
     if (g.kind === 'guns') return `wrecking the ${BLOCKADE.GATES[g.g].r0 < BLOCKADE.HEART.r0 ? 'south' : 'north'} gate's guns`;
-    if (g.kind === 'hide') return s.helm.pose.c === g.cove[0] && s.helm.pose.r === g.cove[1] ? 'hiding in a lagoon' + (s.dmg.share() > 0.05 ? ', being patched' : '') : 'running for a lagoon to hide';
     if (g.kind === 'raid') return `darting out at ${b.ship(g.on).name}`;
     if (g.kind === 'camp') return squares(s.h, s.helm.pose).some(([c, r]) => c === g.at[0] && r === g.at[1]) ? 'camped, firing on what comes by' : 'making for her camp';
     if (g.kind === 'escort') return `escorting ${b.ship(g.on).name}`;

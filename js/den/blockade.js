@@ -519,10 +519,14 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     showReach(id) { reachOf = id; },
     shipAt(point) { const [c, r] = seaCR(point.x, point.z).map(Math.round), s = b.under(c, r); return s ? s.id : -1; },
     focus(id = me) { if (id < 0) return v3(B.COLS / 2 - 0.5, B.ROWS / 2 - 0.5); const s = b.ship(id), at = drawnAt(s.h, s.helm.now()); return v3(at.c, at.r); },
-    /** The ship most worth watching just now, spectating: the biggest thing that's happened lately (a knockout, a gate
-        coming down, a hit), else a sloop darting out or a frigate fighting, else whoever's on the heart's prize. */
-    director(now = clock) {
+    /** The ship most worth watching just now, spectating: the one watched (`keep`) while she's still in the thick of it,
+        unless something big (a knockout, a sinking) has just happened elsewhere; else the biggest thing that's happened
+        lately (a gate coming down, a hit), else a sloop darting out or a frigate fighting, else whoever's on the heart's
+        prize (the user, 15 Nov: "The focus is definitely switching too fast"). */
+    director(now = clock, keep = -1) {
       const recent = action.filter((x) => now - x.at < 6).sort((a, z) => z.weight - a.weight || z.at - a.at)[0];
+      const k = keep >= 0 ? b.ship(keep) : null, stillAtIt = k && k.away <= 0 && (k.dmg.out || /darting|fighting|shooting|launch|anchor/.test(bots.doing(b, keep)));
+      if (stillAtIt && !(recent && recent.ship !== keep && recent.weight >= 8)) return keep;
       if (recent) return recent.ship;
       const busy = b.ships.find((x) => /darting|fighting|shooting/.test(bots.doing(b, x.id)));
       return busy?.id ?? b.ships.find((x) => !x.dmg.out)?.id ?? 0;

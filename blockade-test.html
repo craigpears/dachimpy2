@@ -123,8 +123,8 @@ import { BLOCKADE } from './js/blockade.js';
 
 const $ = (id) => document.getElementById(id), params = new URLSearchParams(location.search);
 paintSky('#4f8fd0', '#cfe2ee');
-camera.far = 500; camera.updateProjectionMatrix();
-scene.fog.near = 140; scene.fog.far = 340;
+camera.far = 640; camera.updateProjectionMatrix();
+scene.fog.near = 200; scene.fog.far = 460;   // (out past the bigger board, 15 Nov: seen whole from above, not lost in the haze)
 pirate.g.visible = false;
 const sea = new THREE.Mesh(new THREE.CircleGeometry(260, 48).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#2f78a8', roughness: 0.35, metalness: 0.1 }));
 sea.receiveShadow = true;
@@ -146,7 +146,7 @@ const brawling = start < 0 && params.get('watch') === 'brawl';
 const admiral = start < 0 && !brawling && params.has('admiral');
 const bk = blockadeSea({ you: start, say, brawl: brawling, admiral: admiral ? 'gold' : null, sailed: (id) => sail(id) });
 
-const FOLLOW = { yaw: 0.35, pitch: 0.55, dist: 46 }, WHOLE = { yaw: 0, pitch: 1.05, dist: 205 };
+const FOLLOW = { yaw: 0.35, pitch: 0.55, dist: 46 }, WHOLE = { yaw: 0, pitch: 1.05, dist: 265 };
 const cam = { yaw: 0.35, pitch: 0, dist: 0, at: new THREE.Vector3(), follow: true, director: start < 0 && !brawling && !admiral, watching: 0, cut: 0, cinema: brawling };
 Object.assign(cam, FOLLOW);
 // (the brawl: its caption, and the way out of it to the whole blockade, the director on)
@@ -275,7 +275,7 @@ canvas.addEventListener('pointermove', (e) => {
   if (!p) return;
   if (pts.size === 2) {
     const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
-    if (pinch) cam.dist = Math.min(220, Math.max(6, cam.dist * pinch / d));
+    if (pinch) cam.dist = Math.min(300, Math.max(6, cam.dist * pinch / d));
     pinch = d;
   } else {
     cam.yaw -= (e.clientX - p[0]) * 0.006;
@@ -283,7 +283,7 @@ canvas.addEventListener('pointermove', (e) => {
   }
   p[0] = e.clientX; p[1] = e.clientY;
 });
-canvas.addEventListener('wheel', (e) => { e.preventDefault(); cam.dist = Math.min(220, Math.max(6, cam.dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+canvas.addEventListener('wheel', (e) => { e.preventDefault(); cam.dist = Math.min(300, Math.max(6, cam.dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
 
 const clock = new THREE.Clock();
 function frame() {
@@ -299,7 +299,7 @@ function frame() {
   }
   // Spectating with the director: on to whatever's happening, never cutting more often than every few seconds, the
   // camera drifting slowly round her.
-  if (bk.you() < 0 && cam.director && (cam.cut -= dt) <= 0) { const id = bk.director(); if (id !== cam.watching) { cam.watching = id; cam.cut = 5; sig = ''; } }
+  if (bk.you() < 0 && cam.director && (cam.cut -= dt) <= 0) { const id = bk.director(undefined, cam.watching); cam.cut = 4; if (id !== cam.watching) { cam.watching = id; cam.cut = 12; sig = ''; } }
   if (bk.you() < 0 && cam.director) cam.yaw += dt * 0.05;
   if (cam.cinema) {
     // (the brawl: between the two while they're close, else on whichever's knocked out, her crew at work; the camera

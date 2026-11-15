@@ -4005,6 +4005,23 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - Still to come (the task board, tasks/carpet-ride/): the second leg to the blockade; Gravee painting her portrait ("Naturally [Gravee] taking
   a portrait").
 
+### A blockade's about the points (15 Nov)
+
+- **You hang on the points, and die on them if you must.** The user: "this is a game about the points. You will hang to
+  the points. You die practically on the points. As long as doing so would not mean the other person gets more points
+  indirectly than it's worth ... sinking's not the end of the world. Being dead in the water, away from flags, not
+  covering anything. Oof." So no ship ever hides ("you never hide. There's just no tactical reason or benefit to. You
+  lose coverage of points"): a hurt one is patched where she is. What damage changes is her nerve: "being more or less
+  aggressive depending on your damage level ... if you know the person next to you is more damaged than you are, you get
+  more aggressive. If you're damaged, you might kind of take fewer risks". Nobody wanders off to a corner of the sea.
+- **Sinking costs travel, not just time.** Open sea round the board (six squares a side), the big ships coming back in
+  by an edge and sailing in ("there needs to be a bit of a buffer travel zone"), the sloops quick on the edge winds;
+  every ship can come in by either end (frigates by either gate's side, sloops and brigs by either side's edge: "island
+  and oceanside spawns").
+- **A sheltered spot has a way in from outside.** The heart's corners are out of any frigate's reach inside the fort,
+  a brig's launching spot; each has a gap through the wall from the open sea, a postern or a way out, so a sloop can
+  slip in at her ("balance that with another kind of gap coming from the outside").
+
 ### The blockade's balance: emergent, never a rule (15 Nov)
 
 - **Rock, paper, scissors comes from how the ships handle, never from a rule about what a ship may attack.** The user,

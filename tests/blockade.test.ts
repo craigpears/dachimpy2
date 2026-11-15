@@ -12,7 +12,7 @@ import { orderAt, orderText, FREE, STRATEGIES } from '../src/blockade-orders';
 import { squares, alongs, SLOOP_HANDLING, BRIG_HANDLING, FRIGATE_HANDLING } from '../src/ship-handling';
 import { DAMAGE } from '../src/ship-damage';
 
-const B = BLOCKADE, prize: [number, number] = [21, 17];
+const B = BLOCKADE, prize: [number, number] = [27, 23];
 /** A seeded dice, so a game plays the same every run. */
 const dice = (seed: number) => () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
 const frigate = (b: Blockade, team = 'gold') => b.ships.find((s) => s.kind === 'frigate' && s.team === team)!;
@@ -22,7 +22,7 @@ const brig = (b: Blockade, team = 'gold') => b.ships.find((s) => s.kind === 'bri
 const lagoonBuoy = (reef: (typeof B.REEFS)[number]) => B.BUOYS.find((u) => Math.max(Math.abs(u.at[0] - reef.at[0]), Math.abs(u.at[1] - reef.at[1])) <= 2)!;
 /** Everyone else out of the way, on open water in the north-east, so a test's ships have the sea to themselves. */
 const clearAway = (b: Blockade, keep: { id: number }[]) => {
-  b.ships.filter((s) => !keep.some((k) => k.id === s.id) && !s.craft).forEach((s, i) => s.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
+  b.ships.filter((s) => !keep.some((k) => k.id === s.id) && !s.craft).forEach((s, i) => s.helm.moor({ c: 36 + (i % 8), r: 36 + Math.floor(i / 8) * 3, d: 1 }));
   b.notice();
 };
 
@@ -41,11 +41,11 @@ describe('the board, as a blockade board is, and more epic (15 Nov: "three or fo
       for (const s of mine) for (const [c, r] of squares(s.h, s.helm.pose)) expect(b.rocks.has(`${c},${r}`), s.name).toBe(false);
     }
   });
-  it('the heart\'s a walled fort: its only ways through the two gates\', the two side ways and the four ways out, one square each', () => {
+  it('the heart\'s a walled fort: its only ways through the two gates\', the two side ways, the ways out and the two posterns, one square each', () => {
     const b = new Blockade(), open: string[] = [];
     for (const w of B.WALLS) for (let c = w.c0; c <= w.c1; c++) for (let r = w.r0; r <= w.r1; r++) if (!b.rocks.has(`${c},${r}`)) open.push(`${c},${r}`);
     const inWall = ([c, r]: [number, number]) => B.WALLS.some((w) => c >= w.c0 && c <= w.c1 && r >= w.r0 && r <= w.r1);
-    const ways = [...B.GATES.flatMap((g) => [`${g.way},${g.r0}`, `${g.way},${g.r1}`]), ...B.SIDEWAYS.map(([c, r]) => `${c},${r}`), ...B.EXITS.flat().flatMap(laneSquares).filter(inWall).map(([c, r]) => `${c},${r}`)];
+    const ways = [...B.GATES.flatMap((g) => [`${g.way},${g.r0}`, `${g.way},${g.r1}`]), ...B.SIDEWAYS.map(([c, r]) => `${c},${r}`), ...B.POSTERNS.map(([c, r]) => `${c},${r}`), ...B.EXITS.flat().flatMap(laneSquares).filter(inWall).map(([c, r]) => `${c},${r}`)];
     expect(open.sort()).toEqual([...new Set(ways)].sort());
   });
   it('the sloops can get into the heart from the start, and a brig, one square wide, through a gate under its guns; the frigates can\'t till a tower\'s down (15 Nov: "a way of naturally delaying the war [frigs]")', () => {
@@ -108,11 +108,11 @@ describe('the board, as a blockade board is, and more epic (15 Nov: "three or fo
   it('a sloop in the heart leaves it for a lagoon once the enemy\'s frigates are in', () => {
     const b = new Blockade(), s = sloop(b), foe = frigate(b, 'crimson');
     clearAway(b, [s, foe]);
-    s.helm.moor({ c: 21, r: 16, d: 0 }); b.notice();
+    s.helm.moor({ c: 27, r: 22, d: 0 }); b.notice();
     const bot = new Bot(s.id, dice(1)), goalAt = () => { bot.tick(b, 0.1); const g = bot.goal; return g?.kind === 'buoy' ? B.BUOYS[g.i].at : null; };
     for (let i = 0; i < 40; i++) goalAt();
     expect(inHeart(...goalAt()!)).toBe(true);
-    foe.helm.moor({ c: 22, r: 19, d: 1 }); b.notice();
+    foe.helm.moor({ c: 28, r: 25, d: 1 }); b.notice();
     const fresh = new Bot(s.id, dice(1));
     for (let i = 0; i < 40; i++) fresh.tick(b, 0.1);
     const g = fresh.goal;
@@ -163,7 +163,7 @@ describe('scoring, as YPPedia has it: a buoy in one side\'s influence alone scor
 describe('shooting each other: holes where she\'s shot, and dead in the water (15 Nov: "I want to shoot the sloop from the war frigate and see it just go dead in the water")', () => {
   it('a frigate\'s broadside on a sloop holes her where it struck; the third knocks her out, held till she\'s rebuilt', () => {
     const b = new Blockade(), f = frigate(b), s = sloop(b, 'crimson');
-    f.helm.moor({ c: 8, r: 14, d: 0 }); s.helm.moor({ c: 10, r: 14, d: 0 });
+    f.helm.moor({ c: 14, r: 20, d: 0 }); s.helm.moor({ c: 16, r: 20, d: 0 });
     for (let i = 0; i < 3; i++) {
       const shot = b.fire(f.id, 'R')!.shots.find((x) => x.what?.what === 'ship')!;
       expect(shot.hole).toBeTruthy();
@@ -196,7 +196,7 @@ describe('the gates\' guns doubled, punishing campers (15 Nov: "training on peop
   });
   it('a gun paints a target on the square of the nearest ship in its reach and fires on it, the shot GATE_AIM coming down: lying still, she\'s hit (15 Nov: "paint a target on a square and then just take quite a while to fire")', () => {
     const b = new Blockade(), s = sloop(b), gun = b.battery[0];
-    b.ships.filter((x) => x !== s).forEach((x, i) => x.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
+    b.ships.filter((x) => x !== s).forEach((x, i) => x.helm.moor({ c: 36 + (i % 8), r: 36 + Math.floor(i / 8) * 3, d: 1 }));
     s.helm.moor({ c: gun.at[0], r: gun.at[1] - 2, d: 1 }); b.notice();
     let fired: { to: [number, number]; secs: number } | null = null, t = 0;
     for (; t < 1 && !fired; t += 0.1) { const e = b.tick(0.1).guns.find((x) => x.gun === 0 && x.e.kind === 'fire'); if (e && e.e.kind === 'fire') fired = e.e; }
@@ -210,7 +210,7 @@ describe('the gates\' guns doubled, punishing campers (15 Nov: "training on peop
   });
   it('a sloop that moves off the painted square before the shot comes down is missed: keep moving and the guns can\'t touch her (15 Nov: "it\'s clear that a sloop will move quickly before it shoots")', () => {
     const b = new Blockade(), s = sloop(b), gun = b.battery[0];
-    b.ships.filter((x) => x !== s).forEach((x, i) => x.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
+    b.ships.filter((x) => x !== s).forEach((x, i) => x.helm.moor({ c: 36 + (i % 8), r: 36 + Math.floor(i / 8) * 3, d: 1 }));
     s.helm.moor({ c: gun.at[0], r: gun.at[1] - 2, d: 1 }); b.notice();
     let fired = false;
     for (let t = 0; t < 1 && !fired; t += 0.1) fired = b.tick(0.1).guns.some((x) => x.gun === 0 && x.e.kind === 'fire');
@@ -231,8 +231,8 @@ describe('a sinking blockade (15 Nov: "that sense of working your way back in wo
   it('a frigate knocked out and shot on sinks: off the board, in nobody\'s way, no influence, no guns, till she comes back where she came in', () => {
     const b = new Blockade(), f = frigate(b, 'crimson'), g = frigate(b, 'gold');
     // (the two out on open water, the gold frigate's broadside on her)
-    b.ships.filter((s) => s !== f && s !== g).forEach((s, i) => s.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
-    g.helm.moor({ c: 7, r: 10, d: 1 }); f.helm.moor({ c: 7, r: 14, d: 1 }); b.notice();
+    b.ships.filter((s) => s !== f && s !== g).forEach((s, i) => s.helm.moor({ c: 36 + (i % 8), r: 36 + Math.floor(i / 8) * 3, d: 1 }));
+    g.helm.moor({ c: 13, r: 16, d: 1 }); f.helm.moor({ c: 13, r: 20, d: 1 }); b.notice();
     knockOut(b, f);
     let sunk = false;
     for (let i = 0; i < 20 && !sunk; i++) { g.guns.tick(9); sunk = (['L', 'R'] as const).some((side) => b.fire(g.id, side)?.shots.some((x) => x.sunk)); }
@@ -250,20 +250,22 @@ describe('a sinking blockade (15 Nov: "that sense of working your way back in wo
     expect([f.dmg.out, f.dmg.sunk, f.dmg.holes.length]).toEqual([false, false, 0]);
     for (const [c, r] of squares(f.h, f.helm.pose)) expect(b.under(c, r)?.id).toBe(f.id);
   });
-  it('someone lying where she came in: she waits till they\'ve gone', () => {
-    const b = new Blockade(), f = frigate(b, 'crimson'), other = frigate(b, 'gold');
+  it('someone lying on each of her entries: she waits till they\'ve gone', () => {
+    const b = new Blockade(), f = frigate(b, 'crimson'), other = frigate(b, 'gold'), third = b.ships.filter((s) => s.kind === 'frigate' && s.team === 'gold')[1];
     b.sink(f);
-    other.helm.moor(f.start); b.notice();
+    // (a frigate has two, one each end of the board, 15 Nov: "Ocean Island matters for the [war frigs] as well")
+    expect(f.entries).toHaveLength(2);
+    other.helm.moor(f.entries[0]); third.helm.moor(f.entries[1]); b.notice();
     for (let t = 0; t < B.RETURN + 5; t += 0.5) expect(b.tick(0.5).returned).not.toContain(f.id);
-    other.helm.moor({ c: 7, r: 10, d: 1 }); b.notice();
+    other.helm.moor({ c: 13, r: 16, d: 1 }); b.notice();
     let back = false;
     for (let t = 0; t < 2 && !back; t += 0.5) back = b.tick(0.5).returned.includes(f.id);
     expect(back).toBe(true);
   });
   it('a bot fires on an enemy who\'s knocked out, to sink her; and leaves her be once she\'s gone', () => {
     const b = new Blockade(), f = frigate(b, 'crimson'), g = frigate(b, 'gold');
-    b.ships.filter((s) => s !== f && s !== g).forEach((s, i) => s.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
-    g.helm.moor({ c: 7, r: 10, d: 1 }); f.helm.moor({ c: 7, r: 14, d: 1 }); b.notice();
+    b.ships.filter((s) => s !== f && s !== g).forEach((s, i) => s.helm.moor({ c: 36 + (i % 8), r: 36 + Math.floor(i / 8) * 3, d: 1 }));
+    g.helm.moor({ c: 13, r: 16, d: 1 }); f.helm.moor({ c: 13, r: 20, d: 1 }); b.notice();
     knockOut(b, f);
     const bot = new Bot(g.id, dice(2));
     let fired = 0;
@@ -285,7 +287,7 @@ describe('admiral mode: an order for each ship (15 Nov: "you need to be able to 
     // (a sloop's guns can't hurt a tower: there, she camps)
     expect(orderAt(b, sl, north.way, north.r0)?.kind).toBe('camp');
     // (on a rock: the nearest square she fits)
-    const camp = orderAt(b, f, 18, 18)!;
+    const camp = orderAt(b, f, 24, 24)!;
     expect(camp.kind).toBe('camp');
     if (camp.kind === 'camp') expect(b.rocks.has(`${camp.at[0]},${camp.at[1]}`)).toBe(false);
     expect(orderText(b, { kind: 'hold', buoy: 0 })).toBe('hold the four-pennant buoy in the heart');
@@ -295,7 +297,7 @@ describe('admiral mode: an order for each ship (15 Nov: "you need to be able to 
     const b = new Blockade(), bots = new Bots(b, [], dice(4)), f = frigate(b), sl = sloop(b), other = b.ships.find((x) => x.team === 'gold' && x.kind === 'sloop' && x !== sl && !x.raider)!;
     bots.order(f.id, { kind: 'gate', g: 1 });
     // (her camp out on the open sea; the far buoy, off the south gate)
-    bots.order(sl.id, { kind: 'camp', at: [10, 11] });
+    bots.order(sl.id, { kind: 'camp', at: [16, 17] });
     bots.order(other.id, { kind: 'hold', buoy: 3 });
     for (let i = 0; i < 2; i++) { bots.tick(b, 0.1); b.tick(0.1); }
     const goal = (id: number) => bots.bots.find((x) => x.id === id)!.goal;
@@ -303,7 +305,7 @@ describe('admiral mode: an order for each ship (15 Nov: "you need to be able to 
     let camped = 0;
     for (let i = 0; i < 900; i++) {
       bots.tick(b, 0.1); b.tick(0.1);
-      if (i > 600 && sl.away <= 0 && !sl.dmg.out && squares(sl.h, sl.helm.pose).some(([c, r]) => c === 10 && r === 11)) camped++;
+      if (i > 600 && sl.away <= 0 && !sl.dmg.out && squares(sl.h, sl.helm.pose).some(([c, r]) => c === 16 && r === 17)) camped++;
     }
     expect(camped).toBeGreaterThan(100);
     expect(b.reaches(other, B.BUOYS[3]) || other.dmg.out || other.away > 0).toBe(true);
@@ -359,9 +361,9 @@ describe('a raider snipes from off a frigate\'s bow or stern (15 Nov: "they snip
   it('she makes for a berth across the frigate\'s line past her end, from where her own broadside rakes her and none of the frigate\'s bears on her', () => {
     const b = new Blockade(), raider = b.ships.find((s) => s.raider && s.team === 'gold')!, foe = frigate(b, 'crimson');
     // (out on open water, the frigate heading along the board, the raider off to one side of her and astern)
-    b.ships.filter((s) => s !== raider && s !== foe).forEach((s, i) => s.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
-    foe.helm.moor({ c: 8, r: 10, d: 1 });
-    raider.helm.moor({ c: 2, r: 13, d: 1 });
+    b.ships.filter((s) => s !== raider && s !== foe).forEach((s, i) => s.helm.moor({ c: 36 + (i % 8), r: 36 + Math.floor(i / 8) * 3, d: 1 }));
+    foe.helm.moor({ c: 14, r: 16, d: 1 });
+    raider.helm.moor({ c: 8, r: 19, d: 1 });
     b.notice();
     const bot = new Bot(raider.id, dice(3));
     bot.tick(b, 5);
@@ -393,7 +395,8 @@ describe('the brawl, to watch (15 Nov: "I want to see two of the big ships reall
     expect(bears(a, z)).toBe(true);
     expect(bears(z, a)).toBe(true);
     let moved = false;
-    for (let i = 0; i < 400; i++) {
+    // (the first half minute: by then one's often sunk, and the other's gone on to the gates)
+    for (let i = 0; i < 300; i++) {
       bots.tick(b, 0.1); b.tick(0.1);
       if (duel.some((id, k) => JSON.stringify(b.ship(id).helm.pose) !== JSON.stringify(start[k]))) moved = true;
     }
@@ -405,7 +408,7 @@ describe('the brawl, to watch (15 Nov: "I want to see two of the big ships reall
 });
 
 describe('the bots, a whole round (15 Nov: "you should see sloops hiding out, sometimes coming out ... while [war frigs] are having a fight to land a few pot shots")', () => {
-  it('sloops in by the side ways first; frigates fight, shoot a gate down and get in; sloops hide, raid, are knocked out and rebuilt; ships sink and come back; both sides score', () => {
+  it('sloops in by the side ways first; frigates fight, shoot a gate down and get in; sloops raid, are knocked out and rebuilt, and never hide; ships sink and come back; both sides score', () => {
     // (seed 6: any seed's round has all of this but a frigate getting into the heart, which two rounds in three do)
     const b = new Blockade(), bots = new Bots(b, [], dice(6)), log = { gate: -1, sloopIn: -1, frigateIn: -1, hid: 0, raided: 0, fought: 0, outs: 0, sunk: 0, back: 0, launched: 0, rammed: 0, faded: 0, brigOut: 0, brigIn: 0 };
     const wasOut = new Set<number>();
@@ -425,7 +428,9 @@ describe('the bots, a whole round (15 Nov: "you should see sloops hiding out, so
     expect(log.sloopIn).toBeGreaterThan(0);
     expect(log.gate).toBeGreaterThan(log.sloopIn);
     expect(log.frigateIn).toBeGreaterThan(log.gate);
-    for (const k of ['hid', 'raided', 'fought', 'outs', 'sunk', 'back', 'launched', 'rammed', 'faded'] as const) expect(log[k], k).toBeGreaterThan(0);
+    for (const k of ['raided', 'fought', 'outs', 'sunk', 'back', 'launched', 'rammed', 'faded'] as const) expect(log[k], k).toBeGreaterThan(0);
+    // (nobody hides: the user, 15 Nov, "you never hide. There\'s just no tactical reason or benefit to. You lose coverage of points")
+    expect(log.hid).toBe(0);
     // (the brigs out round the islands far more than in the heart: theirs is the middle ground)
     expect(log.brigOut).toBeGreaterThan(log.brigIn * 2);
     expect(b.score.gold).toBeGreaterThan(0);
@@ -457,7 +462,7 @@ describe('war brigs, the middle class (15 Nov: "a middle ship class, so it\'s no
   it('each brig launches her craft off her sides, heading as she is, for a while; not again till they\'re all back aboard and her time\'s up', () => {
     const b = new Blockade(), t = brig(b, 'gold'), g = brig(b, 'crimson');
     clearAway(b, [t, g]);
-    t.helm.moor({ c: 20, r: 6, d: 1 }); g.helm.moor({ c: 24, r: 28, d: 3 }); b.notice();
+    t.helm.moor({ c: 26, r: 12, d: 1 }); g.helm.moor({ c: 30, r: 34, d: 3 }); b.notice();
     expect(b.craftOf(t).map((x) => x.craft!.kind)).toEqual(['ram', 'ram', 'ram']);
     expect(b.craftOf(g).map((x) => x.craft!.kind)).toEqual(['ghost', 'ghost']);
     expect(b.craftOf(t).every((x) => x.away > 0)).toBe(true);
@@ -484,9 +489,9 @@ describe('war brigs, the middle class (15 Nov: "a middle ship class, so it\'s no
   it('a turtle beside an enemy lying still rams her, backs off a moment, and rams again; whatever she is (15 Nov: "send in the turtles and crush your war frigs"; "rather than ... [a rule] ... a mechanical advantage")', () => {
     const b = new Blockade(), t = brig(b, 'gold'), f = frigate(b, 'crimson');
     clearAway(b, [t, f]);
-    t.helm.moor({ c: 20, r: 6, d: 1 }); f.helm.moor({ c: 26, r: 9, d: 1 }); b.notice();
+    t.helm.moor({ c: 26, r: 12, d: 1 }); f.helm.moor({ c: 32, r: 15, d: 1 }); b.notice();
     const [turtle] = b.launch(t.id), x = b.ship(turtle);
-    for (const c of b.craftOf(t)) if (c !== x) c.helm.moor({ c: 40, r: 30 + (c.id % 3), d: 1 });
+    for (const c of b.craftOf(t)) if (c !== x) c.helm.moor({ c: 46, r: 36 + (c.id % 3), d: 1 });
     // (lying just off the frigate's side)
     x.helm.moor({ c: f.helm.pose.c, r: Math.max(...squares(f.h, f.helm.pose).map(([, r]) => r)) + 1, d: 1 }); b.notice();
     // (a ship that's only just come there slips her; lying still a moment, she's rammed)
@@ -503,7 +508,7 @@ describe('war brigs, the middle class (15 Nov: "a middle ship class, so it\'s no
     expect(again).toBe(1);
     // (a sloop lying still beside her is rammed as any ship is: no rule keeps her off)
     const sl = sloop(b, 'crimson');
-    f.helm.moor({ c: 40, r: 20, d: 1 }); sl.helm.moor({ c: x.helm.pose.c + 1, r: x.helm.pose.r, d: 1 }); b.notice();
+    f.helm.moor({ c: 46, r: 26, d: 1 }); sl.helm.moor({ c: x.helm.pose.c + 1, r: x.helm.pose.r, d: 1 }); b.notice();
     let onSloop = 0;
     for (let i = 0; i < 60 && !onSloop; i++) onSloop = b.tick(0.1).rams.filter((r) => r.on === sl.id).length;
     expect(onSloop).toBe(1);
@@ -511,7 +516,7 @@ describe('war brigs, the middle class (15 Nov: "a middle ship class, so it\'s no
   it('a phantom sloop: no shot ever hits her, and she holds no buoy; nor does a turtle (15 Nov: "they don\'t take damage. Like, you really can\'t shoot them")', () => {
     const b = new Blockade(), t = brig(b, 'gold'), g = brig(b, 'crimson'), f = frigate(b, 'gold');
     clearAway(b, [t, g, f]);
-    t.helm.moor({ c: 20, r: 6, d: 1 }); g.helm.moor({ c: 24, r: 30, d: 1 }); f.helm.moor({ c: 20, r: 10, d: 1 }); b.notice();
+    t.helm.moor({ c: 26, r: 12, d: 1 }); g.helm.moor({ c: 30, r: 36, d: 1 }); f.helm.moor({ c: 26, r: 16, d: 1 }); b.notice();
     const turtle = b.ship(b.launch(t.id)[0]), ghost = b.ship(b.launch(g.id)[0]);
     // (the phantom right under the frigate's broadside: it goes through her)
     ghost.helm.moor({ c: f.helm.pose.c - 1, r: Math.max(...squares(f.h, f.helm.pose).map(([, r]) => r)) + 2, d: 1 }); b.notice();
@@ -526,12 +531,12 @@ describe('war brigs, the middle class (15 Nov: "a middle ship class, so it\'s no
   it('a craft knocked out goes down at once and stays aboard her brig, never coming back at the edge; and her brig sunk, her craft fade', () => {
     const b = new Blockade(), t = brig(b, 'gold'), f = frigate(b, 'crimson');
     clearAway(b, [t, f]);
-    t.helm.moor({ c: 20, r: 6, d: 1 }); f.helm.moor({ c: 20, r: 10, d: 1 }); b.notice();
+    t.helm.moor({ c: 26, r: 12, d: 1 }); f.helm.moor({ c: 26, r: 16, d: 1 }); b.notice();
     const [a, z] = b.launch(t.id).map((id) => b.ship(id));
     // (one turtle lying under the frigate's broadside, the others well away from it)
     a.helm.moor({ c: f.helm.pose.c - 1, r: Math.max(...squares(f.h, f.helm.pose).map(([, r]) => r)) + 2, d: 1 });
-    z.helm.moor({ c: 40, r: 3, d: 1 });
-    for (const x of b.craftOf(t)) if (x !== a && x !== z) x.helm.moor({ c: 40, r: 6, d: 1 });
+    z.helm.moor({ c: 46, r: 9, d: 1 });
+    for (const x of b.craftOf(t)) if (x !== a && x !== z) x.helm.moor({ c: 46, r: 12, d: 1 });
     b.notice();
     let sunk = false;
     for (let i = 0; i < 12 && !sunk; i++) { f.guns.tick(9); sunk = (['L', 'R'] as const).some((side) => b.fire(f.id, side)?.shots.some((x) => x.sunk && x.what?.what === 'ship' && x.what.id === a.id)); }
@@ -544,12 +549,12 @@ describe('war brigs, the middle class (15 Nov: "a middle ship class, so it\'s no
   it('launching anchors her: she can\'t move while her craft are out; weighing anchor calls them home and takes a while (15 Nov: "she has to stay anchored while they\'re out ... They become a sitting duck")', () => {
     const b = new Blockade(), t = brig(b, 'gold');
     clearAway(b, [t]);
-    t.helm.moor({ c: 20, r: 6, d: 1 }); b.notice();
+    t.helm.moor({ c: 26, r: 12, d: 1 }); b.notice();
     expect(b.anchored(t)).toBe(false);
     expect(b.launch(t.id).length).toBeGreaterThan(0);
     expect(b.anchored(t)).toBe(true);
     expect(b.put(t.id, 'F')).toBe(false);
-    expect(b.drop(t.id, 30, 6)).toBeNull();
+    expect(b.drop(t.id, 36, 12)).toBeNull();
     const at = { ...t.helm.pose };
     for (let i = 0; i < 50; i++) b.tick(0.1);
     expect(t.helm.pose).toEqual(at);
@@ -566,19 +571,19 @@ describe('war brigs, the middle class (15 Nov: "a middle ship class, so it\'s no
   it('a brig\'s bot won\'t anchor to launch with an enemy sloop close enough to catch her at it', () => {
     const b = new Blockade(), t = brig(b, 'gold'), f = frigate(b, 'crimson'), sl = sloop(b, 'crimson');
     clearAway(b, [t, f, sl]);
-    t.helm.moor({ c: 20, r: 6, d: 1 }); f.helm.moor({ c: 26, r: 10, d: 1 }); sl.helm.moor({ c: 23, r: 8, d: 1 }); b.notice();
+    t.helm.moor({ c: 26, r: 12, d: 1 }); f.helm.moor({ c: 32, r: 16, d: 1 }); sl.helm.moor({ c: 29, r: 14, d: 1 }); b.notice();
     const bots = new Bots(b, b.ships.filter((s) => s !== t && !s.craft).map((s) => s.id), dice(3));
     for (let i = 0; i < 30; i++) { bots.tick(b, 0.1); b.tick(0.1); }
     expect(b.anchored(t)).toBe(false);
     // (the sloop gone off: she launches, and anchors)
-    sl.helm.moor({ c: 40, r: 30, d: 1 }); b.notice();
+    sl.helm.moor({ c: 46, r: 36, d: 1 }); b.notice();
     for (let i = 0; i < 30 && !b.anchored(t); i++) { bots.tick(b, 0.1); b.tick(0.1); }
     expect(b.anchored(t)).toBe(true);
   });
   it('a brig\'s bot launches her craft when an enemy frigate\'s near, and her turtles ram her', () => {
     const b = new Blockade(), t = brig(b, 'gold'), f = frigate(b, 'crimson');
     clearAway(b, [t, f]);
-    t.helm.moor({ c: 20, r: 6, d: 1 }); f.helm.moor({ c: 26, r: 9, d: 1 }); b.notice();
+    t.helm.moor({ c: 26, r: 12, d: 1 }); f.helm.moor({ c: 32, r: 15, d: 1 }); b.notice();
     const bots = new Bots(b, b.ships.filter((s) => s !== t && s !== f && !s.craft).map((s) => s.id), dice(3));
     let launched = 0, rammed = 0;
     for (let i = 0; i < 400 && !rammed; i++) { bots.tick(b, 0.1); launched += b.launches.splice(0).length; rammed += b.tick(0.1).rams.filter((x) => x.on === f.id).length; }
@@ -611,7 +616,7 @@ describe('reefs round the island buoys, the brigs\' and the sloops\' middle grou
   });
   it('every frigate can still get to both gates and the open sea all round, the long way past the islands', () => {
     const b = new Blockade();
-    for (const f of b.ships.filter((s) => s.kind === 'frigate')) for (const [c, r] of [[21, 9], [22, 26], [6, 8], [38, 28]] as [number, number][]) {
+    for (const f of b.ships.filter((s) => s.kind === 'frigate')) for (const [c, r] of [[27, 15], [28, 32], [12, 14], [44, 34]] as [number, number][]) {
       expect(f.sea.plotPast(f.helm.pose, c, r), `${f.name} to ${c},${r}`).not.toBeNull();
     }
   });
@@ -627,9 +632,9 @@ describe('dip, duck and dodge (15 Nov: "in the open water, it would be suicide, 
   it('a sloop in an enemy frigate\'s broadside gets out of it before it bears, and fires as she goes', () => {
     const b = new Blockade(), f = frigate(b, 'crimson'), sl = sloop(b, 'gold');
     clearAway(b, [f, sl]);
-    f.helm.moor({ c: 20, r: 6, d: 1 }); b.notice();
+    f.helm.moor({ c: 26, r: 12, d: 1 }); b.notice();
     // (two squares off her side, square in her broadside)
-    const [c, r] = [...reach(b, f)].map((k) => k.split(',').map(Number)).find(([x, y]) => x === 20)!;
+    const [c, r] = [...reach(b, f)].map((k) => k.split(',').map(Number)).find(([x, y]) => x === 26)!;
     sl.helm.moor({ c, r, d: 0 }); b.notice();
     expect(reach(b, f).has(`${sl.helm.pose.c},${sl.helm.pose.r}`)).toBe(true);
     const bot = new Bot(sl.id, dice(1));
@@ -640,9 +645,9 @@ describe('dip, duck and dodge (15 Nov: "in the open water, it would be suicide, 
     const b = new Blockade(), f = frigate(b, 'crimson'), sl = sloop(b, 'gold');
     clearAway(b, [f, sl]);
     // (the frigate on open water south of the fort, a rock by the sloop, the rock square off her side)
-    f.helm.moor({ c: 21, r: 1, d: 1 }); b.notice();
-    expect(b.rocks.has('21,4')).toBe(true);
-    sl.helm.moor({ c: 20, r: 4, d: 0 }); b.notice();
+    f.helm.moor({ c: 27, r: 7, d: 1 }); b.notice();
+    expect(b.rocks.has('27,10')).toBe(true);
+    sl.helm.moor({ c: 26, r: 10, d: 0 }); b.notice();
     const bot = new Bot(sl.id, dice(1));
     let safe = false;
     for (let i = 0; i < 30 && !safe; i++) { bot.tick(b, 0.1); b.tick(0.1); safe = !reach(b, f).has(`${sl.helm.pose.c},${sl.helm.pose.r}`); }
@@ -671,8 +676,8 @@ describe('playing for the points (15 Nov: "people aren\'t really paying attentio
   it('a frigate holding the prize keeps it: a sloop out of her reach is left be', () => {
     const b = new Blockade(), f = frigate(b), sl = sloop(b, 'crimson');
     clearAway(b, [f, sl]);
-    f.helm.moor({ c: 21, r: 17, d: 1 });
-    sl.helm.moor({ c: 21, r: 25, d: 1 }); b.notice();
+    f.helm.moor({ c: 27, r: 23, d: 1 });
+    sl.helm.moor({ c: 27, r: 31, d: 1 }); b.notice();
     expect(b.reaches(f, B.BUOYS[0])).toBe(true);
     const bot = new Bot(f.id, dice(5));
     for (let t = 0; t < 15; t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
@@ -681,7 +686,7 @@ describe('playing for the points (15 Nov: "people aren\'t really paying attentio
   it('a brig, with an enemy frigate camped in the heart, makes for her lagoon\'s corner by the wind\'s gap into it, anchors there and launches', () => {
     const b = new Blockade(), br = brig(b), f = frigate(b, 'crimson');
     clearAway(b, [br, f]);
-    f.helm.moor({ c: 21, r: 17, d: 1 }); b.notice();
+    f.helm.moor({ c: 27, r: 23, d: 1 }); b.notice();
     const bot = new Bot(br.id, dice(7));
     for (let t = 0; t < 90 && !b.anchored(br); t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
     expect(b.anchored(br)).toBe(true);
@@ -693,7 +698,7 @@ describe('playing for the points (15 Nov: "people aren\'t really paying attentio
   it('a turtle goes for a frigate lying still before a sloop on the move nearer her', () => {
     const b = new Blockade(), br = brig(b), f = frigate(b, 'crimson'), sl = sloop(b, 'crimson');
     clearAway(b, [br, f, sl]);
-    br.helm.moor({ c: 8, r: 18, d: 1 }); f.helm.moor({ c: 18, r: 18, d: 0 }); sl.helm.moor({ c: 12, r: 18, d: 0 }); b.notice();
+    br.helm.moor({ c: 14, r: 24, d: 1 }); f.helm.moor({ c: 24, r: 24, d: 0 }); sl.helm.moor({ c: 18, r: 24, d: 0 }); b.notice();
     expect(b.launch(br.id)).toBeTruthy();
     const turtle = b.ships.find((s) => s.craft?.kind === 'ram' && s.team === 'gold' && s.away <= 0)!;
     const bot = new Bot(turtle.id, dice(9));
@@ -734,7 +739,8 @@ describe('island side and ocean side (15 Nov: "for the smaller ships, they shoul
       expect(west.some((s) => s.kind === 'brig') && east.some((s) => s.kind === 'brig')).toBe(true);
       expect(west.filter((s) => s.kind === 'sloop').length).toBeGreaterThan(0);
       expect(east.filter((s) => s.kind === 'sloop').length).toBeGreaterThan(0);
-      for (const f of b.ships.filter((s) => s.team === team && s.kind === 'frigate')) expect(f.entries).toHaveLength(1);
+      // (its frigates on their own end, facing their gate, with an entry at the other end too, by the other gate: 15 Nov)
+      for (const f of b.ships.filter((s) => s.team === team && s.kind === 'frigate')) { expect(f.entries).toHaveLength(2); expect(f.entries[1].r > B.ROWS / 2).toBe(f.entries[0].r < B.ROWS / 2); }
     }
   });
   it('a sloop sunk comes back in by the other side\'s edge, then her own again', () => {
@@ -746,5 +752,23 @@ describe('island side and ocean side (15 Nov: "for the smaller ships, they shoul
     b.sink(sl);
     for (let t = 0; t <= B.RETURN + 1 && sl.away > 0; t += 0.5) b.tick(0.5);
     expect(sl.helm.pose.c).toBe(was);
+  });
+});
+
+describe('nobody off in a corner (15 Nov: "three sloops, two of which are repairing, like really right on the corner of the map ... there should be no reason for them to really be venturing over there")', () => {
+  it('a sloop hides to be patched only inside a lagoon\'s reef', () => {
+    const b = new Blockade();
+    for (const team of ['gold', 'crimson'] as const) for (const [c, r] of b.coves(team)) expect(B.REEFS.some((x) => Math.max(Math.abs(c - x.at[0]), Math.abs(r - x.at[1])) < x.ring)).toBe(true);
+  });
+  it('a frigate leaves be a sloop sheltering in a lagoon, close as she is', () => {
+    const b = new Blockade(), f = frigate(b, 'crimson'), sl = sloop(b, 'gold');
+    clearAway(b, [f, sl]);
+    const reef = B.REEFS[0];
+    sl.helm.moor({ c: reef.hide[0], r: reef.hide[1], d: 1 });
+    f.helm.moor({ c: reef.at[0] + reef.ring + reef.shoal + 2, r: reef.at[1] - 5, d: 0 }); b.notice();
+    expect(b.sheltered(sl)).toBe(true);
+    const bot = new Bot(f.id, dice(2));
+    for (let t = 0; t < 8; t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
+    expect(bot.goal?.kind === 'fight' && bot.goal.on === sl.id).toBe(false);
   });
 });
