@@ -114,6 +114,7 @@
 import * as THREE from 'three';
 import { renderer, scene, camera, paintSky, pirate } from './js/den/world.js';
 import { blockadeSea } from './js/den/blockade.js';
+import { BLOCKADE } from './js/blockade.js';
 
 const $ = (id) => document.getElementById(id), params = new URLSearchParams(location.search);
 paintSky('#4f8fd0', '#cfe2ee');
@@ -127,8 +128,9 @@ scene.add(sea);
 let sayT = 0;
 const say = (text, bad = false) => { const el = $('say'); el.textContent = text; el.classList.add('on'); el.classList.toggle('bad', bad); sayT = 3 + text.length / 30; };
 // Spectating to start (the user, 15 Nov: "you should be able to just spectate and watch"), the director moving the
-// camera to whatever's happening; ?ship= a number to sail her.
-const start = params.has('ship') ? Math.max(0, Math.min(15, Number(params.get('ship')) || 0)) : -1;
+// camera to whatever's happening; ?ship= a number to sail her (any of both fleets', the brigs too; not a brig's craft).
+const fleet = BLOCKADE.TEAMS.reduce((n, t) => n + t.ships.length, 0);
+const start = params.has('ship') ? Math.max(0, Math.min(fleet - 1, Number(params.get('ship')) || 0)) : -1;
 // ?watch=brawl: a cinematic (the user, 15 Nov: "I want to see two of the big ships really having a brawl and fighting it
 // out to see what that damage looks like"; "That needs to be like one of the shortcuts so people can actually see a
 // cinematic of the blockade"): two war frigates broadside to broadside, the camera slowly round them both.
@@ -169,7 +171,7 @@ for (const [kind, el] of [['sloop', $('stratSloop')], ['brig', $('stratBrig')], 
     sig = '';
   };
 }
-if (brawling) { const [a, z] = bk.duel.map((id) => bk.b.ship(id).name); $('cineTitle').textContent = `${a} and ${z}: a brawl`; cinema(true); Object.assign(cam, { yaw: -0.9, pitch: 0.38, dist: 34 }); }
+if (brawling) { const [a, z] = bk.duel.map((id) => bk.b.ship(id).name); $('cineTitle').textContent = `${a} and ${z}: a brawl`; cinema(true); Object.assign(cam, { yaw: -0.9, pitch: 0.55, dist: 34 }); }
 const sail = (id) => {
   bk.sail(id);
   $('mine').hidden = id < 0;

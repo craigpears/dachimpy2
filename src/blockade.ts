@@ -189,8 +189,9 @@ export const BLOCKADE = {
   /** The brawl to watch (blockade-test.html?watch=brawl, 15 Nov: "I want to see two of the big ships really having a
       brawl and fighting it out to see what that damage looks like"; "That needs to be like one of the shortcuts so
       people can actually see a cinematic of the blockade"): two war frigates broadside to broadside on the open water
-      west of the fort, between its reefs, room to come about, the rest of the blockade going on round them. */
-  BRAWL: [{ name: 'Primates Rule', at: { c: 7, r: 15, d: 1 } }, { name: 'Iron Pride', at: { c: 7, r: 19, d: 1 } }] as { name: string; at: Pose }[],
+      in the south-west corner, room to come about and for the camera to go round them clear of the fort, the rest of the
+      blockade going on beyond them. */
+  BRAWL: [{ name: 'Primates Rule', at: { c: 6, r: 3, d: 1 } }, { name: 'Iron Pride', at: { c: 6, r: 7, d: 1 } }] as { name: string; at: Pose }[],
 };
 
 const HANDLINGS: Record<Kind, Handling> = { sloop: SLOOP_HANDLING, brig: BRIG_HANDLING, frigate: FRIGATE_HANDLING };
