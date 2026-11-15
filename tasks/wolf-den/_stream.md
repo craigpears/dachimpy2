@@ -3,4 +3,4 @@ name: Multibella's wolf den
 hue: 285
 ---
 
-Her island and hut with the four-ring star table, a first lesson and its read guide, playtested by you (the basics). Next: her demonstrating the deeper mechanics. (15 Nov)
+Her lesson now shows how it all works, a step at a time on real boards: for you to playtest. Next: the wolf den on a phone (15 Nov)

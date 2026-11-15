@@ -1,6 +1,6 @@
 ---
 title: Multibella demonstrating the mechanics
-status: doing
+status: playtest
 asked: 15 Nov
 updated: 15 Nov
 link: den.html?at=wolfden&as=dachimpy
@@ -15,3 +15,4 @@ session: local_43b1ead3-69fd-4b10-88fc-68a7e57dcd0e
 
 - 15 Nov: put on the board.
 - 15 Nov: being done: started in its own session
+- 15 Nov: for you to playtest: her lesson's 'How it works': four steps on real boards (the cascade and wild slots, the fourth ring, a chart on a cascade's last clear, Umami's evil constellation), the read guide to match (bbfe981). Tests pass; not yet looked at in 3D

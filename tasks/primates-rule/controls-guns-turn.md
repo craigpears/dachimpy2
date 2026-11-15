@@ -16,3 +16,4 @@ session: local_1c668cf5-51c6-4f28-851f-a2174855ed7a
 - 15 Nov: put on the board.
 - 15 Nov: and her turn drawn rotating on the spot; it should always be moving forward, round the circle (15 Nov)
 - 15 Nov: being done: started in its own session, its own worktree
+- 15 Nov: its session couldn't start: the repository needs trusting in Claude Desktop
