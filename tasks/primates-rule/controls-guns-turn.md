@@ -4,7 +4,7 @@ status: doing
 asked: 15 Nov
 updated: 15 Nov
 link: frigate-test.html
-session: local_682e8061-d929-4dbc-9bd1-ef6337c64a8e
+session: local_1c668cf5-51c6-4f28-851f-a2174855ed7a
 ---
 
 **Asked:** the full controls "so I can shoot ... at the sloop"; her turn "making it cover a lot more space than you would in a sloop, so that actually is making it faster"; her guns a broadside, not aimed gun by gun; "a destructible ... Imperial Gate thing" to shoot at; the pilot turning toward a plotted point when going forward would do, "within the silhouette of the whole ship".
@@ -19,3 +19,4 @@ session: local_682e8061-d929-4dbc-9bd1-ef6337c64a8e
 - 15 Nov: its session couldn't start: the repository needs trusting in Claude Desktop
 - 15 Nov: ready to start: back to ready until its session can start
 - 15 Nov: being done: restarted in its own session and worktree, the repository trusted
+- 15 Nov: being done: the original session restarted by you; the duplicate stopped
