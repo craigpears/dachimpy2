@@ -11,3 +11,7 @@ the example Multibella's lesson should walk through, not Umami's evil constellat
 
 Pandayay, alongside it: "u dont need to do triples to get fren, if u go fast enough u can do singles, and any good set
 of doubles will fren too ... not to let examples of higher lvl tactics get u worried".
+
+## quick-double.png (the user, 15 Nov)
+
+The quick double, set up on a real board: "I first set up the third ring so that there were two whites, then collected the white and yellow in the right order on the outside, and am now turning them for a quick double". On the third ring, whites at N and NE with NW empty, the yellow target at N under its white; on the outer ring a white at NE, then a yellow at E behind it. Turned anticlockwise, the white drops into NW and the three whites clear (the single); the yellow comes over N as it empties and falls into the yellow target (the double). The red marks are the user's.
