@@ -16,7 +16,8 @@ import { drawnAt } from '../ship-handling.js';
 import { FRIGATES, WAR_FRIGATE_PLAN, deckY } from '../den-frigate.js';
 import { BRIGS, WAR_BRIG_PLAN } from '../den-brig.js';
 import { SLOOP_HULL } from '../ships.js';
-import { scene, mat, mesh, canvasTex, burst, makePirate } from './world.js';
+import { scene, camera, mat, mesh, canvasTex, burst, makePirate } from './world.js';
+import { bake } from './bake.js';
 import { blastTick } from './blast.js';
 import { turretView, turretWrecked, turretFire, turretLand, turretShotsTick } from './turret.js';
 import { gateLook } from './gate-look.js';
@@ -118,6 +119,9 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     }
   });
   const reefRockM = ['#6d6f68', '#7a776c', '#5d6660'].map((col) => mat(col, { flatShading: true, roughness: 0.95 }));
+  // (everything of the board that never moves, its rocks and walls and islets, baked into one mesh a material: three
+  // hundred stones were three hundred draws, 15 Nov)
+  const still = new THREE.Group();
   const rockGeo = new THREE.DodecahedronGeometry(1, 0), reefSheets = [];
   for (const reef of BLOCKADE.REEFS) {
     const at = v3(...reef.at), size = ((reef.ring + reef.shoal) * 2 + 3) * CELL;
@@ -135,7 +139,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         m.scale.set(sz * (1 + roll() * 0.4), sz * 0.6, sz * (1 + roll() * 0.4));
         m.position.set(at.x + (roll() - 0.5) * 2.6, 0.02, at.z + (roll() - 0.5) * 2.6);
         m.rotation.set(0, roll() * 3, 0);
-        g.add(m);
+        still.add(m);
       }
       continue;
     }
@@ -144,22 +148,23 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
       m.scale.set(s * (0.9 + roll() * 0.3), s * (0.8 + roll() * 0.9), s * (0.9 + roll() * 0.3));
       m.position.set(at.x + ((i & 1) - 0.5) * 1.8 + (roll() - 0.5) * 0.6, s * 0.35, at.z + ((i >> 1) - 0.5) * 1.8 + (roll() - 0.5) * 0.6);
       m.rotation.set(roll() * 3, roll() * 3, roll() * 3);
-      g.add(m);
+      still.add(m);
     }
   }
   // ----- a tiny island by each lagoon's buoy: a round of sand, a tuft of grass, a palm or two -----
   const sandM = mat('#e2cf98', { roughness: 1 }), grassM = mat('#6f9a46', { roughness: 1, flatShading: true }), trunkM = mat('#8a6a44', { roughness: 1 }), leafM = mat('#4f8a3a', { roughness: 1, side: THREE.DoubleSide });
   for (const { islet: [c, r] } of BLOCKADE.REEFS) {
     const at = v3(c, r), roll = dice(c, r);
-    const sand = mesh(new THREE.CylinderGeometry(CELL * 0.55, CELL * 0.68, 0.7, 14), sandM); sand.position.set(at.x, 0.1, at.z); g.add(sand);
-    const hill = mesh(new THREE.DodecahedronGeometry(CELL * 0.3, 0), grassM); hill.scale.set(1, 0.5, 1); hill.position.set(at.x + (roll() - 0.5) * 0.6, 0.5, at.z + (roll() - 0.5) * 0.6); g.add(hill);
+    const sand = mesh(new THREE.CylinderGeometry(CELL * 0.55, CELL * 0.68, 0.7, 14), sandM); sand.position.set(at.x, 0.1, at.z); still.add(sand);
+    const hill = mesh(new THREE.DodecahedronGeometry(CELL * 0.3, 0), grassM); hill.scale.set(1, 0.5, 1); hill.position.set(at.x + (roll() - 0.5) * 0.6, 0.5, at.z + (roll() - 0.5) * 0.6); still.add(hill);
     for (let k = 0, n = 1 + Math.floor(roll() * 2); k < n; k++) {
       const palm = new THREE.Group(), h = 2.6 + roll() * 1.4, lean = (roll() - 0.5) * 0.5;
       const trunk = mesh(new THREE.CylinderGeometry(0.12, 0.18, h, 6), trunkM); trunk.position.y = h / 2; palm.add(trunk);
       for (let i = 0; i < 6; i++) { const leaf = mesh(new THREE.PlaneGeometry(0.5, 2.0), leafM, false); leaf.position.set(0, h, 0); leaf.rotation.set(-1.1, i / 6 * Math.PI * 2, 0); leaf.translateY(0.9); palm.add(leaf); }
-      palm.position.set(at.x + (roll() - 0.5) * 1.6, 0.4, at.z + (roll() - 0.5) * 1.6); palm.rotation.z = lean; palm.rotation.y = roll() * 6; g.add(palm);
+      palm.position.set(at.x + (roll() - 0.5) * 1.6, 0.4, at.z + (roll() - 0.5) * 1.6); palm.rotation.z = lean; palm.rotation.y = roll() * 6; still.add(palm);
     }
   }
+  g.add(bake(still));
   // ----- the imperial gates and their bastion guns -----
   const gls = b.gates.map((gate, gi) => gateLook(g, gate, b.battery.filter((_, i) => b.gunGate[i] === gi), v3));
   const bastions = b.battery.map((_, i) => { const gi = b.gunGate[i], k = b.battery.slice(0, i).filter((__, j) => b.gunGate[j] === gi).length; return gls[gi].bastions[k]; });
@@ -191,6 +196,9 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
   });
 
   // ----- the ships: each her own look, her name, her influence circle, her crew and her damage -----
+  // (how near the camera, in the sea's units, a ship has to be for her little crew to be drawn: following a ship, she
+  // and those round her; the whole board, none. The usual trick: detail only where it can be seen)
+  const DETAIL = 70;
   const sqGeoReach = new THREE.PlaneGeometry(CELL * 0.92, CELL * 0.92).rotateX(-Math.PI / 2);
   // (a turtle's damage isn't drawn on her: two hits and she's gone)
   const NO_DAMAGE = { tick: () => ({ low: 0, list: 0, turn: 0 }), reset() {} };
@@ -199,7 +207,9 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     const plan = big ? WAR_FRIGATE_PLAN : brig ? WAR_BRIG_PLAN : null;
     const look = big ? frigateMesh(FRIGATES[s.name] ?? FRIGATES['Primates Rule']) : brig ? frigateMesh(BRIGS[s.name] ?? BRIGS.Tidecaller, WAR_BRIG_PLAN)
       : craft === 'ram' ? turtleMesh() : craft === 'ghost' ? ghostSloopMesh() : null;
-    const m = look ? look.g : sloopMesh();
+    // (a sloop baked down to one mesh a material, as a frigate is: nothing on her moves here; her crew and her holes,
+    // added after, stay as they are)
+    const m = look ? look.g : bake(sloopMesh());
     g.add(m);
     const hull = plan ? plan.hull : SLOOP_HULL, deck = plan ? deckY(plan, 'waist') : SLOOP_DECK;
     const crew = craft ? [] : big
@@ -208,7 +218,8 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         : [{ x: 0.55, z: 0.35, job: 'carp' }, { x: 0.05, z: -0.35, job: 'bilge' }];
     const dl = craft === 'ram' ? NO_DAMAGE : damageLook(m, hull, { deck, crew, dress: DRESS[s.team] });
     // (her helmsman, at her wheel or tiller; a craft has none to see)
-    if (!craft) { const helm = makePirate(DRESS[s.team]); helm.g.position.set(plan ? plan.helm.x - 0.6 : -1.15, plan ? deckY(plan, 'quarter') : SLOOP_DECK, 0); helm.g.rotation.y = Math.PI / 2; m.add(helm.g); }
+    const helm = craft ? null : makePirate(DRESS[s.team]).g;
+    if (helm) { helm.position.set(plan ? plan.helm.x - 0.6 : -1.15, plan ? deckY(plan, 'quarter') : SLOOP_DECK, 0); helm.rotation.y = Math.PI / 2; m.add(helm); }
     const name = label(s.name, col); g.add(name);
     if (craft) name.scale.multiplyScalar(0.7);
     const R = (B.INFLUENCE[s.kind] + (s.h.long - 1) / 2) * CELL;
@@ -221,7 +232,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     mark.visible = false; mark.renderOrder = 3; g.add(mark);
     // (a craft starts aboard her brig, unseen)
     if (craft) { m.visible = false; name.visible = false; ring.visible = false; }
-    return { s, m, look, dl, name, ring, line, mark, big, brig, craft, heel: 0, pending: new Set(), fadeT: craft ? 99 : undefined };
+    return { s, m, look, dl, helm, name, ring, line, mark, big, brig, craft, heel: 0, pending: new Set(), fadeT: craft ? 99 : undefined };
   });
 
   // ----- a frigate's broadside reach, shaded red on the water (the one you're following): her blind spots plain, off her
@@ -351,8 +362,13 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         const s = V.s, h = s.helm, at = drawnAt(s.h, h.now()), turning = h.cur && (h.cur.m === 'L' || h.cur.m === 'R') && !h.cur.bump && h.t < h.cur.secs;
         V.heel += ((turning ? (h.cur.m === 'L' ? -1 : 1) * (V.big ? 0.05 : 0.12) : 0) - V.heel) * Math.min(1, dt * 3);
         // (gone under: nothing more of her drawn, her smoke and crew with her)
-        const aboard = s.craft && s.away > 0 && !V.sinking, under = s.away > 0 && (aboard || (V.sinkT ?? 0) > SINK_SECS + 0.7), d = under ? { low: 0, list: 0, turn: 0 } : V.dl.tick(dt, s.dmg, { pending: V.pending });
         const [x, z] = seaXZ(at.c, at.r);
+        // (near the camera, her crew drawn and at work; further off, only her: DETAIL)
+        const far = Math.hypot(camera.position.x - x, camera.position.y, camera.position.z - z), near = far < DETAIL;
+        if (V.helm) V.helm.visible = near;
+        // (a big ship's deck furniture as near as her crew; her guns twice as far)
+        if (V.look?.detail) { V.look.detail.furniture.visible = near; V.look.detail.guns.visible = far < DETAIL * 2; }
+        const aboard = s.craft && s.away > 0 && !V.sinking, under = s.away > 0 && (aboard || (V.sinkT ?? 0) > SINK_SECS + 0.7), d = under ? { low: 0, list: 0, turn: 0 } : V.dl.tick(dt, s.dmg, { pending: V.pending, near });
         V.m.position.set(x, d.low + Math.sin(clock * (V.big ? 0.8 : 1.1) + s.id) * 0.05, z);
         V.m.rotation.set(V.heel + d.list, Math.PI / 2 - at.a * Math.PI / 2 + d.turn, Math.sin(clock * 0.6 + s.id) * 0.012, 'YXZ');
         V.look?.tick(dt);

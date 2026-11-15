@@ -251,18 +251,24 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN, { furled = false } = 
   rod(last, [-l + 0.2, railY(-l + 0.2), 0], 0.02, M.rope, 3);
 
   // ----- her guns and furniture, as her config places them -----
-  const piece = (kind, opts, x, z, yaw) => {
+  // (each its own group, baked on its own: her guns and her deck's furniture are two thirds of what she's drawn from, so
+  // a scene that sees her from far off can leave them out, `detail`; the blockade does, 15 Nov)
+  const gunsG = new THREE.Group(), furnG = new THREE.Group();
+  gunsG.userData.live = furnG.userData.live = true;
+  const piece = (kind, opts, x, z, yaw, into) => {
     const make = FURNITURE[kind];
     if (!make) throw new Error(`No furniture called ${kind}`);
     const p = make(opts || {});
     p.g.position.set(x, deckY(P, deckAt(P, x)) + 0.02, z); p.g.rotation.y = yaw || 0;
-    g.add(p.g);
+    into.add(p.g);
     if (p.tick) ticks.push(p.tick);
   };
-  for (const gun of guns) piece(ship.gunKind, ship.gunOpts, gun.x, gun.z, gun.side === 'port' ? Math.PI : 0);
-  for (const f of ship.furniture) piece(f.kind, f.opts, f.x, f.z, f.yaw);
+  for (const gun of guns) piece(ship.gunKind, ship.gunOpts, gun.x, gun.z, gun.side === 'port' ? Math.PI : 0, gunsG);
+  for (const f of ship.furniture) piece(f.kind, f.opts, f.x, f.z, f.yaw, furnG);
+  g.add(gunsG, furnG);
 
   bake(g);
+  bake(gunsG); bake(furnG);
   bake(sails);
   g.add(sails);
   g.rotation.order = 'YXZ';   // (turned to her heading, then heeled over about her own length, as the sloop)
@@ -278,5 +284,5 @@ export function frigateMesh(ship, plan = WAR_FRIGATE_PLAN, { furled = false } = 
     let t = 0;
     ticks.push((dt) => { t += dt; const a = 0.56 + Math.sin(t * 1.7) * 0.07 + Math.sin(t * 5.3) * 0.03; for (const m of ghostly.values()) m.opacity = a; });
   }
-  return { g, sails, plan: P, ship, tick(dt) { for (const t of ticks) t(dt); } };
+  return { g, sails, plan: P, ship, detail: { guns: gunsG, furniture: furnG }, tick(dt) { for (const t of ticks) t(dt); } };
 }

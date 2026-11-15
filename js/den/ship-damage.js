@@ -16,8 +16,9 @@ const SIZE = { small: 0.24, medium: 0.32, large: 0.42 };
 
 /** Her damage drawn on `g` (her group: bow toward +x, port toward -z, the waterline at y 0), her hull `hull`
     (src/ships.ts), her deck's height `deck`, her crew's places `crew` ([{ x, z, job: 'carp' | 'bilge' }], on her
-    deck), dressed as `dress` (makePirate's options). Returns { tick(dt, dmg, { pending }) → { low, list, turn } }:
-    what to add to where she's drawn. `pending`, holes whose shot hasn't come down yet (drawn when it does). */
+    deck), dressed as `dress` (makePirate's options). Returns { tick(dt, dmg, { pending, near }) → { low, list, turn } }:
+    what to add to where she's drawn. `pending`, holes whose shot hasn't come down yet (drawn when it does); `near`,
+    whether she's close enough to the camera for her crew to be drawn. */
 export function damageLook(g, hull, { deck, crew = [], dress = {} }) {
   const drawn = new Map(), big = hull.len > 8;
   const hands = crew.map((c, i) => {
@@ -79,7 +80,7 @@ export function damageLook(g, hull, { deck, crew = [], dress = {} }) {
       patched.length = 0;
       turn = 0;
     },
-    tick(dt, dmg, { pending = new Set() } = {}) {
+    tick(dt, dmg, { pending = new Set(), near = true } = {}) {
       t += dt;
       const ids = new Set(dmg.holes.map((h) => h.id));
       for (const id of [...drawn.keys()]) if (!ids.has(id)) patch(id);
@@ -91,7 +92,11 @@ export function damageLook(g, hull, { deck, crew = [], dress = {} }) {
       }
       // Her crew at work: carpenters hammering while there's a hole, bilgers pumping while there's water.
       const work = { carp: dmg.holes.length > 0, bilge: dmg.water > 0.02 };
-      for (const c of hands) {
+      // (far from the camera, her crew aren't drawn, nor worked, nor their sparks and spray: too small to see, and
+      // seventy little pirates across a blockade were most of what it drew; the user, 15 Nov: "you only do those
+      // details when you're zoomed in")
+      for (const c of hands) c.p.g.visible = near;
+      if (near) for (const c of hands) {
         const busy = work[c.job], k = busy ? Math.abs(Math.sin(t * (c.job === 'carp' ? 9 : 4) + c.ph)) : 0;
         c.p.g.position.y = deck + (c.job === 'bilge' ? 0.12 * k : 0);
         c.p.g.rotation.x = c.job === 'carp' ? 0.35 * k : 0;
@@ -99,7 +104,7 @@ export function damageLook(g, hull, { deck, crew = [], dress = {} }) {
         if (busy && c.job === 'carp' && Math.random() < dt * 1.5) { g.updateMatrixWorld(true); burst(c.p.g.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.45, 0)), '#f6e2b0', 3, 1.2); }
       }
       // Water pumped over her side.
-      if (work.bilge && (sprayT -= dt) < 0) {
+      if (near && work.bilge && (sprayT -= dt) < 0) {
         sprayT = 0.5 - dmg.water * 0.3;
         g.updateMatrixWorld(true);
         const side = Math.random() < 0.5 ? -1 : 1, w = g.localToWorld(new THREE.Vector3((Math.random() - 0.5) * hull.len * 0.3, deck, side * (hull.beam / 2 + 0.1)));
