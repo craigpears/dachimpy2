@@ -92,7 +92,7 @@ describe('"there should be an object for a destructible turret ... just there to
   });
 });
 
-describe('fired on anyway (15 Nov: the blockade's gate guns "punishing people camping")', () => {
+describe('fired on anyway (15 Nov: the blockade\'s gate guns "punishing people camping")', () => {
   it('a gun not alert holds fire on her in its reach, unless the place says fire on her anyway', () => {
     const t = new Turret({ at: [6, 8], alert: false });
     t.wait = 0;

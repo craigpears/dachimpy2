@@ -135,13 +135,13 @@ describe('shooting each other: holes where she\'s shot, and dead in the water (1
   });
 });
 
-describe('the gates' guns doubled, punishing campers (15 Nov: "training on people's positions, especially punishing people camping ... double up on the [cannons] ... provide more of a barrier to the war frigates")', () => {
+describe('the gates\' guns doubled, punishing campers (15 Nov: "training on people\'s positions, especially punishing people camping ... double up on the [cannons] ... provide more of a barrier to the war frigates")', () => {
   it('four bastion guns a gate', () => {
     const b = new Blockade();
     for (let g = 0; g < b.gates.length; g++) expect(b.gunGate.filter((x) => x === g)).toHaveLength(4);
     for (const gun of b.battery) expect(b.rocks.has(`${gun.at[0]},${gun.at[1]}`)).toBe(true);
   });
-  it('a gun not yet roused leaves a ship passing under it be, and fires on her once she's lingered there CAMP seconds', () => {
+  it(`a gun not yet roused leaves a ship passing under it be, and fires on her once she's lingered there CAMP seconds`, () => {
     const b = new Blockade(), s = sloop(b), gun = b.battery[0];
     b.ships.filter((x) => x !== s).forEach((x, i) => x.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
     // (lying still under the south gate's first gun, unroused)
@@ -256,7 +256,7 @@ describe('admiral mode: an order for each ship (15 Nov: "you need to be able to 
   });
 });
 
-describe('the admiral's strategies, a handful each (15 Nov: "keep the Admiral mode relatively simple ... like choosing just a strategy")', () => {
+describe(`the admiral's strategies, a handful each (15 Nov: "keep the Admiral mode relatively simple ... like choosing just a strategy")`, () => {
   const round = (kind: 'sloop' | 'frigate', name: string, secs: number) => {
     const b = new Blockade(), bots = new Bots(b, [], dice(5)), st = STRATEGIES[kind].find((x) => x.name === name)!;
     const mine = b.ships.filter((x) => x.team === 'gold' && x.kind === kind);
@@ -270,11 +270,11 @@ describe('the admiral's strategies, a handful each (15 Nov: "keep the Admiral mo
     expect(STRATEGIES.frigate.length).toBeGreaterThanOrEqual(5);
     for (const k of ['sloop', 'frigate'] as const) expect(STRATEGIES[k][0].order).toEqual(FREE);
   });
-  it('sloops running for the middle go for the heart's buoys only; holding the outside, never', () => {
+  it(`sloops running for the middle go for the heart's buoys only; holding the outside, never`, () => {
     expect(round('sloop', 'Run for the middle', 40).goals).not.toContain('outside');
     expect(round('sloop', 'Hold the outside', 40).goals).not.toContain('heart');
   });
-  it('frigates taking the middle step by step wreck a gate's guns; hunting their frigates fight them; controlling the outside keep off the gates', () => {
+  it(`frigates taking the middle step by step wreck a gate's guns; hunting their frigates fight them; controlling the outside keep off the gates`, () => {
     const siege = round('frigate', 'Take the middle step by step', 60);
     expect(siege.goals).toContain('guns');
     expect(siege.b.battery.some((x) => x.wrecked || x.hits > 0)).toBe(true);
