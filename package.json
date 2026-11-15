@@ -8,10 +8,12 @@
     "check": "tsc -p tests",
     "task": "node tools/task.mjs",
     "board": "node tools/task.mjs board",
-    "board:serve": "node tools/task.mjs serve"
+    "board:serve": "node tools/task.mjs serve",
+    "smoke": "node tools/smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
+    "playwright": "1.49.1",
     "typescript": "^5.9.3",
     "vitest": "^3.2.7"
   }

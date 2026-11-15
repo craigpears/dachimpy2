@@ -51,6 +51,11 @@ them as they are (a test checks). Tests: Vitest, `tests/*.test.ts` (`vitest.conf
 `npm run check` type-checks them). `tests/build.test.ts` fails if `js/` is out of date with `src/`. Tests, `src/`
 and configs aren't published (`.assetsignore`). When the user describes something going wrong in a part that has
 tests, add a test for it, named after what they saw, with the date.
+Smoke tests (15 Nov, after `?at=helium` crashed on arrival, live, for a day): `npm run smoke` (`tools/smoke.mjs`,
+Playwright's Chromium on the real GPU) opens every `den.html?at=` link on the front page, as the plain modules and
+as the bundle, played a few seconds with Space pressed, and every other page, failing on any uncaught or console
+error; about a minute and a half, one line when it passes. Run it before every push to main, after `npm run build`;
+`npm run smoke -- helium` for just the pages with that in their address. A link added to the front page is covered.
 
 Modular, no technical debt (the user, 10 Nov: "we need to make sure I'm not creating spaghetti or just mess"):
 - Each puzzle (Carpentry, Gunnery, Bilge, Swordfight, Treasure Haul, rowing...) is one module with one
