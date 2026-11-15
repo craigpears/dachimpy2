@@ -104,6 +104,14 @@ Pirate Den notes: [TODO.md](TODO.md) holds the fixes and quality-of-life changes
 (agreed; just do them), and [IDEAS.md](IDEAS.md) holds their unrefined ideas for new puzzles and features.
 Keep the two apart: when the user mentions a fix or tweak, add it to TODO.md; when they brain-dump a new idea,
 add it to IDEAS.md.
+The task board (15 Nov; [tasks/README.md](tasks/README.md)): what's in flight, a card a file in `tasks/<stream>/`,
+by status (asked, ready, doing, review, playtest, done, parked), drawn into `tasks/board.html` by `tools/task.mjs`.
+Only the script changes a card (`npm run task -- add | set | note | stream`), never a hand edit or a hand-drawn page
+(the user: "more deterministic ... I don't have to worry about how many tokens are being spent"). Anything bigger
+than a quick fix gets a card beside its TODO.md note; a session started for one is put on it (`set <id> doing
+--session <id>`); sessions themselves never touch `tasks/`; when one reports back, the main session moves its
+card on (`review` or `playtest`, its link and a screenshot). "Pick up tasks" means offer each `ready` card as a
+session, its brief from `show <id>`.
 
 The changelog (the user, 11 Nov: "as each bigger feature's added, and it should be more visual"):
 `changelog.html` and its teaser shots in `changelog/`, newest first. When a bigger feature lands (a

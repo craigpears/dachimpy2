@@ -111,6 +111,24 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   guide and its tasks, the frigate test, the sloop race to check and iterate on, the training helpers (bots) that
   make Kikkit and the others better at Sailing. A folder of task files (one a card: stream, status, what's asked,
   what's ready to look at) is the source; the board reads it.
+  And (15 Nov): "ideally, I'd like it to be more deterministic ... I don't have to worry about how many tokens are
+  being spent updating the board and rendering it". So a script draws the board from the files, never a model; an
+  agent changes a card with one short command.
+
+- **Primates Rule, played on frigate-test.html (15 Nov):** "It looks really cool." Asked:
+  - The full controls, "so I can shoot and go and do a bit more ... just be able to shoot at the sloop."
+  - Her turning makes her quicker than the sloop: "a turn is making it cover a lot more space than you would in a
+    sloop, so that actually is making it faster, which is kind of weird considering that's supposed to be what the
+    sloop is good at ... maybe it like has a big turning circle, but just then you'd have to balance it in other
+    ways." Her wide turn must never be a shortcut.
+  - Her guns: a broadside, not aimed gun by gun ("would it just fire a broadside and then you'd hit the sloop as part
+    of it? ... that's what we said as one of the trade-offs"). "Update that for sure."
+  - Something to shoot at: "put like a ... destructible. That Imperial Gate thing".
+  - Her pilot (a point plotted to sail to) always turns toward it: "It doesn't seem to figure out ... what path it
+    can take to it. By just being like ... if I just went forward, then you would be kind of close enough. Because it
+    would be within the silhouette of the whole ship." Arrived once the point's under any square of her.
+  - How she turns looks wrong: "it should always be moving forward. It seems to be more like rotating on the spot when
+    it turns." Drawn going round her quarter circle, bows leading, never pivoting.
 
 - **The wolf den on a phone (14 Nov):** "fix the controls on mobile ... I've clicked on [Multibella's]. I can't even
   see anything. Like, the menus and control instructions literally take the entire screen up." On a phone the wolf

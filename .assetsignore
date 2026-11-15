@@ -16,3 +16,4 @@ tsconfig.json
 .vscode
 vitest.config.ts
 notes
+tasks
