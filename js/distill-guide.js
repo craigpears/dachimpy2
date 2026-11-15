@@ -162,6 +162,8 @@ const fireWhites = (cols) => {
 const range = (a, b) => Array.from({ length: b - a }, (_, i) => a + i);
 /** The junk columns done from the fire in, and the one being filled. */
 const junkSide = (cols) => range(junkTarget(cols), COLS);
+/** The whites in some columns: the gaps left to fill with junk (ringed on the fill's board). */
+const gapsIn = (cols, xs) => xs.flatMap((x) => cols[x].flatMap((p, y) => (p === WHITE ? [[x, y]] : [])));
 export function phaseExamples() {
     const lesson = lessonBoards();
     const kept = (key, shade, rings = () => []) => {
@@ -170,7 +172,7 @@ export function phaseExamples() {
     };
     const pictures = {
         fire: { cols: lesson.before, drags: lesson.drags, rings: fireWhites(lesson.before), shade: range(COLS - FIRE_COLS, COLS), from: `${LESSON_FROM}, Helium's step one` },
-        fill: { cols: lesson.after, drags: [], rings: [], shade: junkSide(lesson.after), from: `${LESSON_FROM}, after step one` },
+        fill: { cols: lesson.after, drags: [], rings: gapsIn(lesson.after, junkSide(lesson.after)), shade: junkSide(lesson.after), from: `${LESSON_FROM}, after step one` },
         block: kept('phase:block', () => range(COLS - 3, COLS), toolsAt),
         chain: kept('phase:chain', (cols) => range(0, COLS).filter((x) => clear(cols[x]))),
     };

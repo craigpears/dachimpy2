@@ -21,7 +21,7 @@ import type { GuideItem, Picture, Technique, Trick } from './distill-guide.js';
 import { ROUTINES } from './distill-routines.js';
 import { PATH_LABEL, SWEEP_LABEL } from './distill-bots.js';
 import { DRAG_TRICKS } from './distill-teach.js';
-import { TEACH, TUTOR } from './lines/helium.js';
+import { POINT, TEACH, TUTOR } from './lines/helium.js';
 import { afterOpening } from './den-helium.js';
 import type { Choice, Part, Tutorial } from './tutorial.js';
 
@@ -134,10 +134,21 @@ const CHOICES: readonly Choice[] = [
   { id: 'end', label: 'The end game', ...L.end, covers: ['end'] },
 ];
 
+// ---------------------------------------------------------------- what each is for
+
+/** Each part with its point, in Helium's words (src/lines/helium.ts, POINT, by its id; RULES.md, "Every trick shown
+    says what it's for", 15 Nov): what's wrong or wanted on its board, and what its move did. Their lesson says them
+    round the move (src/den-helium-tutor.ts), and the read guide shows them beside the part (js/distill-guide-view.js),
+    so the two say the same. Every ready part has one (tests/den-helium-tutor.test.ts). */
+const pointed = (parts: readonly Part[]): Part[] => parts.map((p) => {
+  const point = (POINT as Readonly<Record<string, { before: string; after: string }>>)[p.id];
+  return point ? { ...p, point: { before: point.before, after: point.after } } : p;
+});
+
 /** Distilling's tutorial (see the top of this file). */
 export const DISTILL_TUTORIAL: Tutorial = {
   puzzle: 'Distilling', teacher: 'Helium',
-  basics: [...THUMB_PARTS, ...DRAG_PARTS, ...BASIC_PARTS], phases: PHASE_PARTS, tricks: TRICK_PARTS, scenarios: SCENARIO_PARTS, choices: CHOICES,
+  basics: pointed([...THUMB_PARTS, ...DRAG_PARTS, ...BASIC_PARTS]), phases: pointed(PHASE_PARTS), tricks: pointed(TRICK_PARTS), scenarios: pointed(SCENARIO_PARTS), choices: CHOICES,
   hello: L.opening,
   anchors: { basics: 'thumb', phases: 'phases', tricks: 'phases', scenarios: 'reading' },
 };

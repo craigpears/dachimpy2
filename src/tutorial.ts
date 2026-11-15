@@ -41,6 +41,11 @@ export interface Part {
   tag?: string;
   /** Not ready yet, and what's left (a description written ahead of its puzzle): left out of the nav and the menu. */
   todo?: string;
+  /** What it's for, on the board that shows it, in the teacher's voice (RULES.md, "Every trick shown says what it's
+      for", 15 Nov): what's wrong or wanted there, said before the move (`before`), and what the move achieved, said
+      after it (`after`). The lesson says them round the move, the pieces ringed; the read guide shows the same two
+      beside the part, so the two say the same. */
+  point?: { before: string; after: string };
 }
 
 /** One of the teacher's opening questions. */
@@ -159,6 +164,7 @@ export function problems(t: Tutorial): string[] {
     if (!part.shows.ref.trim()) out.push(`${part.id}: nothing shows it`);
     if (part.phase !== undefined && (s === 'basics' || s === 'phases')) out.push(`${part.id}: only tricks and scenarios have a phase`);
     if (part.phase !== undefined && !t.phases.some((p) => p.id === part.phase)) out.push(`${part.id}: no phase ${part.phase}`);
+    if (part.point && (!part.point.before.trim() || !part.point.after.trim())) out.push(`${part.id}: its point wants a line before the move and one after`);
   }
   const anchors = new Map<string, string>();
   for (const { part } of all) {
