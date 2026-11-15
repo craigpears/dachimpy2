@@ -7,16 +7,16 @@
    force option ... The sloop will have its nimble [ways] through." So the same helm (src/den-sail.ts: the
    pin, the pilot, your own moves, the turn's clock) sails any ship, handed her handling:
    - moves a turn: Battle Navigation's tokens, by YPPedia (src/ships.ts: the sloop 4, a war frigate 3);
-   - her pace: the seconds a square takes (the sloop the den's SAIL.MOVE; a war frigate half as long again,
-     heavier to drive: FRIGATE_PACE);
+   - her pace: the seconds a square takes (the sloop the den's SAIL.MOVE; a war frigate a fifth as long again,
+     heavier to drive: FRIGATE_PACE, so the sloop stays a little quicker everywhere, never by miles);
    - how wide she turns: a quarter circle `radius` squares round (her middle `radius` squares ahead, then
      `radius` across, ending facing that way), half her length (the sloop 1, as Battle Navigation's turn;
      the frigate 2). Drawn, her middle sails round the quarter circle, bows leading: never pivoting;
-   - how long a turn takes: Battle Navigation's (the sloop's) a move's, like any; a wider one is sailed square
-     by square, no quicker over the ground than going straight on (the user, 15 Nov: "a turn is making it
-     cover a lot more space than you would in a sloop, so that actually is making it faster"). Her wide turn
-     is a cost, never a shortcut: it needs room, and the sloop turns twice as quick over the ground as she
-     goes straight, while the frigate turns no quicker than she goes straight;
+   - how long a turn takes: in proportion, as the sloop's (the user, 15 Nov: "be proportionate, similar to how
+     the sloop is"): Battle Navigation's (the sloop's) a move's, a turn `radius` wide `radius` of her moves, so
+     each kind of move of hers covers the ground at the same share of the sloop's speed. Her wide turn needs
+     room and is never a shortcut past the sloop (15 Nov, the first go: "a turn is making it cover a lot more
+     space than you would in a sloop, so that actually is making it faster");
    - her size on the squares, from her hull against SAIL.CELL (4 m): her length rounded (her ends can
      overhang a square a little), her beam rounded up (her sides mustn't scrape the rocks). The sloop, 4.4 m
      by 2.3, takes one square; Primates Rule, 15 m by 4.6, four along and two across, so a one-square gap is
@@ -26,7 +26,8 @@
    turn she's no room for leaves her as she was (the sloop's turns her on the spot, as the den's does). Only
    when she can't move at all, a big ship is warped round on the spot, slowly.
    Her pilot sails her till the square you plotted is under her, any square of her ("within the silhouette
-   of the whole ship", 15 Nov), going straight on when that gets her there. */
+   of the whole ship", 15 Nov), going straight on when that gets her there; where she'll lie then, her berth,
+   is drawn as the block of squares she'll cover ("aim you for like a block of squares, not just one"). */
 import { SAIL, Sea, Helm, pauseFor } from './den-sail.js';
 import { SLOOP, WAR_FRIGATE, SLOOP_HULL } from './ships.js';
 import { FRIGATE_HULL } from './den-frigate.js';
@@ -36,22 +37,24 @@ const key = (c, r) => `${c},${r}`;
 /** The numbers that aren't YPPedia's (RACE.md §11, "Racing in a frigate or a sloop"). */
 export const HANDLING = {
     /** A war frigate's seconds a square, against the sloop's SAIL.MOVE. */
-    FRIGATE_PACE: 1.5,
+    FRIGATE_PACE: 1.2,
     /** Seconds a side's guns take to load again, by their size. */
     RELOAD: { small: 2, medium: 2.5, large: 3 },
 };
 /** Seconds of the clock a square straight on takes her, all told: the move, the pause after it, and her
     share of the breather between turns (SAIL.BREAK over her moves a turn). */
 export const groundSecs = (pace, tokens) => pace + pauseFor(pace) + SAIL.BREAK / tokens;
-/** Seconds a turn takes. Battle Navigation's, a square ahead and one across (the sloop's), is a move like any:
-    her nimbleness. A wider one is sailed square by square: its 2 x `radius` squares take her, all told, as
-    long as that many squares straight on (groundSecs), so turning never covers ground quicker than going
-    straight (15 Nov). */
+/** Seconds a turn takes, in proportion, as the sloop's (15 Nov: "be proportionate, similar to how the sloop
+    is"): Battle Navigation's, a square ahead and one across (the sloop's), is a move's time; a turn `radius`
+    wide takes her, all told (groundSecs: its pause and her share of the breather counted once), as long as
+    `radius` of her moves. So a frigate's turn is to her as the sloop's is to the sloop: the same handful of
+    squares for each square she'd go straight on, never more. (Before, 15 Nov's first go, a wide turn took as
+    long as all its squares straight on, and she was half as quick as the sloop round a course.) */
 export function turnSecs(pace, tokens, radius) {
     if (radius <= 1)
         return pace;
     const each = groundSecs(pace, tokens), extra = each - pace;
-    return 2 * radius * each - extra;
+    return radius * each - extra;
 }
 /** A ship's handling, from her class and her hull: `pace` her seconds a square. */
 export function handlingFor(ship, hull, pace = SAIL.MOVE) {
@@ -205,6 +208,28 @@ export class ShipHelm extends Helm {
             return super.now();
         return shipPose(this.sea.ship, cur.from, cur.m, Math.min(1, this.t / cur.secs), cur.bump, cur.to);
     }
+    /** Her course ahead as poses: where this turn leaves her, then where each move of the course after it does. */
+    route() {
+        let p = this.after();
+        const out = [p];
+        for (const m of this.course()) {
+            p = this.sea.sail(p, m).to;
+            out.push(p);
+        }
+        return out;
+    }
+    /** Where she'll lie when she's there, a block of squares rather than the one you clicked (15 Nov: "that pilot
+        should really aim you for like a block of squares, not just one, because obviously you can't sit on one
+        square"): her pose at the end of her course to the pin, whichever of the poses with it under her her pilot
+        found quickest (null with no pin). */
+    berth() {
+        if (!this.pin)
+            return null;
+        const r = this.route();
+        return r[r.length - 1];
+    }
+    /** The squares of her berth. */
+    berthSquares() { const b = this.berth(); return b ? squares(this.sea.ship, b) : []; }
     /** The squares she covers, where she is and (under way) where the move she's on takes her. */
     covers() {
         const out = new Set(squares(this.sea.ship, this.pose).map(([c, r]) => key(c, r)));

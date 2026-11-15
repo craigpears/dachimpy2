@@ -85,7 +85,7 @@ describe('the same helm sailing each by her handling', () => {
       for (let t = 0; t < 60; t += 0.05) if (helm.tick(0.05).some((e) => e.kind === 'arrive')) return t;
       return Infinity;
     };
-    expect(time(FR)).toBeGreaterThan(time(SL) * 1.15);
+    expect(time(FR)).toBeGreaterThan(time(SL) * 1.05);   // (a little slower: 15 Nov, "be proportionate")
   });
   it('the frigate needs room to turn: a turn she\'s no room for leaves her as she was', () => {
     // Two squares out from a line of rocks, facing it: a sloop turns along it, the frigate can't.
@@ -180,24 +180,27 @@ describe('the test sea: a narrow gap only the sloop fits, a boom only the frigat
 });
 
 /* Primates Rule as played on frigate-test.html (the user, 15 Nov): "It looks really cool", and the next pass. */
-describe('her turn is a cost, never a shortcut (15 Nov: "a turn is making it cover a lot more space than you would in a sloop, so that actually is making it faster")', () => {
+describe('her turn in proportion, as the sloop\'s (15 Nov: "be proportionate, similar to how the sloop is"; and before, "a turn is making it cover a lot more space than you would in a sloop, so that actually is making it faster")', () => {
   // Seconds of the clock all told for a move (its pause, and her share of the breather between turns), and the
   // squares of ground it covers.
   const allTold = (h: Handling, m: Move) => { const secs = new ShipSea(h, 20, 20, open()).moveSecs(false, { c: 9, r: 9, d: 0 }, m); return secs + pauseFor(secs) + SAIL.BREAK / h.tokens; };
   const ground = (h: Handling, m: Move) => (m === 'F' ? 1 : 2 * h.radius);
   const perSquare = (h: Handling, m: Move) => allTold(h, m) / ground(h, m);
-  it('her wide turn covers the ground no quicker than she goes straight on', () => {
-    expect(perSquare(FR, 'L')).toBeCloseTo(groundSecs(FR.pace, FR.tokens));
-    expect(perSquare(FR, 'R')).toBeGreaterThanOrEqual(perSquare(FR, 'F') - 1e-9);
-  });
-  it('every move of hers covers the ground slower than every move of the sloop\'s', () => {
-    for (const m of MOVES) for (const n of MOVES) expect(perSquare(FR, m)).toBeGreaterThan(perSquare(SL, n));
-  });
-  it('the sloop keeps Battle Navigation\'s quick turn: a square ahead and one across in a move\'s time', () => {
+  it('her turn takes `radius` of her moves all told, as the sloop\'s takes one', () => {
+    expect(allTold(FR, 'L')).toBeCloseTo(FR.radius * allTold(FR, 'F'));
+    expect(allTold(FR, 'R')).toBeCloseTo(FR.radius * allTold(FR, 'F'));
+    expect(allTold(SL, 'L')).toBeCloseTo(allTold(SL, 'F'));
     expect(SL.turn).toBe(SAIL.MOVE);
-    expect(perSquare(SL, 'L')).toBeLessThan(perSquare(SL, 'F'));
+    expect(allTold(FR, 'F')).toBeCloseTo(groundSecs(FR.pace, FR.tokens));
   });
-  it('sailing both round the same course, the sloop is ahead at every mark through the turns', () => {
+  it('each kind of move of hers covers the ground at the same share of the sloop\'s speed, a little slower', () => {
+    const share = (m: Move) => perSquare(FR, m) / perSquare(SL, m);
+    expect(share('L')).toBeCloseTo(share('F'));
+    expect(share('R')).toBeCloseTo(share('F'));
+    expect(share('F')).toBeGreaterThan(1.05);
+    expect(share('F')).toBeLessThan(1.3);
+  });
+  it('sailing both round the same course, the sloop is ahead at every mark, but not by miles', () => {
     const course: [number, number][] = [[14, 12], [26, 18], [28, 30], [16, 26], [6, 30]];
     const marks = (h: Handling) => {
       const helm = new ShipHelm(new ShipSea(h, 34, 34, open()), { c: 6, r: 3, d: 0 }), at: number[] = [];
@@ -215,9 +218,12 @@ describe('her turn is a cost, never a shortcut (15 Nov: "a turn is making it cov
     expect(frigate.at).toHaveLength(course.length);
     expect(frigate.turns).toBeGreaterThan(3);   // (she does turn on the way)
     sloop.at.forEach((t, i) => expect(t).toBeLessThan(frigate.at[i]));
-    // As she turned before (a turn her `radius` squares' seconds), she was first to the first mark.
-    const before = marks({ ...FR, turn: FR.pace * FR.radius });
-    expect(before.at[0]).toBeLessThan(sloop.at[0]);
+    expect(frigate.at[course.length - 1]).toBeLessThan(sloop.at[course.length - 1] * 1.25);
+    // As she turned at first (a turn her `radius` squares' seconds, its squares for nothing), she was first to
+    // the first mark; and as she turned next (as long as all its squares straight on), half as quick round it.
+    expect(marks({ ...FR, turn: FR.pace * FR.radius }).at[0]).toBeLessThan(sloop.at[0]);
+    const each = groundSecs(FR.pace, FR.tokens), slow = marks({ ...FR, turn: 2 * FR.radius * each - (each - FR.pace) });
+    expect(slow.at[course.length - 1]).toBeGreaterThan(frigate.at[course.length - 1] * 1.2);
   });
 });
 

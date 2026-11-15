@@ -627,9 +627,10 @@ function update(dt) {
   // At sea: following her from behind and above, out over the water (turn and zoom as ever).
   sailView += ((sail.on ? 1 : 0) - sailView) * Math.min(1, dt * 2);
   if (sailView > 0.001 && sail.g) {
-    L2.set(sail.g.position.x, Math.max(0.6, sail.g.position.y - 1), sail.g.position.z - 2);   // (up in the clifftop lagoon, looking at her there)
+    const fg = sail.follow ?? sail.g;   // (or Primates Rule, out on her test run: js/den/frigate-run.js)
+    L2.set(fg.position.x, Math.max(0.6, fg.position.y - 1), fg.position.z - 2);   // (up in the clifftop lagoon, looking at her there)
     look.lerp(L2, sailView);
-    dist += (26 * view.zoom - dist) * sailView;
+    dist += ((sail.follow ? 40 : 26) * view.zoom - dist) * sailView;   // (further back for a ship her size)
     tilt += (Math.max(0.3, Math.min(1.45, 0.78 + view.pitch)) - tilt) * sailView;
   }
   // The Sailing board open: her slid into the part of the screen it leaves (js/den/sail-station.js).

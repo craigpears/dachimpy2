@@ -96,6 +96,10 @@ export function twoShipsSea(ships, say = () => {}) {
   const sqMat = { on: new THREE.MeshBasicMaterial({ color: '#ffd23a', transparent: true, opacity: 0.22, depthWrite: false }), off: new THREE.MeshBasicMaterial({ color: '#f3ecdc', transparent: true, opacity: 0.09, depthWrite: false }) };
   const pool = (n, make) => Array.from({ length: n }, () => { const m = make(); m.visible = false; g.add(m); return m; });
   const marks = { sloop: pool(4, () => new THREE.Mesh(sqGeo, sqMat.off)), frigate: pool(16, () => new THREE.Mesh(sqGeo, sqMat.off)) };
+  // (where the one you're steering will lie at her pin, her berth: a block of squares, her size, 15 Nov: "aim you
+  // for like a block of squares, not just one")
+  const berthM = new THREE.MeshBasicMaterial({ color: '#ffd23a', transparent: true, opacity: 0.32, depthWrite: false });
+  const berth = pool(8, () => { const m = new THREE.Mesh(new THREE.PlaneGeometry(CELL * 0.6, CELL * 0.6).rotateX(-Math.PI / 2), berthM); m.renderOrder = 2; return m; });
   const dotGeo = new THREE.CircleGeometry(0.4, 14).rotateX(-Math.PI / 2), dotM = new THREE.MeshBasicMaterial({ color: '#f3ecdc', transparent: true, opacity: 0.7, depthWrite: false });
   const dots = pool(24, () => new THREE.Mesh(dotGeo, dotM));
   const pinOf = (col) => {
@@ -164,6 +168,7 @@ export function twoShipsSea(ships, say = () => {}) {
     const s = t.ships[kind], act = kind === t.active, cov = [...s.helm.covers()].map((k) => k.split(',').map(Number));
     marks[kind].forEach((m, i) => { m.visible = i < cov.length; if (m.visible) { m.material = act ? sqMat.on : sqMat.off; m.position.copy(v3(...cov[i], 0.05)); } });
     const p = s.helm.pin; pins[kind].visible = !!p; if (p) pins[kind].position.copy(v3(...p));
+    if (act) { const b = s.helm.berthSquares(); berth.forEach((m, i) => { m.visible = i < b.length; if (m.visible) m.position.copy(v3(...b[i], 0.06)); }); }
   };
   /** Her course ahead, a dot a square (the active ship's). */
   const course = () => {

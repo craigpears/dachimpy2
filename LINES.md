@@ -69,9 +69,9 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 
 - "Is there anyone out here who could explain that with fewer tangents?"
 
-### Sailing up near Primates Rule at anchor, still to come (once a voyage)
+### Sailing up near Primates Rule at anchor, ready for a test run (once a voyage)
 
-- "Primates Rule, at anchor. She's not ready yet: coming soon!"
+- "Primates Rule, at anchor, ready for a test run: Space leaves your sloop here and takes you aboard her"
 
 ### Off Helium's island the first time, their still just gone bang: between their lines
 

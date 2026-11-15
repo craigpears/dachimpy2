@@ -32,10 +32,12 @@ import { jazzmyWorld, jazzmyTick, jazzmyAboard, canPickUpJazzmy } from './jazzmy
 import { station, stationKey, stationToggle, stationTick, stationPrompt, stationReset } from './sail-station.js';
 import { kikkitWorld, kikkitTick, kikkitShown, kikkitHail, kikkitPrompt, kikkitHolds, kikkitReset } from './whirlpools.js';
 import { inKikkitWaters } from '../den-kikkit.js';
+import { MOORED_MID } from '../den-moored.js';
 import { tzzWorld, tzzTick, tzzHail, tzzPrompt, tzzReset } from './balloon-isle.js';
 import { heliumWorld, heliumTick, heliumHail, heliumPrompt, heliumReset, heliumKey, heliumHover, heliumDown, heliumHolds } from './helium-isle.js';
 import { empireWorld, empireTick, empirePrompt, empireReset } from './imperial-isle.js';
 import { primatesTick, primatesReset } from './moored.js';
+import { run, canTakeHer, takeHer, takePrompt, leaveHer, runKey, runClick, runOpen, runPrompt, runHud, runTick } from './frigate-run.js';   // (Primates Rule's test run)
 import { smugglersWorld, smugglersTick, smugglersPrompt, smugglersReset } from './smugglers.js';
 import { rumTick, rumKey, rumPrompt, rumGoal, rumReset } from './rumrun.js';
 import { marksTick } from './marks.js';
@@ -77,6 +79,7 @@ export function ashore() {
   keys.clear();
 }
 export function sailReset() {
+  if (run.on) leaveHer();   // (off Primates Rule's test run: frigate-run.js)
   if (sail.on) { sail.on = false; document.body.classList.remove('sailing'); }
   sail.sea.breeze?.set(WIND.START.d, WIND.START.s);
   sail.helm = new Helm(sail.sea);
@@ -154,6 +157,7 @@ function seaCellAt(x, y) {
   return { c: (p.x - SEA_X0) / SAIL.CELL - 0.5, r: (SAIL.Z0 - p.z) / SAIL.CELL - 0.5 };
 }
 export function sailClick(x, y) {
+  if (run.on) { const at = seaCellAt(x, y); if (at) runClick(at); return; }   // (aboard Primates Rule: frigate-run.js)
   if (umamiClick(x, y)) return;   // (his board, and poling her along the lagoon's shore: capybara.js)
   if (heliumDown(x, y)) return;   // (Distilling at Helium's still: helium-isle.js)
   if (raceClick(x, y)) return;   // (the race's barrier of driftwood, its Foraging board: race-forage.js)
@@ -169,6 +173,7 @@ export function sailClick(x, y) {
   else if (sail.helm.via) toast('She\'ll ride the trade winds: the pin\'s where they drop her off');
 }
 export function sailHover(x, y) {
+  if (run.on) { const at = seaCellAt(x, y), c = at && Math.round(at.c), r = at && Math.round(at.r); sail.hover = at && runOpen(c, r) ? [c, r] : null; return; }
   if (umamiHover(x, y) || raceHover(x, y) || heliumHover(x, y)) { sail.hover = null; return; }
   if (patch.on) { patchHover(x, y); sail.hover = null; return; }
   if (hold.mode) { holdHover(x, y); sail.hover = null; return; }
@@ -190,7 +195,11 @@ function rigToggle() {
   if (!station.want && !rigBusy()) { if (rowing.on) rowToggle(); if (gunnery.on) gunneryToggle(); }
   stationToggle(rigBusy());
 }
+// Nothing else has her just now, so Primates Rule can be taken out from beside her (frigate-run.js): not racing,
+// no puzzle out, no one aboard, her oars in.
+const runFree = () => race.rules.state === 'off' && !watch.on && !rigBusy() && !rowing.on && !gunnery.on && !station.on && !rumGoal() && !cine && !sail.helm.oars && !sail.helm.held();
 export function sailKey(key) {
+  if (runKey(key)) return;   // (aboard Primates Rule on her test run: frigate-run.js)
   if (hold.mode && holdKey(key)) return;
   if (kikkitHolds() && key !== 'p') return;   // (round and round in a whirlpool: whirlpools.js)
   if (umamiKey(key)) return;   // (Umami's board, and her moorings in the lagoon: capybara.js)
@@ -216,6 +225,7 @@ export function sailKey(key) {
   else if (key === 'escape') { sail.helm.stop(); toast('Pin pulled up: she\'ll stop when this turn\'s done'); }
   else if (key === 'h' && race.rules.state === 'off') {   // (not in a race: home's no use there)
     sail.helm.drop(SAIL.HOME.c, SAIL.HOME.r); if (sail.helm.pin) toast('Heading home to the cove'); }
+  else if ((key === ' ' || key === 'enter') && canTakeHer(runFree())) takeHer();   // (Primates Rule's test run: frigate-run.js)
   else if ((key === ' ' || key === 'enter') && canHaulWreck()) haulWreck();
   else if ((key === ' ' || key === 'enter') && canLand(sail.helm)) ashore();
   else if ((key === ' ' || key === 'enter') && canLandIsle(sail.helm)) isleAshore();   // (Mischievious's isle: isle.js)
@@ -233,6 +243,7 @@ export function sailKey(key) {
 export function sailPrompt() {
   if (nearSloop()) return 'Space: board the old sloop';
   if (!sail.on) return '';
+  if (run.on) return runPrompt();   // (aboard Primates Rule: frigate-run.js)
   if (haul.on) return haulPrompt();
   if (rowing.on) return rowPrompt();
   if (gunnery.on) return gunneryPrompt();
@@ -251,6 +262,7 @@ export function sailPrompt() {
   if (canLandMultibella(h)) return h.slot < 0 ? "Off Multibella's island · Space: ashore to her wolf den (Duty Navigation) · click the sea to drop a pin" : "Under way off Multibella's island · Space: go ashore";
   if (canPickUpJazzmy(h)) return h.slot < 0 ? "Off Jazzmy's island · Space: pick her up, for an adventure · click the sea to drop a pin" : "Under way off Jazzmy's island · Space: pick her up";
   if (canHaulWreck()) return 'The old wreck · Space: haul up its treasure (Treasure Haul) · click the sea to drop a pin';
+  if (canTakeHer(runFree())) return takePrompt();
   if (h.slot < 0 && h.headwind()) return headwindPrompt();
   if (h.pin) return rumGoal() + (h.oars ? 'Rowing to the pin' : 'Under way to the pin');
   if (h.slot >= 0) return 'Under way';
@@ -262,8 +274,9 @@ export function sailPrompt() {
    freeing Umami, the crane's starts, the old wreck's treasure. A click does what Space does. */
 export function sailOffer() {
   if (nearSloop()) return { at: sail.g.localToWorld(V3(0.3, SLOOP_DECK + 1.6, 0)), label: 'Board the old sloop', go: board };
-  if (!sail.on || haul.on || rowing.on || gunnery.on || station.on || patch.on || hold.mode) return null;
+  if (!sail.on || run.on || haul.on || rowing.on || gunnery.on || station.on || patch.on || hold.mode) return null;
   const go = () => sailKey(' ');
+  if (canTakeHer(runFree())) return { at: V3(seaX(MOORED_MID.c), 4, seaZ(MOORED_MID.r)), label: 'Take Primates Rule out', go };
   if (umamiPrompt()) return umamiOffer();
   if (cranePrompt()) return craneOffer();
   if (sail.helm.held() || canLand(sail.helm) || canLandIsle(sail.helm) || canLandMultibella(sail.helm) || canPickUpJazzmy(sail.helm) || !canHaulWreck()) return null;
@@ -378,7 +391,7 @@ export function sailTick(dt) {
   sail.g.rotation.y = Math.PI / 2 - p.a * Math.PI / 2;
   sail.g.rotation.x = sail.heel + (p.heel ?? 0) + Math.sin(t * 0.7) * 0.02;   // (leaning into the oars' pull: rowShown)
   sail.g.rotation.z = Math.sin(t * 0.55) * 0.02 + (p.flip ?? 0);   // (end over end: a backflip in Kikkit's whirlpools)
-  if (sail.on) {
+  if (sail.on && !run.on) {   // (aboard Primates Rule, you're at her wheel: frigate-run.js)
     // You, at the tiller, facing her bow (up on her stern, beside it, while the board's on her deck,
     // so you're not stood on it, nor between it and the camera).
     const deck = patch.on || rowing.on || gunnery.on, at = sail.g.localToWorld(deck ? V3(-1.7, SLOOP_DECK + 0.35, 0.45) : V3(-1.15, SLOOP_DECK, 0)), yaw = sail.g.rotation.y;
@@ -427,7 +440,8 @@ export function sailTick(dt) {
   raceTick(dt);   // (the race, its guns, its crane and the rival: race.js)
   watchTick(dt);   // (the race watched, four racers and no player: race-watch.js)
   marksTick(dt, !!cine || watch.on);   // (where Space does something, marked on the water: marks.js)
-  if (sail.on && !watch.on) sailHud();
+  runTick(dt);   // (Primates Rule out on her test run: frigate-run.js)
+  if (sail.on && !watch.on) { if (run.on) runHud(); else sailHud(); }
 }
 // The oars' button on the sailing bar (on mousedown: the bar's redrawn as the tokens change, so a
 // click could be lost between press and release).

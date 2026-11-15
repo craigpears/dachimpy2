@@ -129,6 +129,18 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
     would be within the silhouette of the whole ship." Arrived once the point's under any square of her.
   - How she turns looks wrong: "it should always be moving forward. It seems to be more like rotating on the spot when
     it turns." Drawn going round her quarter circle, bows leading, never pivoting.
+  Done (15 Nov, first pass), then played again (15 Nov):
+  - Her speed: "be proportionate, similar to how the sloop is ... it certainly seems weird as well"; "really need to
+    figure out balancing that speed, unless we are really just like, we are removing that as a sloop's advantage and
+    giving it more the ability to get through gaps." Done: her turn takes `radius` of her moves as the sloop's takes
+    one, her pace 1.2 s; she's 0.85 of the sloop's speed every kind of move (RACE.md §11). Still the user's call:
+    keep a small speed edge for the sloop, or none.
+  - "That pilot should really aim you for like a block of squares, not just one, because obviously you can't sit on
+    one square." Done: her berth drawn as a block of gold squares her size.
+  - "Put into the main game where you've got [Primates Rule] all in progress ... park this sloop there and then take
+    the war frig on a test run, even if it's just to go shoot some nearby things and destructible obstacles, or sail
+    out into the ocean through some rocks." Done: Space by her at anchor, `?at=primates` (src/den-frigate-run.ts).
+    To playtest.
 
 - **The wolf den on a phone (14 Nov):** "fix the controls on mobile ... I've clicked on [Multibella's]. I can't even
   see anything. Like, the menus and control instructions literally take the entire screen up." On a phone the wolf
