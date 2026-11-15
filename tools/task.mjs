@@ -367,7 +367,7 @@ function act(c, words, run) {
     // Done nothing to it? Say so, with what it said, rather than leave the card looking forgotten.
     const now = load().cards.find((x) => x.id === c.id);
     if (!why && now && now.body.trim().endsWith(`you said: "${words}"`)) why = `did nothing: ${out.trim().slice(-300)}`;
-    if (why) change(load().cards, c.id, undefined, { note: `acting on it ${why}` });
+    if (why && now) change(load().cards, c.id, undefined, { note: `acting on it ${why}` }); // (gone? moved while it ran)
     drawBoard();
     console.log(`updated ${c.id}${why ? ': ' + why : ''}`);
   }, run);
@@ -378,8 +378,10 @@ function act(c, words, run) {
 export function resume(run = spawn, dir = TASKS) {
   const picked = [];
   for (const c of load(dir).cards) {
-    const last = c.body.trim().split('\n').pop();
-    const said = last.match(/^- [^:]+: you said: "(.*)"$/)?.[1];
+    const lines = c.body.trim().split('\n'), last = lines.at(-1);
+    // what you said last, with nothing after it but one failed try (the runs that failed before 15 Nov's fix, retried once)
+    const at = lines.findLastIndex((l) => /^- [^:]+: you said: "/.test(l)), after = at < 0 ? [] : lines.slice(at + 1);
+    const said = at >= 0 && after.length <= 1 && after.every((l) => /^- [^:]+: acting on it /.test(l)) ? lines[at].match(/^- [^:]+: you said: "(.*)"$/)?.[1] : undefined;
     if (said) { act(c, said, run); picked.push(c.id); }
     else if (c.meta.status === 'inbox' && /^- [^:]+: added\.$/.test(last)) { triage(c, run); picked.push(c.id); }
   }

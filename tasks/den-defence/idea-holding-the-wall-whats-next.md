@@ -17,3 +17,5 @@ first fix (TODO.md has the playtest):
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "yeah I don't really care enough about this this we've moved on it's going to be removed"
+- 15 Nov: acting on it did nothing:  status. The Bash shim for `node` failed with "This: command not found", and the direct-node and PowerShell attempts were blocked pending approval. The command to run, once it's approved, is `node tools/task.mjs set idea-holding-the-wall-whats-next done --note "not wanted: moved on, to be removed"`.

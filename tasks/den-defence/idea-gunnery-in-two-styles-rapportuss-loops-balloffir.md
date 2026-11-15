@@ -45,3 +45,7 @@ a real Gunnery board. The detail waits on her videos.
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "set a valid ideas I think that's really should be categorized under like like a tutorials which list rather than being related to the denspecifically"
+- 15 Nov: acting on it did nothing: er it creates a stream that doesn't exist yet.
+
+If you approve the command, I'll run `npm run task -- move idea-gunnery-in-two-styles-rapportuss-loops-balloffir tutorials`. I'd then add a `note` that you want it grouped with the tutorials, and check whether the other tutorial cards belong there too.

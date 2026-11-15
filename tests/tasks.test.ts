@@ -105,10 +105,13 @@ describe('the task board (the user, 14 Nov: "a clear list of things and what the
       writeFileSync(join(dir, 'den', 'said.md'), format({ title: 'Said', status: 'idea' }, '\nA.\n\n## Log\n\n- 9 Nov: added.\n- 15 Nov: you said: "this is done"\n'));
       writeFileSync(join(dir, 'den', 'answered.md'), format({ title: 'Answered', status: 'done' }, '\nB.\n\n## Log\n\n- 15 Nov: you said: "done"\n- 15 Nov: done: as said\n'));
       const prompts: string[] = [];
-      const fake = () => ({ on() {}, stdout: { on() {} }, stderr: { on() {} }, stdin: { end: (p: string) => { prompts.push(p); } } });
-      expect(resume(fake, dir)).toEqual(['said']);
-      expect(prompts[0]).toContain('> this is done');
-      busy.delete('said');
+      const closers: Array<(code: number) => void> = [];
+      const fake = () => ({ on(ev: string, f: any) { if (ev === 'close') closers.push(f); }, stdout: { on() {} }, stderr: { on() {} }, stdin: { end: (p: string) => { prompts.push(p); } } });
+      writeFileSync(join(dir, 'den', 'failed.md'), format({ title: 'Failed', status: 'idea' }, '\nC.\n\n## Log\n\n- 15 Nov: you said: "tidy it"\n- 15 Nov: acting on it did nothing: approve node?\n'));
+      writeFileSync(join(dir, 'den', 'twice.md'), format({ title: 'Twice', status: 'idea' }, '\nD.\n\n## Log\n\n- 15 Nov: you said: "tidy it"\n- 15 Nov: acting on it did nothing: x\n- 15 Nov: acting on it did nothing: y\n'));
+      expect(resume(fake, dir).sort()).toEqual(['failed', 'said']);
+      expect(prompts.some((p) => p.includes('> this is done'))).toBe(true);
+      closers.forEach((f) => f(1)); // the runs finish (failed), freeing their places
     } finally { rmSync(dir, { recursive: true, force: true }); }
   });
   it('a card tidied up: its text rewritten, its log kept (the user, 15 Nov: "can you tidy this idea card up just so it\'s a bit more concise")', () => {
