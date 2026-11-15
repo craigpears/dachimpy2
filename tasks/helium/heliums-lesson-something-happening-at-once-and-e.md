@@ -15,3 +15,4 @@ branch: claude/dreamy-einstein-6b1aaa
 
 - 15 Nov: added.
 - 15 Nov: for you to review: straight into step one, Show me something else (T) beside it, every trick: what's wrong, the move, what it did; on its branch, not merged
+- 15 Nov: merged into main, to try locally at den.html?at=helium&as=dachimpy (not pushed)

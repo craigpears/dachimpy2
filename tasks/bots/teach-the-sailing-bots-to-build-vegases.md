@@ -15,3 +15,4 @@ and Vegases.
 ## Log
 
 - 15 Nov: moved over from TODO.md, its column a first guess.
+- 15 Nov: same as train-sailing-bots (duplicate, set done)

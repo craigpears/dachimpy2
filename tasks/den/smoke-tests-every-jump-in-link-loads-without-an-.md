@@ -1,6 +1,6 @@
 ---
 title: Smoke tests: every jump-in link loads without an error
-status: review
+status: done
 asked: 15 Nov
 updated: 15 Nov
 branch: claude/nervous-shamir-82a870
@@ -14,3 +14,4 @@ branch: claude/nervous-shamir-82a870
 
 - 15 Nov: added.
 - 15 Nov: for you to review: npm run smoke: 75 pages (28 jump-in links each as modules and as the bundle, and every other page) in about 85s; caught a deliberate break; found the race editor crashing and Helium's island throwing now and then (carded); Playwright 1.49.1, its Chromium already on this machine. On its branch, not merged.
+- 15 Nov: done: merged into main; npm run smoke passes all 75 pages (84s) with the two bugs it found fixed

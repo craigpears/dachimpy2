@@ -486,9 +486,13 @@ export function burst(at, color, n, speed) {
    gun's wreck), and the sparks and chalk lines every effect and board uses. */
 const probes = [new THREE.Mesh(sparkGeo, new THREE.MeshBasicMaterial()), outline([[0, 0]], 0, '#ffffff'), outline([[0, 0]], 0, '#ffffff')];
 probes[2].material.transparent = true;
+// (renderer.compile, not compileAsync: compileAsync is compile and then a timer polling till the shaders are ready,
+// a result nothing here waits on; and the poll threw, uncaught, on a material disposed in the meantime, as Helium's
+// island does replacing its first board: smoke tests, 15 Nov, about one run in three. The building's the same.)
 export function warm(...objs) {
-  if (!renderer.compileAsync) return;
-  for (const o of objs.length ? objs : [scene, ...probes]) renderer.compileAsync(o, camera, scene).catch(() => {});
+  for (const o of objs.length ? objs : [scene, ...probes]) {
+    try { renderer.compile(o, camera, scene); } catch (e) {}
+  }
 }
 let toastTimer;
 // A toast stays up long enough to read (longer for longer words: 10 Nov, the checkpoint's message
