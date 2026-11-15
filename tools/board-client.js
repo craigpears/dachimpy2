@@ -102,6 +102,7 @@
   }
   function shut() {
     if (open) draft[open] = box.value;
+    if (into === box) micOff(); // it was writing into the card that's gone
     panel.hidden = true; open = null; document.body.classList.remove('reading');
     $$('.cols .card.open').forEach((x) => x.classList.remove('open'));
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
@@ -115,32 +116,39 @@
     const first = $$('.card', b.closest('.col')).find(showing);
     if (first) openCard(first.dataset.id); else tell('Nothing in that column.');
   }));
+  // The keys. The mic writes into the boxes without them ever being clicked into, so the keys always work while it's
+  // on (the user, 15 Nov: "all the shortcuts break as soon as the text box has got attention ... I'm going to be
+  // primarily using the mic ... So it doesn't really ever need any text focus"). Only a box you've clicked into to
+  // type in, with the mic off, takes the keys as letters; Esc leaves it, and Alt+ any key still works in it.
   document.addEventListener('keydown', (e) => {
-    // M (Alt+M while writing): the mic on or off, into the open card's box, or the inbox's when no card's open.
-    const writing = e.target.closest?.('input, textarea, select');
-    if (e.code === 'KeyM' && (e.altKey || (!writing && !e.ctrlKey && !e.metaKey))) {
+    const inBox = !!e.target.closest?.('input, textarea, select');
+    const typing = inBox && !rec, alt = e.altKey && !e.ctrlKey && !e.metaKey;
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { // send (and next), wherever you are
       e.preventDefault();
+      if (!panel.hidden && e.target !== drop.text && into !== drop.text) send(true); else dropIt();
+      return;
+    }
+    if (typing && !alt) { if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); } return; }
+    if (e.ctrlKey || e.metaKey || (e.altKey && !alt)) return;
+    if (inBox) e.target.blur(); // a key while the mic's on: the box lets go, so the next one's a key too
+    const n = Number(/^Digit(\d)$/.exec(e.code)?.[1] ?? NaN);
+    if (e.code === 'KeyM') { // the mic on or off: into the open card's box, or the inbox's when no card's open
       if (!Speech) tell("This browser can't listen: open the board in Chrome or Edge, or use Win+H.");
       else toggleMic(e.target === drop.text || panel.hidden ? drop.text : box);
-      return;
-    }
-    if (e.target === drop.text && e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); dropIt(); return; }
-    if (panel.hidden) return;
-    if (e.target === box) {
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(true); }
-      else if (e.key === 'Escape') box.blur();
-      return;
-    }
-    if (e.target.closest?.('input, textarea, select') || e.ctrlKey || e.metaKey || e.altKey) return;
-    const n = Number(e.key);
-    if (e.key === 'ArrowRight' || e.key === 'j') step(1);
-    else if (e.key === 'ArrowLeft' || e.key === 'k') step(-1);
+    } else if (panel.hidden) return;
+    else if (e.key === 'ArrowRight' || e.code === 'KeyJ') step(1);
+    else if (e.key === 'ArrowLeft' || e.code === 'KeyK') step(-1);
+    else if (e.code === 'KeyN') send(true);
+    else if (e.code === 'KeyI') { if (box.value.trim()) dropIt(box); }
     else if (e.key === 'Escape') shut();
-    else if (e.key === 'Enter' || e.key === '/') box.focus();
+    else if (e.key === 'Enter' || e.key === '/') { if (rec) return; box.focus(); }
     else if (n >= 1 && n <= STATUSES.length) moveTo(open, STATUSES[n - 1]);
     else return;
     e.preventDefault();
   });
+  // A button clicked (Mic, Send, a status) doesn't keep the keys from working either.
+  panel.addEventListener('click', (e) => { if (e.target.closest('button')) e.target.closest('button').blur(); });
+  $('.drop').addEventListener('click', (e) => { if (e.target.closest('button')) e.target.closest('button').blur(); });
 
   // What's said about a card: logged on it at once, then acted on by a headless Claude; the card's redrawn when it's
   // finished (watched every few seconds).
@@ -192,6 +200,7 @@
   function toggleMic(target) {
     if (rec && into === target) return micOff();
     into = target; showMic();
+    if (document.activeElement?.matches?.('textarea')) document.activeElement.blur(); // the mic writes; the keys stay keys
     if (rec) return; // already listening: now into the other box
     rec = new Speech(); rec.continuous = true; rec.interimResults = false; rec.lang = 'en-GB';
     rec.onresult = (e) => {
@@ -213,7 +222,7 @@
         ? "The mic isn't allowed here: allow it in the browser's address bar, or use Win+H." : 'The mic stopped: ' + e.error);
     };
     rec.onend = () => { try { rec?.start(); } catch (e) {} }; // it stops by itself after a pause; keep it on
-    rec.start();
+    rec.start(); showMic();
   }
   if (Speech) mics.forEach((m) => {
     m.hidden = false;

@@ -59,6 +59,9 @@ inbox with a note, for the main session. It doesn't commit: the main session doe
 ## A card opened, and going through them
 
 The board moves over to make room for the panel, so it can still be scrolled, dragged and dropped into beside it.
+It's made for the mic: the boxes are written into without ever being clicked into, so every key keeps working while
+it's on (M the mic, N send and next, ← → go through, 1 to 8 move it, I to the inbox, Esc close; the user, 15 Nov:
+"it doesn't really ever need any text focus"). Click into a box only to type; Esc leaves it.
 
 Click a card (or Tab to it and Enter) and it opens in a panel down the right: everything on it, what was asked and its
 whole log. ← and → go through the cards showing (the stream picked), column by column from that card's own, each

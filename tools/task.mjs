@@ -8,6 +8,7 @@
 //   node tools/task.mjs add <stream> "<title>" [--status st] [--asked "the user's words"] [--done "what done looks like"]
 //   node tools/task.mjs set <id> <status> [--note "a line for its log"] [--link ?at=..] [--shot path] [--session id] [--branch b]
 //   node tools/task.mjs note <id> "<a line for its log>"
+//   node tools/task.mjs tidy <id> "<its new text>"           its text rewritten (made concise), its log kept
 //   node tools/task.mjs stream <stream> "<where it got to>"
 //   node tools/task.mjs move <id> <stream>                into another stream
 //   node tools/task.mjs board                             draws tasks/board.html (add, set, note and stream draw it too)
@@ -229,7 +230,7 @@ export function board({ streams, cards }, when = new Date()) {
   <form class="update"><textarea name="text" placeholder="Say or type what's changed: &quot;that works now&quot;, &quot;still slow when you turn&quot;, &quot;split the guns off into their own card&quot;..."></textarea>
     <button type="button" class="mic" data-for="card" hidden title="Dictate, on M (say &quot;next&quot; to send and go on)">Mic (M)</button><button type="button" class="toinbox" title="Not about this card: what's in the box to the inbox instead (say &quot;inbox&quot;)">To the inbox</button><span class="gap"></span>
     <button type="submit" class="send" name="stay">Send</button><button type="submit" class="send" name="on">Send and next</button>
-    <span class="hint">Keys: &larr; &rarr; to go through, 1-${Object.keys(STATUSES).length} to move it, M for the mic (Alt+M while writing), Enter to write, "To the inbox" for something that isn't about this card, Ctrl+Enter to send and go on, Esc to close. What you send is logged on the card and a headless Claude acts on it (moves it, splits it, notes it).</span></form>
+    <span class="hint">Keys, working while the mic's on: M the mic, N send and next, &larr; &rarr; go through, 1-${Object.keys(STATUSES).length} move it, I to the inbox, Esc close. To type instead, click in the box (Esc to leave it; Ctrl+Enter sends). What you send is logged on the card and a headless Claude acts on it (moves it, splits it, notes it).</span></form>
 </aside>
 <script src="../tools/board-client.js"></script>
 </body></html>
@@ -271,6 +272,16 @@ export function change(cards, id, status, opt = {}) {
   const body = what.length ? logged(c.body, what.join(': ')) : c.body;
   writeFileSync(c.file, format(meta, body));
   return { ...c, meta, body };
+}
+
+/** A card's text rewritten (tidied, made concise), its log kept and the tidy logged; the old text is in git history. */
+export function tidy(cards, id, text) {
+  const c = find(cards, id);
+  const body = String(text ?? '').trim();
+  if (!body) throw new Error('tidy <id> "<the card\'s new text>"');
+  const log = c.body.match(/\n## Log\n[^]*$/)?.[0] ?? '\n## Log\n';
+  writeFileSync(c.file, format({ ...c.meta, updated: today() }, logged(`\n${body}\n${log}`, 'tidied up (the old text is in git history)')));
+  return c;
 }
 
 /** Something dropped in the inbox: a card of its own in tasks/inbox/, what was written its Asked. */
@@ -324,7 +335,10 @@ export function update(cards, id, text, run = spawn) {
   if (!words) throw new Error('Nothing said');
   const c = change(cards, id, undefined, { note: `you said: "${words}"` });
   console.log(`updating ${c.id}`);
-  headless(c.id, fill(UPDATE, c, words), (why) => {
+  headless(c.id, fill(UPDATE, c, words), (why, out) => {
+    // Done nothing to it? Say so, with what it said, rather than leave the card looking forgotten.
+    const now = load().cards.find((x) => x.id === c.id);
+    if (!why && now && now.body.trim().endsWith(`you said: "${words}"`)) why = `did nothing: ${out.trim().slice(-300)}`;
     if (why) change(load().cards, c.id, undefined, { note: `acting on it ${why}` });
     drawBoard();
     console.log(`updated ${c.id}${why ? ': ' + why : ''}`);
@@ -425,6 +439,9 @@ function main(argv) {
   } else if (cmd === 'set' || cmd === 'note') {
     const c = change(all.cards, pos[0], cmd === 'set' ? pos[1] : undefined, { ...opt, note: cmd === 'note' ? pos[1] : opt.note });
     console.log(line(c));
+  } else if (cmd === 'tidy') {
+    const c = tidy(all.cards, pos[0], pos[1]);
+    console.log(`tidied ${c.stream}/${c.id}`);
   } else if (cmd === 'move') {
     const c = find(all.cards, pos[0]);
     if (!all.streams.some((s) => s.id === pos[1])) throw new Error(`No stream "${pos[1]}": ${all.streams.map((x) => x.id).join(', ')}`);
@@ -441,7 +458,7 @@ function main(argv) {
     const { meta } = existsSync(s.file) ? parse(readFileSync(s.file, 'utf8')) : { meta: { name: s.id, hue: 30 } };
     writeFileSync(s.file, format(meta, `\n${pos[1]} (${today()})\n`));
     console.log(`${s.id}: ${pos[1]}`);
-  } else throw new Error(`Unknown command "${cmd}" (list, show, add, set, note, move, stream, board, serve)`);
+  } else throw new Error(`Unknown command "${cmd}" (list, show, add, set, note, tidy, move, stream, board, serve)`);
   drawBoard();
 }
 

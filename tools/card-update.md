@@ -18,6 +18,10 @@ on and dictating into here about what the updated status of each thing is.")
    - **Something else they mention** (a new fix, a new idea, a part to split off): a card of its own, `node
      tools/task.mjs add <stream> "<title>" --asked "<their words>"` (`--status idea` for an idea), in the stream it
      belongs to, then `note {{id}} "split off: <new id>"`. Already a card for it? `note` that card instead.
+   - **Tidy it up** (more concise, less of a brain-dump, refocused): rewrite the card's text with `node
+     tools/task.mjs tidy {{id}} "<its new text>"` (its log is kept). Short: what the idea or fix is, in a sentence
+     or two, then a few bullets; keep the user's most telling words as quotes, with their dates; drop the rambling,
+     and anything done or dropped (say which in a `note`). Fold in what they've just said if it adds to it.
    - **Split it up** (a brain-dump grown into several ideas; tasks/README.md, "An idea card is one idea"): each
      live part its own card in their words, then `set {{id}} done --note "split up: <what's built>, <new ids>,
      <what's dropped>"`.

@@ -38,3 +38,4 @@ colour, and what it does for her at sea.)
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "at least this need some tidying up it's a big ol' of text at the moment but yeah I think these need some specific tag or category of people I'd like to work in somehow but haven't yet"
