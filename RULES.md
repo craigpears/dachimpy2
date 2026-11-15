@@ -4004,3 +4004,19 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   original tune if it ever gets music, no lyrics.
 - Still to come (the task board, tasks/carpet-ride/): the second leg to the blockade; Gravee painting her portrait ("Naturally [Gravee] taking
   a portrait").
+
+### The blockade's balance: emergent, never a rule (15 Nov)
+
+- **Rock, paper, scissors comes from how the ships handle, never from a rule about what a ship may attack.** The user,
+  of turtles told to leave sloops alone: "it feels a bit artificial ... rather than it being a mechanical advantage".
+  So every craft and ship goes for whatever her bot thinks best, and the triangle emerges: a frigate's slow, long turns
+  give a turtle the moment it needs to ram her (a ram only lands on a ship lying still a second), while a sloop that
+  keeps moving slips her, and one that sits still foolishly is rammed just the same ("that makes it ... emergent
+  rather than some magical rule"); a brig anchored to launch is a sitting duck for a sloop quick into position; a
+  sloop that duels a frigate is sunk by her weight of shot.
+- **The gate guns punish sitting still, not being near.** A ship moving about in a gun's reach, however long, isn't
+  camping ("if the sloops are constantly moving, they shouldn't be vulnerable to the guns").
+- **Balance is proved fleet against fleet, terrain included** (tests/blockade-balance.test.ts, BLOCKADE.md §3): equal
+  points, both ways round, on open sea and on the blockade's own board, guns and all ("brigs being able to use the
+  terrain to launch from a protected position is very key to the balance test"). When a side of the triangle doesn't
+  hold, the fix is in handling, terrain or price, and the test says so.
