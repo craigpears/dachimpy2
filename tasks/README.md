@@ -41,8 +41,10 @@ Each draws the board again. `board:serve` shows it at http://localhost:8643/, wh
 2. The user says start it, or "pick up tasks": the main session reads the `ready` cards (`list --status ready`, then
    `show`), and offers each as a session of its own, its brief from the card; on the user's go it's `doing`, with
    `--session`.
-3. Sessions don't touch tasks/. When one reports back, the main session checks its work, merges it, and moves its card
-   on: `review` or `playtest` with its link and a screenshot, the stream's note if it moved on.
+3. A session keeps its own card current, by the script (the user, 15 Nov: "you should be able to update the card
+   you're working on"): a `note` as it goes, and `set <id> review` or `playtest` with its link and a shot when its
+   work's in. It touches no other card, and no stream. The main session checks its work, merges it, and does the
+   rest of the organising: the other cards, the streams, and the card's move if the session didn't.
 4. Once the user's played it: `done` (or back to `ready` with what they said).
 
 ## The inbox: drop it in, it's sorted for you

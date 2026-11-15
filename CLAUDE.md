@@ -122,8 +122,8 @@ how many tokens are being spent"); the user drags cards between columns on `npm 
 what's changed about each (logged on it, then acted on by a headless Claude, `tools/card-update.md`), and drops brain-dumps into its inbox, each sorted
 straight away by a headless Claude (`tools/inbox-triage.md`) into a card, an idea or a design document (README, "The
 inbox"); what it sorted is committed by the main session. A session started for a card is put on it (`set <id>
-doing --session <id>`); sessions themselves never touch `tasks/`; when one reports back, the main session moves its
-card on (`review` or `playtest`, its link and a screenshot). "Pick up tasks" means offer each `ready` card as a
+doing --session <id>`); a session keeps its own card current by the script (a `note`, `review` or `playtest` when its work's in; the user, 15 Nov: "you should be able to update the card you're working on"), touching no other card; when one reports back, the main session checks
+it and moves the card on if the session didn't. "Pick up tasks" means offer each `ready` card as a
 session, its brief from `show <id>`.
 
 The changelog (the user, 11 Nov: "as each bigger feature's added, and it should be more visual"):
