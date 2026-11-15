@@ -1502,14 +1502,54 @@ check, a share link, and the den's own race for 3D.
       overhang), her beam rounded up (her sides mustn't scrape). The sloop 1 by 1; Primates Rule (15 m by 4.6) 4
       along and 2 across, so a one-square gap is too narrow for her: no special rule, just her beam.
     - **Turning wide:** a turn is a quarter circle `radius` squares round, half her length: the sloop 1 (Battle
-      Navigation's turn exactly), the frigate 2 (two ahead, two across). Every square she covers at every step of a
-      move has to be open water, so she needs room to turn; a turn she's no room for leaves her as she was.
-    - **Guns:** shots a side a broadside, YPPedia's (the sloop 1 small, a war frigate 2 large), out of her middle
+      Navigation's turn exactly), the frigate 2 (her middle two ahead, two across, either way). Every square she
+      covers at every step of a move, and where she swings round at the corner, has to be open water, so she needs
+      room to turn. A turn she's no room for leaves her as she was, never pivoting (the sloop's still turns her on
+      the spot, as the den's does); only when she can't move at all is a big ship warped round on the spot, slowly.
+    - **Her turn is a cost, never a shortcut (15 Nov).** Played, "a turn is making it cover a lot more space than
+      you would in a sloop, so that actually is making it faster, which is kind of weird considering that's
+      supposed to be what the sloop is good at ... maybe it like has a big turning circle, but just then you'd have
+      to balance it in other ways." Why she gained: her turn took `radius` squares' time (3 s) but carried her four
+      squares (two ahead, two across) on one move of the turn, about 1.05 squares a second all told, where she makes
+      0.43 going straight and the sloop 0.59. So a frigate zigzagging toward a mark beat a sloop sailing straight
+      at it (sailed round a five-mark course, she was first to the first). Now (`turnSecs`): Battle Navigation's
+      turn (a square ahead, one across) stays a move's time, the sloop's nimbleness, two squares for one; a wider
+      turn is sailed square by square, its 2 × `radius` squares taking her, all told (each move's pause and her
+      share of the breather between turns counted), as long as that many squares straight on: 8.45 s for the
+      frigate's. Every move of hers now covers the ground slower than any of the sloop's, and round the same
+      course the sloop is ahead at every mark (twice as quick over it). The trade-off: the frigate's turns are
+      slow and need room; the sloop's are her quickest way over the ground. Drawn, the frigate gathers way into
+      a turn and eases off out of it (a glide, not the den's quick ease), so she's always under way.
+    - **Drawn moving forward (15 Nov: "it should always be moving forward. It seems to be more like rotating on
+      the spot when it turns").** Her middle sails round the quarter circle, her heading always along it, bows
+      leading, never pivoting: her own square (half a square aft and to port of her middle) follows it, so her
+      left turn and her right turn are the same circle (before, her own square went round it, and her left turn
+      was tighter than her right). Her blocked turn used to spin her where she was, which is what pivoting was.
+    - **Her pilot (15 Nov: "if I just went forward, then you would be kind of close enough. Because it would be
+      within the silhouette of the whole ship").** She's there once the square you plotted is under any square
+      of her, and her pilot sails her to be so, going straight on when that does it; dropped on a square already
+      under her, she's there. (`Sea.there`, a ship's own; the sloop's is just her square, as the den's.)
+    - **Guns:** a broadside, never aimed gun by gun (15 Nov: "would it just fire a broadside and then you'd hit the
+      sloop as part of it? ... that's what we said as one of the trade-offs"): Q and E (or the page's buttons), as
+      everywhere at sea, shots a side YPPedia's (the sloop 1 small, a war frigate 2 large) out of her middle
       squares, 3 squares' range; a side loads again in 2 s (small) or 3 s (large).
-    - **The two obstacles:** a narrow gap one square wide (the sloop's); a channel three wide with a boom of chained
-      logs across it, which only large guns hurt: 4 shots, two of her broadsides, then open water for both. The
-      sloop's small guns bounce off it.
-    To try with the user: whether the pace and the turn feel right in a frigate; the obstacles in the real race
+    - **Shooting each other (15 Nov: "just be able to shoot at the sloop").** A shot on the other ship holes her,
+      shown on her as the race's sloops are (a flash, timber and smoke, then stars over her, smoke off her deck,
+      sitting low and listing: js/den/holed.js, the race's look pulled out to share). There's no deck patch board
+      on the test sea, so her crew patch her in a few seconds: 3 for a small shot, 5 for a large (`TWO_SEA.HOLED`).
+      Her two shots a side are a wider net than the sloop's one; they don't hole her twice.
+    - **The two obstacles:** a narrow gap one square wide (the sloop's); a channel three wide under an imperial gate
+      (15 Nov: "put like a ... destructible. That Imperial Gate thing"): the Empire's gatehouse over it (empire.js,
+      its arch high enough for her masts), its boom of chained logs across the way in, which only large guns hurt
+      (4 shots, two of her broadsides, then open water for both; the sloop's small guns bounce off), and a bastion
+      gun either side, the den's destructible gun (src/den-turret.ts, turret.js). They leave you be till someone
+      fires on the gate, then fire on whoever's in their reach (3 squares), a shot on her square holing her; any
+      ship's hits quieten one, the third wrecks it. So the frigate lying broadside to the boom gets fired on while
+      she breaks it, and the sloop can quieten the guns for her but never break the boom.
+    To try with the user: what her bigger broadside trades against the sloop's speed (two large shots a side,
+    holing for longer, and the only guns that break the gate, against a sloop quicker everywhere and twice as quick
+    through the turns: is that a fair choice of ship in a race?); whether she's now too slow on a course of many
+    turns (her pace, `HANDLING.FRIGATE_PACE`, is the dial); whether the pace and the turn feel right in a frigate; the obstacles in the real race
     (the imperial gate as the frigate's boom, §12; the narrow ways as the sloop's); whether the frigate also rides
     out the winds and whirlpools ("Bigger ships ride out the winds", IDEAS.md), not built.
 

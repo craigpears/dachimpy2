@@ -2,9 +2,10 @@
    sea (src/two-ships.ts, frigate-test.html). RACE.md §11, "Racing in a frigate or a sloop" (14 Nov): the
    frigate battling her way through, the sloop slipping through the narrow ways. */
 import { describe, expect, it } from 'vitest';
-import { SAIL, Sea, path, poseAt, type Move, type Pose } from '../src/den-sail';
-import { SLOOP_HANDLING as SL, FRIGATE_HANDLING as FR, HANDLING, ShipSea, ShipHelm, Guns, squares, shipPath, shipPose, drawnAt, broadside } from '../src/ship-handling';
+import { SAIL, Sea, path, poseAt, pauseFor, type Move, type Pose } from '../src/den-sail';
+import { SLOOP_HANDLING as SL, FRIGATE_HANDLING as FR, HANDLING, ShipSea, ShipHelm, Guns, squares, shipPath, shipPose, drawnAt, broadside, groundSecs, type Handling } from '../src/ship-handling';
 import { TwoShips, TWO_SEA, Boom, seaXZ, seaCR } from '../src/two-ships';
+import { TURRET } from '../src/den-turret';
 
 const MOVES: Move[] = ['F', 'L', 'R'];
 const open = () => new Set<string>();
@@ -38,12 +39,17 @@ describe('each ship\'s handling, from YPPedia\'s numbers and her hull', () => {
       expect(mine.steps.map((q) => [q.c, q.r])).toEqual(den.cells);
       for (const u of [0, 0.3, 0.7, 1]) expect(shipPose(SL, p, m, u)).toEqual(poseAt(p, m, u));
     }
-    expect(shipPath(FR, { c: 8, r: 8, d: 0 }, 'L').to).toEqual({ c: 6, r: 10, d: 3 });
-    expect(shipPath(FR, { c: 8, r: 8, d: 0 }, 'R').to).toEqual({ c: 10, r: 10, d: 1 });
-    expect(shipPath(FR, { c: 8, r: 8, d: 0 }, 'F').to).toEqual({ c: 8, r: 9, d: 0 });
-    // Drawn on a quarter circle the same, from where she was to where she ends up.
-    const end = shipPose(FR, { c: 8, r: 8, d: 0 }, 'L', 1);
-    expect(end.c).toBeCloseTo(6); expect(end.r).toBeCloseTo(10); expect(end.a).toBeCloseTo(-1);
+    // Her middle goes two ahead and two across, either way (her own square, aft and to port of it, follows).
+    const p0 = { c: 8, r: 8, d: 0 }, m0 = drawnAt(FR, { c: 8, r: 8, a: 0 });
+    for (const [m, dc, d] of [['L', -2, 3], ['R', 2, 1]] as const) {
+      const to = shipPath(FR, p0, m).to, m1 = drawnAt(FR, { c: to.c, r: to.r, a: to.d });
+      expect(to.d).toBe(d);
+      expect(m1.c - m0.c).toBeCloseTo(dc); expect(m1.r - m0.r).toBeCloseTo(2);
+      // Drawn on a quarter circle the same, from where she was to where she ends up.
+      const end = shipPose(FR, p0, m, 1);
+      expect(end.c).toBeCloseTo(to.c); expect(end.r).toBeCloseTo(to.r); expect(end.a).toBeCloseTo(m === 'L' ? -1 : 1);
+    }
+    expect(shipPath(FR, p0, 'F').to).toEqual({ c: 8, r: 9, d: 0 });
   });
   it('is drawn at the middle of her squares', () => {
     expect(drawnAt(SL, { c: 3, r: 4, a: 0 })).toEqual({ c: 3, r: 4, a: 0 });
@@ -170,5 +176,177 @@ describe('the test sea: a narrow gap only the sloop fits, a boom only the frigat
     const g = new Guns(2);
     expect(g.fire('L')).toBe(true); expect(g.fire('L')).toBe(false); expect(g.fire('R')).toBe(true);
     g.tick(2); expect(g.ready('L')).toBe(true);
+  });
+});
+
+/* Primates Rule as played on frigate-test.html (the user, 15 Nov): "It looks really cool", and the next pass. */
+describe('her turn is a cost, never a shortcut (15 Nov: "a turn is making it cover a lot more space than you would in a sloop, so that actually is making it faster")', () => {
+  // Seconds of the clock all told for a move (its pause, and her share of the breather between turns), and the
+  // squares of ground it covers.
+  const allTold = (h: Handling, m: Move) => { const secs = new ShipSea(h, 20, 20, open()).moveSecs(false, { c: 9, r: 9, d: 0 }, m); return secs + pauseFor(secs) + SAIL.BREAK / h.tokens; };
+  const ground = (h: Handling, m: Move) => (m === 'F' ? 1 : 2 * h.radius);
+  const perSquare = (h: Handling, m: Move) => allTold(h, m) / ground(h, m);
+  it('her wide turn covers the ground no quicker than she goes straight on', () => {
+    expect(perSquare(FR, 'L')).toBeCloseTo(groundSecs(FR.pace, FR.tokens));
+    expect(perSquare(FR, 'R')).toBeGreaterThanOrEqual(perSquare(FR, 'F') - 1e-9);
+  });
+  it('every move of hers covers the ground slower than every move of the sloop\'s', () => {
+    for (const m of MOVES) for (const n of MOVES) expect(perSquare(FR, m)).toBeGreaterThan(perSquare(SL, n));
+  });
+  it('the sloop keeps Battle Navigation\'s quick turn: a square ahead and one across in a move\'s time', () => {
+    expect(SL.turn).toBe(SAIL.MOVE);
+    expect(perSquare(SL, 'L')).toBeLessThan(perSquare(SL, 'F'));
+  });
+  it('sailing both round the same course, the sloop is ahead at every mark through the turns', () => {
+    const course: [number, number][] = [[14, 12], [26, 18], [28, 30], [16, 26], [6, 30]];
+    const marks = (h: Handling) => {
+      const helm = new ShipHelm(new ShipSea(h, 34, 34, open()), { c: 6, r: 3, d: 0 }), at: number[] = [];
+      let t = 0, i = 0, turns = 0;
+      helm.drop(...course[0]);
+      while (t < 400 && i < course.length) {
+        const ev = helm.tick(0.05); t += 0.05;
+        turns += ev.filter((e) => e.kind === 'move' && e.m !== 'F').length;
+        if (ev.some((e) => e.kind === 'arrive')) { at.push(t); if (++i < course.length) helm.drop(...course[i]); }
+      }
+      return { at, turns };
+    };
+    const sloop = marks(SL), frigate = marks(FR);
+    expect(sloop.at).toHaveLength(course.length);
+    expect(frigate.at).toHaveLength(course.length);
+    expect(frigate.turns).toBeGreaterThan(3);   // (she does turn on the way)
+    sloop.at.forEach((t, i) => expect(t).toBeLessThan(frigate.at[i]));
+    // As she turned before (a turn her `radius` squares' seconds), she was first to the first mark.
+    const before = marks({ ...FR, turn: FR.pace * FR.radius });
+    expect(before.at[0]).toBeLessThan(sloop.at[0]);
+  });
+});
+
+describe('her turn drawn moving forward (15 Nov: "it should always be moving forward. It seems to be more like rotating on the spot when it turns")', () => {
+  it('her middle sails round the quarter circle, always along her heading, bows leading', () => {
+    for (const m of ['L', 'R'] as Move[]) for (const d of [0, 1, 2, 3]) {
+      const p = { c: 10, r: 10, d }, N = 60;
+      let last = drawnAt(FR, shipPose(FR, p, m, 0)), went = 0;
+      for (let i = 1; i <= N; i++) {
+        const at = drawnAt(FR, shipPose(FR, p, m, i / N)), dc = at.c - last.c, dr = at.r - last.r, len = Math.hypot(dc, dr);
+        // (the heading halfway through the step: quarter turns, 0 out to sea, 1 right)
+        const a = (at.a + last.a) / 2 * Math.PI / 2, along = (dc * Math.sin(a) + dr * Math.cos(a)) / len;
+        expect(len).toBeGreaterThan(0);      // never standing still to turn
+        expect(along).toBeGreaterThan(0.99); // and always going the way her bows point
+        went += len; last = at;
+      }
+      expect(went).toBeCloseTo(Math.PI / 2 * FR.radius, 1);   // (the quarter circle's length)
+    }
+  });
+  it('a turn she\'s no room for leaves her as she was, never pivoting while she can go on', () => {
+    // A rock two squares off her starboard bow: no room to turn right, room to go on.
+    const rocks = new Set(['11,12']), sea = new ShipSea(FR, 20, 20, rocks), p = { c: 10, r: 10, d: 0 };
+    expect(sea.move(p, 'F').bump).toBe(false);
+    const got = sea.move(p, 'R');
+    expect(got.bump).toBe(true);
+    expect(got.to).toEqual(p);
+  });
+  it('only when she can\'t move at all is she warped round on the spot', () => {
+    // Bows on the board's edge, rocks either side ahead: nowhere to go.
+    const sea = new ShipSea(FR, 20, 20, new Set(['6,18', '6,19', '13,18', '13,19'])), p = { c: 10, r: 18, d: 0 };
+    for (const m of MOVES) expect(sea.clear(p, m)).toBe(false);
+    const got = sea.move(p, 'L');
+    expect(got.bump).toBe(true);
+    expect(got.to.d).toBe(3);
+    const was = drawnAt(FR, { c: p.c, r: p.r, a: p.d }), now = drawnAt(FR, { c: got.to.c, r: got.to.r, a: got.to.d });
+    expect([now.c, now.r]).toEqual([was.c, was.r]);   // (about her middle)
+  });
+});
+
+describe('her pilot: there once the point\'s under her (15 Nov: "within the silhouette of the whole ship")', () => {
+  it('a point under any of her squares is where she is already', () => {
+    const sea = new ShipSea(FR, 20, 20, open()), helm = new ShipHelm(sea, { c: 10, r: 4, d: 0 });
+    for (const [c, r] of squares(FR, helm.pose)) expect(sea.there(helm.pose, c, r)).toBe(true);
+    helm.drop(9, 2);
+    expect(helm.pin).toBeNull();
+  });
+  it('goes straight on when that brings the point under her, never turning toward it', () => {
+    const sea = new ShipSea(FR, 20, 20, open()), helm = new ShipHelm(sea, { c: 10, r: 4, d: 0 });
+    // One square to port of her own square, four ahead: a few squares on, it's under her port side.
+    helm.drop(9, 8);
+    const plan = helm.course();
+    expect(plan.every((m) => m === 'F')).toBe(true);
+    const ev = run(helm, 12);
+    expect(ev.filter((e) => e.kind === 'move').every((e) => (e as { m: Move }).m === 'F')).toBe(true);
+    expect(ev.some((e) => e.kind === 'arrive')).toBe(true);
+    expect(sea.there(helm.pose, 9, 8)).toBe(true);
+  });
+  it('the sloop still sails right onto it, as the den\'s does', () => {
+    const helm = new ShipHelm(new ShipSea(SL, 20, 20, open()), { c: 10, r: 4, d: 0 });
+    helm.drop(10, 7);
+    run(helm, 10);
+    expect(helm.pose).toMatchObject({ c: 10, r: 7 });
+  });
+});
+
+describe('shooting (15 Nov: "just be able to shoot at the sloop"; "would it just fire a broadside and then you\'d hit the sloop as part of it?")', () => {
+  it('her broadside: two large shots out of her middle squares, three squares out, slower to load than the sloop\'s one small one', () => {
+    const shots = broadside(FR, { c: 10, r: 10, a: 0 }, 'R', () => null);
+    expect(shots).toHaveLength(2);
+    expect(shots.every((s) => s.cells.length === SAIL.RANGE)).toBe(true);
+    const rows = shots.map((s) => s.from[1]), mid = squares(FR, { c: 10, r: 10, d: 0 }).map(([, r]) => r);
+    expect(Math.min(...rows)).toBeGreaterThan(Math.min(...mid));
+    expect(Math.max(...rows)).toBeLessThan(Math.max(...mid));
+    expect(FR.reload).toBeGreaterThan(SL.reload);
+  });
+  it('her broadside on the sloop holes her, dazed till her crew have patched her, longer for a large shot', () => {
+    const t = new TwoShips(), f = t.ships.frigate, s = t.ships.sloop;
+    f.helm.moor({ c: 10, r: 4, d: 0 }); s.helm.moor({ c: 12, r: 4, d: 0 });
+    t.tick(0.01);
+    const got = t.fire('R', 'frigate')!;
+    expect(got.shots.some((x) => x.what === 'sloop' && x.holed)).toBe(true);
+    expect(t.holed('sloop')).toBe(true);
+    s.helm.drop(12, 7);
+    const held = { ...s.helm.pose };
+    for (let i = 0; i < (TWO_SEA.HOLED.large - 0.5) / 0.05; i++) t.tick(0.05);
+    expect(s.helm.pose).toEqual(held);
+    for (let i = 0; i < 1 / 0.05; i++) t.tick(0.05);
+    expect(t.holed('sloop')).toBe(false);
+    // and the sloop's small shot on her holes her a shorter while
+    s.helm.moor({ c: 12, r: 4, d: 2 });
+    s.guns.tick(9); t.tick(0.01);
+    expect(t.fire('R', 'sloop')!.shots[0].what).toBe('frigate');
+    expect(t.patch.frigate).toBe(TWO_SEA.HOLED.small);
+    expect(TWO_SEA.HOLED.small).toBeLessThan(TWO_SEA.HOLED.large);
+  });
+});
+
+describe('the imperial gate to shoot at (15 Nov: "put like a ... destructible. That Imperial Gate thing")', () => {
+  const S = TWO_SEA;
+  it('its boom across the channel, a gun on a bastion either side', () => {
+    const t = new TwoShips();
+    expect(t.battery.map((g) => g.at)).toEqual(S.GATE.GUNS);
+    for (const [c, r] of [...S.GATE.GUNS, ...S.GATE.TOWERS]) expect(t.rocks.has(`${c},${r}`)).toBe(true);
+    for (const [c, r] of t.boom.squares) expect(t.stopAt('frigate', c, r)).toBe('boom');
+    expect(t.stopAt('frigate', ...S.GATE.GUNS[0])).toBe('gun');
+  });
+  it('its guns leave her be till someone fires on the gate, then fire on her in reach', () => {
+    const t = new TwoShips(), f = t.ships.frigate;
+    f.helm.moor({ c: 16, r: 5, d: 1 });
+    let fired = 0;
+    for (let i = 0; i < 100; i++) fired += t.tick(0.05).guns.filter((g) => g.e.kind === 'fire').length;
+    expect(fired).toBe(0);
+    t.fire('L', 'frigate');
+    for (let i = 0; i < 100; i++) fired += t.tick(0.05).guns.filter((g) => g.e.kind === 'fire').length;
+    expect(fired).toBeGreaterThan(0);
+  });
+  it('a gun\'s shot coming down on her, sat still, holes her', () => {
+    const t = new TwoShips(), f = t.ships.frigate;
+    f.helm.moor({ c: 16, r: 5, d: 1 });
+    for (const g of t.battery) g.rouse();
+    let hit = false;
+    for (let i = 0; i < 200 && !hit; i++) hit = t.tick(0.05).guns.some((g) => g.hit === 'frigate');
+    expect(hit).toBe(true);
+    expect(t.holed('frigate')).toBe(true);
+  });
+  it('any ship\'s shots quieten its guns, and the third wrecks one; only large guns break the boom', () => {
+    const t = new TwoShips(), g = t.battery[0];
+    for (let i = 0; i < TURRET.WRECK; i++) expect(g.hit()).toBe(i < TURRET.WRECK - 1 ? 'quiet' : 'wrecked');
+    expect(t.stopAt('sloop', ...g.at)).toBe('rock');
+    expect(t.boom.hit('small')).toBe('bounced');
   });
 });

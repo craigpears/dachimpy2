@@ -5,7 +5,7 @@
 // smoking stump. A place puts one down and sets its look (the checkpoint's bastions: checkpoint.js).
 import * as THREE from 'three';
 import { scene, mat, mesh, V3, burst, worldLets, shake, flagpole, warm } from './world.js';
-import { rock } from './land.js';
+import { rock } from './rock.js';
 import { gunMesh } from './gun.js';
 
 /* `look`: the stone's colour, the tower's top and foot radius and height, a coloured band below its

@@ -9,7 +9,8 @@
      (compiled to js/den-frigate.js); her look is js/den/frigate.js, and the sloop's js/den/sloop.js, the
      same the den draws. At anchor, it stands them up side by side on a calm sea. Sail (the default) puts
      them on a small test sea of their own, both sailed by the den's helm by each one's handling, with a
-     narrow gap only the sloop fits and a boom only the frigate's broadside breaks (src/two-ships.ts and
+     narrow gap only the sloop fits and an imperial gate whose boom only the frigate's broadside breaks, its
+     guns firing back once it's fired on; they shoot each other too (src/two-ships.ts and
      src/ship-handling.ts; its 3D js/den/two-ships.js; RACE.md §11). -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,6 +32,13 @@
   .tok { width: 30px; height: 30px; border: 1px solid var(--edge); border-radius: 6px; display: grid; place-items: center; font: 700 18px 'Alegreya Sans', sans-serif; background: #241810; color: var(--dim); }
   .tok.lit { background: #6a4a1a; color: var(--ink); border-color: var(--gold); }
   .tok.mine { color: var(--gold); }
+  .pad button { min-width: 40px; }
+  .gun { position: relative; overflow: hidden; }
+  .gun i { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--gold); width: 100%; transition: width .1s linear; }
+  .gun.loading { color: var(--dim); }
+  #status { font-size: 13px; color: var(--dim); margin-bottom: 6px; }
+  #status b { color: var(--gold); }
+  #status .bad { color: #e8875a; }
   #say { position: fixed; left: 50%; top: 14px; transform: translateX(-50%); width: max-content; max-width: min(520px, calc(100vw - 32px)); background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; padding: 6px 12px; font-size: 15px; opacity: 0; transition: opacity .3s; pointer-events: none; }
   #say.on { opacity: 1; }
   #say.bad { border-color: #c8572a; }
@@ -59,13 +67,22 @@
   </div>
   <div id="sail" hidden>
     <h1>Two ships</h1>
-    <p>Sail either through the rocks to the buoy. Click the water to sail there; W A D put in a move, Q E fire a broadside, Tab switches ship. The sloop slips through the narrow gap; Primates Rule is too big for it, so she smashes the boom.</p>
+    <p>Sail either through the rocks to the buoy. Click the water to sail there; W A D put in a move, Q E fire a broadside (port, starboard), X stops her, Tab switches ship. The sloop slips through the narrow gap; Primates Rule is too big for it, so she smashes the imperial gate's boom, and its guns fire back. Shoot each other too: a hit holes her a while.</p>
     <div class="row">
       <button data-ship="sloop">Sloop</button>
       <button data-ship="frigate">Primates Rule</button>
       <button id="whole">Whole sea</button>
     </div>
     <div class="toks" id="toks"></div>
+    <div class="row pad">
+      <button data-key="a" title="Turn left (A)">↰</button>
+      <button data-key="w" title="Forward (W)">↑</button>
+      <button data-key="d" title="Turn right (D)">↱</button>
+      <button data-key="x" title="Stop (X)">Stop</button>
+      <button data-key="q" class="gun" id="gunL" title="Port broadside (Q)">◀ Fire<i></i></button>
+      <button data-key="e" class="gun" id="gunR" title="Starboard broadside (E)">Fire ▶<i></i></button>
+    </div>
+    <div id="status"></div>
     <div id="handling"></div>
   </div>
 </div>
@@ -146,8 +163,8 @@ const pick = (kind) => {
   two.swap(kind);
   document.querySelectorAll('[data-ship]').forEach((b) => b.classList.toggle('on', b.dataset.ship === kind));
   const h = two.hud().h, sq = (n) => `${n} square${n > 1 ? 's' : ''}`;
-  $('handling').innerHTML = `<b>${h.tokens}</b> moves a turn, <b>${h.pace}</b> s a square, turns <b>${sq(h.radius)}</b> wide; ` +
-    `takes <b>${h.long} × ${h.wide}</b> ${h.long * h.wide > 1 ? 'squares' : 'square'}; <b>${h.shots}</b> ${h.guns} shot${h.shots > 1 ? 's' : ''} a side.`;
+  $('handling').innerHTML = `<b>${h.tokens}</b> moves a turn, <b>${h.pace}</b> s a square, turns <b>${sq(h.radius)}</b> wide in <b>${+h.turn.toFixed(1)}</b> s; ` +
+    `takes <b>${h.long} × ${h.wide}</b> ${h.long * h.wide > 1 ? 'squares' : 'square'}; <b>${h.shots}</b> ${h.guns} shot${h.shots > 1 ? 's' : ''} a side, loading in <b>${h.reload}</b> s.`;
   if (!cam.follow) { cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on'); }
 };
 document.querySelectorAll('[data-ship]').forEach((b) => { b.onclick = () => pick(b.dataset.ship); });
@@ -173,6 +190,8 @@ const setMode = (m) => {
   params.set('mode', mode); keepParams();
 };
 document.querySelectorAll('[data-mode]').forEach((b) => { b.onclick = () => setMode(b.dataset.mode); });
+// The buttons: the same as the keys, for a phone or a mouse.
+document.querySelectorAll('[data-key]').forEach((b) => { b.onclick = () => { if (mode === 'sail') two.key(b.dataset.key); }; });
 addEventListener('keydown', (e) => {
   if (mode !== 'sail' || e.ctrlKey || e.metaKey || e.altKey) return;
   const k = e.key.toLowerCase();
@@ -180,9 +199,14 @@ addEventListener('keydown', (e) => {
   if (k === '1' || k === '2') { pick(k === '1' ? 'sloop' : 'frigate'); return; }
   if (two.key(k)) e.preventDefault();
 });
-let hudSig = '';
+let hudSig = '', stSig = '';
+const GATE_GUN = { watching: 'watching', firing: '<span class="bad">firing</span>', quiet: 'quiet', wrecked: 'wrecked' };
 const hud = () => {
   const s = two.hud(), n = s.h.tokens, sig = `${s.kind}|${s.moves.join('')}|${s.lit}|${s.mine}`;
+  for (const side of ['L', 'R']) { const b = $('gun' + side); b.classList.toggle('loading', !s.guns[side]); b.querySelector('i').style.width = `${(1 - s.load[side]) * 100}%`; }
+  const st = (s.holed ? `<span class="bad">Holed: patched in <b>${Math.ceil(s.holed)}</b> s.</span> ` : '') +
+    `The gate: ${s.boom > 0 ? `its boom <b>${s.boom}</b> large shot${s.boom > 1 ? 's' : ''} from breaking` : 'its boom <b>broken</b>'}; its guns ${s.battery.map((g) => GATE_GUN[g]).join(' and ')}.`;
+  if (st !== stSig) { stSig = st; $('status').innerHTML = st; }
   if (sig === hudSig) return;
   hudSig = sig;
   $('toks').innerHTML = Array.from({ length: n }, (_, i) => {
