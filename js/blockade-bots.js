@@ -133,7 +133,8 @@ export class Bot {
             // (a friend in the way, or one of a brawl's ships, left to it: holding fire)
             const friend = shots.some((x) => x.what?.what === 'ship' && (at(x.what.id).team === s.team || this.spare.has(x.what.id)));
             const gate = this.goal?.kind === 'gate' && s.h.guns === 'large' && shots.some((x) => x.what?.what === 'tower');
-            const gun = shots.some((x) => x.what?.what === 'gun' && b.battery[x.what.i].roused && !(b.battery[x.what.i].quiet > 0));
+            // (a gate's gun firing on anyone, or on her for camping under it)
+            const gun = shots.some((x) => x.what?.what === 'gun' && (b.battery[x.what.i].roused || b.gunOn[x.what.i] === s.id) && b.battery[x.what.i].live());
             if ((foe || gate || gun) && !friend && b.fire(s.id, side))
                 this.firedAt = b.clock;
         }

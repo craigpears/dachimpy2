@@ -51,10 +51,11 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   Eldritch Wail the ghost ship, Crimson Tide; Red Wake, Smoke and Mirrors, Scarlet Fever, Blood Orange, Rust Bucket).
 - **The heart, a walled fort in the middle**, two deep, with four ways in:
   - **an imperial gate** in its south wall and another in its north: its way one square wide under its arch, a
-    tower two squares wide either side, bastion guns on the wall. The sloops run straight through; a frigate lies
-    broadside to a tower and shoots it down (6 large shots, both of each broadside on it: three broadsides), and
-    then the way's three wide for anyone. A gate's guns leave you be till it's fired on, then fire on whoever's in
-    reach (the gate's medium shot's damage); any ship's hits quieten one, three wreck it;
+    tower two squares wide either side, four bastion guns on the wall (doubled, 15 Nov: below). The sloops run
+    straight through; a frigate lies broadside to a tower and shoots it down (6 large shots, both of each broadside
+    on it: three broadsides), and then the way's three wide for anyone. A gate's guns fire on anyone who lingers in
+    their reach (`CAMP`, 4 s), and once the gate's fired on, on whoever's in reach at all (the gate's medium shot's
+    damage); any ship's hits quieten one, three wreck it;
   - **a side way** through its west wall and its east: a one-square gap with a wind blowing in through it from the
     open sea. A sloop on it is carried through, fast; a frigate rides the winds out (and wouldn't fit anyway).
 - **Islands**: four out on the open sea, sand and grass and palms, each with a cove a sloop hides in, one square in
@@ -128,6 +129,17 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   Snipe or her own choice; a dashed line from each of your ships to her order, a ring where it ends. Start the round
   and watch; change any order as it plays, or Sail to take her helm. A gate down, her order to shoot it is done and
   she's her own again.
+- **The gates' guns doubled, punishing campers** (15 Nov: "I do love watching the imperial [cannons] ... training on
+  people's positions, especially punishing people camping. I almost partly think that we need to double up on the
+  [cannons] ... first of all, stop people camping. And provide more of a barrier to the war frigates ... that central
+  three-pointer is fantastic for how fast the sloops can get in ... you have the choice. You either charge the guns
+  and take damage, get into that middle fast, or ..."). Four bastion guns a gate, two by its towers and two further
+  along the wall; a gun fires on any ship that's lingered in its reach 4 s, roused or not, so camping by a gate, on
+  the buoy off it or lying broadside to a tower, is punished, while slipping past mostly isn't; once its gate's fired
+  on, on anyone in its reach. A frigate's choice at a gate: charge it under fire (a tower down, the way three wide),
+  or wreck its guns first (three hits each), slower. A ship knocked out in a gate's mouth is camping there: the guns
+  sink her, and the way's clear again. The bots fire back at a gun firing on them. The sloops' way into the heart, the
+  side ways' winds, is out of every gun's reach.
 - **Knocked out, seen** (15 Nov: "a tiny bit clearer"): a thick black column of smoke off her middle, seen across the
   board. Holes are drawn anywhere along the square they struck, so a still duel's don't stack.
 
@@ -161,6 +173,9 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   344 s; raiders on a raid hit frigates mostly from off their ends (25 hits to 15 from the side, those on the way in),
   frigates hitting raiders 9 to 22 times a round. The brawl: the two land 9 to 24 hits each in two minutes, one
   knocked out at 37 s in one, at 111 s in another, neither in the third.
+- With the guns doubled and punishing campers, three seeded rounds: a gate down at 21 to 31 s; a frigate in the heart
+  in all three (42, 125 and 182 s); the guns fire 110 to 139 times a round and hit 90 to 120 (31 to 98 on frigates);
+  6 to 8 of the 8 guns wrecked a round; 8 to 16 ships sunk (up to 11 by the guns); 2.2 to 3.2 s of computing.
 - With sinking, three seeded rounds: 5 to 8 ships sunk a round (frigates and sloops both), every one back; a frigate in
   the heart in two of the three (54 and 311 s); 4.4 to 4.8 s of computing a round. A frigate knocked out by a gate can
   lie in its mouth, in everyone's way, till she's finished.

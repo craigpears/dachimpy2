@@ -17,8 +17,8 @@
      coming in from two edges each: Dachimpy's from the south and west, Dalnoth's from the north and east;
    - the heart of the board, its best buoys, inside a walled fort in the middle: an imperial gate in its south wall
      and another in its north, one square wide, which a frigate has to crumble a tower of to get through
-     (src/imperial-gate.ts: "a way of naturally delaying the war [frigs]"), their bastion guns firing on anyone once
-     their gate's fired on; and a side way through its west wall and its east, a one-square gap with a wind blowing
+     (src/imperial-gate.ts: "a way of naturally delaying the war [frigs]"), four bastion guns on each firing on anyone
+     who lingers under them, and on anyone at all once their gate's fired on; and a side way through its west wall and its east, a one-square gap with a wind blowing
      in through it that carries a sloop through fast and that a frigate rides out ("sideways ... that only the sloops
      can really get to on those fast little winds");
    - islands out on the open sea, each with a cove in it a sloop can hide in, one square in by a narrow way no
@@ -60,11 +60,17 @@ export const BLOCKADE = {
   ] as Rect[],
   /** The heart, inside them. */
   HEART: { c0: 16, c1: 27, r0: 14, r1: 21 } as Rect,
-  /** The imperial gates: each one's way (its column), its wall's rows, its bastion guns on the wall. */
+  /** The imperial gates: each one's way (its column), its wall's rows, its bastion guns on the wall, four, doubled up
+      (15 Nov: "I do love watching the imperial [cannons] ... training on people's positions, especially punishing people
+      camping. I almost partly think that we need to double up on the [cannons] ... stop people camping. And provide
+      more of a barrier to the war frigates"): two by the gate's towers, two further along. */
   GATES: [
-    { way: 21, r0: 12, r1: 13, guns: [[16, 12], [26, 12]] as [number, number][] },
-    { way: 22, r0: 22, r1: 23, guns: [[17, 23], [27, 23]] as [number, number][] },
+    { way: 21, r0: 12, r1: 13, guns: [[16, 12], [18, 12], [24, 12], [26, 12]] as [number, number][] },
+    { way: 22, r0: 22, r1: 23, guns: [[17, 23], [19, 23], [25, 23], [27, 23]] as [number, number][] },
   ],
+  /** Seconds a ship lingers in a gate gun's reach before it fires on her, roused or not: camping there's punished;
+      slipping past isn't, mostly; charging through a fallen gate under its guns costs her. */
+  CAMP: 4,
   /** The side ways: a one-square gap through the west wall and the east. */
   SIDEWAYS: [[14, 18], [15, 18], [28, 17], [29, 17]] as [number, number][],
   /** The winds (the way each blows: 0 up the board, 1 right, 2 down, 3 left; n squares from `at`): one in through
@@ -186,6 +192,10 @@ export class Blockade {
   private seen = new Map<number, string>();
   /** Each square a ship covers just now, and whose (kept as they move: notice). */
   private taken = new Map<string, number>();
+  /** Each gate gun's seconds each ship's been in its reach (camping there, past BLOCKADE.CAMP), and the ship it's
+      firing on just now (-1: none). */
+  private dwell: Map<number, number>[] = [];
+  gunOn: number[] = [];
   /** Each kind of ship's chart of this board (src/hull-chart.ts): all the sloops share one, all the frigates another. */
   charts = {} as Record<Kind, HullChart>;
 
@@ -236,8 +246,15 @@ export class Blockade {
       s.guns.tick(dt);
       this.notice();
     }
+    // (every square a ship's on, read once for all the guns)
+    const on = [...this.taken].map(([k, id]) => { const [c, r] = k.split(',').map(Number); return { c, r, id }; });
     this.battery.forEach((g, i) => {
-      for (const e of g.tick(dt, this.gunTarget(g))) {
+      // (how long each ship's been under it: a gun not yet roused fires on whoever's camped there)
+      const dw = this.dwell[i] ??= new Map(), near = new Set(on.filter((x) => g.reaches(x.c, x.r)).map((x) => x.id));
+      for (const s of this.ships) if (near.has(s.id)) dw.set(s.id, (dw.get(s.id) ?? 0) + dt); else dw.delete(s.id);
+      const target = this.gunTarget(g, on, g.roused ? null : (id) => (dw.get(id) ?? 0) >= BLOCKADE.CAMP);
+      this.gunOn[i] = target?.id ?? -1;
+      for (const e of g.tick(dt, target, !!target)) {
         const hit = e.kind === 'land' ? this.under(...e.to) : null;
         let hole: Hole | undefined, sunk = false;
         if (hit) ({ hole, sunk } = this.hurt(hit, BLOCKADE.GATE_GUNS, e.to, g.at));
@@ -249,17 +266,17 @@ export class Blockade {
     if (this.clock >= BLOCKADE.ROUND) this.over = true;
     return out;
   }
-  /** The ship a gate's gun fires on: the nearest square of any in its reach, not knocked out. */
-  private gunTarget(g: Turret): { c: number; r: number } | null {
-    let best: [number, number] | null = null, far = Infinity;
-    for (const s of this.ships) {
-      if (s.dmg.out || s.away > 0) continue;
-      for (const id of s.helm.covers()) {
-        const [c, r] = id.split(',').map(Number), d = Math.max(Math.abs(c - g.at[0]), Math.abs(r - g.at[1]));
-        if (g.reaches(c, r) && d < far) { far = d; best = [c, r]; }
-      }
+  /** The ship a gate's gun fires on: the nearest square of any in its reach (`only` those camped there, if it's not
+      roused), not knocked out (unless it's a sinking blockade: lying there knocked out, she's camping). */
+  private gunTarget(g: Turret, on: { c: number; r: number; id: number }[], only: ((id: number) => boolean) | null = null): { c: number; r: number; id: number } | null {
+    let best: { c: number; r: number; id: number } | null = null, far = Infinity;
+    for (const x of on) {
+      const s = this.ships[x.id];
+      if ((s.dmg.out && !BLOCKADE.SINKING) || (only && !only(s.id))) continue;
+      const d = Math.max(Math.abs(x.c - g.at[0]), Math.abs(x.r - g.at[1]));
+      if (g.reaches(x.c, x.r) && d < far) { far = d; best = x; }
     }
-    return best && { c: best[0], r: best[1] };
+    return best;
   }
   /** Where any ship's moved to, every other's pilot works her way out afresh. */
   notice() {

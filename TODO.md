@@ -181,6 +181,9 @@ tested"). Struck off here once played; what the playtest corrects goes in RULES.
   - Admiral mode (15 Nov): "give each ship a target or directive, where it's going, what it's doing ... then you watch
     the things unfold and can ... update and tweak things or take over". Done, a first pass: blockade-test.html?admiral
     (src/blockade-orders.ts; BLOCKADE.md §3). To playtest.
+  - The gates' guns (15 Nov): "I do love watching the imperial [cannons] ... training on people's positions, especially
+    punishing people camping ... double up on the [cannons] ... stop people camping. And provide more of a barrier to
+    the war frigates." Done: four a gate, firing on anyone lingering in reach (BLOCKADE.md §3). To playtest.
   - **The buoys' flags clear, and the bots as teams (15 Nov):** "you should see some flags in the middle of those
     things ... the [war frigs] control that large open area and protect the sloops, but the sloops ... help the [war
     frigs] cover more ground while the [war frigs] do the protecting." To do: the buoys' flags plainly seen from the

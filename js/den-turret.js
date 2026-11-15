@@ -91,8 +91,9 @@ export class Turret {
     /** `ship`: where she is now (Helm.now), or null when it shouldn't fire on her (she's not out, or
         Helm.spared: dazed, at the lock, or just patched). Fires on her square if she's on one of its
         marks, or (roused) anywhere in its reach, when it's loaded and can fire; shots in the air come
-        down whatever. */
-    tick(dt, ship) {
+        down whatever. `anyway`: the place says fire on her in its reach, roused or not (the blockade's
+        gate guns on a ship camping under them). */
+    tick(dt, ship, anyway = false) {
         const out = [];
         this.quiet = Math.max(0, this.quiet - dt);
         this.wait = Math.max(0, this.wait - dt);
@@ -105,7 +106,7 @@ export class Turret {
         if (!at || !this.live() || this.wait > 1e-9)
             return out;
         const onMark = this.trained(...at);
-        if (!onMark && !(this.roused && this.reaches(...at)))
+        if (!onMark && !((this.roused || anyway) && this.reaches(...at)))
             return out;
         const aimed = !onMark, secs = aimed ? this.cfg.flight : this.cfg.markFlight;
         this.wait = aimed ? this.cfg.reload : this.cfg.markReload;

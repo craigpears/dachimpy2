@@ -135,6 +135,29 @@ describe('shooting each other: holes where she\'s shot, and dead in the water (1
   });
 });
 
+describe('the gates' guns doubled, punishing campers (15 Nov: "training on people's positions, especially punishing people camping ... double up on the [cannons] ... provide more of a barrier to the war frigates")', () => {
+  it('four bastion guns a gate', () => {
+    const b = new Blockade();
+    for (let g = 0; g < b.gates.length; g++) expect(b.gunGate.filter((x) => x === g)).toHaveLength(4);
+    for (const gun of b.battery) expect(b.rocks.has(`${gun.at[0]},${gun.at[1]}`)).toBe(true);
+  });
+  it('a gun not yet roused leaves a ship passing under it be, and fires on her once she's lingered there CAMP seconds', () => {
+    const b = new Blockade(), s = sloop(b), gun = b.battery[0];
+    b.ships.filter((x) => x !== s).forEach((x, i) => x.helm.moor({ c: 30 + (i % 8), r: 30 + Math.floor(i / 8) * 3, d: 1 }));
+    // (lying still under the south gate's first gun, unroused)
+    s.helm.moor({ c: gun.at[0], r: gun.at[1] - 2, d: 1 }); b.notice();
+    expect(gun.roused).toBe(false);
+    let fired = -1;
+    for (let t = 0; t < B.CAMP + 3 && fired < 0; t += 0.1) if (b.tick(0.1).guns.some((x) => x.gun === 0 && x.e.kind === 'fire')) fired = t;
+    expect(fired).toBeGreaterThanOrEqual(B.CAMP - 0.2);
+    expect(b.gunOn[0]).toBe(s.id);
+    // (away from it, the count starts again)
+    s.helm.moor({ c: 2, r: 30, d: 1 }); b.notice();
+    for (let t = 0; t < 1; t += 0.1) b.tick(0.1);
+    expect(b.gunOn[0]).toBe(-1);
+  });
+});
+
 describe('a sinking blockade (15 Nov: "that sense of working your way back in would be lost if you can\'t [sink] at all")', () => {
   const knockOut = (b: Blockade, s: ReturnType<typeof frigate>) => { while (!s.dmg.out) s.dmg.hit('large', 0, 'L'); s.helm.hit(); };
   it('a frigate knocked out and shot on sinks: off the board, in nobody\'s way, no influence, no guns, till she comes back where she came in', () => {

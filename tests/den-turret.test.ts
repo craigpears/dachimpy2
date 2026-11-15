@@ -91,3 +91,13 @@ describe('"there should be an object for a destructible turret ... just there to
     expect(fires(shoot(0.4))).toBe(true);   // (she's still in reach)
   });
 });
+
+describe('fired on anyway (15 Nov: the blockade's gate guns "punishing people camping")', () => {
+  it('a gun not alert holds fire on her in its reach, unless the place says fire on her anyway', () => {
+    const t = new Turret({ at: [6, 8], alert: false });
+    t.wait = 0;
+    expect(t.tick(0.1, { c: 6, r: 6 })).toEqual([]);
+    expect(t.tick(0.1, { c: 6, r: 6 }, true).some((e) => e.kind === 'fire')).toBe(true);
+    expect(t.roused).toBe(false);
+  });
+});
