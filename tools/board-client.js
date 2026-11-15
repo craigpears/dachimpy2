@@ -117,6 +117,12 @@
   }));
   document.addEventListener('keydown', (e) => {
     if (panel.hidden) return;
+    // M (Alt+M while writing): the mic on or off.
+    if (e.code === 'KeyM' && (e.altKey || (e.target !== box && !e.ctrlKey && !e.metaKey && !e.target.closest?.('input, textarea, select')))) {
+      e.preventDefault();
+      if (mic.hidden) tell("This browser can't listen: open the board in Chrome or Edge, or use Win+H."); else mic.click();
+      return;
+    }
     if (e.target === box) {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(true); }
       else if (e.key === 'Escape') box.blur();
@@ -172,8 +178,9 @@
   if (Speech) {
     mic.hidden = false;
     let rec = null;
+    const off = () => { if (rec) { rec.onend = null; rec.stop(); } rec = null; mic.classList.remove('on'); mic.textContent = 'Mic (M)'; };
     mic.addEventListener('click', () => {
-      if (rec) { rec.onend = null; rec.stop(); rec = null; mic.classList.remove('on'); mic.textContent = 'Mic'; return; }
+      if (rec) return off();
       rec = new Speech(); rec.continuous = true; rec.interimResults = false; rec.lang = 'en-GB';
       rec.onresult = (e) => {
         for (let i = e.resultIndex; i < e.results.length; i++) {
@@ -184,15 +191,21 @@
           box.value = (box.value ? box.value.replace(/\s*$/, ' ') : '') + said;
         }
       };
-      rec.onerror = (e) => tell('The mic: ' + e.error);
+      rec.onerror = (e) => {
+        if (e.error === 'no-speech' || e.error === 'aborted') return; // a quiet spell: it carries on
+        off(); // refused, no microphone, no network: it's off, not trying again and again
+        tell(e.error === 'not-allowed' || e.error === 'service-not-allowed'
+          ? "The mic isn't allowed here: allow it in the browser's address bar, or use Win+H." : 'The mic stopped: ' + e.error);
+      };
       rec.onend = () => { try { rec?.start(); } catch (e) {} }; // it stops by itself after a pause; keep it on
-      rec.start(); mic.classList.add('on'); mic.textContent = 'Mic on';
+      rec.start(); mic.classList.add('on'); mic.textContent = 'Mic on (M)';
     });
   }
 
   // A card linked to (#its-id) opens.
-  const linked = decodeURIComponent(location.hash.slice(1));
-  if (linked && cardEl(linked)) openCard(linked);
+  const follow = () => { const id = decodeURIComponent(location.hash.slice(1)); if (id && id !== open && cardEl(id)) openCard(id); };
+  follow();
+  window.addEventListener('hashchange', follow);
 
   // The inbox: what's dropped in is a card at once, then sorted by a headless Claude (tools/inbox-triage.md); the
   // board watches it and draws itself again once it's been put where it goes.

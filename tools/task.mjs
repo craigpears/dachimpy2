@@ -224,9 +224,9 @@ export function board({ streams, cards }, when = new Date()) {
   <div class="sts">${keys}</div>
   <div class="read"></div>
   <form class="update"><textarea name="text" placeholder="Say or type what's changed: &quot;that works now&quot;, &quot;still slow when you turn&quot;, &quot;split the guns off into their own card&quot;..."></textarea>
-    <button type="button" class="mic" hidden title="Dictate (say &quot;next&quot; to send and go on)">Mic</button><span class="gap"></span>
+    <button type="button" class="mic" hidden title="Dictate, on M (say &quot;next&quot; to send and go on)">Mic (M)</button><span class="gap"></span>
     <button type="submit" class="send" name="stay">Send</button><button type="submit" class="send" name="on">Send and next</button>
-    <span class="hint">Keys: &larr; &rarr; to go through, 1-${Object.keys(STATUSES).length} to move it, Enter to write, Ctrl+Enter to send and go on, Esc to close. What you send is logged on the card and a headless Claude acts on it (moves it, splits it, notes it).</span></form>
+    <span class="hint">Keys: &larr; &rarr; to go through, 1-${Object.keys(STATUSES).length} to move it, M for the mic (Alt+M while writing), Enter to write, Ctrl+Enter to send and go on, Esc to close. What you send is logged on the card and a headless Claude acts on it (moves it, splits it, notes it).</span></form>
 </aside>
 <script src="../tools/board-client.js"></script>
 </body></html>

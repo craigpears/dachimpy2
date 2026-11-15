@@ -13,3 +13,4 @@ you rescue then hangs around your den, so finished quests add up into a den full
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "that's a little bit with where after you get married the spouse hops on your ship and we're doing this a bit with the being able to place the capybauer but I don't think I'll really want to Action anything on this or this can be done I think"

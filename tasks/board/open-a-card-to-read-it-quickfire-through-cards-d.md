@@ -11,3 +11,4 @@ updated: 15 Nov
 
 - 15 Nov: added.
 - 15 Nov: for you to playtest: the panel, going through with the keys, the mic, and updates acted on by a headless Claude; restart board:serve to see it
+- 15 Nov: M turns the mic on and off (Alt+M while writing); a mic that's refused switches itself off; a card's #link opens it on the page too

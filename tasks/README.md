@@ -63,7 +63,7 @@ whole log. ← and → go through the cards showing (the stream picked), column 
 column's "Go through" starts at its top; 1 to 8 move it (Inbox to Done, the buttons along the top say which); Esc
 closes it; a card's link, `#its-id`, opens it. Below is a box for what's changed, typed or said (the user, 15 Nov:
 "some quick way of going between them, even if the quick fire way is then me just having this mic on and dictating
-into here about what the updated status of each thing is"): the Mic button where the browser can listen (Chrome,
+into here about what the updated status of each thing is"): the Mic button, or M (Alt+M while writing), where the browser can listen (Chrome,
 Edge; "next" said on its own sends it and goes on, "back" goes back), or Windows' dictation (Win+H) anywhere.
 Ctrl+Enter, or "Send and next", sends it: it's logged on the card at once in your words, and a headless Claude
 (`tools/card-update.md`; the same limits as the inbox's) acts on it, its status, its title, a new card split off, a
