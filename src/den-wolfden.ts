@@ -17,7 +17,10 @@
    wolf-kin, the guide's), and the lesson's boards, each laid for a part of the tutorial and the moves Multibella plays on
    it, and when she says what as they play (her cues, `stageCues`; the words are src/lines/multibella.ts's LESSON).
    The deeper mechanics (15 Nov, after the user played the basics): a cascade making wild targets, the outer ring where
-   stars wait, a constellation charted by a cascade's last clear, and Umami's evil constellation. Not yet (to come, with the user): the rumbles, the den's Foraging, the funny cutscenes. */
+   stars wait, a constellation charted by a cascade's last clear, and Umami's evil constellation (a fun one, not the
+   lesson); and Umami's run from his replay, the lesson's "How it works" (`replay`). Her opening, the first time you
+   come in: spinning the wheel frantically as the werewolves come, the moon waning (`OPENING`). Not yet (to come,
+   with the user): the rumbles, the den's Foraging. */
 import { Navigation, bottomRow, type Mark, type NextStar, type Place, type Stage } from './navigation.js';
 import type { Plan, Piece } from './den-houses.js';
 
@@ -108,19 +111,25 @@ export const BOARDS: Readonly<Record<string, Laid>> = {
     next: { c: R, spoke: 3 },
     moves: [],
   },
-  /* The run in the screenshots ("Single! +3", "Double! +6", "Triple! Constellation!"): the red dropped makes a line
-     round the third ring; the orange above falls onto two below it, a line down its spoke, beside the constellation's
-     place holding a blue; that combo's clear turns it wild, the blue counts, and it's charted on the third step. */
-  run: {
+  /* Umami's run, from his replay (notes/wolf-den/, the user's screenshots of 14 Nov: "the tutorial thing I was
+     intending", 15 Nov), its constellation where his was: an orange target in the centre ring at the top, a yellow
+     over it and a red on the left in the middle ring, a yellow up-left in the third (71). Three are filled, but a blue
+     sits in the orange one. A white dropped down the lower left makes three round the centre: "Single! +3". The red
+     over the first white falls in beside the two reds: "Double! +6", a combo's clear, and the orange target beside it
+     goes every colour (wild), the blue in it counting. So the constellation's charted on the third step: "Triple!
+     Constellation! +213", and the next goes up with four wild targets in its centre (two clears before the chart).
+     Her lesson's "How it works" walks it a beat at a time (src/wolf-den-tutorial.ts's WALK). */
+  replay: {
     rings: [
-      [_, _, W, O, B],
-      [_, _, B, O, W],
-      [_, _, R, R],
-      [_, _, _, O],
+      [B, R, R, W, W, _, O, B],
+      [Y, O, B, R, B, _, R, W],
+      [_, Y, W, _, O, _, _, Y],
+      [_, B],
     ],
-    marks: [{ ring: 0, spoke: 4, colour: Y }],
-    next: { c: R, spoke: 4 },
+    marks: [{ ring: 0, spoke: 0, colour: O }, { ring: 1, spoke: 0, colour: Y }, { ring: 1, spoke: 6, colour: R }, { ring: 2, spoke: 7, colour: Y }],
+    next: { c: W, spoke: 5 },
     moves: [{ drop: true }],
+    plan: [{ ring: 0, spoke: 0 }, { ring: 0, spoke: 3 }, { ring: 0, spoke: 4 }, { ring: 0, spoke: 5 }, { ring: 1, spoke: 3 }, { ring: 0, spoke: 1 }, { ring: 0, spoke: 2 }],
   },
   /* A Trapdoor: the third ring turned a place puts a red over two reds down spoke 0; they go, and the yellow parked
      above them in the fourth ring falls into the place. */
@@ -275,3 +284,35 @@ export function playStep(game: Navigation, step: Step) {
 }
 /** Seconds between Multibella's moves on a lesson's board, and how long she waits before the first. */
 export const PACE_LESSON = { MOVE: 1.1, FIRST: 1.6 } as const;
+
+// ---------------------------------------------------------------- her opening
+
+/* Her opening, a little cutscene the first time you come in (the user, 14 Nov, on the wolf den's idea card, "Funny
+   cutscenes": her spinning the wheel frantically as the moon wanes; 15 Nov, missing it: "I thought she was supposed to
+   be ... turning the table and doing all of the things, like just like spinning it ... stop the werewolves coming").
+   js/den/wolfden-opening.js plays it (js/den/cine.js); her words are src/lines/multibella.ts's OPENING, by `say`. */
+export type OpeningShot = 'hut' | 'wheel' | 'window' | 'her';
+export interface OpeningBeat { at: number; shot: OpeningShot; say: 'frantic' | 'spin' | 'waning' | 'phew' }
+export const OPENING = {
+  /** Its length (s). */
+  SECS: 13.5,
+  /** Its beats: from when (s), the camera's shot, her line. */
+  BEATS: [
+    { at: 0, shot: 'hut', say: 'frantic' },
+    { at: 3.4, shot: 'wheel', say: 'spin' },
+    { at: 6.8, shot: 'window', say: 'waning' },
+    { at: 10.2, shot: 'her', say: 'phew' },
+  ] as readonly OpeningBeat[],
+  /** Her hands on the wheel: a ring turned or a star dropped every EVERY seconds, till UNTIL. */
+  SPIN: { EVERY: 0.17, UNTIL: 10 },
+  /** The moon in the window: full till FROM, gone by TO, the werewolf turning back to a wolf-kin as it goes. */
+  WANE: { FROM: 2.2, TO: 9.6 },
+} as const;
+/** Her opening at `t` seconds: its beat (the index in BEATS), how much moon's left, whether she's still spinning,
+    and whether it's over. */
+export function openingAt(t: number): { beat: number; moon: number; spinning: boolean; done: boolean } {
+  let beat = 0;
+  OPENING.BEATS.forEach((b, i) => { if (t >= b.at) beat = i; });
+  const { FROM, TO } = OPENING.WANE, moon = Math.max(0, Math.min(1, 1 - (t - FROM) / (TO - FROM)));
+  return { beat, moon, spinning: t < OPENING.SPIN.UNTIL, done: t >= OPENING.SECS };
+}

@@ -1443,29 +1443,46 @@ Kind and practical, and encouraging ("You got this!"): the one who explained the
 - *You booch:* "Oops, booched it. Happens to everyone. Deep breath, keep going."
 - *You leave:* "Bye! Take a cookie for the road."
 
-### Her lesson's opening choice, at the star table (T)
+### Her opening, the first time you come in: a little cutscene
+
+- *At her star table, spinning the wheel frantically, the werewolf at the window:* "No no no no, not tonight! Chart, chart, chart!"
+- *Close on the wheel, rings flying round:* "Come on, little stars... Double! Where's my yellow?!"
+- *The moon waning in the window, the werewolf turning back:* "That's it, that's it... back to wolf-kin, all of you!"
+- *She stops, and sees you:* "Phew. Oh! Hi! Didn't see you there. Cookie?"
+- *Once it's over: the moon rising again:* "They'll be back at moonrise. There it goes. Pull up to the table, I'll show you how it's done."
+
+### Her lesson's opening choice, at the star table (it pops up as you sit; T)
 
 - *Her opening line:* "A wolf den's Navigation isn't the one you know. Let me show you."
-- *Her first question, and once it's picked:*
-  - *asks:* "Want to start with what's different here?"
-  - *then:* "What's different, then. Which bit?"
 - *Her second, and once it's picked:*
-  - *asks:* "Or how it all works underneath, a step at a time?"
-  - *then:* "Step by step, then. Top one first?"
+  - *asks:* "Or what's different here?"
+  - *then:* "What's different, then. Which bit?"
+- *Her first question, and once it's picked:*
+  - *asks:* "Want to see how it works? Umami's run, from his replay, a step at a time."
+  - *then:* "Umami's run, then. Space for each step."
 - *Her third, and once it's picked:*
   - *asks:* "Or the chains that pay?"
   - *then:* "Chains! Pick one."
 - *Her fourth, and once it's picked:*
-  - *asks:* "Or shall I play you a run, start to finish?"
-  - *then:* "A run, then. Watch closely."
+  - *asks:* "Or a fun one? Umami's evil constellation."
+  - *then:* "Evil, this one. Watch."
 - *As a lesson's board is laid, when it has no words of its own ({title} its name):* "This one's {title}. I'll set it up, you watch the board."
 - *Handing you the board:* "Your board now. I'll be right here with the cookies."
 - *Under it, in the bar:* "Chart what you can: each constellation turns werewolves back. T for her lessons again."
-- *Handing you the board after a step of how it works, with another to come ({title} its name):* "Next up: {title}. Hit Next when you're ready. I'll grab a cookie."
-- *Under it, in the bar:* "N, or Next, for her next step: {title}. T for her lessons."
+- *Handing you the board after Umami's run, its four wild targets up:* "Your board now, those four wild targets and all. Any star fills them. Cookie while you think?"
+- *Under it, in the bar:* "Space drops, arrows turn. T for her lessons again."
 
 ### Her lesson, as she plays each board at the star table: as it's laid, before a move, as each clear or chart of a cascade shows, as slots go wild, as the next constellation goes up, and at the end
 
+- *How it works: Umami's run, from his replay, a beat at a time (Space for each):*
+  - *set:* "This is Umami's run, from his replay. Three targets filled, but there's a blue in the orange one, top middle. Two whites round the centre, two reds beside the orange. He drops one white..."
+  - *step1:* "Single! Plus 3. Three whites, gone. And the red above the first one falls in, beside the two reds..."
+  - *step2:* "Double! Plus 6."
+  - *wild:* "See the top target? Every colour now. A clear in a combo turns the targets beside it wild, so that blue counts."
+  - *step3:* "Triple!"
+  - *chart:* "Constellation! 71, times three: 213. For one white."
+  - *deal:* "And the next one comes up with four wild targets in the centre. Two clears before the chart did that."
+  - *end:* "Single, Double, Triple Constellation. That's the trick: end a cascade on the constellation."
 - *A cascade, lines only, making wild targets:*
   - *set:* "Cascades first. See the two reds round the third ring, and the stars waiting up top? One red dropped, and watch what it sets off."
   - *step1:* "Single! Three reds. And the blue that was waiting over them falls in..."
@@ -1489,7 +1506,7 @@ Kind and practical, and encouraging ("You got this!"): the one who explained the
   - *chart:* "Triple! Constellation! 125, times three."
   - *deal:* "Two clears before it, so the next one gets a fourth wild target in the centre."
   - *end:* "375 for one red dropped. A line's 3. So every cascade you build, end it on the constellation."
-- *Umami's evil constellation, a star at a time:*
+- *Umami's evil constellation (a fun one), a star at a time:*
   - *set:* "Now, an evil one. Made with Umami in mind: six reds side by side, round the centre. Let's fill it a star at a time."
   - *step1:* "Gone! Five reds in a row is a line, and lines go."
   - *end:* "Any way you fill it one at a time, three end up side by side first, and poof. It only goes in a combo."
@@ -1498,11 +1515,6 @@ Kind and practical, and encouraging ("You got this!"): the one who explained the
   - *step1:* "Both whites' spokes go at once..."
   - *chart:* "...and both reds land together. Constellation! Double, too: 486."
   - *end:* "Most people booch it trying. You didn't. Well, I didn't. Cookie?"
-- *The run from the screenshots:*
-  - *step1:* "Single! A red line round the third ring..."
-  - *step2:* "Double! The orange fell onto two oranges."
-  - *wild:* "And that slot's gone wild: the blue in it counts now."
-  - *chart:* "Triple! Constellation! That's the run from the screenshots."
 - *The Trapdoor:*
   - *step1:* "The reds go..."
   - *chart:* "...and the yellow waiting above drops into its slot. Double!"

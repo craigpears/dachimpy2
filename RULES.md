@@ -2644,18 +2644,37 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     mechanics: the plan's places ringed in gold while she says it, before she plays (as every demonstration does);
     then, as each stage shows, her line for it (a cascade's step, slots going wild, a chart, the next constellation
     going up), the board waiting while she talks (Space moves her on). Her words are src/lines/multibella.ts's
-    `LESSON`, by board and cue; a slot turned wild by a clear is drawn wild only once that clear's shown. "How it
-    works" is four steps in order (`MECHANICS`), N or Next for the next one: a cascade, lines only, +3, +6, +9, its
-    combo clears leaving wild targets; the fourth ring, a star waiting up there, carried round, dropped in by a clear
-    under it (250), then the next constellation going up; the same cascade charting the last slot on its third clear
-    (375, a line's 3); and Umami's evil constellation (below), first a star at a time (the fifth red makes a line and
-    they go), then by her combo, both reds landing together (486).
+    `LESSON`, by board and cue; a slot turned wild by a clear is drawn wild only once that clear's shown. What's
+    different shows the same way: a cascade, lines only, +3, +6, +9, its combo clears leaving wild targets; the fourth
+    ring, a star waiting up there, carried round, dropped in by a clear under it (250); the same cascade charting the
+    last slot on its third clear (375, a line's 3).
+  - **How it works is Umami's run, from his replay (15 Nov).** The user, after playing the first version: "not what was
+    meant": the lesson was to walk through the replay they'd sent (notes/wolf-den/), not Umami's evil constellation.
+    One real board (`BOARDS.replay`), his constellation where his was (an orange target top middle in the centre ring,
+    a yellow over it and a red on the left in the middle ring, a yellow up-left in the third: 71), three filled, a blue
+    in the orange one; one white dropped: "Single! +3", the red above falling in beside two reds, "Double! +6", the
+    orange target beside it gone every colour, then "Triple! Constellation! +213" and the next up with four wild
+    targets. Three steps (`WALK`: Single, Double, Triple), walked a beat at a time: every beat she speaks holds the
+    board, her words up, till Space.
+  - **Next is Space (15 Nov):** "when it says next, like, surely that should be a space, or there's nothing really
+    inviting." While she waits, the Drop button's place is Next (saying the step it goes on to: "Next: Double! +6"),
+    pulsing; Space or a tap goes on. No N key.
+  - **Fewer controls, the menu the way in (15 Nov):** "Multibella should be less controls"; her lessons' menu along
+    the bottom, "that menu at the bottom that pops up quickly would be brilliant." It pops up as you sit at the table
+    the first time, on How it works (Space plays Single); T after. In a lesson the bar's only Next, Lessons and Stop.
+  - **Her opening (15 Nov; asked 14 Nov, the idea card's "Funny cutscenes"):** the first time you come in, a little
+    cutscene: her at the star table spinning the wheel frantically, rings flying round on a real board, to stop the
+    werewolves coming, the moon waning in the window and the werewolf there turning back; then "Phew. Oh! Hi!" and the
+    moon rising again for the next pack. About 13 seconds; Space or Esc skips it (`OPENING`).
+  - **Umami's evil constellation is a fun one (15 Nov):** "They did keep the umami thing just as like a fun one ... I'd
+    love for him to go after try and figure out how to solve that. But ... that's not the tutorial thing I was
+    intending." Out of How it works; her menu's fourth choice, "A fun one".
   - **"Wild target"** in her words, the guide's and the code's: YPPedia's word (the user, 15 Nov: "Go with yppedia and
     wild targets"), over "wild slot", the Wolf Dens Guide's and the players'.
   - **Umami's evil constellation at the wolf den (15 Nov):** the user's combo-only constellation (11 Nov, "The
     starlit door"; IDEAS.md), made with Umami in mind, at last somewhere in the world: shown in her lesson, credited
     to Umami in the changelog. Not yet dealt in play.
-  - Not yet: the rumbles, the den's Foraging, Multibella at the table, the cutscenes, a way to it on the sea.
+  - Not yet: the rumbles, the den's Foraging, a way to it on the sea.
 - **Duty Navigation (11 Nov), built by the real puzzle.** The night sky in front of a hidden cliff door,
   each constellation lighting its stars on the rock ("The starlit door", below). One module, `src/navigation.ts`,
   knowing nothing of the den; its look `js/den/nav-board.js` (`navBoard`); played on its own in the

@@ -17,18 +17,28 @@ export const WOLF_DEN = {
   bye: 'Bye! Take a cookie for the road.',
 } as const;
 
+/** Her opening, a little cutscene the first time you come in (src/den-wolfden.ts's OPENING, by `say`): at her star
+    table, spinning the wheel frantically to stop the werewolves coming as the moon wanes; then she sees you. */
+export const OPENING = {
+  frantic: 'No no no no, not tonight! Chart, chart, chart!',
+  spin: 'Come on, little stars... Double! Where\'s my yellow?!',
+  waning: 'That\'s it, that\'s it... back to wolf-kin, all of you!',
+  phew: 'Phew. Oh! Hi! Didn\'t see you there. Cookie?',
+  after: 'They\'ll be back at moonrise. There it goes. Pull up to the table, I\'ll show you how it\'s done.',
+} as const;
+
 /** Her lesson's opening choice and its words (src/wolf-den-tutorial.ts; js/tutorial-choice.js draws it). */
 export const TUTOR = {
   hello: 'A wolf den\'s Navigation isn\'t the one you know. Let me show you.',
-  basics: { asks: 'Want to start with what\'s different here?', then: 'What\'s different, then. Which bit?' },
-  mechanics: { asks: 'Or how it all works underneath, a step at a time?', then: 'Step by step, then. Top one first?' },
+  basics: { asks: 'Or what\'s different here?', then: 'What\'s different, then. Which bit?' },
+  mechanics: { asks: 'Want to see how it works? Umami\'s run, from his replay, a step at a time.', then: 'Umami\'s run, then. Space for each step.' },
   tricks: { asks: 'Or the chains that pay?', then: 'Chains! Pick one.' },
-  run: { asks: 'Or shall I play you a run, start to finish?', then: 'A run, then. Watch closely.' },
+  fun: { asks: 'Or a fun one? Umami\'s evil constellation.', then: 'Evil, this one. Watch.' },
   show: 'This one\'s {title}. I\'ll set it up, you watch the board.',
   after: 'Your board now. I\'ll be right here with the cookies.',
   afterNote: 'Chart what you can: each constellation turns werewolves back. T for her lessons again.',
-  next: 'Next up: {title}. Hit Next when you\'re ready. I\'ll grab a cookie.',
-  nextNote: 'N, or Next, for her next step: {title}. T for her lessons.',
+  walked: 'Your board now, those four wild targets and all. Any star fills them. Cookie while you think?',
+  walkedNote: 'Space drops, arrows turn. T for her lessons again.',
 } as const;
 
 /** What she says as she plays a lesson's board, by the board (src/den-wolfden.ts's BOARDS) and her cue on it (its
@@ -36,6 +46,16 @@ export const TUTOR = {
     as slots go wild, 'chart', 'deal' as the next constellation goes up, 'end'). The places she talks of at 'set' are
     ringed on the board. "Wild target": YPPedia's word (the user, 15 Nov). */
 export const LESSON = {
+  replay: {
+    set: 'This is Umami\'s run, from his replay. Three targets filled, but there\'s a blue in the orange one, top middle. Two whites round the centre, two reds beside the orange. He drops one white...',
+    step1: 'Single! Plus 3. Three whites, gone. And the red above the first one falls in, beside the two reds...',
+    step2: 'Double! Plus 6.',
+    wild: 'See the top target? Every colour now. A clear in a combo turns the targets beside it wild, so that blue counts.',
+    step3: 'Triple!',
+    chart: 'Constellation! 71, times three: 213. For one white.',
+    deal: 'And the next one comes up with four wild targets in the centre. Two clears before the chart did that.',
+    end: 'Single, Double, Triple Constellation. That\'s the trick: end a cascade on the constellation.',
+  },
   cascade: {
     set: 'Cascades first. See the two reds round the third ring, and the stars waiting up top? One red dropped, and watch what it sets off.',
     step1: 'Single! Three reds. And the blue that was waiting over them falls in...',
@@ -72,12 +92,6 @@ export const LESSON = {
     step1: 'Both whites\' spokes go at once...',
     chart: '...and both reds land together. Constellation! Double, too: 486.',
     end: 'Most people booch it trying. You didn\'t. Well, I didn\'t. Cookie?',
-  },
-  run: {
-    step1: 'Single! A red line round the third ring...',
-    step2: 'Double! The orange fell onto two oranges.',
-    wild: 'And that slot\'s gone wild: the blue in it counts now.',
-    chart: 'Triple! Constellation! That\'s the run from the screenshots.',
   },
   trapdoor: {
     step1: 'The reds go...',
@@ -119,19 +133,23 @@ export const CHARACTER: Character = {
       },
     },
     {
-      when: 'Her lesson\'s opening choice, at the star table (T)', says: TUTOR,
-      each: { hello: 'Her opening line', basics: 'Her first question, and once it\'s picked', mechanics: 'Her second, and once it\'s picked', tricks: 'Her third, and once it\'s picked', run: 'Her fourth, and once it\'s picked', show: 'As a lesson\'s board is laid, when it has no words of its own ({title} its name)', after: 'Handing you the board', afterNote: 'Under it, in the bar', next: 'Handing you the board after a step of how it works, with another to come ({title} its name)', nextNote: 'Under it, in the bar' },
+      when: 'Her opening, the first time you come in: a little cutscene', says: OPENING,
+      each: { frantic: 'At her star table, spinning the wheel frantically, the werewolf at the window', spin: 'Close on the wheel, rings flying round', waning: 'The moon waning in the window, the werewolf turning back', phew: 'She stops, and sees you', after: 'Once it\'s over: the moon rising again' },
+    },
+    {
+      when: 'Her lesson\'s opening choice, at the star table (it pops up as you sit; T)', says: TUTOR,
+      each: { hello: 'Her opening line', mechanics: 'Her first question, and once it\'s picked', basics: 'Her second, and once it\'s picked', tricks: 'Her third, and once it\'s picked', fun: 'Her fourth, and once it\'s picked', show: 'As a lesson\'s board is laid, when it has no words of its own ({title} its name)', after: 'Handing you the board', afterNote: 'Under it, in the bar', walked: 'Handing you the board after Umami\'s run, its four wild targets up', walkedNote: 'Under it, in the bar' },
     },
     {
       when: 'Her lesson, as she plays each board at the star table: as it\'s laid, before a move, as each clear or chart of a cascade shows, as slots go wild, as the next constellation goes up, and at the end',
       says: LESSON,
       each: {
+        replay: 'How it works: Umami\'s run, from his replay, a beat at a time (Space for each)',
         cascade: 'A cascade, lines only, making wild targets',
         outer: 'The fourth ring: a star waiting up there, carried round, dropped in by a clear under it',
         lastClear: 'A constellation charted by a cascade\'s last clear',
-        evilTry: 'Umami\'s evil constellation, a star at a time',
+        evilTry: 'Umami\'s evil constellation (a fun one), a star at a time',
         evil: 'Umami\'s evil constellation, filled by a combo',
-        run: 'The run from the screenshots',
         trapdoor: 'The Trapdoor',
         echo: 'The Echo',
       },

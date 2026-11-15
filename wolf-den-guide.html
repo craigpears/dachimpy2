@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wolf den Navigation, the read version</title>
 <!-- The wolf den's read version (RULES.md, "Every tutorial has a read version, kept in sync"; 14 Nov, a first
-     version; 15 Nov, the deeper mechanics): Multibella's lesson at the wolf den's star table written down. The words are
+     version; 15 Nov, the deeper mechanics, then How it works as Umami's run from his replay, a beat at a time): Multibella's lesson at the wolf den's star table written down. The words are
      the page's own, by hand; every board is drawn by js/wolf-den-guide-view.js with the den's own board
      (js/den/nav-board.js) from the lesson's boards (src/den-wolfden.ts's BOARDS), each one before (her plan ringed) and
      after its moves, with what she says as she plays it (src/lines/multibella.ts's LESSON), and the sticky nav from the
@@ -57,6 +57,24 @@
   <p class="failed" data-failed hidden>The boards couldn't be drawn here. Try a newer browser, or open the page from the den's own site.</p>
 
   <section id="basics">
+    <h2>How it works: Umami's run</h2>
+    <p class="intro">From Umami's replay of a real wolf den: one white dropped, and the constellation charted three steps later for 213. Multibella walks you through it a beat at a time (Space for each); here it is beat by beat, the board as each shows.</p>
+    <article id="single" data-moves="replay" data-beat="single">
+      <h3>Single! +3</h3>
+      <p class="sub">A line: a point a star.</p>
+      <p>Umami's constellation has four targets: an orange in the centre ring at the top, a yellow over it and a red on the left in the middle ring, a yellow up to the left in the third. Three are filled, but there's a blue in the orange one. Two whites sit round the centre ring with a red over the first, and two reds beside the orange target. He drops a white down the lower left: three whites round the centre, a line, gone. A line's worth a point a star, times its step in the move: 3.</p>
+    </article>
+    <article id="double" data-moves="replay" data-beat="double">
+      <h3>Double! +6: a wild target</h3>
+      <p class="sub">A combo's clear turns the targets beside it wild.</p>
+      <p>The red over the first white falls in, beside the two reds: another line, in the same move, the Double, 3 stars times two. And every clear from a move's second step on is a combo's: it turns the constellation's targets on it and beside it wild, ringed in every colour, taking any star. The orange target is right beside it, so the blue in it counts now.</p>
+    </article>
+    <article id="triple" data-moves="replay" data-beat="triple">
+      <h3>Triple! Constellation! +213</h3>
+      <p class="sub">Charted on the third step: 71 times three.</p>
+      <p>With the orange target wild, every target's filled, and the constellation's charted on the move's third step: its 71 times three, 213, for one white. Charted after two clears, the next one goes up with four wild targets in its centre. That's the game in a wolf den: build a cascade, and end it on the constellation.</p>
+    </article>
+
     <h2>What's different here</h2>
     <p class="intro">Plain Duty Navigation's rules still hold: Up and Down pick a ring, Left and Right turn it, Space drops the next star down its spoke, and three of a colour in a line go. These are what a wolf den changes.</p>
     <article id="cascade" data-moves="cascade">
@@ -115,10 +133,10 @@
       <p class="sub">Chart, then clear.</p>
       <p>Put a pair beside a place, so that once it's charted the stars falling into the places it leaves make a line. Here the middle ring turns its red onto the red place; charted, it goes, and the blue above falls between two blues. The chart came first, so it isn't multiplied, but it was in a chain: the next centre is wild.</p>
     </article>
-    <article id="beside" data-moves="run" data-says="no">
+    <article id="beside" data-moves="replay" data-says="no">
       <h3>A combo beside the wrong star</h3>
       <p class="sub">The wrong colour, made right.</p>
-      <p>A slot holding the wrong colour isn't lost. Clear a combo beside it and it turns wild, and the star already in it counts. That's what happened in the run below: the blue in the yellow slot charted.</p>
+      <p>A slot holding the wrong colour isn't lost. Clear a combo beside it and it turns wild, and the star already in it counts. That's what happened in Umami's run, at the top: the blue in the orange target charted.</p>
     </article>
     <article id="noReset" data-board="rings">
       <h3>Don't reset the board</h3>
@@ -129,15 +147,10 @@
 
   <section id="scenarios">
     <h2>Scenarios</h2>
-    <article id="run" data-moves="run">
-      <h3>Single, Double, Triple Constellation</h3>
-      <p class="sub">"Single! +3", "Double! +6", "Triple! Constellation!"</p>
-      <p>A good player's run, from screenshots of a real one. A red dropped makes a line round the third ring: a Single. The orange above it falls onto two oranges down its spoke: a Double, and it's beside the yellow slot holding a blue. That clear, in a combo, turns the slot wild, the blue in it counts, and the constellation's charted on the third step, its points tripled.</p>
-    </article>
     <article id="evil" data-moves="evilTry">
       <h3>Umami's evil constellation</h3>
-      <p class="sub">Six reds side by side round the centre: only a combo fills it.</p>
-      <p>Made with Umami in mind. Most constellations can be filled a star at a time, the last one charting it before any line can go. Not this one: whichever five reds are in before the last, three of them sit side by side, a line, and they're gone. Even three, four or five in a row can be done a star at a time (two, a gap, two, and the last into the gap); six can't. So the last two have to land at once.</p>
+      <p class="sub">A fun one. Six reds side by side round the centre: only a combo fills it.</p>
+      <p>Made with Umami in mind, just for fun. Most constellations can be filled a star at a time, the last one charting it before any line can go. Not this one: whichever five reds are in before the last, three of them sit side by side, a line, and they're gone. Even three, four or five in a row can be done a star at a time (two, a gap, two, and the last into the gap); six can't. So the last two have to land at once.</p>
       <p>Multibella's way: whites in the two gaps, a white over each in the third ring, the reds waiting over those in the fourth, and a white beside each in the middle ring. One turn of the middle ring puts a white under each, both spokes of whites go in the same step, and both reds drop in together: charted on the second step, 243 doubled.</p>
     </article>
   </section>
