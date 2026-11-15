@@ -24,3 +24,4 @@ branch: claude/confident-morse-f1ac9a
 - 15 Nov: being done: being reworked in its own session: Umami's replay as How it works, Space for Next, the bottom menu the way in, her opening cutscene
 - 15 Nov: reworked (session 5c782c03, branch claude/confident-morse-f1ac9a): How it works walks Umami's replay, Single +3, Double +6 (top target wild), Triple Constellation +213, four wild targets, a beat at a time on Space; Next is Space; her menu pops up as you sit; in a lesson only Next, Lessons, Stop; her opening cutscene spinning the wheel as the moon wanes; the evil constellation kept as 'A fun one'. Tests and smoke pass; not looked at in 3D with screenshots
 - 15 Nov: for you to playtest
+- 15 Nov: The user, 15 Nov: "notes for wolf den are it's speed nav and quick doubles is a good strategy. So a layer of three so you can line up two pieces in the outer ring and it's nice and simple". Logged, not built yet: the main session is asking them.
