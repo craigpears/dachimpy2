@@ -2876,6 +2876,18 @@ small ships because of the narrower gaps. I think that would be a cool proof of 
   way you can clear enough space for your big ship." A race or a run for frigates, the gate too narrow until
   it's blown open.
 - **Racing in either (14 Nov):** pick a war frigate or a sloop for the sloop race, each opening routes of its own: the frigate battling through, the sloop nimble (RACE.md §11).
+- **Unequal turns: the frigate slow to react, not slow (15 Nov).** "Maybe you could have unequal turns ... the [war
+  frig] can move every for every X seconds, the sloop gets like two turns for every two kind of cycles of turns for
+  the [war frig] ... that'll then show, yeah, the [war frig]'s slower to react, and that's how it would equal them
+  out." And her forward as big as her turn: "to go forward on the [war frig], I think proportionately you want to be
+  going like 4 squares, so it's equivalent movement to the turn, otherwise it looks really weird." Then "the turns on
+  them can be really long, so like it would be easy for a sloop to kind of really jump in and be like pop pop, fire a
+  couple of cannonballs and run away before the [war frig] can react. That would be a really great balancing
+  feature." So: her turn of moves (Battle Navigation's turn) lasts as long as two of the sloop's, and each of her moves
+  is big (forward several squares, her wide turn as now), so over open water she's as quick or quicker, but she
+  commits to a long plan and can't answer a sloop darting in to fire and away. Rough numbers (sloop's turn of moves
+  6.8 s, 4 squares straight): hers 13.6 s with 3 moves of 2 squares forward is 0.75 of the sloop's speed straight, of
+  3 squares 1.1x, of 4 squares 1.5x. Not built: to try on frigate-test.html first.
 - **Primates Rule's own pictures (found 14 Nov):** Dachimpy.com's v3 on the user's NAS has PrimatesRule.jpg, her
   cabin and her galley (`//nas-pears/Projects/Dachimpy.com/Dachimpy.com/v3`), to check her look against.
 
