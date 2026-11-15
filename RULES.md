@@ -2703,6 +2703,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     moves counted (choosing a ring isn't); constellations' places weighted toward the middle (filled
     from the centre out, its strategy) and never a line of three of a colour among themselves; sizes
     one star, then two, three... a constellation (SIZES, a host can give its own, and fewer colours).
+  - **Stars come in bags of ten, not plain random (the user, 15 Nov, from what players said; not built yet).**
+    "pieces come in, they say come in bags of 10 for this puzzle. So instead of it being random, it's like you get a
+    bag mixed up with two of each colour ... you don't get a third of anything until you get two of each in that
+    cycle." Shuffled within the bag, it seems. It makes combos needing three of a colour slower to set up.
   - A first go is the first three, one, two and three stars (FIRST_GO): the greedy bot takes about 66
     moves over them (15, 21 and 30), a minute or two at the keys, and booches about once in thirteen
     goes.
