@@ -181,7 +181,9 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     frigate can't, her influence falls short of the buoy from outside the reef, and her broadsides stop on it. Those
     buoys made two pennants, so they're worth the fight. The reefs close the way between each island and the fort,
     so a frigate going from the south to the north goes the long way round past the islands, along the board's edge
-    (two rocks there taken out so she fits); drawn as coral heads over shallow water;
+    (two rocks there taken out so she fits); drawn as a lagoon (15 Nov, of coloured coral heads: "they look incredibly
+    weird and colourful, not very lagoon reef like"): the sea paling to turquoise round it, a sandbar ring just under
+    the water with surf along its outside and its gaps open, a grey rock here and there;
   - drawn from a war frigate's parts on her own plan (two masts, one row of ports, her stern's few sizes her own:
     `Plan.stern`), the turtles and ghost sloops by `js/den/sea-craft.js`; the admiral picks a strategy for her too
     (her own choice, hold the outside, run for the middle, hunt their frigates).

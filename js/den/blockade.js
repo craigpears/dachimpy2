@@ -69,24 +69,67 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
   // ----- the rocks, the fort's walls among them (its towers and bastions their own) -----
   const stoneM = mat('#6b6158', { flatShading: true, roughness: 0.95 }), stoneGeo = new THREE.DodecahedronGeometry(1, 0);
   const isleSq = new Set(BLOCKADE.ISLANDS.flatMap((i) => islandLand(i).map(([c, r]) => `${c},${r}`)));
-  // (the reefs round the island buoys: shallow water over sand, low coral heads breaking the surface, not rocks)
+  // (the reefs round the island buoys, drawn as a lagoon is (15 Nov: "they look incredibly weird and colourful, not very
+  // lagoon reef like"): the sea paling to turquoise round each, the reef a ring of pale sand just under the water with
+  // a few dark rocks breaking it and white surf along it, the lagoon inside clear turquoise)
   // (the fort's wall where a reef meets it, still wall)
   const wall = (c, r) => B.WALLS.some((w) => c >= w.c0 && c <= w.c1 && r >= w.r0 && r <= w.r1);
   const reefSq = new Set(BLOCKADE.REEFS.flatMap((x) => reefSquares(x).filter(([c, r]) => !wall(c, r)).map(([c, r]) => `${c},${r}`)));
-  const shallowM = new THREE.MeshStandardMaterial({ color: '#6fd0c4', roughness: 0.6, transparent: true, opacity: 0.75 });
-  const coralMs = ['#e8826e', '#f0b25c', '#d870a8', '#f2e2c4', '#b8d06a'].map((col) => mat(col, { flatShading: true, roughness: 0.85 }));
-  const coralGeo = new THREE.IcosahedronGeometry(1, 0), shallowGeo = new THREE.BoxGeometry(CELL, 0.5, CELL);
+  // (each reef painted as one picture over the sea: a soft paling round it, the lagoon, a sandbar ring with a wobbly
+  // edge and its gaps open, surf along its outside; the few rocks on it in 3D)
+  const reefTex = (reef) => canvasTex(512, 512, (x, w) => {
+    const n = reef.ring * 2 + 3, px = w / n, mid = w / 2, roll = dice(reef.at[0], reef.at[1]);
+    const toPx = (c, r) => [mid + (c - reef.at[0]) * px, mid - (r - reef.at[1]) * px];
+    x.clearRect(0, 0, w, w);
+    const halo = x.createRadialGradient(mid, mid, px * 1.5, mid, mid, mid);
+    halo.addColorStop(0, 'rgba(74, 185, 178, 0.75)'); halo.addColorStop(0.6, 'rgba(58, 160, 165, 0.45)'); halo.addColorStop(1, 'rgba(47, 143, 154, 0)');
+    x.fillStyle = halo; x.fillRect(0, 0, w, w);
+    // (along the ring: its middle line, a rounded square reef.ring squares out)
+    const R = reef.ring * px, corner = px * 1.1, along = [];
+    for (let t = 0; t < 1; t += 1 / 400) {
+      const u = t * 4, side = Math.floor(u), f = u - side, a = -R + corner + f * (2 * R - 2 * corner);
+      const pts = [[a, -R], [R, a], [-a, R], [-R, -a]][side];
+      along.push(pts);
+      if (f > 0.97) for (let k = 0; k <= 8; k++) { const th = (side * Math.PI) / 2 - Math.PI / 2 + (k / 8) * (Math.PI / 2); along.push([[R - corner, R - corner], [-R + corner, R - corner], [-R + corner, -R + corner], [R - corner, -R + corner]][side].map((v, i) => v + (i ? Math.sin(th) : Math.cos(th)) * corner)); }
+    }
+    const gaps = reef.gaps.map(([c, r]) => toPx(c, r));
+    const inGap = (X, Y) => gaps.some(([gx, gy]) => Math.hypot(X - gx, Y - gy) < px * 0.62);
+    // the sandbar under the water, its edge wobbling
+    for (const [ax, ay] of along) {
+      const X = mid + ax, Y = mid + ay;
+      if (inGap(X, Y)) continue;
+      x.fillStyle = 'rgba(160, 220, 204, 0.8)'; x.beginPath(); x.arc(X + (roll() - 0.5) * px * 0.2, Y + (roll() - 0.5) * px * 0.2, px * (0.42 + roll() * 0.16), 0, Math.PI * 2); x.fill();
+    }
+    for (const [ax, ay] of along) {
+      const X = mid + ax, Y = mid + ay;
+      if (inGap(X, Y) || roll() < 0.5) continue;
+      x.fillStyle = 'rgba(226, 216, 178, 0.45)'; x.beginPath(); x.arc(X + (roll() - 0.5) * px * 0.35, Y + (roll() - 0.5) * px * 0.35, px * (0.12 + roll() * 0.14), 0, Math.PI * 2); x.fill();
+    }
+    // surf, white, along the bar's outer edge
+    for (const [ax, ay] of along) {
+      const d = Math.hypot(ax, ay) || 1, out = px * 0.5, X = mid + ax + (ax / d) * out, Y = mid + ay + (ay / d) * out;
+      if (inGap(mid + ax, mid + ay) || roll() < 0.35) continue;
+      x.fillStyle = `rgba(255, 255, 255, ${0.25 + roll() * 0.35})`; x.beginPath(); x.ellipse(X, Y, px * (0.06 + roll() * 0.14), px * (0.04 + roll() * 0.06), Math.atan2(ay, ax) + Math.PI / 2, 0, Math.PI * 2); x.fill();
+    }
+  });
+  const reefRockM = ['#6d6f68', '#7a776c', '#5d6660'].map((col) => mat(col, { flatShading: true, roughness: 0.95 }));
+  const rockGeo = new THREE.DodecahedronGeometry(1, 0), reefSheets = [];
+  for (const reef of BLOCKADE.REEFS) {
+    const at = v3(...reef.at), size = (reef.ring * 2 + 3) * CELL;
+    const q = new THREE.Mesh(new THREE.PlaneGeometry(size, size).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: reefTex(reef), transparent: true, depthWrite: false }));
+    q.position.set(at.x, 0.02, at.z); q.renderOrder = 1; g.add(q); reefSheets.push(q);
+  }
   for (const k of b.rocks) {
     const [c, r] = k.split(',').map(Number);
     if (isleSq.has(k) || b.gates.some((gate) => gate.towerAt(c, r) >= 0) || b.battery.some((x) => x.at[0] === c && x.at[1] === r)) continue;
     const roll = dice(c, r), at = v3(c, r);
     if (reefSq.has(k)) {
-      const sh = mesh(shallowGeo, shallowM, false); sh.position.set(at.x, -0.12, at.z); g.add(sh);
-      for (let i = 0; i < 5; i++) {
-        const s = 0.6 + roll() * 0.7, m = mesh(coralGeo, coralMs[Math.floor(roll() * coralMs.length)]);
-        m.scale.set(s * (1 + roll() * 0.6), s * (0.35 + roll() * 0.45), s * (1 + roll() * 0.6));
-        m.position.set(at.x + (roll() - 0.5) * 2.8, s * 0.12, at.z + (roll() - 0.5) * 2.8);
-        m.rotation.set(roll() * 0.5, roll() * 3, roll() * 0.5);
+      // (a rock or two breaking the surface, low and dark)
+      for (let i = 0, n = roll() < 0.45 ? 1 : 0; i < n; i++) {
+        const sz = 0.4 + roll() * 0.4, m = mesh(rockGeo, reefRockM[Math.floor(roll() * reefRockM.length)]);
+        m.scale.set(sz * (1 + roll() * 0.4), sz * 0.6, sz * (1 + roll() * 0.4));
+        m.position.set(at.x + (roll() - 0.5) * 2.6, 0.02, at.z + (roll() - 0.5) * 2.6);
+        m.rotation.set(0, roll() * 3, 0);
         g.add(m);
       }
       continue;
@@ -333,6 +376,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         buoys[i].o.position.y = Math.sin(clock * 1.2 + i) * 0.1;
       });
       for (const t of lanes) t.offset.y -= dt * 2.2;
+      for (const q of reefSheets) q.material.opacity = 0.92 + Math.sin(clock * 0.9) * 0.08;   // (the surf, breathing)
       // Your pin, your berth there, your course.
       const mine = me >= 0 ? b.ship(me) : null;
       pin.visible = !!mine?.helm.pin;
