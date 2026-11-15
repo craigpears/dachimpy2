@@ -2870,6 +2870,17 @@ small ships because of the narrower gaps. I think that would be a cool proof of 
   board, both ships on it, the shape of the sea deciding which goes where. Ties in with "Bigger ships ride out the
   winds" (a deep-water mechanic) and Daquan's flotilla (the underdogs against the giant ship).
 - A proof of concept: something to look at and steer, not a full game; on its own test page, like frigate-test.html.
+- **Flags in the coves, a role for each ship (15 Nov):** the user, looking at Primates Rule: "I really want to be
+  able to put this in [a] proverbial blockade." Little flags a sloop can take, set behind rocks in the small coves,
+  so getting to one means running the gauntlet past the big ships: "if you try sailing past a sloop, past a war
+  frigate in a sloop, you're probably going to get blown to pieces. But once you're past and you're in that little
+  cove, you've got the control point." Some worth more, "really valuable 3-point flags", well worth sitting on. Taking
+  one starts the fighting over it: the other side sends a sloop of its own, or a war frigate launches rowboats or
+  smaller ships to contest it. "What can the little ships do that the big ships can't?" The answer gives every ship a
+  role: "the points are captured by the sloops. The main areas are dominated by the big ships." The user knows it
+  bends Puzzle Pirates' blockades ("somewhat against the spirit of blockades, but ... we're experimenting with
+  concepts here"). (To shape with the user: how a flag's taken and held, what its points win, and whether a frigate
+  launching boats is a real mechanic or a cutscene.)
 - **Blasting through the gate (14 Nov):** the user, deciding the sloop race's imperial gate stays a choice
   (RACE.md §12): a gate everyone has to fight through, racing to shoot it down first, fits a bigger ship: "if
   you had a bigger ship with more guns ... you have to blast your way through the gate because that's the only
