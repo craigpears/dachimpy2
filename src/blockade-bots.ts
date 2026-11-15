@@ -37,11 +37,11 @@
    ship of her kind, so a bot weighs every buoy, cove and gate by how long it really is to get there, round the
    rocks and the walls (and a frigate's shut out of the heart till a gate's down because there's no way in for her,
    not by a rule). */
-import type { Pose } from './den-sail.js';
+import { SAIL, type Pose } from './den-sail.js';
 import type { Side } from './ship-handling.js';
 import { squares, drawnAt, alongs, shipPath } from './ship-handling.js';
 import { BLOCKADE, inHeart, phantom, type Blockade, type Ship, type Buoy } from './blockade.js';
-const RAM_STILL = BLOCKADE.LAUNCH.RAM.STILL;
+const RAM_STILL = BLOCKADE.LAUNCH.RAM.STILL, SAIL_SLOTS = SAIL.SLOTS;
 import { FREE, type Order } from './blockade-orders.js';
 
 export const BOTS = {
@@ -80,9 +80,10 @@ export const BOTS = {
   /** A brig's: how much more the open sea's buoys are worth to her, and the heart's (less: the frigates' to take); how
       near an enemy has to be for her to launch her craft (from her lagoon's corner to the heart's middle, and a little). */
   BRIG: { OUT: 1.5, HEART: 0.35, LAUNCH: 17, SAFE: 7 },
-  /** Seconds between a turtle's looks for whom to ram (quick: her prey moves), how far she looks, and how many squares
-      nearer a ship lying still looks to her (she can only ram one lying still). */
-  RAM: { THINK: 0.8, REACH: 24, STUCK: 1.6, STILL_FIRST: 8 },
+  /** Seconds between a turtle's looks for whom to ram (quick: her prey moves), how far she looks, how many squares
+      nearer a ship lying still looks to her (she can only ram one lying still), a frigate (her worth; a brig half), and
+      the one she's after already. */
+  RAM: { THINK: 0.8, REACH: 24, STUCK: 1.6, STILL_FIRST: 8, WORTH: 12, KEEP: 4 },
   /** How near (squares, middle to middle) an enemy she's fighting has to be for her to swing her broadside round onto her. */
   SWING: 5,
   /** A skirmishing sloop's seconds running off after each broadside (hit and run). */
@@ -210,11 +211,13 @@ export class Bot {
     // (a sloop dips, ducks and dodges: out of a frigate's broadside before it bears, firing as she goes)
     if (s.kind === 'sloop' && !s.craft && this.dodge(b, s)) { this.shoot(b, s); return; }
     // (a turtle: no guns, only her prey, looked for often)
+    // (her prey looked for every RAM.THINK; steered at every frame, a move put in the moment she's free for one: looking
+    // only every RAM.THINK, she idled between moves, 0.8 squares a second for all her quick handling, and her 30 seconds
+    // ran out short of her frigate, 15 Nov)
     if (s.craft?.kind === 'ram') {
-      if ((this.t -= dt) > 0) return;
-      this.t = BOTS.RAM.THINK;
-      const goal = this.prey(b, s);
-      if (goal) { this.goal = goal; this.charge(b, s, goal.at); }
+      // (at once when she's launched, not after the bots' usual few seconds' start)
+      if (!this.goal || (this.t -= dt) <= 0) { this.t = BOTS.RAM.THINK; const goal = this.prey(b, s); this.goal = goal; }
+      if (this.goal?.kind === 'ram') this.charge(b, s, this.goal.at);
       return;
     }
     // (a brig: her craft launched whenever an enemy's near)
@@ -572,7 +575,12 @@ export class Bot {
     // (a brawl's ships left to it, as every bot leaves them)
     // (a ship lying still first, a few squares' worth: she can only ram one that's still, so a frigate camped on a buoy
     // is hers before a sloop darting about nearer)
-    const lies = (o: Ship) => far(o.helm.pose.c, o.helm.pose.r) - ((b.still.get(o.id) ?? 0) >= RAM_STILL ? BOTS.RAM.STILL_FIRST : 0);
+    // (and worth: a frigate's worth sinking far more than a sloop, a brig between, as a captain weighs it; and the one
+    // she's after already, so she doesn't change her mind every look. Since no sloop hides, sloops lying on the
+    // lagoons' buoys drew the turtles off the frigates they were launched at: 15 Nov, 3 or 4 rams on frigates a game)
+    const was = this.goal?.kind === 'ram' ? this.goal.on : -1;
+    const lies = (o: Ship) => far(o.helm.pose.c, o.helm.pose.r) - ((b.still.get(o.id) ?? 0) >= RAM_STILL ? BOTS.RAM.STILL_FIRST : 0)
+      - (o.kind === 'frigate' ? BOTS.RAM.WORTH : o.kind === 'brig' ? BOTS.RAM.WORTH / 2 : 0) - (o.id === was ? BOTS.RAM.KEEP : 0);
     const foes = b.ships.filter((o) => o.team !== s.team && !o.craft && o.away <= 0 && !this.spare.has(o.id) && far(o.helm.pose.c, o.helm.pose.r) <= BOTS.RAM.REACH)
       .sort((a, z) => lies(a) - lies(z));
     for (const o of foes) {
@@ -598,9 +606,15 @@ export class Bot {
     if (now < this.near - 0.5) { this.near = now; this.since = b.clock; }
     if (b.clock - this.since > BOTS.RAM.STUCK) { this.near = now; this.since = b.clock; this.steer(b, s); return; }
     if (s.helm.pin || s.helm.slot >= 0 || s.helm.mine.length) return;
-    const moves = (['F', 'L', 'R'] as const).filter((m) => s.sea.clear(p, m)).map((m) => ({ m, d: far(shipPath(s.h, p, m).to) - (m === 'F' ? 0.01 : 0) }));
-    moves.sort((a, z) => a.d - z.d);
-    if (moves.length) s.helm.put(moves[0].m);
+    // (a whole turn's worth at once, each the move ending nearest her prey from where the last leaves her: one at a time,
+    // every move was a turn of its own and its breather after, a second and a half a square, 15 Nov)
+    let q = p;
+    for (let k = 0; k < SAIL_SLOTS && far(q) > 1.5; k++) {
+      const moves = (['F', 'L', 'R'] as const).filter((m) => s.sea.clear(q, m)).map((m) => ({ m, to: shipPath(s.h, q, m).to })).map((x) => ({ ...x, d: far(x.to) - (x.m === 'F' ? 0.01 : 0) }));
+      moves.sort((a, z) => a.d - z.d);
+      if (!moves.length || !s.helm.put(moves[0].m)) break;
+      q = moves[0].to;
+    }
   }
   /** A turtle's nearest yet to her prey (charge). */
   private near = Infinity;

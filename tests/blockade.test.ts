@@ -772,3 +772,27 @@ describe('nobody off in a corner (15 Nov: "three sloops, two of which are repair
     expect(bot.goal?.kind === 'fight' && bot.goal.on === sl.id).toBe(false);
   });
 });
+
+describe('turtles get to their frigates (15 Nov: 3 or 4 rams on frigates a game after the bigger board, "Yes, dig in")', () => {
+  it('a turtle goes for a frigate lying still before a sloop lying still nearer her: the frigate\'s worth more', () => {
+    const b = new Blockade(), br = brig(b), f = frigate(b, 'crimson'), sl = sloop(b, 'crimson');
+    clearAway(b, [br, f, sl]);
+    br.helm.moor({ c: 14, r: 12, d: 1 }); f.helm.moor({ c: 26, r: 12, d: 0 }); sl.helm.moor({ c: 19, r: 12, d: 0 }); b.notice();
+    expect(b.launch(br.id)).toBeTruthy();
+    const turtle = b.ships.find((s) => s.craft?.kind === 'ram' && s.team === 'gold' && s.away <= 0)!;
+    const bot = new Bot(turtle.id, dice(9));
+    b.still.set(f.id, 5); b.still.set(sl.id, 5);
+    bot.tick(b, 0.1);
+    expect(bot.goal?.kind === 'ram' && bot.goal.on).toBe(f.id);
+  });
+  it('one launched at a frigate lying still sixteen squares off on open water rams her inside her time', () => {
+    const b = new Blockade(), br = brig(b), f = frigate(b, 'crimson');
+    clearAway(b, [br, f]);
+    br.helm.moor({ c: 8, r: 6, d: 1 }); f.helm.moor({ c: 25, r: 6, d: 0 }); b.notice();
+    const [id] = b.launch(br.id), bot = new Bot(id, dice(3));
+    let at = -1;
+    for (let t = 0; t < B.LAUNCH.LIFE.ram && at < 0; t += 0.1) { bot.tick(b, 0.1); const ev = b.tick(0.1); b.still.set(f.id, 9); if (ev.rams.some((r) => r.ram === id)) at = t; }
+    expect(at).toBeGreaterThan(0);
+    expect(at).toBeLessThan(B.LAUNCH.LIFE.ram * 0.75);
+  });
+});

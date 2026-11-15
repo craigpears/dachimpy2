@@ -94,7 +94,8 @@ export const BLOCKADE = {
     LAUNCH: {
         EVERY: 30,
         CRAFT: { ghost: ['Wisp', 'Shade'], ram: ['Snapper', 'Old Shell', 'Barnacle'] },
-        LIFE: { ghost: 40, ram: 30 },
+        // (a turtle as long as a phantom since the bigger board, 15 Nov: thirty seconds ran out short of her frigate)
+        LIFE: { ghost: 40, ram: 40 },
         // (a turtle rams again and again, every COOL seconds, for as long as she's out: the user, 15 Nov, rock, paper,
         // scissors: "War brigs, can they be good at beating war frigates with how they deploy the turtles?"; "if you go for
         // too many frigs ... the other team having Atlantean war frigs. They'll just send in the turtles and crush your war

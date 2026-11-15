@@ -368,6 +368,14 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     this pass): the frigates fight each other far more now (up to 345 s a game) and a frigate on the move can't be
     rammed. To look into next.
 
+- **Turtles get to their frigates again** (15 Nov, after the bigger board: 3 or 4 rams on frigates a game, was 36 to
+  60; "Yes, dig in"): watched, a turtle that reached her frigate found her lying still 32 times in 35, but few got
+  there: with no sloop hiding any more, sloops lying on the lagoons' buoys drew them off (as much time after sloops as
+  after frigates), and each lost seconds at launch. Now a turtle weighs her prey by its worth too (a frigate 12
+  squares nearer than it is, a brig 6, `RAM.WORTH`) and keeps to the one she's after (`RAM.KEEP`); she looks at once
+  when launched; she puts in a whole turn's moves at a time; a turtle lasts 40 seconds (was 30, a phantom's). Three
+  games after: rams on frigates 12, 25, 41.
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of
