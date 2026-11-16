@@ -101,6 +101,11 @@ Distilling, the puzzle Helium teaches, has one too, [DISTILLING.md](DISTILLING.m
 and targets, researched 12 Nov): read it before working on Distilling, and keep it current.
 The tabletop blockade (16 Nov), a faithful Puzzle Pirates blockade kept wholly apart from the den's 3D one, has
 [TABLETOP-BLOCKADE.md](TABLETOP-BLOCKADE.md): its real rules, and the user's notes on teaching blockade nav; read it before working on it.
+Its rules `src/cade.ts` (the cade, the players' word, so its files never meet the 3D blockade's: the board and its
+tiles, every ship by YPPedia's table `KINDS`, a slot resolved by YPPedia's claim rules `resolveSlot`, influence and
+points `influence`, crews and tokens, a round played `Cade`), its 26 real boards `src/cade-boards.ts` (from the user's
+own BlockadeSim, `cadeBoard`); tests `tests/cade.test.ts` (the BlockadeSim's own unit tests ported, then YPPedia's)
+and `tests/cade-boards.test.ts`.
 The sloop race has a design document of its own, [RACE.md](RACE.md) (the user, 11 Nov: "all these kind of
 thoughts, design and balance decisions should all be in some kind of game design document specific to these
 races"): read it before working on the race, and keep it up to date with every design or balance decision and

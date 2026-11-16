@@ -18,6 +18,12 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 ## Design rules from playtests
 
+- **The simulation underneath, the drawing on top (16 Nov).** The user, starting the tabletop blockade: "all the
+  simulation should happen underneath, and any 3D-ish stuff or rendering stuff happens on top ... the core
+  simulation should be very logic based, very testable." Every game, puzzle and place: its rules a pure TypeScript
+  module in `src/` with tests, knowing nothing of how it's drawn; the 3D, the flat pages, the bots and the lessons
+  all on top of it, through what it returns, never reaching into it. Distilling (`src/distilling.ts` under its board,
+  its bots and Helium's lesson) and the tabletop blockade (`src/cade.ts`) are the pattern.
 - **It's a game, not a tutorial.** Short, quick-fire, with a journey and a daily puzzle.
 - **Words over percentages.** Don't fill the screen with numbers. Grades, meters and rarity
   words are fine. When rarity is shown, also say how often a piece turns up as "about 1 in X"

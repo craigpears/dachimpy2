@@ -262,3 +262,31 @@ Blockade nav challenges:
 
 - 16 Nov: started; the card, this document, the user's notes. The real rules researched into §1, from YPPedia and
   the old cade sim's server. Next: agree the first cut with the user, then its rules module and tests.
+- 16 Nov: **the rules built**, `src/cade.ts`, pure and tested; nothing drawn yet. The user: "use its unit tests as a
+  baseline, definitely port it", and "all the simulation should happen underneath, and any 3D-ish stuff or rendering
+  stuff happens on top" (RULES.md). Named the cade throughout (`cade.ts`, `cade-boards.ts`, this document's name too),
+  so nothing meets the 3D blockade's `blockade.ts` and BLOCKADE.md. What's in:
+  - The board as text, one character a square; the user's sim's boards read as they were (`boardFromCraig`, `raw`
+    for its unit tests' squares) or turned a quarter clockwise into the game's shape, whirlpools still clockwise.
+    All 26 of its real boards in `src/cade-boards.ts`.
+  - Every ship by YPPedia's tables. A slot: moves, winds and whirlpools, guns, sinks, every ship at once by
+    YPPedia's claim rules (worked out together, not ship by ship as the sim did, so no ship's order changes
+    anything). Influence and points each turn. Crews making moves and loading guns at the sim's rates, mending
+    damage; tokens lost after five turns; a plan checked against her ship and her tokens; a round of turns, the
+    sunk back fresh on their edge.
+  - Tests: the sim's 24 collision and gun scenes, each on its Lilac board in its order, all passing as they did;
+    then YPPedia's cases.
+- Decided in the code where the sources are silent, each **to confirm with the user**:
+  - A ship shoved by a bump needs a clear square, one nobody's in or sailing into; if it isn't, nothing's shoved and
+    a bigger bumping ship stops too, but the ship sailing into that square carries on (the sim stopped her as well).
+    Two ships bumping one: nobody's shoved.
+  - A ship sailing into a square whose ship was stopped there (by a rock, say) stops, and it's a ram, both hurt (the
+    sim stopped her without damage).
+  - Head on, two ships of different sizes take two rams' damage each (YPPedia, Ramming); every other ram, one.
+  - Rocks never sink a ship, only take her to full (the sim); a ship's damage sinks her at the end of the slot, so
+    a ship sunk in a slot still fires in it.
+  - Back into the safe zone by her own move: she's stopped, no damage (the game takes her off the board). Shoved or
+    blown in, she goes (the sim's wind test).
+  - Ships in the safe zone don't fire; ships in it take no damage, rams included.
+  - No bilge yet, no maneuvers, no budget, no crew needed for influence.
+- Next: a flat test page to play it on (its look on top of `Cade`), then bots, then the island.
