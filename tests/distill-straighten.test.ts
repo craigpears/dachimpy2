@@ -2,7 +2,7 @@
    junk stuck in them, the bot still quick sorting. src/distill-read.ts's `straighten`, src/distill-patterns.ts's bank
    (`bankOf`, `bankJunk`), src/distill-bots.ts's moves for it. */
 import { describe, expect, it } from 'vitest';
-import { advise, pulledDown } from '../src/distill-bots';
+import { P, advise, decisionTime, pulledDown } from '../src/distill-bots';
 import { readBoard, strayDrags } from '../src/distill-read';
 import { bankJunk, bankOf, solidColumns } from '../src/distill-patterns';
 import { BROWN, Distilling } from '../src/distilling';
@@ -98,5 +98,23 @@ describe('the user\'s pictures (16 Nov), copied exactly', () => {
     const [{ a }] = playOn(PIC6, 1);
     expect(a.drags).toEqual([{ x: 4, y: 1, ways: [1, 2, 1, 1] }]);
     expect(pulledDown(B(PIC6), a.drags)).toBeGreaterThanOrEqual(2);
+  });
+});
+
+// (picture 5, after the bot had pulled its fifth junk column apart to start the chain: four finished junk columns on the
+// right, column 6 emptied back to white: K*KKwwbKK wwbbwKwb wwwbwwwww wwwwwwww wwwww*www wwwwwwww KKKKKbbb* KKKKbbbb
+// KbKKbbbbb KbKbbbbK)
+describe(`"If you've got an easily completed junk column, you don't do that ever. You keep going until you are at risk of burning a column" (16 Nov, picture 5)`, () => {
+  // The whites banked, a fifth junk column half built in column 6 with the junk left to finish it, four finished.
+  const cols = B('KKKKwwwww wwwwwwww wwwwwwwww wwwwwwww wwwwwwwww wwwwKKKK KKKKKbbb* KKKKbbbb KbKKbbbbb KbKbbbbK');
+  it(`with four finished junk columns waiting and junk to finish the fifth, it isn't time to start the chain`, () => {
+    expect(decisionTime(cols, 4)).toBe(false);
+    const was = P.KEEP_FILLING;
+    try { P.KEEP_FILLING = false; expect(decisionTime(cols, 4)).toBe(true); } finally { P.KEEP_FILLING = was; }   // (the old rule: banked, so start)
+  });
+  it('"down to, like, even just say 1 or 2 junk columns": then it is', () => {
+    // (the same, two of the finished junk columns gone to the furnace)
+    const two = B('KKKKwwwww wwwwwwww wwwwwwwww wwwwwwww wwwwwwwww wwwwwwww wwwwwwwww wwwwKKKK KbKKbbbbb KbKbbbbK');
+    expect(decisionTime(two, 4)).toBe(true);
   });
 });

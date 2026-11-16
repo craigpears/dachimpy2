@@ -178,6 +178,10 @@ export const P = {
   STRAIGHTEN: true,
   /** With nothing else worth doing in Stage I, a hoist rather than a wait (16 Nov). */
   HOIST_IDLE: true,
+  /** The whites banked, the chain started only once the finished junk columns waiting for the furnace are down to
+      SWITCH_QUEUE (or the junk can't finish the next one): 16 Nov, `decisionTime`. */
+  KEEP_FILLING: true,
+  SWITCH_QUEUE: 2,
   STRAY: true,
   SLACK: 1,
   /** ms left on the furnace below which only what saves its column counts. */
@@ -1158,14 +1162,20 @@ export function counts(cols: Board): { whites: number; junk: number } {
   for (const c of cols) for (const p of c) { if (p === WHITE) whites++; else if (isJunk(p)) junk++; }
   return { whites, junk };
 }
-/** Whether it's decision time in Stage I: the whites banked make `bank` columns, or too little junk is
-    left to finish the junk column being built. */
+/** Whether it's decision time in Stage I: too little junk is left to finish the junk column being built; or the
+    whites banked make `bank` columns and (P.KEEP_FILLING) the finished junk columns waiting for the furnace are down to
+    P.SWITCH_QUEUE (the user, 16 Nov, seeing a chain started with a fifth junk column half built and pulled apart: "if
+    you've got an easily completed junk column, you don't do that ever. You keep going until you are at risk of burning
+    a column ... There is no reason to switch until, you know, really you're down to, like, even just say 1 or 2 junk
+    columns, even if you're being incredibly anxious"). */
 export function decisionTime(cols: Board, bank: number): boolean {
   const t = junkTarget(cols), { whites } = counts(cols);
   let junkLeft = 0;
   for (let x = 0; x < t; x++) for (const p of cols[x]) if (isJunk(p)) junkLeft++;
   const need = cols[t].filter((p) => p === WHITE).length;
-  return whites >= bank * PER_COLUMN || junkLeft < need;
+  if (junkLeft < need) return true;
+  if (whites < bank * PER_COLUMN) return false;
+  return !P.KEEP_FILLING || doneFromRight(cols) <= P.SWITCH_QUEUE;
 }
 /** A column at least half white: it goes up as it is, never burns (the bank, after a chain). */
 export const mostlyWhite = (col: readonly number[]): boolean => col.filter((p) => p === WHITE).length * 2 >= col.length;

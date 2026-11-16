@@ -2401,9 +2401,14 @@ white columns now, so we're switching from quick dragging to ... straightening u
   minute, effort 16.1 a column gone; as built, chain mean 4.3, best 6, no white burned 6 of 6, 15.6 points a minute,
   effort 17.3. Fewer whites burned and more points, chains a little shorter: too few boards to tell; a 20-board run
   each way (about 25 minutes) is the user's call.
-- **Left**: two blacks boxed in by a spice at the bank's bottom stay (no single drag reaches them); and the user's next
-  note, a chain started while a fifth junk column was easy to finish ("There is no reason to switch until ... you're
-  down to, like, even just say 1 or 2 junk columns"), is the stage switch's (`decisionTime`, the let go), not this.
+- **When the chain starts** (16 Nov, picture 5: a chain started with a fifth junk column half built, pulled apart
+  back to white; "you keep going until you are at risk of burning a column ... down to, like, even just say 1 or 2
+  junk columns"): `decisionTime` (src/distill-bots.ts), with the whites banked, waits till the finished junk columns
+  waiting for the furnace are down to `P.SWITCH_QUEUE` (2), or the junk can't finish the next one (`P.KEEP_FILLING`;
+  its columns-burned measure, the user's other idea, not needed for it). 6 boards: CC^3 chain mean 3.3 to 4.0, best 5
+  to 6, 11.6 to 12.7 points a minute, effort 12.0 to 12.5 a column; CC^8 unchanged (it never came up in those six).
+- **Left**: two blacks boxed in by a spice at the bank's bottom stay (no single drag reaches them); picture 4's brown
+  carried right across clear columns in the chain wants the chain's planner two moves ahead.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
