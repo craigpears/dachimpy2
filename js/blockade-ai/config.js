@@ -52,6 +52,15 @@ export const BOTS = {
     RUN: 4,
     /** Seconds a ship's lain still before a phantom sloop counts her fair game, whatever she is. */
     CAMPED: 6,
+    /** How near (squares, middle to middle) an enemy has to be for a frigate on the points to turn her broadside onto her. */
+    BEAR: 8,
+    /** A stuck frigate's end raked (one half in a gateway): how near she has to be, how few seconds away her end, and her
+        worth. */
+    RAKE: { NEAR: 14, SECS: 15, W: 10 },
+    /** How near (squares) an enemy sloop has to be to a friend's brig at anchor for a sloop to go and drive her off. */
+    GUARD: 7,
+    /** Seconds a big ship goes getting no nearer the buoy she's making for before she gives it up a while (as long again). */
+    STALL: 15,
 };
 export const same = (a, z) => !!a && !!z && JSON.stringify(a) === JSON.stringify(z);
 /** The same thing to do, if not exactly (a raid on the same ship, wherever she's got to; hiding in the same cove). */

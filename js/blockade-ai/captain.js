@@ -42,7 +42,7 @@ export class Captain {
             return;
         this.shoot(b, s);
         // (idle short of where she's going, she looks again sooner: but never more than twice a second)
-        const idle = s.helm.slot < 0 && !s.helm.pin && (this.goal?.kind === 'buoy' ? !b.reaches(s, BLOCKADE.BUOYS[this.goal.i]) : this.goal?.kind === 'raid' || this.goal?.kind === 'fight');
+        const idle = s.helm.slot < 0 && !s.helm.pin && (this.goal?.kind === 'buoy' ? !this.settled(b, s, BLOCKADE.BUOYS[this.goal.i]) : this.goal?.kind === 'raid' || this.goal?.kind === 'fight');
         if ((this.t -= dt) > 0 && !(idle && this.t < BOTS.THINK - 0.5))
             return;
         this.t = BOTS.THINK * (0.8 + 0.4 * this.random());
@@ -58,7 +58,9 @@ export class Captain {
     /** In a skirmish, her kind's own way with it before she simply fights the nearest enemy. */
     skirmishFirst(_b, _s, _t) { return null; }
     /** What her kind does before weighing the buoys (a brig to her launching spot, a raider's raid): none, she weighs them. */
-    first(_b, _s) { return null; }
+    first(_b, _s, _mates) { return null; }
+    /** She's where she means to be for a buoy: her influence on it (a frigate, and not lying in a gateway). */
+    settled(b, s, buoy) { return b.reaches(s, buoy); }
     /** A buoy's worth to her kind. */
     buoyWorth(b, s, buoy, i, mates) { return worth(b, s, buoy, i, mates); }
     /** What else her kind weighs beside the buoys (a frigate's gates, guns and fights; a brig's fights). */
@@ -98,8 +100,30 @@ export class Captain {
             this.since = b.clock;
         this.goal = g.goal;
         this.score = g.score;
+        this.stalled(b, s);
         this.steer(b, s);
     }
+    /** A big ship making for a buoy and getting no nearer it (round and round outside a full gateway, her way round the
+        ships in it plotted afresh each look): after STALL seconds she gives it up a while (`noway`, STALL more) and her
+        next look sends her elsewhere (16 Nov: "They've been sat out there forever ... they seem to have gotten stuck"). */
+    stalled(b, s) {
+        const g = this.goal;
+        if (s.kind === 'sloop' || g?.kind !== 'buoy' || this.settled(b, s, BLOCKADE.BUOYS[g.i])) {
+            this.making = null;
+            return;
+        }
+        const at = BLOCKADE.BUOYS[g.i].at, k = `${at[0]},${at[1]}`, eta = s.sea.eta(s.helm.pose, ...at);
+        if (!this.making || this.making.k !== k || eta < this.making.best - 0.5) {
+            this.making = { k, best: Math.min(eta, this.making?.k === k ? this.making.best : Infinity), since: b.clock };
+            return;
+        }
+        if (b.clock - this.making.since > BOTS.STALL) {
+            this.noway.set(k, b.clock + BOTS.STALL);
+            this.making = null;
+        }
+    }
+    /** The buoy she's making for, the nearest she's been to it (seconds off), and since when. */
+    making = null;
     /** What's best for her just now. */
     pick(b, s, mates) {
         // A brawl: she fights her foe off her side, broadside to broadside, keeping her spot while she's getting there or
@@ -142,7 +166,7 @@ export class Captain {
                 return { goal, score: 50 };
         }
         // Her kind's own first call (a brig to her launching spot, a phantom's dart, a raider's raid).
-        const own = this.first(b, s);
+        const own = this.first(b, s, mates);
         if (own)
             return own;
         const best = [], p = s.helm.pose, post = this.order.kind;
@@ -157,6 +181,10 @@ export class Captain {
                 best.push({ goal: { kind: 'buoy', i }, score: w / 10 });
                 return;
             }
+            // (a big ship that found no way there a moment ago (a gateway full) looks elsewhere a while rather than waiting
+            // outside: 16 Nov, "They've been sat out there forever ... they seem to have gotten stuck")
+            if (s.kind !== 'sloop' && this.blocked(b, buoy.at))
+                return;
             // (how long it really is, off her chart: none, and there's no way (a frigate and the heart, its gates shut))
             const eta = s.sea.eta(p, ...buoy.at);
             if (eta < Infinity)
@@ -426,7 +454,7 @@ export class Captain {
             if (s.helm.sailTo(g.pose))
                 return;
         }
-        if (g.kind === 'buoy' && b.reaches(s, BLOCKADE.BUOYS[g.i])) {
+        if (g.kind === 'buoy' && this.settled(b, s, BLOCKADE.BUOYS[g.i])) {
             if (s.helm.pin)
                 s.helm.stop();
             return;

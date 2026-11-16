@@ -57,7 +57,7 @@ export class BrigAI extends Captain {
         }
         return null;
     }
-    first(b, s) {
+    first(b, s, mates) {
         // A brig, with an enemy frigate in the heart: to her lagoon's corner nearest it, beside the gap the wind runs through
         // into the fort, out of any frigate's reach (a frigate scrapes her bottom in the shoals), to launch her craft in at
         // her along the wind (the user, 15 Nov: "war frigs camping in the middle, war brigs sending turtles in through the

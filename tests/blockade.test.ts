@@ -934,3 +934,35 @@ describe('a turtle rams a frigate where her broadsides don\'t bear (16 Nov: "tur
     expect(at[0]).toBeLessThanOrEqual(Math.max(...cols));
   });
 });
+
+describe('tactics (16 Nov: "I don\'t see very many tactical moves being made")', () => {
+  it('a frigate on the prize, an enemy frigate dead ahead in reach, turns her broadside onto her and keeps the prize ("at the very least, you would swing ... and start putting broadside")', () => {
+    const b = new Blockade(), f = frigate(b), e = frigate(b, 'crimson');
+    clearAway(b, [f, e]);
+    f.helm.moor({ c: 26, r: 23, d: 1 }); e.helm.moor({ c: 32, r: 23, d: 1 }); b.notice();
+    const bot = botFor(b, f.id, dice(1));
+    for (let i = 0; i < 60; i++) { bot.tick(b, 0.1); b.tick(0.1); }
+    expect(f.helm.pose.d % 2).toBe(0);
+    expect(b.reaches(f, B.BUOYS[0])).toBe(true);
+  });
+  it('a sloop goes after an enemy sloop at her side\'s brig lying at anchor ("I would expect them to be protecting the war brig")', () => {
+    const b = new Blockade(), br = brig(b), sl = b.ships.find((s) => s.kind === 'sloop' && s.team === 'gold' && !s.craft && !s.raider)!, foe = sloop(b, 'crimson');
+    clearAway(b, [br, sl, foe]);
+    br.helm.moor({ c: 14, r: 24, d: 1 }); b.notice(); b.launch(br.id);
+    for (const c of b.craftOf(br)) c.helm.moor({ c: 46, r: 30 + (c.id % 3), d: 1 });
+    foe.helm.moor({ c: 12, r: 21, d: 1 }); sl.helm.moor({ c: 18, r: 30, d: 1 }); b.notice();
+    const bot = botFor(b, sl.id, dice(2));
+    bot.tick(b, 5);
+    expect(bot.goal).toMatchObject({ kind: 'fight', on: foe.id });
+  });
+  it('no frigate lies long in a gateway, half in and half out ("they seem now to just want to sit in the gate"; "that ship is a sitting duck")', () => {
+    const b = new Blockade(), bots = new Bots(b, [], dice(1)), gate: Record<string, number> = {};
+    const inGate = (s: (typeof b.ships)[number]) => squares(s.h, s.helm.pose).some(([c, r]) => B.GATES.some((g) => r >= g.r0 && r <= g.r1 && Math.abs(c - g.way) <= 2));
+    for (let t = 0; t < B.ROUND && !b.over; t += 0.1) {
+      bots.tick(b, 0.1); b.tick(0.1); b.fired.length = 0; b.launches.length = 0;
+      for (const s of b.ships) if (s.kind === 'frigate' && s.away <= 0 && inGate(s)) gate[s.name] = (gate[s.name] ?? 0) + 0.1;
+    }
+    // (passing through takes a few seconds; lying there, minutes: 206 s for one, 16 Nov, before)
+    for (const secs of Object.values(gate)) expect(secs).toBeLessThan(40);
+  }, 120000);
+});

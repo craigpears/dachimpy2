@@ -440,6 +440,27 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
     (were 0 to 20), 4 and 5 of the enemy's guns wrecked by frigates;
   - a turtle's ram drawn as a lunge two thirds of the way at what she strikes, head down, and back (`butt`, 0.45 s).
 
+- **The bots a plug-in AI for each kind; tactics; the anchor shown** (16 Nov: "almost like an AI folder ... so that each of
+  these can be have like a separate plugin AI"; "I don't see very many tactical moves being made"; "they seem now to just
+  want to sit in the gate"; "They've been sat out there forever ... they seem to have gotten stuck"; "at the very least,
+  you would swing ... and start putting broadside"; "I would expect them to be protecting the war brig"; "it needs to be
+  some more visible animation when a [war brig] is anchored"):
+  - `src/blockade-ai/`: `captain.ts` what every kind does alike, a kind's AI a Captain with its own `act`, `first`,
+    `buoyWorth`, `options`, `settled`; `index.ts`'s `AIS` which sails which, any swapped through `Bots`' `ais`, any class
+    that's a `ShipAI`; three seeded games played out exactly as before the split;
+  - a frigate's never `settled` on a buoy while she's in a gateway (`inGateway`): she goes on in, straight on when she's
+    caught there; a big ship getting no nearer her buoy for `STALL` 15 s gives it up as long again;
+  - a frigate on the points, idle, an enemy within `BEAR` 8 and no side bearing, turns by a move keeping the buoy in reach;
+  - an enemy frigate half in a gateway, within `RAKE` reach and 15 s, raked from her end by a frigate; one in a gateway or
+    lying still a while sniped at by one sloop; an enemy sloop within `GUARD` 7 of a brig at anchor fought by one sloop;
+  - after, two games: frigates' time in a gateway 0 to 63 s (one lay there 206 s before);
+  - the heart is cramped for a frigate: from most poses near the prize she can't turn at all, rocks or no ships, so the
+    turning happens where there's room;
+  - a brig's anchor (js/den/anchor.js): falls from her bow with a splash, her cable taut into spreading rings and a tag
+    while she lies there, wound in as she weighs it;
+  - the design page draws a brig's turtles boxing a frigate in at her ends (16 Nov: "we need ... something like that for
+    the design page, where it shows a war brig with its turtles surrounding a war frigate").
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of

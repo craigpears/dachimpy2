@@ -68,7 +68,7 @@ export abstract class Captain implements ShipAI {
     if (this.act(b, s, dt)) return;
     this.shoot(b, s);
     // (idle short of where she's going, she looks again sooner: but never more than twice a second)
-    const idle = s.helm.slot < 0 && !s.helm.pin && (this.goal?.kind === 'buoy' ? !b.reaches(s, BLOCKADE.BUOYS[this.goal.i]) : this.goal?.kind === 'raid' || this.goal?.kind === 'fight');
+    const idle = s.helm.slot < 0 && !s.helm.pin && (this.goal?.kind === 'buoy' ? !this.settled(b, s, BLOCKADE.BUOYS[this.goal.i]) : this.goal?.kind === 'raid' || this.goal?.kind === 'fight');
     if ((this.t -= dt) > 0 && !(idle && this.t < BOTS.THINK - 0.5)) return;
     this.t = BOTS.THINK * (0.8 + 0.4 * this.random());
     this.think(b, s, mates);
@@ -84,7 +84,9 @@ export abstract class Captain implements ShipAI {
   /** In a skirmish, her kind's own way with it before she simply fights the nearest enemy. */
   protected skirmishFirst(_b: Blockade, _s: Ship, _t: Ship | undefined): { goal: Goal; score: number } | null { return null; }
   /** What her kind does before weighing the buoys (a brig to her launching spot, a raider's raid): none, she weighs them. */
-  protected first(_b: Blockade, _s: Ship): { goal: Goal; score: number } | null { return null; }
+  protected first(_b: Blockade, _s: Ship, _mates: Goal[]): { goal: Goal; score: number } | null { return null; }
+  /** She's where she means to be for a buoy: her influence on it (a frigate, and not lying in a gateway). */
+  protected settled(b: Blockade, s: Ship, buoy: Buoy): boolean { return b.reaches(s, buoy); }
   /** A buoy's worth to her kind. */
   protected buoyWorth(b: Blockade, s: Ship, buoy: Buoy, i: number, mates: Goal[]): number { return worth(b, s, buoy, i, mates); }
   /** What else her kind weighs beside the buoys (a frigate's gates, guns and fights; a brig's fights). */
@@ -121,8 +123,21 @@ export abstract class Captain implements ShipAI {
     // (when her hiding or her raid started: not again just because the ship she's raiding has moved)
     if (!sameAim(this.goal, g.goal) && g.goal.kind === 'raid') this.since = b.clock;
     this.goal = g.goal; this.score = g.score;
+    this.stalled(b, s);
     this.steer(b, s);
   }
+  /** A big ship making for a buoy and getting no nearer it (round and round outside a full gateway, her way round the
+      ships in it plotted afresh each look): after STALL seconds she gives it up a while (`noway`, STALL more) and her
+      next look sends her elsewhere (16 Nov: "They've been sat out there forever ... they seem to have gotten stuck"). */
+  private stalled(b: Blockade, s: Ship) {
+    const g = this.goal;
+    if (s.kind === 'sloop' || g?.kind !== 'buoy' || this.settled(b, s, BLOCKADE.BUOYS[g.i])) { this.making = null; return; }
+    const at = BLOCKADE.BUOYS[g.i].at, k = `${at[0]},${at[1]}`, eta = s.sea.eta(s.helm.pose, ...at);
+    if (!this.making || this.making.k !== k || eta < this.making.best - 0.5) { this.making = { k, best: Math.min(eta, this.making?.k === k ? this.making.best : Infinity), since: b.clock }; return; }
+    if (b.clock - this.making.since > BOTS.STALL) { this.noway.set(k, b.clock + BOTS.STALL); this.making = null; }
+  }
+  /** The buoy she's making for, the nearest she's been to it (seconds off), and since when. */
+  private making: { k: string; best: number; since: number } | null = null;
 
   /** What's best for her just now. */
   protected pick(b: Blockade, s: Ship, mates: Goal[]): { goal: Goal; score: number } | null {
@@ -164,7 +179,7 @@ export abstract class Captain implements ShipAI {
       if (goal) return { goal, score: 50 };
     }
     // Her kind's own first call (a brig to her launching spot, a phantom's dart, a raider's raid).
-    const own = this.first(b, s);
+    const own = this.first(b, s, mates);
     if (own) return own;
     const best: { goal: Goal; score: number }[] = [], p = s.helm.pose, post = this.order.kind;
     // (a strategy's weights: the heart's buoys, the gates, the fights)
@@ -174,6 +189,9 @@ export abstract class Captain implements ShipAI {
       if ((post === 'middle' && !heart) || (post === 'outside' && heart)) return;
       const w = this.buoyWorth(b, s, buoy, i, mates) * (heart ? heartW : 1);
       if (b.reaches(s, buoy)) { best.push({ goal: { kind: 'buoy', i }, score: w / 10 }); return; }
+      // (a big ship that found no way there a moment ago (a gateway full) looks elsewhere a while rather than waiting
+      // outside: 16 Nov, "They've been sat out there forever ... they seem to have gotten stuck")
+      if (s.kind !== 'sloop' && this.blocked(b, buoy.at)) return;
       // (how long it really is, off her chart: none, and there's no way (a frigate and the heart, its gates shut))
       const eta = s.sea.eta(p, ...buoy.at);
       if (eta < Infinity) best.push({ goal: { kind: 'buoy', i }, score: w / (4 + eta) });
@@ -398,7 +416,7 @@ export abstract class Captain implements ShipAI {
       if (p.c === g.pose.c && p.r === g.pose.r && p.d === g.pose.d) return;
       if (s.helm.sailTo(g.pose)) return;
     }
-    if (g.kind === 'buoy' && b.reaches(s, BLOCKADE.BUOYS[g.i])) { if (s.helm.pin) s.helm.stop(); return; }
+    if (g.kind === 'buoy' && this.settled(b, s, BLOCKADE.BUOYS[g.i])) { if (s.helm.pin) s.helm.stop(); return; }
     const at = g.kind === 'buoy' ? BLOCKADE.BUOYS[g.i].at : g.at;
     // (lying off her, or where she's camped, or by the friend she's escorting: firing as they bear)
     if ((g.kind === 'fight' || g.kind === 'camp' || g.kind === 'escort') && squares(s.h, s.helm.pose).some(([c, r]) => c === at[0] && r === at[1])) { if (s.helm.pin && g.kind !== 'fight') s.helm.stop(); return; }

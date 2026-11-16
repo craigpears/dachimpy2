@@ -1,3 +1,5 @@
+import { BLOCKADE } from '../blockade.js';
+import { squares } from '../ship-handling.js';
 /** A buoy's worth to one side: whose it is just now, and whether a friend's already on it (each kind's AI weighs it
     further, `buoyWorth`). */
 export function worth(b, s, buoy, i, mates) {
@@ -6,6 +8,11 @@ export function worth(b, s, buoy, i, mates) {
     if (mates.some((g) => g.kind === 'buoy' && g.i === i))
         w *= 0.35;
     return w;
+}
+/** Any of her squares in one of the fort's gateways (its rows, about its way): lying there she's half in and half out,
+    a sitting duck from astern. */
+export function inGateway(s) {
+    return squares(s.h, s.helm.pose).some(([c, r]) => BLOCKADE.GATES.some((g) => r >= g.r0 && r <= g.r1 && Math.abs(c - g.way) <= 2));
 }
 /** The towers standing, gate by gate: what the berths by them hang on. */
 export const towersSig = (b) => b.gates.map((x) => x.towers.map((t) => t.hp > 0 ? 1 : 0).join('')).join('/');

@@ -4034,6 +4034,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   brig launches at them in reach as at a frigate ("they're the standoff hunters").
 - **A turtle rams where the broadsides don't bear**: off a ship's nearer end, bow or stern, her side only if there's
   nothing else ("let's stay at the front of the war frig and start ramming it from the front").
+- **Never half in a gateway.** A frigate holding a buoy from a gateway goes on in; caught there, she moves straight on
+  when she can; an enemy frigate stuck there is raked from astern by a frigate and sniped at by a sloop ("that ship is a
+  sitting duck for somebody else to just swing around behind it").
+- **Manoeuvre on the points.** A frigate on the points with an enemy in reach and no broadside bearing turns to bring hers
+  round, by a move that keeps the buoy in her reach ("you can still maneuver within the middle, fight things, but just
+  ... while you've got the points within your influence").
+- **Guard the brig.** A sloop drives off an enemy sloop at her side's brig lying at anchor, one sloop to each ("I would
+  expect them to be protecting the war brig and getting behind [her]").
 - **No fights off the points.** A frigate fires on whoever comes into her broadside, but never picks a fight with an
   enemy who isn't on or contesting a buoy ("You don't hang around off points getting into fights").
 - **A sheltered spot has a way in from outside.** The heart's corners are out of any frigate's reach inside the fort,

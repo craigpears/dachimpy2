@@ -8,7 +8,7 @@ import { BOTS, type Goal } from './config.js';
 import { Captain } from './captain.js';
 
 export class GhostAI extends Captain {
-  protected first(b: Blockade, s: Ship): { goal: Goal; score: number } | null {
+  protected first(b: Blockade, s: Ship, mates: Goal[]): { goal: Goal; score: number } | null {
     // A phantom sloop darts at anything slow or sat still (a frigate first, a brig, a ship that's lain still a while),
     // again and again: she's only a while, nothing can hurt her, no hiding.
     {

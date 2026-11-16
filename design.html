@@ -50,6 +50,11 @@
   .rps-why { fill: var(--ink); font: 600 15px 'Alegreya Sans', sans-serif; }
   .rps-why:not([text-anchor]) { text-anchor: middle; }
   .rps figcaption { text-align: center; font-size: 14px; color: var(--ink); opacity: .75; margin-top: 4px; }
+  .box-reach { fill: var(--ink); opacity: .1; }
+  .box-reach-edge { fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 6 5; opacity: .45; }
+  .box-hull { fill: var(--paper2); stroke: var(--ink-head); stroke-width: 3; }
+  .box-turtle { fill: var(--good); stroke: var(--ink-head); stroke-width: 2; }
+  .box-line { fill: none; stroke: var(--ink); stroke-width: 2; stroke-dasharray: 3 6; opacity: .6; }
   article p { margin: 0 2px 6px; }
   article ul { margin: 2px 0 8px; padding-left: 22px; }
   article li { margin: 0 0 5px; }
@@ -359,9 +364,31 @@
       </svg>
       <figcaption id="rps-cap">Each arrow points from the ship that wins to the one she beats.</figcaption>
     </figure>
+    <figure class="rps" aria-labelledby="box-cap">
+      <svg viewBox="0 0 640 330" role="img" aria-labelledby="box-cap">
+        <!-- her broadsides' reach, out from either side of her -->
+        <rect class="box-reach" x="250" y="40" width="200" height="88"/><rect class="box-reach-edge" x="250" y="40" width="200" height="88"/>
+        <rect class="box-reach" x="250" y="202" width="200" height="88"/><rect class="box-reach-edge" x="250" y="202" width="200" height="88"/>
+        <text x="350" y="90" class="rps-why">her broadside</text><text x="350" y="252" class="rps-why">her broadside</text>
+        <!-- the frigate, heading right, bow at 460 -->
+        <path class="box-hull" d="M250 138 L430 138 Q468 138 474 165 Q468 192 430 192 L250 192 Q240 165 250 138 Z"/>
+        <text x="352" y="161" class="rps-name">War frigate</text><text x="352" y="182" class="rps-sub">can't turn, can't bear</text>
+        <!-- turtles off her bow and stern, ramming -->
+        <g><ellipse class="box-turtle" cx="512" cy="150" rx="17" ry="14"/><circle class="box-turtle" cx="493" cy="150" r="6"/></g>
+        <g><ellipse class="box-turtle" cx="512" cy="186" rx="17" ry="14"/><circle class="box-turtle" cx="493" cy="186" r="6"/></g>
+        <g><ellipse class="box-turtle" cx="208" cy="165" rx="17" ry="14"/><circle class="box-turtle" cx="227" cy="165" r="6"/></g>
+        <text x="540" y="134" class="rps-why" text-anchor="start"><tspan x="534">ramming her bow</tspan></text>
+        <text x="196" y="138" class="rps-why" text-anchor="end"><tspan x="190">and her stern</tspan></text>
+        <!-- her brig, at anchor off in her lagoon -->
+        <path class="box-line" d="M96 268 Q150 230 196 180"/>
+        <g class="rps-node"><circle cx="70" cy="282" r="40"/><text x="70" y="280" class="rps-name" style="font-size:17px">War brig</text><text x="70" y="298" class="rps-sub" style="font-size:12px">at anchor</text></g>
+      </svg>
+      <figcaption id="box-cap">A war brig's turtles box a frigate in: off her bow and stern none of her broadsides bear, and with turtles at both ends she can't turn to bring them round.</figcaption>
+    </figure>
     <h3>Rock, paper, scissors</h3>
     <p><b>A war frigate sinks a sloop</b> by sheer weight of shot. <b>A war brig beats a war frigate</b> with her craft: a turtle rams her bow or her stern, where her broadsides don't bear, but only a ship lying still, so a frigate camped on a buoy is just what it wants. <b>A sloop beats a war brig</b>: a brig anchors to launch and stays anchored while her craft are out, a sitting duck for a sloop quick enough to reach her.</p>
     <p><b>How it plays out.</b> The frigates shoot a gate down and camp the heart. The brigs answer from the lagoons, anchoring in the corner nearest the fort and sending turtles in along the wind. The sloops dart into the lagoons to catch the brigs at anchor. Between times a brig sends her craft at the enemy's gate guns, her standoff work: a turtle's ram cracks a gun's stone, a phantom's broadside too, and the guns fire back, so it takes a launch or two and a turtle or two. Nothing tells a ship what she mustn't attack: the triangle comes out of how each kind handles.</p>
+    <p><b>Small tactics.</b> A frigate never lies half in a gateway, her stern out, a sitting duck; one that does gets raked from astern by an enemy frigate, and sniped at by a sloop. On the points with an enemy in reach and no broadside bearing, a frigate turns to bring hers round, so long as the buoy stays in her reach. A sloop drives off an enemy sloop that's after her side's brig at anchor.</p>
     <div class="shots">
       <a href="changelog/brigs-send-turtles.jpg"><img src="changelog/brigs-send-turtles.jpg" width="800" height="643" loading="lazy" alt="Tidecaller, an Atlantean war brig, at anchor in the west lagoon among the coral, the wind's arrows running from her lagoon into the fort's heart, where two of her sea turtles swim at a crimson war frigate lying in the heart"></a>
     </div>

@@ -2,7 +2,8 @@
    gate's towers and guns, worked out once for each kind of ship. TypeScript, compiled to js/blockade-ai/places.js. */
 import type { Pose } from '../den-sail.js';
 import type { Side } from '../ship-handling.js';
-import { type Blockade, type Ship, type Buoy } from '../blockade.js';
+import { BLOCKADE, type Blockade, type Ship, type Buoy } from '../blockade.js';
+import { squares } from '../ship-handling.js';
 import { type Goal } from './config.js';
 
 /** A buoy's worth to one side: whose it is just now, and whether a friend's already on it (each kind's AI weighs it
@@ -14,6 +15,12 @@ export function worth(b: Blockade, s: Ship, buoy: Buoy, i: number, mates: Goal[]
   return w;
 }
 
+
+/** Any of her squares in one of the fort's gateways (its rows, about its way): lying there she's half in and half out,
+    a sitting duck from astern. */
+export function inGateway(s: Ship): boolean {
+  return squares(s.h, s.helm.pose).some(([c, r]) => BLOCKADE.GATES.some((g) => r >= g.r0 && r <= g.r1 && Math.abs(c - g.way) <= 2));
+}
 
 export type Berth = { g: number; tower: number; pose: Pose; side: Side };
 export type GunBerth = { g: number; i: number; pose: Pose; side: Side };

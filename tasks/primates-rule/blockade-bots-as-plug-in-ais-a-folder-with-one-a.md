@@ -1,6 +1,6 @@
 ---
 title: Blockade bots as plug-in AIs: a folder with one AI per kind (war frigate, war brig, sloop, turtle, ghost sloop)
-status: asked
+status: playtest
 asked: 16 Nov
 updated: 16 Nov
 ---
@@ -10,3 +10,5 @@ updated: 16 Nov
 ## Log
 
 - 16 Nov: added.
+- 16 Nov: for you to playtest
+- 16 Nov: Built (f8959b9): src/blockade-ai/, captain.ts shared, frigate/brig/sloop/turtle/ghost.ts each kind's own, index.ts AIS registry, any kind swapped through Bots' ais. Three seeded games identical before and after; 392 tests pass.

@@ -10,11 +10,16 @@
      front of the ship where they're safe, then they can't return a broadside"; "you never hide").
    - With an enemy brig close by she goes for her end, too quick for a brig (rock, paper, scissors: "sloops beat war
      brigs ... because of how they can just dart around and evade them").
-   - She leaves a frigate be unless she's sniping at her end: a broadside duel with one is a sloop sunk. */
+   - She leaves a frigate be unless she's sniping at her end: a broadside duel with one is a sloop sunk.
+   - An enemy sloop at her side's brig lying at anchor, she drives off, one sloop to each (16 Nov: "I would expect them
+     to be protecting the war brig and getting behind [her]").
+   - An enemy frigate stuck, half in a gateway or lying still a while, one sloop goes and snipes at her end (16 Nov:
+     "that ship is a sitting duck"). */
 import { SAIL } from '../den-sail.js';
 import type { Side } from '../ship-handling.js';
 import { BLOCKADE, inHeart, type Blockade, type Ship, type Buoy } from '../blockade.js';
 import { BOTS, type Goal } from './config.js';
+import { inGateway } from './places.js';
 import { Captain } from './captain.js';
 
 export class SloopAI extends Captain {
@@ -38,9 +43,29 @@ export class SloopAI extends Captain {
     if (t.kind !== 'sloop') { const r = this.raid(b, s, Infinity, false, t.id); if (r) return { goal: r, score: 9 }; }
     return null;
   }
-  protected first(b: Blockade, s: Ship): { goal: Goal; score: number } | null {
+  protected first(b: Blockade, s: Ship, mates: Goal[]): { goal: Goal; score: number } | null {
     // A raider darts out at an enemy brig or frigate's end, and back to the buoys a while; never hiding (the user, 15 Nov:
     // "you never hide. There's just no tactical reason or benefit to. You lose coverage of points").
+    const free = this.order.kind === 'free', taken = (id: number) => mates.some((x) => (x.kind === 'raid' || x.kind === 'fight') && x.on === id);
+    const far = (o: Ship) => Math.hypot(o.helm.pose.c - s.helm.pose.c, o.helm.pose.r - s.helm.pose.r);
+    // (her side's brig at anchor with an enemy sloop at her: off her side to fight her, broadside to broadside)
+    if (free) for (const br of b.ships) {
+      if (br.team !== s.team || !b.anchored(br)) continue;
+      const foe = b.ships.filter((o) => o.team !== s.team && o.kind === 'sloop' && !o.craft && o.away <= 0 && !o.dmg.out && !b.safe(o)
+        && Math.hypot(o.helm.pose.c - br.helm.pose.c, o.helm.pose.r - br.helm.pose.r) <= BOTS.GUARD && far(o) <= BOTS.REACH).sort((a, z) => far(a) - far(z))[0];
+      if (!foe || (taken(foe.id) && !(this.goal?.kind === 'fight' && this.goal.on === foe.id))) continue;
+      if (this.nerve(s, foe) < BOTS.NERVE.GO) continue;
+      const at = this.raid(b, s, Infinity, true, foe.id);
+      if (at) return { goal: { kind: 'fight', on: foe.id, at: at.at }, score: 8 };
+    }
+    // (an enemy frigate stuck: her end sniped at, where she can't answer)
+    if (free) for (const o of b.ships) {
+      if (o.team === s.team || o.kind !== 'frigate' || o.away > 0 || o.dmg.out || b.safe(o) || far(o) > BOTS.REACH) continue;
+      if (!(inGateway(o) || (b.still.get(o.id) ?? 0) >= BOTS.CAMPED) || (taken(o.id) && !(this.goal?.kind === 'raid' && this.goal.on === o.id))) continue;
+      if (this.nerve(s, o) < BOTS.NERVE.GO) continue;
+      const raid = this.raid(b, s, BOTS.REACH, false, o.id);
+      if (raid) return { goal: raid, score: 8 };
+    }
     const raider = this.order.kind === 'snipe' || (this.order.kind === 'free' && s.raider);
     if (raider) {
       const raiding = this.goal?.kind === 'raid', done = raiding && (this.firedAt > this.since || b.clock - this.since > BOTS.RAID);

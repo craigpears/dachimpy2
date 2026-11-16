@@ -7,7 +7,7 @@ import { BLOCKADE, inHeart } from '../blockade.js';
 import { BOTS } from './config.js';
 import { Captain } from './captain.js';
 export class GhostAI extends Captain {
-    first(b, s) {
+    first(b, s, mates) {
         // A phantom sloop darts at anything slow or sat still (a frigate first, a brig, a ship that's lain still a while),
         // again and again: she's only a while, nothing can hurt her, no hiding.
         {
