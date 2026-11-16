@@ -1182,6 +1182,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   then the junk columns sorted, blacks over browns; then wait for the burn. "Step one, get it over. Step two, kind of
   resort and straighten the line." In the chain, the junk in the column going up and the two after it is taken right
   the same way.
+- **Distilling: keep building junk columns till they run short (16 Nov, after a chain started with a fifth junk column
+  half built and pulled apart).** "If you've got an easily completed junk column, you don't do that ever. You keep
+  going until you are at risk of burning a column ... There is no reason to switch until, you know, really you're down
+  to, like, even just say 1 or 2 junk columns, even if you're being incredibly anxious." Whites banked for the target,
+  the chain starts only when the finished junk columns waiting for the furnace are down to two, or the junk can't
+  finish the next one.
 - **Distilling: going backwards to pull trapped browns down (16 Nov, notes/distilling/52-a-black-back-along-the-top.webp).**
   Browns stuck at the top of the white columns sink only through a black: a black taken back left along the top, up
   through each brown, pulls them down ("going backwards across the screen ... is good if it pulls down trapped pieces
