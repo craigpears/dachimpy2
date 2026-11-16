@@ -1,6 +1,6 @@
 ---
 title: Blockade: ships go for a frigate's exposed end, e.g. her stern stuck out of a gate, a sitting duck
-status: asked
+status: playtest
 asked: 16 Nov
 updated: 16 Nov
 ---
@@ -10,3 +10,5 @@ updated: 16 Nov
 ## Log
 
 - 16 Nov: added.
+- 16 Nov: for you to playtest
+- 16 Nov: Built (pushed): an enemy frigate half in a gateway is raked from her end by a frigate (within 15 s), and sniped at by one sloop (also one lying still a while).
