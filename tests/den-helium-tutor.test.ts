@@ -3,9 +3,9 @@
    a real board), quick to get into and every trick with its point (15 Nov): src/den-helium-tutor.ts,
    src/lines/helium.ts's TUTOR and POINT. */
 import { describe, expect, it } from 'vitest';
-import { DISTILL_TUTORIAL, learnBeats, noteFor, ringedAfter, tutorBeats } from '../src/den-helium-tutor';
+import { DISTILL_TUTORIAL, learnBeats, nextOf, noteFor, ringedAfter, tutorBeats } from '../src/den-helium-tutor';
 import { distillShows } from '../src/distill-tutorial';
-import { SECTIONS, TutorialMenu, openingOf, partsOf, problems } from '../src/tutorial';
+import { SECTIONS, TutorialMenu, findPart, lessonOrder, openingOf, partsOf, problems } from '../src/tutorial';
 import { Distilling, WHITE, BROWN, BLACK } from '../src/distilling';
 import { POINT, TUTOR } from '../src/lines/helium';
 import { afterOpening, follow, lessonBeats, lessonPlan } from '../src/den-helium';
@@ -62,13 +62,41 @@ describe('"I don\'t want to have to ask 3 questions to see something happen" (15
     expect(beats[moves].step).toBe(1);   // (step one's drags: the first thing after the opening)
     expect(beats.slice(0, moves).every((b) => b.act.kind === 'none' || b.act.kind === 'burn' || b.act.kind === 'bang')).toBe(true);
   });
-  it('says once, beside it, that T shows something else; the button and the bar say T too', () => {
-    expect(beats.filter((b) => b.says === TUTOR.else)).toHaveLength(1);
-    expect(TUTOR.else).toMatch(/\bT\b/);
-    expect(TUTOR.button).toMatch(/\(T\)$/);
-    expect(TUTOR.barKey).toMatch(/^T: /);
-    // (and only once step one's moved the board)
-    expect(beats.findIndex((b) => b.says === TUTOR.else)).toBeGreaterThan(beats.findIndex((b) => b.act.kind === 'drags'));
+  it('says once, handing you the still, that T is their lessons: nothing over the lesson itself', () => {
+    expect(beats.filter((b) => /\bT\b/.test(b.says))).toHaveLength(1);
+    expect(beats.at(-1)!.says).toMatch(/T for lessons/);
+    expect(TUTOR.button).toBe('Lessons (T)');
+    expect(TUTOR.next).toMatch(/\(N\)$/);
+  });
+});
+
+describe('"I like that it\'s a single level ... click, click, and in. It felt a lot smoother" (15 Nov, of the wolf den\'s lessons)', () => {
+  const T = DISTILL_TUTORIAL;
+  it('a choice opens one list in a game\'s order, no tabs; a part picked from it plays', () => {
+    expect(T.flat).toBe(true);
+    for (const [key, choice] of [['1', 'basics'], ['2', 'early'], ['3', 'higher']] as const) {
+      const m = new TutorialMenu(T);
+      m.key(key);
+      const v = m.view();
+      expect(v.choice).toBe(choice);
+      expect(v.tabs).toEqual([]);
+      expect(v.items.map((i) => i.id)).toEqual(lessonOrder(T, T.choices.find((c) => c.id === choice)!).map((p) => p.id));
+      const r = m.key('1');
+      expect(r.handled && r.event?.kind).toBe('play');
+    }
+    // (the early game in a game's order: the fire's side, its scenarios and moves, then the fill's, then the blocks')
+    const early = lessonOrder(T, T.choices.find((c) => c.id === 'early')!).map((p) => p.id);
+    expect(early.slice(0, 2)).toEqual(['fire', 'stepOne']);
+    expect(early.indexOf('fill')).toBeGreaterThan(early.indexOf('sweep'));
+    expect(early.indexOf('block')).toBeGreaterThan(early.indexOf('turnOver'));
+  });
+  it('Next plays the one after it in that list, its hand-over saying N; at the list\'s end, nothing', () => {
+    const early = lessonOrder(T, T.choices.find((c) => c.id === 'early')!);
+    expect(nextOf('stepOne')?.id).toBe(early[2].id);   // (after their own lesson, the next on the fire's side)
+    for (let i = 0; i + 1 < early.length; i++) expect(nextOf(early[i].id, 'early')?.id).toBe(early[i + 1].id);
+    expect(nextOf(early.at(-1)!.id, 'early')).toBeNull();
+    expect(learnBeats('sweep').at(-1)!.says).toBe(TUTOR.afterNext);
+    expect(tutorBeats(findPart(T, 'hook')!.part).at(-1)!.says).toBe(TUTOR.after);   // (the last of a higher CC's)
   });
 });
 

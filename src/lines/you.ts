@@ -62,7 +62,7 @@ export const AFTER_KIKKIT = 'Is there anyone out here who could explain that wit
 
 /** Sailing up near Primates Rule at anchor, still to come (src/den-moored.ts; the user, 11 Nov: "make
     it clear, it's kind of a to-do item"): at the foot of the screen. */
-export const BY_PRIMATES_RULE = 'Primates Rule, at anchor. She\'s not ready yet: coming soon!';
+export const BY_PRIMATES_RULE = 'Primates Rule, at anchor, ready for a test run: Space leaves your sloop here and takes you aboard her';
 
 /** Coming into the smugglers' cove round the back of Port Decorum, the first time on a voyage (the user,
     11 Nov: "Penguin Island, and then you have the ... Smuggler's Beach there"): at the foot of the screen.
@@ -116,7 +116,7 @@ export const CHARACTER: Character = {
       each: { vow: 'Sweet and blissful: your vow, after your sweetheart\'s', buried: 'Showered in gifts: from under the pile, up to your neck in presents', ido: '"I do"' },
     },
     { when: 'Off Kikkit\'s island, once she\'s told her whole ramble the first time (wondering aloud)', says: [AFTER_KIKKIT] },
-    { when: 'Sailing up near Primates Rule at anchor, still to come (once a voyage)', says: [BY_PRIMATES_RULE] },
+    { when: 'Sailing up near Primates Rule at anchor, ready for a test run (once a voyage)', says: [BY_PRIMATES_RULE] },
     { when: 'Off Helium\'s island the first time, their still just gone bang: between their lines', says: AT_HELIUMS },
     { when: 'Coming into the smugglers\' cove behind Port Decorum, by way of the whirlpools (once a voyage)', says: [AT_SMUGGLERS_BEACH] },
     { when: 'Robert the kangaroo bear roobing your ear, in Roobear\'s ROOm', says: IN_ROOBEARS_HOUSE, each: { rubbed: 'The first time, at her door', again: 'Asking him for another' } },

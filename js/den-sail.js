@@ -1276,6 +1276,12 @@ export class Sea {
         return c >= 0 && c < this.cols && r >= 0 && r < this.rows && !this.rocks.has(k) && !this.whirls.has(k) && !this.pockets.has(k);
     }
     isRock(c, r) { return this.rocks.has(key(c, r)); }
+    /** She's there: at this pose, that square is hers (the sloop's one square; a bigger ship's, any square
+        under her: src/ship-handling.ts, ShipSea). */
+    there(p, c, r) { return p.c === c && p.r === r; }
+    /** The poses (numbered as the pilot's) that count as there, if it isn't just being on the square (a
+        bigger ship's: ShipSea). */
+    goalPoses(_c, _r) { return null; }
     /** Sailing a move from here: where she ends up, and whether she hit something. Forward into a
         rock (or off the edge of the board) and she stays put; a turn that's blocked turns her where
         she is. */
@@ -1319,9 +1325,9 @@ export class Sea {
     plot(from, c, r, via = null, oars = false) {
         if (!this.open(c, r))
             return null;
-        if (!via && from.c === c && from.r === r)
+        if (!via && this.there(from, c, r))
             return [];
-        const memo = `${from.c},${from.r},${from.d}|${c},${r}|${via ?? ''}|${this.rocks.size},${this.wind.size},${this.laid}|${this.rig(oars)}`;
+        const memo = `${from.c},${from.r},${from.d}|${c},${r}|${via ?? ''}|${this.rocks.size},${this.wind.size},${this.laid}|${this.rig(oars)}|${this.plotKey()}`;
         if (!this.plots.has(memo)) {
             if (this.plots.size > 256)
                 this.plots.clear();
@@ -1331,6 +1337,8 @@ export class Sea {
         const got = this.plots.get(memo);
         return got ? [...got] : null;
     }
+    /** Anything else a plot hangs on that a sea of another kind keeps (a ship's exact berth: src/ship-handling.ts). */
+    plotKey() { return ''; }
     /** Up off the sea: on the canal's water above it, or in a lock. */
     canal(c, r) { return this.level(c, r) > 0 || this.isLock(c, r); }
     /** What the moves hang on besides the rocks: under sail, the way the wind blows and how hard; at
@@ -1391,7 +1399,7 @@ export class Sea {
                 const [x, y] = k.split(',').map(Number);
                 board[x * this.rows + y] = 1;
             }
-        const goalSq = c * this.rows + r;
+        const goalSq = c * this.rows + r, goals = boards ? null : this.goalPoses(c, r);
         // A little heap of [seconds, order found, pose], quickest (then first found) on top.
         const heap = [];
         const less = (x, y) => x[0] < y[0] - 1e-9 || (Math.abs(x[0] - y[0]) <= 1e-9 && x[1] < y[1]);
@@ -1441,7 +1449,7 @@ export class Sea {
                 const e = out[m], cost = t + e.secs + COST_TURN + e.ride * COST_PUSH;
                 if ((e.up && !up) || e.whirl)
                     continue; // (and never onto a whirlpool: it'd have her)
-                if (e.end >> 2 === goalSq && (!boards || (!e.bump && board[e.on]))) {
+                if ((goals ? goals.has(e.end) : e.end >> 2 === goalSq) && (!boards || (!e.bump && board[e.on]))) {
                     if (!goal || cost < goal.cost - 1e-9)
                         goal = { cost, at, m };
                     continue;
@@ -1695,7 +1703,7 @@ export class Helm {
         const v = got.via, riding = this.cur ? [this.cur.to, ...this.rides] : [];
         if (v && this.rides.length + (this.cur?.m === 'W' ? 1 : 0) > 0 && riding.some((p) => p.c === v[0] && p.r === v[1]))
             this.via = null;
-        if (!this.via && got.at[0] === this.after().c && got.at[1] === this.after().r && !this.mine.length)
+        if (!this.via && this.sea.there(this.after(), ...got.at) && !this.mine.length)
             this.pin = null;
         else
             this.woken();
@@ -1857,7 +1865,7 @@ export class Helm {
                     cur.done = true;
                     this.pose = { ...cur.to };
                     // (Riding a lane to the pin, she's there when the wind drops her off on it.)
-                    if (this.pin && this.pose.c === this.pin[0] && this.pose.r === this.pin[1] && (!this.via || cur.m === 'W')) {
+                    if (this.pin && this.sea.there(this.pose, ...this.pin) && (!this.via || cur.m === 'W')) {
                         this.pin = null;
                         this.via = null;
                         out.push({ kind: 'arrive', at: { ...this.pose } });

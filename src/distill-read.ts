@@ -35,6 +35,13 @@
    - sortTail (the block phase, the V's tail unsorted): its browns sunk through its blacks, so the next sweep runs
      through (P9);
    - blocks (healthy, the block phase): the junk moved in long drags, as the planner already plays it;
+   - straighten (in place of quick sorting, outside the block phase: STRAIGHTEN_SOLID almost-white columns banked or more
+     with junk in them: the
+     mode switch, the user, 16 Nov, on seed 2's CC^8: "at a certain point it needs to switch modes ... we've got a lot of
+     white columns now, so we're switching from quick dragging to ... straightening up the board, getting black to the
+     top, brown to the bottom on the junk columns"): the junk got out of the white columns first, in one sweep if it
+     takes one ("black down, up through the browns ... step one, get it over. Step two, kind of resort and straighten
+     the line"), then the junk columns sorted blacks over browns;
    - quickSort (healthy): quick, simple sorting moves, blacks down and browns up (P3: "just going down, browns up,
      they're just really fast, quick, simple, easy moves").
    In the chain: 'chain', its own danger read by the planner (`chainZones`).
@@ -47,12 +54,12 @@ import { copyBoard, halfOf, isJunk, junkTarget, playDrags } from './distill-rout
 import type { Drag } from './distill-routines.js';
 import { RISK, burnsIn, flagged, freeCost, whiteRisk, whiteRisks } from './distill-risk.js';
 import type { WhiteRisk } from './distill-risk.js';
-import { PATTERN, ladderBad, patternsOf, stranded, tailOrder } from './distill-patterns.js';
+import { PATTERN, bankEnd, bankJunk, bankOf, bankSettled, bankStrays, junkDisorder, ladderBad, patternsOf, solidColumns, stranded, tailOrder } from './distill-patterns.js';
 import { blockPhase } from './distill-score.js';
 import type { At, Patterns } from './distill-patterns.js';
 
 export type BoardState = 'healthy' | 'atRisk' | 'cracked' | 'damageControl';
-export type Tactic = 'quickSort' | 'blocks' | 'fillGaps' | 'freeTrapped' | 'sortLadder' | 'sortTail' | 'fixCracks' | 'chain';
+export type Tactic = 'quickSort' | 'blocks' | 'fillGaps' | 'freeTrapped' | 'sortLadder' | 'sortTail' | 'fixCracks' | 'straighten' | 'chain';
 
 /** Each state and tactic in plain words, for the pages and Helium. */
 export const STATES: Readonly<Record<BoardState, { label: string; about: string }>> = {
@@ -69,6 +76,7 @@ export const TACTICS: Readonly<Record<Tactic, { label: string; about: string }>>
   sortLadder: { label: 'Sort the right-hand pair', about: 'the two right-hand columns sorted, blacks over browns, before one burns' },
   sortTail: { label: 'Sort the tail', about: 'the browns at the V\'s bottom sunk through the blacks, so the next sweep runs through' },
   fixCracks: { label: 'Fix the cracks', about: 'the stranded junk freed, the browns in the middle kept as tools' },
+  straighten: { label: 'Straighten up', about: 'white columns banked: the junk got out of them, then blacks to the top and browns to the bottom of the junk columns' },
   chain: { label: 'The chain', about: 'whites right, Crystal Clears one after another' },
 };
 
@@ -103,6 +111,10 @@ export const READ = {
   FILL_NEAR: 4,
   /** The ladder's and the tail's drags, at most. */
   SORT_SWAPS: 8,
+  /** Straightening up: solid white columns banked before it starts, and a stray's drag out of them at most, in swaps
+      (down through the whites and up through the browns in one sweep). */
+  STRAIGHTEN_SOLID: 3,
+  STRAY_SWAPS: 12,
   /** A trapped white's surroundings, for how freely they move (low): this many columns either side. */
   FLOW_NEAR: 2,
 };
@@ -125,6 +137,8 @@ export interface Reading {
   timeLeft: number;
   /** Whites in the furnace's column past saving, given up as junk (`doomed`). */
   given?: WhiteRisk[];
+  /** Straightening up: the bank's columns (`bankOf`), the junk to get out of them. */
+  bank?: number[];
 }
 
 const place = (p: At) => `column ${p.x + 1}, row ${p.y + 1}`;
@@ -154,7 +168,7 @@ export function doomed(cols: Board, w: WhiteRisk, timeLeft: number): boolean {
 const list = (ps: readonly At[], most = 3) => ps.slice(0, most).map(place).join(', ') + (ps.length > most ? ` and ${ps.length - most} more` : '');
 
 /** Read a board (see the header). */
-export function readBoard(cols: Board, o: { stage: 'junk' | 'chain'; timeLeft: number }): Reading {
+export function readBoard(cols: Board, o: { stage: 'junk' | 'chain'; timeLeft: number; straighten?: boolean }): Reading {
   const { stage } = o, timeLeft = Number.isFinite(o.timeLeft) ? o.timeLeft : RISK.BURN_MS;
   const patterns = patternsOf(cols, timeLeft), building = junkTarget(cols);
   const base = { stage, patterns, building, timeLeft };
@@ -208,6 +222,11 @@ export function readBoard(cols: Board, o: { stage: 'junk' | 'chain'; timeLeft: n
   if (urgent.length) return read('atRisk', 'fillGaps', `${urgent.length === 1 ? 'a white' : `${urgent.length} whites`} by the fire with ${urgent.length === 1 ? 'its column' : 'their columns'} burning soon (${list(urgent)}): junk into their places, the quickest first`, urgent);
   if (trapped.length) return free(trapped);
   if (block && patterns.tail.unsorted.length) return read(state, 'sortTail', `the V's tail unsorted (${list(patterns.tail.unsorted)}): browns down through the blacks, so the next sweep runs through`, patterns.tail.unsorted);
+  // In place of quick sorting, with enough white columns banked and junk in them: straighten up (see the header).
+  const bank = bankOf(cols), strays = bankStrays(cols, bank);
+  if (o.straighten !== false && !block && strays.length && bank.length >= READ.STRAIGHTEN_SOLID && bankSettled(cols, bank)) {
+    return { ...read(state, 'straighten', `${solidColumns(cols, bank)} white columns banked: straighten up, the junk out of them (${list(strays)}), the junk columns sorted after`, strays), bank };
+  }
   if (block) return read(state, 'blocks', flags.length ? `the whites flagged (${list(flags)}) can wait: the junk moved in blocks` : 'nothing at risk, the whites mostly left: the junk moved in long drags, blocks at a time', []);
   return read(state, 'quickSort', flags.length ? `the whites flagged (${list(flags)}) can wait: quick, simple moves` : 'nothing at risk: quick, simple moves, blacks down and browns up', []);
 }
@@ -289,8 +308,20 @@ export function progress(r: Reading, cols: Board, after: Board, drags: readonly 
       const freed = r.patterns.stranded.length - stranded(after).length;
       return freed;
     }
+    case 'straighten': return straightened(r, cols, after);
     default: return 0;
   }
+}
+
+/** What a move gets done straightening up: the junk got out of the bank's columns (`bankJunk`, the bank's whites none
+    fewer) worth twice the junk columns' swaps of sorting it gains (`junkDisorder`); 0 if it puts junk into the bank or
+    takes a white out of it. */
+export function straightened(r: Reading, cols: Board, after: Board): number {
+  const xs = r.bank ?? bankOf(cols), whites = (b: Board) => xs.reduce((n, x) => n + b[x].filter((p) => p === WHITE).length, 0);
+  if (whites(after) < whites(cols)) return 0;
+  const out = bankJunk(cols, xs) - bankJunk(after, xs);
+  if (out < 0) return 0;
+  return out + (junkDisorder(cols, bankEnd(xs)) - junkDisorder(after, bankEnd(xs))) / 2;
 }
 
 // ---------------------------------------------------------------- moves the tactics look for themselves
@@ -313,6 +344,40 @@ function trace(cols: Board, x: number, y: number, most: number, ok: (to: [number
     }
   };
   dfs(x, y);
+  return out;
+}
+
+/** Straightening up's own drags (the user, 16 Nov): each piece of junk in the bank's columns taken out of them, as far
+    as READ.STRAY_SWAPS swaps (a black down through the whites and up through the browns in one sweep: "you just go
+    down, up, and kind of make that large sweeping motion"); a brown from beside the bank brought in under its blacks,
+    lifting them out; and in the junk columns, a brown sunk through blacks or a
+    black lifted through browns, READ.SORT_SWAPS at most, never into the bank. */
+export function straightenDrags(cols: Board, r: Reading): Drag[][] {
+  const xs = r.bank ?? [], edge = bankEnd(xs), inBank = (x: number) => xs.includes(x), out = strayDrags(cols, r.targets, edge);
+  // A brown from the junk beside the bank brought in under its stranded blacks, lifting each out as it passes (the
+  // user's arrow along the bottom, 16 Nov: "pull those browns down, push the blacks up").
+  if (r.targets.some((t) => cols[t.x][t.y] === BLACK)) for (let x = edge; x < Math.min(COLS - 1, edge + READ.FLOW_NEAR + 1); x++) cols[x].forEach((p, y) => {
+    if (p === BROWN) for (const d of trace(cols, x, y, READ.STRAY_SWAPS, () => true, (_b, at) => inBank(at[0]), 800)) out.push([d]);
+  });
+  for (let x = edge; x < COLS; x++) cols[x].forEach((p, y) => {
+    if (p !== BROWN && p !== BLACK) return;
+    const ok = (to: [number, number]) => !inBank(to[0]) && isJunk(cols[to[0]][to[1]]);
+    for (const d of trace(cols, x, y, READ.SORT_SWAPS, ok, () => true, 200)) out.push([d]);
+  });
+  return out;
+}
+
+/** Junk pieces `strays` taken out of the white columns, each let go in column `to` or further right, READ.STRAY_SWAPS
+    swaps at most: a black down through the whites and up through the browns, a brown up through the whites and down
+    through the blacks at the top ("that's why the blacks are there at the top. They are there to essentially rescue the
+    brown pieces", the user, 16 Nov). */
+export function strayDrags(cols: Board, strays: readonly At[], to: number): Drag[][] {
+  // (Short drags first, then longer: the search runs out before reaching a straight sweep otherwise.)
+  const out: Drag[][] = [], seen = new Set<string>();
+  for (const most of [6, 9, READ.STRAY_SWAPS]) for (const s of strays) for (const d of trace(cols, s.x, s.y, most, () => true, (_b, at) => at[0] >= to, 600)) {
+    const k = JSON.stringify(d);
+    if (!seen.has(k)) { seen.add(k); out.push([d]); }
+  }
   return out;
 }
 

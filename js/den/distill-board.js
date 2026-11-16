@@ -296,6 +296,12 @@ export function distillBoard(o = {}) {
   b.hold = (x, y) => { selected = grid[x]?.[y] ?? null; cursor = { col: x, row: y }; };
   b.letGo = () => { selected = null; };
   b.burn = () => handle(game.burnNow());
+  /** Driven from outside (a bot player, src/distill-bots.ts's BotPlayer, 16 Nov): the game's ticked there, never here,
+      and the board only shows what it did, its events (`show`) and its swaps (`showSwap`, already made in the game),
+      catching up after any lag. */
+  b.external = false;
+  b.show = (ev) => handle(ev);
+  b.showSwap = (x1, y1, x2, y2) => animateSwap(grid[x1][y1], grid[x2][y2]);
   /** Arrows over the pieces: a drag's route, the path its piece takes swap by swap (`{ x, y, ways }`, as the
       planner and the path search give them), drawn from the piece to where it's let go, not played. `o.color`
       ('plan', gold, the default; 'route', pale blue; or any CSS colour), `o.n` a number at its start (its turn
@@ -481,7 +487,7 @@ export function distillBoard(o = {}) {
     b.now += ms;
     clickBusy = Math.max(0, clickBusy - ms);
     // Paused, the furnace stands still, but swaps land, a burn goes and the board slides (for demos).
-    if (!over) handle(b.paused ? game.settle(ms) : game.tick(ms));
+    if (!over && !b.external) handle(b.paused ? game.settle(ms) : game.tick(ms));
     for (const s of [...grid.flat(), ...leaving]) step(s);
     heatShown += (game.heat() - heatShown) * Math.min(1, dt * 10);
     messages = messages.filter((m) => m.hold || b.now - m.t0 < FLOAT_MS);

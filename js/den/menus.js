@@ -39,6 +39,7 @@ import { spouse, spouseCheat } from './spouse.js';
 import { house, houseLeave, houseEnter } from './house.js';
 import { carpet } from './carpet.js';
 import { jazzmyCheat, jazzmyAboard } from './jazzmy-isle.js';
+import { run as frigateRun, primatesCheat } from './frigate-run.js';
 import { LODGINGS, houseById } from '../den-houses.js';
 import { newGame } from '../den.js';
 
@@ -750,6 +751,11 @@ function cheatCarpet() {
   cheatJazzmy();
   jazzmyAboard();
 }
+function cheatPrimates() {   // (Primates Rule's test run: frigate-run.js)
+  if (cine || frigateRun.on) return;
+  if (!sail.on) cheatSail();
+  primatesCheat();
+}
 function cheatLodgings() {
   if (cine || house.on) return;
   toLodgings();
@@ -784,6 +790,7 @@ const CHEAT_SECTIONS = [
     ['Rowing her', cheatRowing, 'rowing'],
     ["Dignity's scene", cheatDignity, 'dignity'],
     ["Umami's rescue", cheatUmami, 'umami'],
+    ["Primates Rule's test run", cheatPrimates, 'primates'],
   ]],
   ['The islands', [
     ['The Wedding Isle', cheatWedding, 'wedding'],

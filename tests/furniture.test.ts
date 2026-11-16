@@ -29,10 +29,10 @@ describe("the furniture, a piece a file, so anyone can add one (14 Nov: 'it's no
     expect(thin).toBe("export * from './furniture/index.js';");
   });
 
-  it('lists every piece there was, once, in the registry', () => {
+  it('lists every piece there was, once, in the registry (and any added since)', () => {
     const ids = furnitureIds();
     expect(new Set(ids).size).toBe(ids.length);
-    expect([...ids].sort()).toEqual([...BEFORE].sort());
+    expect(ids).toEqual(expect.arrayContaining(BEFORE));
   });
 
   it('has every piece file in the registry: imported, passed on and in FILES', () => {

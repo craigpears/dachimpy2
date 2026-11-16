@@ -56,7 +56,8 @@ import { PATH, freed, pairRescue, pathMoves, stuck } from './distill-path.js';
 import type { PathMove, Stuck } from './distill-path.js';
 import { phaseOf, weightIn } from './distill-phase.js';
 import type { Phase } from './distill-phase.js';
-import { TACTICS, hoistDrags, hoistOrder, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, sorts, tailDrags, tipDrags, toolBrowns } from './distill-read.js';
+import { TACTICS, hoistDrags, hoistOrder, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, sorts, straightenDrags, strayDrags, tailDrags, tipDrags, toolBrowns } from './distill-read.js';
+import { bankJunk, bankStrays } from './distill-patterns.js';
 import type { BoardState, Reading, Tactic } from './distill-read.js';
 import { joinPairs } from './distill-teach.js';
 import { channelReason, channelRuns } from './distill-channel.js';
@@ -100,6 +101,8 @@ export interface Style {
       furnace), and takes the endgame's gamble (cashes in a chain whose next column can't be filled in time). */
   early: boolean;
   gamble: boolean;
+  /** The Crystal Clear it plays to, where it has one (a level's; Helium's advice to a target). */
+  target?: number;
 }
 /** A bot (DISTILLING.md §4, the twelfth run): its target chain, the techniques that target needs, at the one
     pace every bot plays at. */
@@ -169,6 +172,10 @@ export const P = {
       move must get to be worth it, and the most for a ready column to burn at once rather than wait while
       it's done. */
   RATE_MIN: 0.15,
+  /** Straightening up once white columns are banked (16 Nov; src/distill-read.ts, `straighten`), and the chain's white
+      columns straightened up, their junk taken right in one drag (`strayDrags`). */
+  STRAIGHTEN: true,
+  STRAY: true,
   SLACK: 1,
   /** ms left on the furnace below which only what saves its column counts. */
   URGENT: 5000,
@@ -659,7 +666,7 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style, reading?: Reading)
   };
   // The board read, once (the user, 13 Nov, the thirty-third and thirty-fourth notes), and every drag let go where it
   // gets something done (src/distill-goals.ts).
-  const read = one && P.READ && !urgent ? (reading ?? readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft })) : null;
+  const read = one && P.READ && !urgent ? (reading ?? readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft, straighten: !!P.STRAIGHTEN })) : null;
   const aims: Aims = { ctx, reading: one ? (reading ?? read) : null };
   const goal: GoalCheck = (b, d, a) => ownGoal(b, d, a, aims) !== null;
   const consider = (found: Move | PathMove) => {
@@ -686,6 +693,19 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style, reading?: Reading)
       consider({ routine: 'rescue', drags: d, reason: `quick sorting: the ${p} at column ${d[0].x + 1}, row ${d[0].y + 1} ${p === 'black' ? 'down' : 'up'} into a white's place by the fire, and it's out left` });
     }
   }
+  // The chain's own white columns straightened up (the user, 16 Nov, seed 2's CC^8 frozen with browns in them: "just
+  // worry about getting them to the right hand side as far as you can ... the blacks are there at the top ... to
+  // essentially rescue the brown pieces"): the junk in the column being filled and the two after it, each taken right
+  // in one drag, up through the whites and down through the blacks (or down and up), let go among the columns to burn.
+  // (Long sweeps for the longer chains only: at a Crystal Clear 1 or 2, plain moves; 13 Nov, "it's giving you really
+  // complicated moves".)
+  if (!one && P.STRAY && style.path && (style.target ?? DEFAULT_TARGET) >= 3 && ctx.fill >= 0 && ctx.burnFrom < COLS) {
+    const xs = [ctx.fill - 2, ctx.fill - 1, ctx.fill].filter((x) => x >= 0);
+    for (const d of strayDrags(cols, bankStrays(cols, xs), ctx.burnFrom)) {
+      const p = cols[d[0].x][d[0].y] === BROWN ? 'brown' : 'black';
+      consider({ routine: 'turnOver', label: STRAIGHTEN_LABEL, drags: d, reason: `the ${p} at column ${d[0].x + 1}, row ${d[0].y + 1} taken right out of the whites, ${p === 'brown' ? 'up through the whites and down through the blacks' : 'down through the whites and up through the browns'}, to burn` });
+    }
+  }
   // The fallback: a piece stuck that nothing the routines offer unsticks (it's still stuck where it is after
   // every one of them): bring a piece round to take its place.
   if (style.path) {
@@ -710,11 +730,14 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style, reading?: Reading)
   // sorting moves are preferred when nothing's at risk.
   const r = read;
   let keep: { x: number; y: number }[] = [];
-  if (r && (r.tactic === 'fillGaps' || r.tactic === 'freeTrapped' || r.tactic === 'fixCracks' || r.tactic === 'sortLadder')) {
+  if (r && (r.tactic === 'fillGaps' || r.tactic === 'freeTrapped' || r.tactic === 'fixCracks' || r.tactic === 'sortLadder' || r.tactic === 'straighten')) {
     const t = byTactic(sit, ctx, style, r, out, admissible);
     if (t.length) return t;
     if (r.tactic === 'fixCracks') keep = toolBrowns(cols, r);
   }
+  // Straightening up with nothing worth doing for it: at least nothing that puts more junk into the white columns (the
+  // user, 16 Nov: "this is going to lead to the board quality degrading over time").
+  if (r?.tactic === 'straighten' && r.bank) { const b0 = bankJunk(cols, r.bank); for (let i = out.length - 1; i >= 0; i--) if (bankJunk(out[i].after!, r.bank) > b0) out.splice(i, 1); }
   const quick = (m: Weighed) => (r?.tactic === 'quickSort' && quickSort(cols, m.move.drags) ? P.QUICK : 1);
   const rank = (m: Weighed) => (even || m.value <= 0 ? m.value : m.value * weightIn(phase, m.move.routine) * quick(m));
   // A cracked board's tools, the browns in the middle, aren't spent on anything but freeing the stranded junk.
@@ -814,6 +837,12 @@ export function byTactic(sit: Situation, ctx: Ctx, style: Style, r: Reading, out
   if (r.tactic === 'fillGaps') cands.push(...own(quickFills(cols, r.targets), 'rescue', `junk raced into a white's place (${r.targets.slice(0, 3).map(place).join(', ')}), and it's out left`));
   else if (r.tactic === 'sortLadder') cands.push(...own(ladderDrags(cols), 'turnOver', `columns ${COLS - 1} and ${COLS} sorted, blacks over browns, the ladder the zigzag climbs, before column ${COLS} goes`));
   else if (r.tactic === 'sortTail') cands.push(...own(tailDrags(cols, r), 'turnOver', 'a brown sunk down through the blacks at the V\'s bottom, so the next sweep runs through'));
+  else if (r.tactic === 'straighten' && style.path) for (const d of straightenDrags(cols, r)) {
+    const after = playDrags(cols, d), p = cols[d[0].x][d[0].y] === BROWN ? 'brown' : 'black', from = `column ${d[0].x + 1}, row ${d[0].y + 1}`;
+    const stray = r.targets.some((t) => t.x === d[0].x && t.y === d[0].y);
+    // (A plain long drag is the sweep, swept blind: "you just go down, up, and kind of make that large sweeping motion".)
+    if (after) cands.push({ move: { routine: 'turnOver', ...(plainDrag(d) ? {} : { label: STRAIGHTEN_LABEL }), drags: d, reason: stray ? `the ${p} at ${from} got out of the white columns, ${p === 'black' ? 'down through the whites and up through the browns' : 'over to the junk'}; sorted after` : `the ${p} at ${from} ${p === 'black' ? 'lifted up through the browns' : 'sunk down through the blacks'}, blacks to the top and browns to the bottom` }, after });
+  }
   const forced = r.tactic === 'fillGaps' || r.tactic === 'freeTrapped' || r.tactic === 'sortLadder';
   const trappedNow = (b: Board) => { const at = wall(b).at; let n = 0; b.forEach((c, x) => c.forEach((_, y) => { if (trappedWhite(b, x, y, at)) n++; })); return n; };
   const trapped0 = trappedNow(cols), block = blockPhase(cols);
@@ -861,6 +890,12 @@ export function byTactic(sit: Situation, ctx: Ctx, style: Style, r: Reading, out
     const hs = hoists(sit, style, r, admissible);
     return hs.map((m) => ({ ...m, saves: true }));
   }
+  // Straightening up: the junk got out of the white columns first, sorting the junk columns only once none can be
+  // ("step one, get it over. Step two, kind of resort and straighten the line").
+  if (r.tactic === 'straighten' && r.bank) {
+    const xs = r.bank, b0 = bankJunk(cols, xs), outs = ranked(cands.filter((c) => bankJunk(c.after, xs) < b0));
+    if (outs.length) return outs;
+  }
   if (r.tactic !== 'freeTrapped') return ranked(cands);
   // The trapped whites one at a time, the most at risk first ("the top right first"): what frees it, a piece brought
   // round to it, the quick fills and short drags into its place among them; failing all of them, what opens the way to
@@ -901,6 +936,8 @@ export function hoists(sit: Situation, style: Style, r: Reading, admissible: (dr
 }
 /** The hoist's name for a player. */
 export const HOIST_LABEL = 'Hoist';
+/** Straightening up's moves, for a player. */
+export const STRAIGHTEN_LABEL = 'Straighten up';
 
 /** The chain's danger zones (`weigh`): the column being filled and the one after it, each while it's mostly white
     with a piece of junk in it that can't go left on its own (a brown on the top, a black on the bottom), the
@@ -1010,7 +1047,7 @@ export function choose(sit: Situation, ctx: Ctx, style: Style, focus: { x: numbe
   const ready = burning ? burnsClean(furnace) : clear(furnace);
   // What's wrong with the furnace's column, to save it when time's short.
   const wrong = (b: Board) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
-  const reading = readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft });
+  const reading = readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft, straighten: !!P.STRAIGHTEN });
   // A plan seen through (the user, 13 Nov: "make sure it actually follows through rather than just making a step towards
   // it"): the white the last move opened the way to (`focus`) is freed next, while that can be done and nothing burning
   // sooner needs the move (the furnace's white, damage control, the ladder about to go): the board read as if it were
@@ -1133,7 +1170,7 @@ export function advise(g: { cols: Board; chain?: number; timeLeft?: number }, o:
   const cols = g.cols, chain = g.chain ?? 0, timeLeft = g.timeLeft ?? Infinity, target = o.target ?? DEFAULT_TARGET;
   const two = chain > 0 || decisionTime(cols, bankFor(target));
   const burns0 = chain > 0 ? 0 : two ? burnsLeft(cols) : 0, stage = two ? 'chain' : 'junk';
-  const style = target === DEFAULT_TARGET ? HELIUM : { ...HELIUM, routines: levelFor(target).routines };
+  const style: Style = target === DEFAULT_TARGET ? HELIUM : { ...HELIUM, routines: levelFor(target).routines, target };
   // The chain's rule of thumb: a next column of junk lets the chain go (`chainContext`).
   const c = stage === 'chain' ? chainContext(cols, chain, burns0, target, HELIUM.reach) : { ctx: contextFor(cols, stage, burns0, HELIUM.reach), burns: burns0, letGo: false };
   const a = choose({ cols, chain, timeLeft }, c.ctx, style);
@@ -1240,6 +1277,8 @@ export interface Played {
   minutes: number;
   swaps: number;
   drags: number;
+  /** A person's effort for its moves (EFFORT): its drags, their swaps and their turns. */
+  effort: number;
   banked: number | null;
   dismissed: boolean;
   finished: boolean;
@@ -1254,45 +1293,129 @@ export interface Played {
 /** Play a session through with a bot: each drag a moment to spot, then swept at its hand speed;
     the furnace runs on meanwhile. Stops at `cap` minutes of play. `onColumn` sees each column, `onPlan`
     each decision. */
-export function playSession(g: Distilling, level: Level, cap = 30, onColumn?: (c: Column) => void, onPlan?: (a: Advice) => void): Played {
-  const bot = new DistillBot(level), swapMs = 1000 / level.rate, cost: Played['cost'] = {};
-  let went = false;
-  const handle = (ev: DistillEvent[]) => {
-    for (const e of ev) if (e.kind === 'column') { went = true; bot.seen(e.column, g); onColumn?.(e.column); }
-  };
-  while (!g.finished && g.time < cap * 60000) {
-    if (g.sliding > 0) { handle(g.tick(g.sliding)); continue; }
-    const a = bot.plan(g);
-    onPlan?.(a);
-    if (a.kind === 'dismiss') { g.dismiss(); break; }
-    if (a.kind === 'burn') { handle(g.burnNow()); handle(g.tick(level.spot)); continue; }
-    if (a.kind === 'wait') { handle(g.tick(Math.max(1, Math.min(250, g.timeLeft())))); continue; }
-    went = false;
-    let ok = true;
-    const was = a.stage === 'junk' ? junkAcross(g.cols) : 0, share = colourLeft(g.cols), t0 = g.time;
+/** The game time a bot's play steps in, ms: the game is ticked in these slices however its time is handed in, so the same
+    seed and bot play the same game whether the whole session's run at once (the bots' runner, the tests) or a frame's
+    worth at a time on a page (the user, 16 Nov: "the bot does the set X things for ticks ... burning and things like
+    that should not be dependent on an animation or real time element at all"). */
+export const STEP_MS = 10;
+/** A person's effort for a bot's moves (the user, 16 Nov: "how many moves a bot makes ... can be as important to how well
+    it's doing as the actual result ... one repeated technique, like the swaps should count less than like the little
+    fiddly ones"): a drag picked up is a move, each swap along it a little more, each turn of direction in it more
+    again; one long straight sweep is little more than one move, three fiddly drags three. */
+export const EFFORT = { DRAG: 1, SWAP: 0.1, TURN: 0.5 };
+/** A person's effort for drags played whole (EFFORT). */
+export const effortOf = (drags: readonly Drag[]): number =>
+  drags.reduce((n, d) => n + EFFORT.DRAG + EFFORT.SWAP * d.ways.length + EFFORT.TURN * d.ways.filter((w, i) => i > 0 && w !== d.ways[i - 1]).length, 0);
+/** What a bot player tells whoever's showing it: each of the game's events, each swap it makes (the piece from (x, y) to
+    `to`), the piece it picks up and lets go, and each plan. Showing is all they do: the game's already moved. */
+export interface BotHooks {
+  onEvents?: (ev: DistillEvent[]) => void;
+  onSwap?: (x: number, y: number, to: [number, number]) => void;
+  onHold?: (x: number, y: number) => void;
+  onLetGo?: () => void;
+  onPlan?: (a: Advice) => void;
+}
+type BotOp = { kind: 'wait'; ms: number } | { kind: 'pick'; x: number; y: number } | { kind: 'swap'; way: number } | { kind: 'drop' } | { kind: 'done' };
+/** A bot playing a game, the one way bots play anywhere (src/distill-bots.ts's playSession, distilling-test.html): it
+    plans a move, takes a moment to spot each drag (its `spot`, or `sweepSpot` swept blind), swaps along it at its hand's
+    `rate`, a burn or a wait as planned, and the board's slide after a column goes waited out; the game ticked in
+    STEP_MS slices all the while. `advance(ms)` runs it on by that much game time; the simulation leads, and what shows
+    it catches up (the user: "if there's a bit of lag, the front end will then catch up with the simulation, not the
+    other way around"). */
+export class BotPlayer {
+  readonly bot: DistillBot;
+  /** Each technique's cost in Stage I, as playSession reports it. */
+  readonly cost: Played['cost'] = {};
+  /** A person's effort for the moves made so far (EFFORT). */
+  effort = 0;
+  private way: number | null = null;
+  private ops: BotOp[] = [];
+  private bank = 0;
+  private went = false;
+  private at: [number, number] | null = null;
+  private move: { a: Advice; was: number; share: number; t0: number } | null = null;
+  constructor(readonly g: Distilling, readonly level: Level, readonly hooks: BotHooks = {}) { this.bot = new DistillBot(level); }
+
+  private tick(ms: number): void { this.emit(this.g.tick(ms)); }
+  /** The game's events: a column gone noted (the bot's, and the move cut short), and passed on to show. */
+  private emit(ev: DistillEvent[]): void {
+    for (const e of ev) if (e.kind === 'column') { this.went = true; this.bot.seen(e.column, this.g); }
+    if (ev.length) this.hooks.onEvents?.(ev);
+  }
+  private drop(): void { if (this.at) { this.at = null; this.hooks.onLetGo?.(); } }
+  /** The next move planned into steps. */
+  private plan(): void {
+    const g = this.g, l = this.level, a = this.bot.plan(g);
+    this.hooks.onPlan?.(a);
+    if (a.kind === 'dismiss') { g.dismiss(); return; }
+    if (a.kind === 'burn') { this.emit(g.burnNow()); this.ops.push({ kind: 'wait', ms: l.spot }); return; }
+    if (a.kind === 'wait') { this.ops.push({ kind: 'wait', ms: Math.max(1, Math.min(250, g.timeLeft())) }); return; }
+    this.went = false;
+    this.move = { a, was: a.stage === 'junk' ? junkAcross(g.cols) : 0, share: colourLeft(g.cols), t0: g.time };
     for (const d of a.drags) {
-      handle(g.tick(a.sweep ? level.sweepSpot : level.spot));
-      bot.drags++;
-      let x = d.x, y = d.y;
-      for (const w of d.ways) {
-        if (went || !g.movable) break;
-        const n = g.swapToward(x, y, w);
-        if (!n) { ok = false; break; }
-        [x, y] = n;
-        handle(g.tick(swapMs));
-      }
-      if (went || !ok) break;
+      this.ops.push({ kind: 'wait', ms: a.sweep ? l.sweepSpot : l.spot }, { kind: 'pick', x: d.x, y: d.y });
+      for (const w of d.ways) this.ops.push({ kind: 'swap', way: w }, { kind: 'wait', ms: 1000 / l.rate });
+      this.ops.push({ kind: 'drop' });
     }
-    if (a.stage === 'junk' && !went && a.routine) {
-      const k = a.sweep ? 'sweep' : (a.technique ?? a.routine), c = (cost[k] ??= { plenty: 0, middle: 0, scarce: 0, ms: 0, over: 0 });
-      c[share > 0.45 ? 'plenty' : share > M.SCARCE ? 'middle' : 'scarce']++;
-      c.ms += g.time - t0 + P.TURN_MS * turnsIn(a.drags);
-      c.over += junkAcross(g.cols) - was;
+    this.ops.push({ kind: 'done' });
+  }
+  /** A move's drags over (played, or cut short by a column going or a swap that couldn't be made): its cost noted. */
+  private finishMove(): void {
+    const m = this.move;
+    this.move = null;
+    this.drop();
+    if (!m || m.a.stage !== 'junk' || this.went || !m.a.routine) return;
+    const k = m.a.sweep ? 'sweep' : (m.a.technique ?? m.a.routine), c = (this.cost[k] ??= { plenty: 0, middle: 0, scarce: 0, ms: 0, over: 0 });
+    c[m.share > 0.45 ? 'plenty' : m.share > M.SCARCE ? 'middle' : 'scarce']++;
+    c.ms += this.g.time - m.t0 + P.TURN_MS * turnsIn(m.a.drags);
+    c.over += junkAcross(this.g.cols) - m.was;
+  }
+  /** Run on by `ms` of game time (on till the game's done, or `until` ms of it played, at the most). */
+  advance(ms: number, until = Infinity): void {
+    const g = this.g;
+    this.bank += ms;
+    while (this.bank >= STEP_MS && !g.finished && g.time < until) {
+      const op = this.ops[0];
+      if (!op) {
+        // (The board sliding after a column went: waited out, then the next move planned.)
+        if (g.sliding > 0) { this.tick(STEP_MS); this.bank -= STEP_MS; continue; }
+        this.plan();
+        continue;
+      }
+      if (op.kind === 'wait') {
+        this.tick(STEP_MS); this.bank -= STEP_MS;
+        op.ms -= STEP_MS;
+        if (op.ms <= 1e-9) this.ops.shift();
+        continue;
+      }
+      this.ops.shift();
+      if (op.kind === 'done') { this.finishMove(); continue; }
+      if (op.kind === 'drop') { this.drop(); if (this.went) this.cut(); continue; }
+      if (op.kind === 'pick') { this.bot.drags++; this.effort += EFFORT.DRAG; this.way = null; this.at = [op.x, op.y]; this.hooks.onHold?.(op.x, op.y); continue; }
+      // A swap: none once a column's gone or the board's sliding (the rest of the move's for a board that's changed).
+      if (this.went || !g.movable || !this.at) { this.cut(); continue; }
+      const [x, y] = this.at, n = g.swapToward(x, y, op.way);
+      if (!n) { this.cut(); continue; }
+      this.at = n;
+      this.effort += EFFORT.SWAP + (this.way !== null && this.way !== op.way ? EFFORT.TURN : 0);
+      this.way = op.way;
+      this.hooks.onSwap?.(x, y, n);
+      this.hooks.onHold?.(n[0], n[1]);
     }
   }
+  /** Burn now (a button, a key), the bot told of the column as it goes. */
+  burn(): void { this.emit(this.g.burnNow()); }
+  /** The rest of the move dropped. */
+  private cut(): void { this.ops = this.ops.filter((o) => o.kind === 'done').slice(0, 1); if (!this.ops.length) this.finishMove(); }
+}
+
+export function playSession(g: Distilling, level: Level, cap = 30, onColumn?: (c: Column) => void, onPlan?: (a: Advice) => void): Played {
+  const p = new BotPlayer(g, level, { onPlan, onEvents: (ev) => { for (const e of ev) if (e.kind === 'column') onColumn?.(e.column); } });
+  p.advance(Infinity, cap * 60000);
+  const bot = p.bot;
   return {
     level: level.name, target: level.target, chains: bot.allChains(), longest: g.longest, score: g.score(), points: g.points, columnsUp: g.columnsUp,
     columnsBurned: g.columns.length - g.columnsUp, whitesBurned: g.whitesBurned, minutes: g.time / 60000,
-    swaps: g.swaps, drags: bot.drags, banked: bot.banked, dismissed: g.dismissed, finished: g.finished, used: bot.used, cost,
+    swaps: g.swaps, drags: bot.drags, effort: p.effort, banked: bot.banked, dismissed: g.dismissed, finished: g.finished, used: bot.used, cost: p.cost,
   };
 }

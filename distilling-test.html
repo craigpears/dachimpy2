@@ -8,7 +8,9 @@
      (compiled to js/distilling.js); the board's look is js/den/distill-board.js, the one Helium's still
      will use. This page only stands it up on its own, with a seed in the address (?seed=7), a restart,
      and the bots of src/distill-bots.ts to watch at their own pace (?bot=cc3, each named by its target chain): each drag swept as a
-     hand would, the piece held, and the routine it's playing (src/distill-routines.ts) in small text. -->
+     hand would, the piece held, and the routine it's playing (src/distill-routines.ts) in small text. A speed
+     control (16 Nov: "can I at least have some sort of speed control?") runs the whole board slower or faster, the
+     hand, the furnace and the pieces alike, so the bot plays the same game: ?speed=0.5, [ and ] to step it. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -53,6 +55,13 @@
     <label for="bot">Watch a practice player:</label>
     <select id="bot"><option value="">no, I'll play</option></select>
   </div>
+  <div class="row">
+    <label for="speed">Speed:</label>
+    <select id="speed" title="Everything at this speed: the player's hand, the furnace, the pieces ([ slower, ] faster)">
+      <option value="0.25">quarter</option><option value="0.5">half</option><option value="1">normal</option>
+      <option value="2">double</option><option value="4">4x</option><option value="8">8x</option>
+    </select>
+  </div>
   <div id="knows"></div>
   <div id="stats"></div>
   <div id="routine"></div>
@@ -69,7 +78,7 @@
 import * as THREE from 'three';
 import { seeded } from './js/mirror-row.js';
 import { Distilling, MESSAGES } from './js/distilling.js';
-import { LEVELS, levelNamed, bankFor, PER_COLUMN, DistillBot } from './js/distill-bots.js';
+import { LEVELS, levelNamed, bankFor, PER_COLUMN, BotPlayer } from './js/distill-bots.js';
 import { ROUTINES } from './js/distill-routines.js';
 import { STATES, TACTICS } from './js/distill-read.js';
 import { stepLines } from './js/distill-goals.js';
@@ -94,8 +103,14 @@ window.screenAt = (col, row) => {
 let seed = Number(params.get('seed')) || 1, board = null, botName = params.get('bot') || '';
 // ?shot: the board alone in the middle, no panel (for a picture of it).
 const shot = params.has('shot');
-// ?fast=n: time n times as fast (to watch a bot's whole session quickly).
-const fast = Number(params.get('fast')) || 1;
+// The speed it's all run at (the user, 16 Nov: "I never remember asking for this to be a super speed thing, but can
+// I at least have some sort of speed control?"): the whole board's time, the bot's hand, the furnace and the pieces
+// alike, so it plays the same game slower or faster. ?speed=n (?fast=n, its old name), the select, or [ and ].
+const SPEEDS = [...$('speed').options].map((o) => Number(o.value));
+let speed = Number(params.get('speed') || params.get('fast')) || 1;
+speed = SPEEDS.reduce((a, b) => (Math.abs(b - speed) < Math.abs(a - speed) ? b : a));
+$('speed').value = String(speed);
+const setSpeed = (v) => { speed = v; $('speed').value = String(v); address(); };
 if (shot) for (const el of document.querySelectorAll('.ui, #prompt')) el.style.display = 'none';
 for (const t of LEVELS) { const o = document.createElement('option'); o.value = t.name; o.textContent = `aiming for ${t.label}`; $('bot').append(o); }
 // (an old tier's name in the address, ?bot=ultimate, is the level nearest it)
@@ -110,36 +125,47 @@ function showKnows() {
 
 const log = (t) => { const li = document.createElement('li'); li.textContent = t; $('log').prepend(li); while ($('log').children.length > 9) $('log').lastChild.remove(); };
 const L = 'wbK*x';
-/** A bot playing through the board, at its pace: a moment to spot each drag, then a swap each 1 / rate s. */
-let bot = null, botWait = 0, botSteps = [], botSpot = 0;
+/** A bot playing the board (src/distill-bots.ts's BotPlayer, the one way bots play anywhere: the same seed and bot play the
+    same game here as in the bots' runner and the tests): it ticks the game; the board only shows what it did. */
+let player = null;
 
 function deal() {
   board?.dispose();
   $('log').innerHTML = '';
+  window.played = [];
   board = distillBoard({
     game: new Distilling(seeded(seed)), at: new THREE.Vector3(0, 0, 0), size: 3,
     onColumn: (c, finished) => {
+      window.played.push({ t: board.game.time, up: c.up, pieces: c.pieces.map((p) => L[p]).join('') });   // (every column gone, for checking a run)
       const what = c.message ? (c.message === 'clear' && c.chain > 1 ? `${MESSAGES.clear} x${c.chain}` : MESSAGES[c.message]) : c.up ? 'up' : 'burned';
       log(`${c.up ? 'up' : 'burned'}: ${c.pieces.map((p) => L[p]).join('')}, ${what}${c.spice ? `, ${MESSAGES[c.spice]}` : ''}, ${c.points + c.bonus} points`);
-      bot?.seen(c, board.game);
-      botSteps = [];
       if (finished) log(`finished: ${board.game.points} points in ${board.game.columnsUp} columns, ${board.game.score().toFixed(2)} a column`);
     },
     onFinish: (gm) => { if (gm.dismissed) log(`dismissed: ${gm.points} points in ${gm.columnsUp} columns, ${gm.score().toFixed(2)} a column`); },
   });
   scene.add(board.group);
-  bot = botName ? new DistillBot(levelNamed(botName)) : null;
+  player = botName ? new BotPlayer(board.game, levelNamed(botName), {
+    onEvents: (ev) => board.show(ev),
+    onSwap: (x, y, to) => board.showSwap(x, y, to[0], to[1]),
+    onHold: (x, y) => board.hold(x, y),
+    onLetGo: () => board.letGo(),
+    onPlan: (p) => showRoutine(p),
+  }) : null;
+  board.external = !!player;
+  // (a burn by hand while a bot plays: the bot told of the column)
+  if (player) board.burn = () => player.burn();
   showKnows();
-  botWait = 600; botSteps = [];
   $('routine').textContent = '';
-  history.replaceState(null, '', `?seed=${seed}${botName ? `&bot=${botName}` : ''}`);
+  address();
 }
+function address() { history.replaceState(null, '', `?seed=${seed}${botName ? `&bot=${botName}` : ''}${speed !== 1 ? `&speed=${speed}` : ''}${shot ? '&shot' : ''}`); }
 $('restart').onclick = () => deal();
 $('next').onclick = () => { seed++; deal(); };
 $('dismiss').onclick = () => board.dismiss();
 $('burn').onclick = () => board.burn();
 $('pause').onclick = () => { board.paused = !board.paused; $('pause').classList.toggle('on', board.paused); };
 $('bot').onchange = () => { botName = $('bot').value; deal(); $('bot').blur(); };
+$('speed').onchange = () => { setSpeed(Number($('speed').value)); $('speed').blur(); };
 deal();
 
 /** The routine the bot's playing, in small text under the stats, so its plan can be followed. */
@@ -172,41 +198,14 @@ function showRoutine(p) {
     $('routine').append(ol);
   }
 }
-function driveBot(dt) {
-  if (!bot || board.game.finished || board.paused) return;
-  botWait -= dt * 1000;
-  if (botWait > 0 || !board.game.movable) return;
-  const t = bot.level;
-  if (botSteps.length) {
-    // A drag as a hand sweeps it: the piece held, a swap as the mouse passes each place, no pause.
-    const [x, y, w] = botSteps.shift();
-    const to = board.swapAt(x, y, w);
-    if (!to) { botSteps = []; board.letGo(); return; }
-    board.hold(...to);
-    botWait = 1000 / t.rate;
-    // The drag's done: let go, and a moment to spot the next.
-    if (!botSteps.length || botSteps[0][0] !== to[0] || botSteps[0][1] !== to[1]) {
-      board.letGo();
-      if (botSteps.length) botWait += botSpot;
-    }
-    return;
-  }
-  const p = bot.plan(board.game);
-  showRoutine(p);
-  if (p.kind === 'dismiss') { board.dismiss(); return; }
-  if (p.kind === 'burn') { board.burn(); botWait = t.spot; return; }
-  if (p.kind === 'wait') { botWait = 250; return; }
-  for (const d of p.drags) {
-    let x = d.x, y = d.y;
-    for (const w of d.ways) { botSteps.push([x, y, w]); [x, y] = board.game.neighbour(x, y, w); }
-  }
-  // A sweep is played blind, one drag straight after another; a technique is spotted first.
-  botSpot = p.sweep ? t.sweepSpot : t.spot;
-  botWait = botSpot;
-}
 addEventListener('keydown', (e) => {
   if (e.target.tagName === 'SELECT') return;
   if (e.target.tagName === 'BUTTON') e.target.blur();
+  if (e.key === '[' || e.key === ']') {
+    const i = SPEEDS.indexOf(speed) + (e.key === ']' ? 1 : -1);
+    if (i >= 0 && i < SPEEDS.length) setSpeed(SPEEDS[i]);
+    e.preventDefault(); return;
+  }
   if (board.key(e.key, e)) e.preventDefault();
 });
 const canvas = renderer.domElement;
@@ -224,19 +223,28 @@ function fit() {
 addEventListener('resize', fit);
 fit();
 
+/* The game an underlying simulation (the user, 16 Nov: "it should be an underlying simulation ... the front end should
+   be showing, especially with the bot involved"; "if there's a bit of lag, the front end will then catch up with the
+   simulation, not the other way around"): with a bot, its player ticks the game in fixed steps of game time
+   (src/distill-bots.ts's STEP_MS), the same seed and bot the same game every time, at any speed or frame rate, as in
+   the bots' runner; the board only draws where it's got to, its animations jumping ahead after a slow frame. Speed is
+   how much game time a second of real time runs. */
 const clock = new THREE.Clock();
 function frame() {
-  const dt = Math.min(0.05, clock.getDelta()) * fast;
-  driveBot(dt);
+  // (a second at most caught up a frame: a tab back from the background carries on, not races)
+  const dt = Math.min(1, clock.getDelta()) * speed;
+  if (player && !board.paused) player.advance(dt * 1000);
   board.tick(dt);
   // Straight on to the board, a little left of the middle so the panel doesn't cover it.
   const v = board.camView(camera), wide = innerWidth > 900, side = shot ? 0 : wide ? -0.9 : 0, low = !shot && !wide ? -0.8 : 0;
   camera.position.copy(v.from).add(new THREE.Vector3(side, low, wide ? 0.3 : 1.2));
   camera.lookAt(v.look.clone().add(new THREE.Vector3(side, low, 0)));
   const gm = board.game, left = gm.timeLeft();
-  $('stats').innerHTML = `Seed <b>${seed}</b> · <b>${(gm.time / 1000).toFixed(0)}</b> s · burn in <b>${Number.isFinite(left) ? (left / 1000).toFixed(1) : '-'}</b> s<br>`
+  $('stats').innerHTML = `Seed <b>${seed}</b>${speed !== 1 ? ` · speed <b>${speed}x</b>` : ''} · <b>${(gm.time / 1000).toFixed(0)}</b> s · burn in <b>${Number.isFinite(left) ? (left / 1000).toFixed(1) : '-'}</b> s<br>`
     + `Flask <b>${gm.flask}</b> / 100 · up <b>${gm.columnsUp}</b>, burned <b>${gm.columns.length - gm.columnsUp}</b><br>`
-    + `Points <b>${gm.points}</b> · score <b>${gm.score().toFixed(2)}</b> · chain <b>${gm.chain}</b> (best ${gm.longest})`;
+    + `Points <b>${gm.points}</b> · score <b>${gm.score().toFixed(2)}</b> · chain <b>${gm.chain}</b> (best ${gm.longest})`
+    // (a bot's moves and a person's effort for them: the user, 16 Nov, "how many moves a bot makes ... can be as important")
+    + (player ? `<br>Moves <b>${player.bot.drags}</b> · swaps <b>${gm.swaps}</b> · effort <b>${player.effort.toFixed(0)}</b>` : '');
   $('prompt').textContent = board.prompt();
   renderer.render(scene, camera);
   requestAnimationFrame(frame);

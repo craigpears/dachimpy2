@@ -35,8 +35,9 @@ export const seaX = (c) => SEA_X0 + (c + 0.5) * SAIL.CELL, seaZ = (r) => SAIL.Z0
 export const voices = new Voices();
 /* sail.bumps and sail.pins: hooks for a place that takes a bump or a pin itself (the starlit door: door.js).
    A bump hook, given the move's event, returns true if the bump was its (no "Bump! Rocks"); a pin hook,
-   given the pointer and the square under it, true if it dropped the pin itself. */
-export const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0, guns: new Broadside(), rockAt: new Map(), world: null, riding: false, said: {}, bumps: [], pins: [] };
+   given the pointer and the square under it, true if it dropped the pin itself. sail.follow: what the camera
+   follows at sea instead of her, if anything (Primates Rule on her test run: frigate-run.js). */
+export const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0, guns: new Broadside(), rockAt: new Map(), world: null, riding: false, said: {}, bumps: [], pins: [], follow: null };
 /** Her mast, sails and guns struck out of the way (true) or up again (false), and anyone standing on
     her deck with them (`sail.struck`: your spouse steps out of view, 12 Nov: "the bride gets in the way
     of the puzzles on deck"). The one implementation: a puzzle on her deck, the oars, the crane. */

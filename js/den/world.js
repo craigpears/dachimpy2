@@ -467,24 +467,49 @@ export const worldLets = {
 };
 export const ray = new THREE.Raycaster(), wallPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 const sparkGeo = new THREE.TetrahedronGeometry(0.07);
-const sparkMats = {};
+/* Every spark, drawn as one instanced mesh however many are flying: one draw for all of them, not one each (a busy
+   blockade had nine hundred in the air at once, 15 Nov: "do the draw calls"). Each is { p, v, life, rx, ry, col }. */
+const SPARKS_MAX = 4000;
+const sparkMesh = new THREE.InstancedMesh(sparkGeo, new THREE.MeshBasicMaterial({ color: '#ffffff' }), SPARKS_MAX);
+sparkMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(SPARKS_MAX * 3), 3);
+sparkMesh.count = 0; sparkMesh.frustumCulled = false;
+const sparkCols = new Map(), sparkM = new THREE.Matrix4(), sparkQ = new THREE.Quaternion(), sparkE = new THREE.Euler(), sparkS = new THREE.Vector3();
 export function burst(at, color, n, speed) {
-  const m = (sparkMats[color] ||= new THREE.MeshBasicMaterial({ color }));
+  if (!sparkMesh.parent) scene.add(sparkMesh);
+  let col = sparkCols.get(color);
+  if (!col) sparkCols.set(color, col = new THREE.Color(color));
   for (let i = 0; i < n; i++) {
-    const s = new THREE.Mesh(sparkGeo, m);
-    s.position.copy(at);
-    s.userData.v = new THREE.Vector3((Math.random() - 0.5) * speed, Math.random() * speed, (Math.random() - 0.2) * speed);
-    s.userData.life = 0.9 + Math.random() * 0.4;
-    scene.add(s);
-    sparks.push(s);
+    if (sparks.length >= SPARKS_MAX) sparks.shift();
+    sparks.push({ p: at.clone(), v: new THREE.Vector3((Math.random() - 0.5) * speed, Math.random() * speed, (Math.random() - 0.2) * speed), life: 0.9 + Math.random() * 0.4, rx: 0, ry: 0, col });
   }
+}
+/** The sparks flying, falling and fading, and gone once faded: every page that bursts them calls it each frame (the
+    blockade's page didn't, 15 Nov, and kept every spark of every shot, tens of thousands a minute, the frame rate
+    falling from 30 to 12 within the minute). */
+export function tickSparks(dt) {
+  let k = 0;
+  for (const s of sparks) {
+    s.v.y -= 7 * dt;
+    s.p.addScaledVector(s.v, dt);
+    s.rx += dt * 6; s.ry += dt * 4;
+    s.life -= dt;
+    if (s.life <= 0) continue;
+    sparks[k] = s;
+    sparkMesh.setMatrixAt(k, sparkM.compose(s.p, sparkQ.setFromEuler(sparkE.set(s.rx, s.ry, 0)), sparkS.setScalar(s.life)));
+    sparkMesh.setColorAt(k, s.col);
+    k++;
+  }
+  sparks.length = k;
+  sparkMesh.count = k;
+  sparkMesh.instanceMatrix.needsUpdate = true;
+  sparkMesh.instanceColor.needsUpdate = true;
 }
 /* Shaders built ahead, in the background, so nothing drawn for the first time stalls the game while
    its shader's built (the user, 10 Nov: "it goes a bit laggy" running the checkpoint's gauntlet: its
    first shot, the splash and the hit each froze it a tenth of a second or more). `objs`: things made
    but not yet in the scene (a shot, a splash); with none, the whole scene, hidden parts and all (a
    gun's wreck), and the sparks and chalk lines every effect and board uses. */
-const probes = [new THREE.Mesh(sparkGeo, new THREE.MeshBasicMaterial()), outline([[0, 0]], 0, '#ffffff'), outline([[0, 0]], 0, '#ffffff')];
+const probes = [sparkMesh, outline([[0, 0]], 0, '#ffffff'), outline([[0, 0]], 0, '#ffffff')];
 probes[2].material.transparent = true;
 // (renderer.compile, not compileAsync: compileAsync is compile and then a timer polling till the shaders are ready,
 // a result nothing here waits on; and the poll threw, uncaught, on a material disposed in the meantime, as Helium's

@@ -64,9 +64,9 @@ describe('Primates Rule at anchor, "kind of a to-do item" (11 Nov)', () => {
     }
   }, 60000);
 
-  it('says she\'s not ready yet the first time on a voyage you sail near her, not on every tick', () => {
-    expect(BY_PRIMATES_RULE).toMatch(/not ready yet/);
-    expect(MOORED.SIGN.note).toMatch(/coming soon/);
+  it('says she\'s ready for a test run (since 15 Nov) the first time on a voyage you sail near her, not on every tick', () => {
+    expect(BY_PRIMATES_RULE).toMatch(/test run/);
+    expect(MOORED.SIGN.note).toMatch(/test run/);
     const [c, r] = AT[0], hail = new MooredHail();
     expect(nearMoored(c, r - 2)).toBe(true);
     expect(nearMoored(c, r - 3)).toBe(false);
