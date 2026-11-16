@@ -2342,6 +2342,43 @@ the moment, its board the last where that white was free enough, the move drawn,
 12 kept, the earliest first, one a deal, all in the first 100 s (most in the first 40). Each asks "What should the bot
 have done here instead?" Tested: each still shows its move, the ringed white out of trouble before it and in after.
 
+### Straightening up (16 Nov, eighteenth run)
+The user, watching CC^8 on seed 2 (distilling-test.html at fixed ticks, a seed and bot replaying the same game): the
+whites banked on the left with blacks stuck at their bottoms and browns at their tops, and the bot still quick sorting,
+"pull those browns down, push the blacks up ... I would be prioritizing that to create nice clear white columns"; a
+black it had pulled down left there, "you have to pull it up through the brown pieces and get the black to the top";
+"step one, get it over. Step two, kind of resort and straighten the line"; and the mode switch, "we've got a lot of
+white columns now, so we're switching from quick dragging to ... straightening up the board". RULES.md, "straighten up".
+
+- **The bank** (src/distill-patterns.ts): the longest run of columns side by side each almost white, two thirds or
+  more (`bankOf`; a fresh junk column may have come in left of it), settled when nothing left of it is half white
+  (`bankSettled`: not the two halves of colour close together, where plain sweeps across do, 12 Nov), and the junk
+  spoiling them (`bankJunk`: a black 2, a brown in the top half 2, in the bottom half 1). The junk columns'
+  disorder right of it, browns above blacks in pairs, not the furnace's (`junkDisorder`).
+- **The tactic** (src/distill-read.ts, `straighten`): in place of quick sorting, outside the block phase, with the
+  bank settled, READ.STRAIGHTEN_SOLID (3) columns or more, and junk in it (every reading before quick sorting comes
+  first: the whites by the fire, the ladder, trapped whites, the tail, the blocks; the user's judged boards keep their
+  readings, and the 12 Nov note "I'm not going to waste my time organizing stuff that's going to get burned" holds:
+  the junk columns are sorted only while there's junk in the bank to get out). Its progress (`straightened`): the junk got out of the bank, worth twice the junk
+  columns' sorting; nothing if it puts junk in or takes a white out.
+- **Its moves** (`straightenDrags`): each stray's drag out of the bank, READ.STRAY_SWAPS (12) at most (`strayDrags`);
+  a brown from the two columns beside the bank brought in under its stuck blacks, lifting them out; the junk columns'
+  browns sunk and blacks lifted. The junk-out moves first, the sorting only once none can be (src/distill-bots.ts);
+  with nothing worth doing, no move that puts junk into the bank. A plain long drag among them is the sweep. Each
+  drag's goal `straighten` (src/distill-goals.ts).
+- **In the chain**: the junk in the column going up and the two after it taken right in one drag, let go among the
+  columns to burn (`P.STRAY`), for targets of CC^3 and up (CC^1 and CC^2 keep plain moves).
+- **Run** (6 boards, CC^8, `PLAN='{"STRAIGHTEN":0,"STRAY":0}'` the old): as built, chain mean 4.3 both, best 5 both,
+  no white burned 4 to 5 of 6, points a minute 15.1 to 13.2. A looser first version (the bank any half-white run, read
+  before the trapped whites, the tail and the blocks, the junk columns sorted with nothing in the bank) reached chain
+  mean 5.3, best 8, one CC^8, 16.5 points a minute, but overrode boards the user judged on 12 and 13 Nov (P17's blocks,
+  P30's tail, "four columns of junk waiting get no sorting drag"), so it was narrowed. Six boards is small; a bigger
+  run, and when the mode switches (the user: "how many columns have burned ... could likely affect the stage of the
+  game"), are next.
+- **Left**: two blacks boxed in by a spice at the bank's bottom stay (no single drag reaches them); and the user's next
+  note, a chain started while a fifth junk column was easy to finish ("There is no reason to switch until ... you're
+  down to, like, even just say 1 or 2 junk columns"), is the stage switch's (`decisionTime`, the let go), not this.
+
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?
 2. The hook: the exact drags, and where the black and the brown end up.

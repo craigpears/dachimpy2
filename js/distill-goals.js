@@ -34,13 +34,13 @@ import { isJunk, junkTarget, playDrags } from './distill-routines.js';
 import { dragTricks } from './distill-teach.js';
 import { flow, hoistOrder, vTip } from './distill-read.js';
 import { whiteRisk } from './distill-risk.js';
-import { disorder, ladderBad, stranded, tailOrder } from './distill-patterns.js';
+import { bankEnd, bankJunk, disorder, junkDisorder, ladderBad, stranded, tailOrder } from './distill-patterns.js';
 import { stuck } from './distill-path.js';
 /** Each goal's kind in a word or two, for the pages. */
 export const GOALS = {
     save: 'Save a white', fill: 'Fill a gap', free: 'Free a white', open: 'Open the way', build: 'Build the Crystal Clear',
     channel: 'Through a channel', buildChannel: 'Build a channel', untrap: 'Free a stuck piece',
-    pull: 'Junk to the colour', bank: 'A white to the others', hoist: 'Hoist', ladder: 'Sort the junk', tail: 'Sort the tail', cracks: 'Fix a crack', store: 'Store the junk',
+    pull: 'Junk to the colour', bank: 'A white to the others', hoist: 'Hoist', ladder: 'Sort the junk', tail: 'Sort the tail', cracks: 'Fix a crack', straighten: 'Straighten up', store: 'Store the junk',
     makeWay: 'Make way', setUp: 'Set up the save',
 };
 /** The trick names, as a player says them. */
@@ -146,6 +146,14 @@ export function ownGoal(b, d, a, aims) {
             const now = new Set(stranded(a).map(key)), freed = stranded(b).find((q) => !now.has(key(q)));
             if (freed && now.size < strandedN(b))
                 return { kind: 'cracks', says: `free the stranded ${PIECE[b[freed.x][freed.y]]} at column ${freed.x + 1}, row ${freed.y + 1}` };
+        }
+        if (r.tactic === 'straighten' && r.bank && isJunk(p)) {
+            // (Straightening up, the user, 16 Nov: the junk got out of the white columns, then the junk columns sorted.)
+            const xs = r.bank, whites = (q) => xs.reduce((n, x) => n + q[x].filter((c) => c === WHITE).length, 0);
+            if (whites(a) >= whites(b) && bankJunk(a, xs) < bankJunk(b, xs))
+                return { kind: 'straighten', says: `straighten up: the ${what} out of the white columns, sorted after` };
+            if (whites(a) >= whites(b) && bankJunk(a, xs) <= bankJunk(b, xs) && junkDisorder(a, bankEnd(xs)) < junkDisorder(b, bankEnd(xs)))
+                return { kind: 'straighten', says: `straighten up: the ${what} ${p === BLACK ? 'up through the browns' : 'down through the blacks'}, blacks to the top and browns to the bottom` };
         }
         if (r.tactic === 'freeTrapped') {
             const t = r.targets[0];

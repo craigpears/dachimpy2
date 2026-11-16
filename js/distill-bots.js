@@ -50,7 +50,8 @@ import { M, ROUTINES, burnsClean, canGo, clear, colourLeft, fillTarget, isJunk, 
 import { blockPhase, boardScore, doneFromRight, keptTools, trappedWhite, wall } from './distill-score.js';
 import { PATH, freed, pairRescue, pathMoves, stuck } from './distill-path.js';
 import { phaseOf, weightIn } from './distill-phase.js';
-import { TACTICS, hoistDrags, hoistOrder, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, sorts, tailDrags, tipDrags, toolBrowns } from './distill-read.js';
+import { TACTICS, hoistDrags, hoistOrder, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, sorts, straightenDrags, strayDrags, tailDrags, tipDrags, toolBrowns } from './distill-read.js';
+import { bankJunk, bankStrays } from './distill-patterns.js';
 import { joinPairs } from './distill-teach.js';
 import { channelReason, channelRuns } from './distill-channel.js';
 import { ownGoal, purposeful, stepsFor } from './distill-goals.js';
@@ -122,6 +123,10 @@ export const P = {
         move must get to be worth it, and the most for a ready column to burn at once rather than wait while
         it's done. */
     RATE_MIN: 0.15,
+    /** Straightening up once white columns are banked (16 Nov; src/distill-read.ts, `straighten`), and the chain's white
+        columns straightened up, their junk taken right in one drag (`strayDrags`). */
+    STRAIGHTEN: true,
+    STRAY: true,
     SLACK: 1,
     /** ms left on the furnace below which only what saves its column counts. */
     URGENT: 5000,
@@ -613,7 +618,7 @@ export function weigh(sit, ctx, style, reading) {
     };
     // The board read, once (the user, 13 Nov, the thirty-third and thirty-fourth notes), and every drag let go where it
     // gets something done (src/distill-goals.ts).
-    const read = one && P.READ && !urgent ? (reading ?? readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft })) : null;
+    const read = one && P.READ && !urgent ? (reading ?? readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft, straighten: !!P.STRAIGHTEN })) : null;
     const aims = { ctx, reading: one ? (reading ?? read) : null };
     const goal = (b, d, a) => ownGoal(b, d, a, aims) !== null;
     const consider = (found) => {
@@ -646,6 +651,19 @@ export function weigh(sit, ctx, style, reading) {
                 consider({ routine: 'rescue', drags: d, reason: `quick sorting: the ${p} at column ${d[0].x + 1}, row ${d[0].y + 1} ${p === 'black' ? 'down' : 'up'} into a white's place by the fire, and it's out left` });
             }
     }
+    // The chain's own white columns straightened up (the user, 16 Nov, seed 2's CC^8 frozen with browns in them: "just
+    // worry about getting them to the right hand side as far as you can ... the blacks are there at the top ... to
+    // essentially rescue the brown pieces"): the junk in the column being filled and the two after it, each taken right
+    // in one drag, up through the whites and down through the blacks (or down and up), let go among the columns to burn.
+    // (Long sweeps for the longer chains only: at a Crystal Clear 1 or 2, plain moves; 13 Nov, "it's giving you really
+    // complicated moves".)
+    if (!one && P.STRAY && style.path && (style.target ?? DEFAULT_TARGET) >= 3 && ctx.fill >= 0 && ctx.burnFrom < COLS) {
+        const xs = [ctx.fill - 2, ctx.fill - 1, ctx.fill].filter((x) => x >= 0);
+        for (const d of strayDrags(cols, bankStrays(cols, xs), ctx.burnFrom)) {
+            const p = cols[d[0].x][d[0].y] === BROWN ? 'brown' : 'black';
+            consider({ routine: 'turnOver', label: STRAIGHTEN_LABEL, drags: d, reason: `the ${p} at column ${d[0].x + 1}, row ${d[0].y + 1} taken right out of the whites, ${p === 'brown' ? 'up through the whites and down through the blacks' : 'down through the whites and up through the browns'}, to burn` });
+        }
+    }
     // The fallback: a piece stuck that nothing the routines offer unsticks (it's still stuck where it is after
     // every one of them): bring a piece round to take its place.
     if (style.path) {
@@ -673,12 +691,20 @@ export function weigh(sit, ctx, style, reading) {
     // sorting moves are preferred when nothing's at risk.
     const r = read;
     let keep = [];
-    if (r && (r.tactic === 'fillGaps' || r.tactic === 'freeTrapped' || r.tactic === 'fixCracks' || r.tactic === 'sortLadder')) {
+    if (r && (r.tactic === 'fillGaps' || r.tactic === 'freeTrapped' || r.tactic === 'fixCracks' || r.tactic === 'sortLadder' || r.tactic === 'straighten')) {
         const t = byTactic(sit, ctx, style, r, out, admissible);
         if (t.length)
             return t;
         if (r.tactic === 'fixCracks')
             keep = toolBrowns(cols, r);
+    }
+    // Straightening up with nothing worth doing for it: at least nothing that puts more junk into the white columns (the
+    // user, 16 Nov: "this is going to lead to the board quality degrading over time").
+    if (r?.tactic === 'straighten' && r.bank) {
+        const b0 = bankJunk(cols, r.bank);
+        for (let i = out.length - 1; i >= 0; i--)
+            if (bankJunk(out[i].after, r.bank) > b0)
+                out.splice(i, 1);
     }
     const quick = (m) => (r?.tactic === 'quickSort' && quickSort(cols, m.move.drags) ? P.QUICK : 1);
     const rank = (m) => (even || m.value <= 0 ? m.value : m.value * weightIn(phase, m.move.routine) * quick(m));
@@ -806,6 +832,14 @@ export function byTactic(sit, ctx, style, r, out, admissible) {
         cands.push(...own(ladderDrags(cols), 'turnOver', `columns ${COLS - 1} and ${COLS} sorted, blacks over browns, the ladder the zigzag climbs, before column ${COLS} goes`));
     else if (r.tactic === 'sortTail')
         cands.push(...own(tailDrags(cols, r), 'turnOver', 'a brown sunk down through the blacks at the V\'s bottom, so the next sweep runs through'));
+    else if (r.tactic === 'straighten' && style.path)
+        for (const d of straightenDrags(cols, r)) {
+            const after = playDrags(cols, d), p = cols[d[0].x][d[0].y] === BROWN ? 'brown' : 'black', from = `column ${d[0].x + 1}, row ${d[0].y + 1}`;
+            const stray = r.targets.some((t) => t.x === d[0].x && t.y === d[0].y);
+            // (A plain long drag is the sweep, swept blind: "you just go down, up, and kind of make that large sweeping motion".)
+            if (after)
+                cands.push({ move: { routine: 'turnOver', ...(plainDrag(d) ? {} : { label: STRAIGHTEN_LABEL }), drags: d, reason: stray ? `the ${p} at ${from} got out of the white columns, ${p === 'black' ? 'down through the whites and up through the browns' : 'over to the junk'}; sorted after` : `the ${p} at ${from} ${p === 'black' ? 'lifted up through the browns' : 'sunk down through the blacks'}, blacks to the top and browns to the bottom` }, after });
+        }
     const forced = r.tactic === 'fillGaps' || r.tactic === 'freeTrapped' || r.tactic === 'sortLadder';
     const trappedNow = (b) => { const at = wall(b).at; let n = 0; b.forEach((c, x) => c.forEach((_, y) => { if (trappedWhite(b, x, y, at))
         n++; })); return n; };
@@ -864,6 +898,13 @@ export function byTactic(sit, ctx, style, r, out, admissible) {
         const hs = hoists(sit, style, r, admissible);
         return hs.map((m) => ({ ...m, saves: true }));
     }
+    // Straightening up: the junk got out of the white columns first, sorting the junk columns only once none can be
+    // ("step one, get it over. Step two, kind of resort and straighten the line").
+    if (r.tactic === 'straighten' && r.bank) {
+        const xs = r.bank, b0 = bankJunk(cols, xs), outs = ranked(cands.filter((c) => bankJunk(c.after, xs) < b0));
+        if (outs.length)
+            return outs;
+    }
     if (r.tactic !== 'freeTrapped')
         return ranked(cands);
     // The trapped whites one at a time, the most at risk first ("the top right first"): what frees it, a piece brought
@@ -910,6 +951,8 @@ export function hoists(sit, style, r, admissible) {
 }
 /** The hoist's name for a player. */
 export const HOIST_LABEL = 'Hoist';
+/** Straightening up's moves, for a player. */
+export const STRAIGHTEN_LABEL = 'Straighten up';
 /** The chain's danger zones (`weigh`): the column being filled and the one after it, each while it's mostly white
     with a piece of junk in it that can't go left on its own (a brown on the top, a black on the bottom), the
     column going up first. Not while a white's still in the junk columns burning out ahead of the chain: saving those
@@ -1037,7 +1080,7 @@ export function choose(sit, ctx, style, focus = null) {
     const ready = burning ? burnsClean(furnace) : clear(furnace);
     // What's wrong with the furnace's column, to save it when time's short.
     const wrong = (b) => (burning ? b[last].filter((p) => p === WHITE).length : junkAt(b[last]));
-    const reading = readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft });
+    const reading = readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft, straighten: !!P.STRAIGHTEN });
     // A plan seen through (the user, 13 Nov: "make sure it actually follows through rather than just making a step towards
     // it"): the white the last move opened the way to (`focus`) is freed next, while that can be done and nothing burning
     // sooner needs the move (the furnace's white, damage control, the ladder about to go): the board read as if it were
@@ -1176,7 +1219,7 @@ export function advise(g, o = {}) {
     const cols = g.cols, chain = g.chain ?? 0, timeLeft = g.timeLeft ?? Infinity, target = o.target ?? DEFAULT_TARGET;
     const two = chain > 0 || decisionTime(cols, bankFor(target));
     const burns0 = chain > 0 ? 0 : two ? burnsLeft(cols) : 0, stage = two ? 'chain' : 'junk';
-    const style = target === DEFAULT_TARGET ? HELIUM : { ...HELIUM, routines: levelFor(target).routines };
+    const style = target === DEFAULT_TARGET ? HELIUM : { ...HELIUM, routines: levelFor(target).routines, target };
     // The chain's rule of thumb: a next column of junk lets the chain go (`chainContext`).
     const c = stage === 'chain' ? chainContext(cols, chain, burns0, target, HELIUM.reach) : { ctx: contextFor(cols, stage, burns0, HELIUM.reach), burns: burns0, letGo: false };
     const a = choose({ cols, chain, timeLeft }, c.ctx, style);

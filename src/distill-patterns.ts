@@ -41,6 +41,9 @@ export const PATTERN = {
   /** Junk the wrong way up (`upsideDown`): the top and bottom this many half rows, and the pieces wrong at least. */
   THIRD: 5,
   UPSIDE_MIN: 6,
+  /** The bank: a column this share white or more counts as almost white (`solidColumns`; "several columns of almost
+      white pieces", six of eight or nine). */
+  SOLID: 0.66,
 };
 
 /** A piece found by a pattern. */
@@ -197,6 +200,49 @@ export function upsideDown(cols: Board, from = 0, to = COLS - doneFromRight(cols
     else if ((p === BLACK && high) || (p === BROWN && low)) right++;
   });
   return { wrong, right, flagged: wrong.length >= PATTERN.UPSIDE_MIN && wrong.length >= 2 * right };
+}
+
+/** The whites banked on the left (the user, 16 Nov, seed 2's CC^8: "once you have several columns of almost white
+    pieces ... measuring how many solid white columns have I got"): the longest run of columns side by side each almost
+    white, PATTERN.SOLID or more (never the furnace's; a fresh column of junk may have come in left of it), the leftmost
+    if two tie. */
+export function bankOf(cols: Board): number[] {
+  let best: number[] = [], run: number[] = [];
+  for (let x = 0; x < COLS - 1; x++) {
+    if (cols[x].filter((p) => p === WHITE).length >= PATTERN.SOLID * cols[x].length) { run.push(x); if (run.length > best.length) best = [...run]; } else run = [];
+  }
+  return best;
+}
+/** Whether the bank is the whites' side, nothing half white left of it (only fresh junk come in): not two halves of
+    colour close together, where plain sweeps across do (12 Nov: "all you need to do is drag the blacks down, the browns
+    up"). */
+export const bankSettled = (cols: Board, xs: readonly number[]): boolean =>
+  xs.length > 0 && cols.slice(0, xs[0]).every((c) => c.filter((p) => p === WHITE).length * 2 < c.length);
+/** The first column right of the bank (0 with none). */
+export const bankEnd = (xs: readonly number[]): number => (xs.length ? xs[xs.length - 1] + 1 : 0);
+/** The bank's columns that are solid white, PATTERN.SOLID white or more. */
+export const solidColumns = (cols: Board, xs = bankOf(cols)): number => xs.filter((x) => cols[x].filter((p) => p === WHITE).length >= PATTERN.SOLID * cols[x].length).length;
+/** The junk spoiling the bank's columns `xs`, each piece where it is: a black anywhere 2 (it sinks through the whites
+    and sticks at the bottom), a brown in the top half 2 (it rises and sticks at the top), a brown in the bottom half 1
+    (it can go on rising: the next to come out). Lower is cleaner; 0 is solid white columns. */
+export function bankJunk(cols: Board, xs: readonly number[]): number {
+  let n = 0;
+  for (const x of xs) cols[x].forEach((p, y) => { if (p === BLACK) n += 2; else if (p === BROWN) n += y * 2 < cols[x].length ? 2 : 1; });
+  return n;
+}
+/** The junk in the bank's columns `xs`, each piece's place. */
+export function bankStrays(cols: Board, xs: readonly number[]): At[] {
+  const out: At[] = [];
+  for (const x of xs) cols[x].forEach((p, y) => { if (p === BLACK || p === BROWN) out.push({ x, y }); });
+  return out;
+}
+/** The junk columns right of the bank, from `from` (half junk or more), their browns above blacks, counted in pairs:
+    the swaps still to sort them blacks over browns (the user, 16 Nov: "straightening up the board, getting black to the
+    top, brown to the bottom on the junk columns"). Not the furnace's: it burns as it is. */
+export function junkDisorder(cols: Board, from: number): number {
+  let n = 0;
+  for (let x = Math.max(0, from); x < COLS - 1; x++) if (cols[x].filter(isJunk).length * 2 >= cols[x].length) n += inversions(cols[x]);
+  return n;
 }
 
 /** Every pattern on a board, read at once. */

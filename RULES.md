@@ -1171,6 +1171,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   browns). Never a white taken from a column that's mostly white. And the first chain's column started further left than
   "two or three in from the fire" ("a person would not be wanting to put themselves under so much pressure"): built
   (`P.FIRST_AT`), off till the user decides, since it burned more whites in the bots' run.
+- **Distilling: straighten up once white columns are banked (16 Nov, watching CC^8 on seed 2).** Quick sorting (blacks
+  down, browns up) is right early on, "but at a certain point it needs to switch modes ... we've got a lot of white
+  columns now, so we're switching from quick dragging to ... straightening up the board, getting black to the top,
+  brown to the bottom on the junk columns". In place of quick sorting, once three columns side by side are six whites
+  in eight or nine or more, with only fresh junk left of them: the junk got out of the white columns first, in one long drag if it takes one (a black down through the whites
+  and up through the browns; a brown up through the whites and down through the blacks at the top: "that's why the
+  blacks are there at the top. They are there to essentially rescue the brown pieces"; a brown along the bottom lifting
+  the stuck blacks out), never more junk put in ("this is going to lead to the board quality degrading over time");
+  then the junk columns sorted, blacks over browns; then wait for the burn. "Step one, get it over. Step two, kind of
+  resort and straighten the line." In the chain, the junk in the column going up and the two after it is taken right
+  the same way.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one
