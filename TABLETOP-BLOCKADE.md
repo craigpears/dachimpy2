@@ -1,4 +1,4 @@
-# The tabletop blockade: design document
+# The tabletop blockade (the cade): design document
 
 Started 16 Nov. A faithful recreation of Puzzle Pirates' blockade, as it plays today, with bots that teach it, like
 Distilling's ([DISTILLING.md](DISTILLING.md)). The task board's card: `tasks/tabletop-blockade/`.
