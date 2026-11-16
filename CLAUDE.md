@@ -99,6 +99,8 @@ Read [STORY.md](STORY.md) for the den's story, its progression and the principle
 up to date as the story grows. Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
 Distilling, the puzzle Helium teaches, has one too, [DISTILLING.md](DISTILLING.md) (its real rules, look, techniques
 and targets, researched 12 Nov): read it before working on Distilling, and keep it current.
+The tabletop blockade (16 Nov), a faithful Puzzle Pirates blockade kept wholly apart from the den's 3D one, has
+[BLOCKADE.md](BLOCKADE.md): its real rules, and the user's notes on teaching blockade nav; read it before working on it.
 The sloop race has a design document of its own, [RACE.md](RACE.md) (the user, 11 Nov: "all these kind of
 thoughts, design and balance decisions should all be in some kind of game design document specific to these
 races"): read it before working on the race, and keep it up to date with every design or balance decision and
