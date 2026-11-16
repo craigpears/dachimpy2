@@ -419,6 +419,18 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   - after, two games: frigates fighting 23 and 117 seconds a game (were 156 to 444), in the heart 34 and 38%, gate-gun
     hits on frigates 0 and 20, 4 and 6 of the 8 guns wrecked.
 
+- **A brig's craft clear the enemy's gate guns; a turtle rams a frigate's ends** (16 Nov: "the turtles and [ghost sloops]
+  ... as good tactical options to clear out the cannon placements. Maybe it should still need a few rounds, so you'd
+  lose some turtles ... they're the standoff hunters"; "let's stay at the front of the war frig and start ramming it
+  from the front. That's what they were designed to do"):
+  - a turtle beside a gate gun of the other side's rams it (`gunBeside`, `Rammed.gun`): a hit to its wrecking, three
+    wreck it, and it isn't quietened by it as by a shot, so it fires on her; a turtle weighs a gun like a still ship,
+    `RAM.GUN` 10 more (a frigate 12);
+  - a phantom sloop goes for the other side's guns when they're nearer than her raid, by the frigates' gun berths;
+  - a brig launches at the other side's guns within `BRIG.LAUNCH` of her as at a frigate;
+  - a turtle comes at a ship's nearer end, bow or stern, then a corner, her side last;
+  - after, two games: 6 and 8 gun rams, 2 to 4 guns wrecked by the craft, 2 to 4 turtles sunk by the guns.
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of

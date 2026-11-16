@@ -390,8 +390,22 @@ export class Blockade {
             if ((s.craft.cool = Math.max(0, (s.craft.cool ?? 0) - dt)) > 0)
                 continue;
             const hit = this.besideFoe(s);
-            if (!hit)
+            // (none: a gate's gun of the other side's beside her, rammed: a brig's standoff work, its guns firing on her
+            // meanwhile; the user, 15 Nov: "a good tactical job for the warbrigs ... they're the standoff hunters")
+            if (!hit) {
+                const g = this.gunBeside(s);
+                if (g < 0)
+                    continue;
+                // (a ram cracks its stone, a hit to its wrecking, but doesn't quieten it as a shot does: it fires on her as she
+                // rams, so a brig loses some of her turtles to it)
+                this.battery[g].hit();
+                this.battery[g].quiet = 0;
+                this.battery.forEach((x, i) => { if (this.gunGate[i] === this.gunGate[g])
+                    x.rouse(); });
+                s.craft.cool = BLOCKADE.LAUNCH.RAM.COOL;
+                out.rams.push({ ram: s.id, on: -1, gun: g, at: [this.battery[g].at[0], this.battery[g].at[1]], holes: [], sunk: false });
                 continue;
+            }
             const { o, at } = hit, from = [s.helm.pose.c, s.helm.pose.r], holes = [];
             let sunk = false;
             for (let i = 0; i < BLOCKADE.LAUNCH.RAM.hits && !sunk && o.away <= 0; i++) {
@@ -639,6 +653,11 @@ export class Blockade {
                     return { o, at: [c + dc, r + dr] };
             }
         return null;
+    }
+    /** A gate's gun still standing of the other side's beside her (diagonals too): its index (-1: none). */
+    gunBeside(s) {
+        const { c, r } = s.helm.pose;
+        return this.battery.findIndex((g, i) => !g.wrecked && this.gunSide[i] !== s.team && Math.max(Math.abs(g.at[0] - c), Math.abs(g.at[1] - r)) <= 1);
     }
     /** Back in, refitted, by the next of her entries that nobody's lying on (a sloop or a brig the other side's edge from
         last time, then her own again: so she's in the fight at both ends of the board): whether she is. */

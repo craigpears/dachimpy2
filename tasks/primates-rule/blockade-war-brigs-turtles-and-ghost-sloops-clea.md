@@ -1,6 +1,6 @@
 ---
 title: Blockade: war brigs' turtles and ghost sloops clear the enemy's gate guns, a good standoff job
-status: asked
+status: doing
 asked: 16 Nov
 updated: 16 Nov
 ---
@@ -10,3 +10,4 @@ updated: 16 Nov
 ## Log
 
 - 16 Nov: added.
+- 16 Nov: being done

@@ -335,6 +335,8 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         if (sc.sunk) sank(ships[sc.ship], p);
       }
       for (const r of ev.rams) {
+        // (a gate's gun rammed: spray and stone; its crumbling is the gun's own to draw)
+        if (r.gun !== undefined) { ships[r.ram].fadeT = 0; const p = v3(...r.at, 0.6); burst(p, '#e8f4fa', 20, 5); burst(p, '#b9ad9a', 10, 3); continue; }
         const V = ships[r.ram], O = ships[r.on], p = v3(...r.at, 0.6);
         V.fadeT = 0;
         burst(p, '#e8f4fa', 26, 6); burst(p, '#7d9a5c', 10, 3); burst(p, '#8a6a44', 10, 4);

@@ -4025,6 +4025,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **The gate guns have a side.** Each gate's guns are the side's whose frigates come in at that end, and fire on the
   other side only ("it's for everybody's gain to destroy them, so the opponent benefits from their destruction as much
   as you do. Hence the dilemma. The turrets need to have a side"), so wrecking the enemy's is worth the detour.
+- **A brig's craft clear the enemy's guns.** A turtle rams a gate gun of the other side's as she would a ship, a hit
+  to its wrecking that doesn't quieten it, so it fires on her as she rams; a phantom's broadside wrecks them too. Her
+  brig launches at them in reach as at a frigate ("they're the standoff hunters").
+- **A turtle rams where the broadsides don't bear**: off a ship's nearer end, bow or stern, her side only if there's
+  nothing else ("let's stay at the front of the war frig and start ramming it from the front").
 - **No fights off the points.** A frigate fires on whoever comes into her broadside, but never picks a fight with an
   enemy who isn't on or contesting a buoy ("You don't hang around off points getting into fights").
 - **A sheltered spot has a way in from outside.** The heart's corners are out of any frigate's reach inside the fort,

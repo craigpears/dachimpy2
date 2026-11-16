@@ -327,8 +327,9 @@ describe('admiral mode: an order for each ship (15 Nov: "you need to be able to 
     let camped = 0, held = 0;
     for (let i = 0; i < 900; i++) {
       bots.tick(b, 0.1); b.tick(0.1);
-      // (on it most of the last half minute: a lagoon's, not the buoy off a gate, under its guns since 15 Nov)
-      if (i >= 600 && (b.reaches(other, B.BUOYS[6]) || other.away > 0)) held++;
+      // (on it a good while of the last minute: a lagoon's, not the buoy off a gate, under its guns since 15 Nov; a minute,
+      // not half, since 16 Nov: sunk there, she can come back by the far edge and have the board to cross)
+      if (i >= 300 && (b.reaches(other, B.BUOYS[6]) || other.away > 0)) held++;
       if (i > 600 && sl.away <= 0 && !sl.dmg.out && squares(sl.h, sl.helm.pose).some(([c, r]) => c === 16 && r === 17)) camped++;
     }
     expect(camped).toBeGreaterThan(100);
@@ -870,5 +871,65 @@ describe('the gate guns have a side (15 Nov: "it\'s for everybody\'s gain to des
     const bot = new Bot(f.id, dice(2));
     for (let t = 0; t < 6; t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
     expect(bot.goal?.kind === 'guns' && BLOCKADE.GATES[bot.goal.g].side).not.toBe('gold');
+  });
+});
+
+describe('a brig\'s craft clear the enemy\'s gate guns, her standoff work (16 Nov: "the turtles and [ghost sloops] ... as good tactical options to clear out the cannon placements. Maybe it should still need a few rounds, so you\'d lose some turtles ... they\'re the standoff hunters")', () => {
+  it('a turtle beside a gate gun of the other side\'s rams it, a hit to its wrecking that doesn\'t quieten it: it fires on her; her own side\'s she leaves', () => {
+    const b = new Blockade(), br = brig(b, 'gold');
+    clearAway(b, [br]);
+    br.helm.moor({ c: 14, r: 24, d: 1 }); b.notice();
+    const [id] = b.launch(br.id), x = b.ship(id);
+    for (const c of b.craftOf(br)) if (c !== x) c.helm.moor({ c: 46, r: 36 + (c.id % 3), d: 1 });
+    const g = B.GATES.findIndex((z) => z.side === 'crimson'), gi = b.battery.findIndex((_, i) => b.gunGate[i] === g), gun = b.battery[gi];
+    x.helm.moor({ c: gun.at[0], r: gun.at[1] + 1, d: 1 }); b.notice();
+    let rams: ReturnType<Blockade['tick']>['rams'] = [], firedOnHer = false;
+    for (let i = 0; i < 80 && !(rams.length && firedOnHer); i++) {
+      const ev = b.tick(0.1);
+      if (!rams.length) rams = ev.rams;
+      if (ev.guns.some((e) => e.e.kind === 'fire' && e.e.to[0] === x.helm.pose.c && e.e.to[1] === x.helm.pose.r)) firedOnHer = true;
+    }
+    expect(rams[0]?.gun).toBe(gi);
+    expect(gun.hits).toBeGreaterThan(0);
+    expect(firedOnHer).toBe(true);
+    // (a gold gun beside her: she leaves it be)
+    const own = b.battery.findIndex((_, i) => b.gunSide[i] === 'gold');
+    x.helm.moor({ c: b.battery[own].at[0], r: b.battery[own].at[1] - 1, d: 1 }); b.notice();
+    for (let i = 0; i < 60; i++) expect(b.tick(0.1).rams).toHaveLength(0);
+    expect(b.battery[own].hits).toBe(0);
+  });
+  it('a brig\'s bot launches at the enemy\'s gate guns in reach of her spot, no frigate near, and her turtles go for them', () => {
+    const b = new Blockade(), br = brig(b, 'gold');
+    clearAway(b, [br]);
+    const bots = new Bots(b, [], dice(4)), bot = bots.bots.find((z) => z.id === br.id)!;
+    // (by the west lagoon, the fort's side of it: no enemy frigate about, so anywhere's her spot)
+    br.helm.moor({ c: 14, r: 24, d: 1 }); b.notice();
+    let launched = 0;
+    for (let i = 0; i < 40 && !launched; i++) { bots.tick(b, 0.1); b.tick(0.1); launched += b.launches.splice(0).length; }
+    expect(launched).toBe(1);
+    for (let i = 0; i < 20; i++) { bots.tick(b, 0.1); b.tick(0.1); }
+    const after = b.craftOf(br).filter((z) => z.away <= 0).map((z) => bots.bots.find((q) => q.id === z.id)!.goal);
+    expect(after.some((goal) => goal?.kind === 'ram' && goal.gun !== undefined && b.gunSide[goal.gun] === 'crimson')).toBe(true);
+  });
+});
+
+describe('a turtle rams a frigate where her broadsides don\'t bear (16 Nov: "turtles approach from the front ... and they start ... going to the war frigate\'s side, getting predictably shot and sunk, instead of ... ramming it from the front. That\'s what they were designed to do")', () => {
+  it('coming at her bow, a turtle makes for the square just past her bow, not round to her side', () => {
+    const b = new Blockade(), br = brig(b), f = frigate(b, 'crimson');
+    clearAway(b, [br, f]);
+    // (the frigate heading north-east up the board on open water, the turtle a few squares ahead of her)
+    br.helm.moor({ c: 14, r: 40, d: 1 }); f.helm.moor({ c: 24, r: 38, d: 0 }); b.notice();
+    const [id] = b.launch(br.id), x = b.ship(id);
+    for (const c of b.craftOf(br)) if (c !== x) c.helm.moor({ c: 46, r: 30 + (c.id % 3), d: 1 });
+    const hers = squares(f.h, f.helm.pose), bowR = Math.max(...hers.map(([, r]) => r)), cols = hers.map(([c]) => c);
+    x.helm.moor({ c: 24, r: Math.min(B.ROWS - 2, bowR + 4), d: 2 }); b.notice();
+    b.still.set(f.id, 5);
+    const bot = new Bot(id, dice(9));
+    bot.tick(b, 5);
+    expect(bot.goal?.kind === 'ram' && bot.goal.on).toBe(f.id);
+    const at = bot.goal?.kind === 'ram' ? bot.goal.at : [0, 0];
+    expect(at[1]).toBe(bowR + 1);
+    expect(at[0]).toBeGreaterThanOrEqual(Math.min(...cols));
+    expect(at[0]).toBeLessThanOrEqual(Math.max(...cols));
   });
 });
