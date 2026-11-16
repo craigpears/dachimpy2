@@ -24,9 +24,13 @@ little blockade thing set out on a tabletop or something. All separate and modul
 ## 1. The real rules
 
 Researched 16 Nov. Sources: YPPedia's Sea battle, Blockade, Collision mechanics, Influence, Ramming, Rock, Wind,
-Whirlpool and Maneuver pages ([Y]), and the old cade sim's server, BenBeri's Obsidio-Server (Apache-2.0, last pushed
-2019), whose code resolves a turn as the game does ([S]). Where they differ, the game's own numbers (YPPedia) win, and
-the sim is used for what YPPedia leaves out. Anything unclear is marked **(to confirm with the user)**.
+Whirlpool and Maneuver pages ([Y]); the user's own BlockadeSim ([C], see Sources), the mechanics the tabletop is
+ported from; and another player's later cade sim server, BenBeri's Obsidio-Server ([S]). Where they differ, the
+game's own numbers (YPPedia) win. Anything unclear is marked **(to confirm with the user)**.
+
+**Where it's built (16 Nov):** in the den's code like everything else, its rules in `src/`, a test page to play it
+flat, then a little island of its own with the tabletop on it; separate from the den's 3D blockade, sharing nothing
+with it.
 
 ### The board [Y][S]
 
@@ -93,7 +97,7 @@ full-damage table agrees: a war frigate sinks at 50 small, 33.3 medium, 25 large
     moves. A larger bumping a smaller takes her square and pushes her on a square ahead of her ("a push").
   - **Rocks and the sides**: never entered; she stays and takes rock damage. A turn whose first square is a rock still
     turns her where she sits (a half turn on the spot, for damage). If only the second square is a rock, she ends on
-    the first, turned **(to confirm with the user)**.
+    the first, turned [C, its first unit test].
   - Rams: two ships of the same class meeting deal one collision's damage each; of different classes, two each.
 - **Winds and whirlpools** act once a slot on a ship sitting on one after the moves. A **wind** pushes her a square
   downwind, as a forward move does, whichever way she faces. A **whirlpool** carries her clockwise to the opposite
@@ -156,8 +160,28 @@ no budget, a short round.
   (`PlayerManager.handleTurns`), collisions (`CollisionCalculator`), tokens (`MoveTokensHandler`, `MoveGenerator`,
   `JobbersQuality`), ships (`vessel/impl`), and 30-odd real blockade boards in `maps/` (Loggerhead, Melanester,
   Aimuari...) to set out on the tabletop.
-- Also found: github.com/craigpears/BlockadeSim (2015, GPL-2.0), "a university pet project", a blockade sim with
-  flags, shooting and sinking; not read yet.
+- **The user's own BlockadeSim** ([C]; the user, 16 Nov: "That's mine. So that should give you all the old mechanics
+  you need to at least build the mechanical part"): github.com/craigpears/BlockadeSim, ActionScript for Whirled,
+  2011 to 2012, the source the tabletop's mechanics are ported from, checked against YPPedia. Its parts:
+  `src/game/logic/CollisionMechanics.as` (a turn resolved: moves in two phases, winds and whirlpools, rams, rocks,
+  shoves, guns, sinks), `Tile.as` (its tile codes: 0 open, 1 tall rock, 2 to 5 winds N E S W, 6 to 9 whirlpool
+  corners, 10 to 12 buoys, 13 small rock, 14 safe zone), `Scoring.as` and `Flag.as` (influence and points each turn),
+  `src/constants.as` (influence shapes, ram and rock damage, max damage), `src/game/data/ShipStats.as` (crews by ship
+  and quality), `src/game/data/MapList.as` (26 real boards: Akhlys, Gallows, Iocane, Duat, Zuyua, Labyrinth Moors,
+  Windward Vale...; rows of 38, the board's 36 and a rock border, so turned on its side), and
+  `src/unitTests/UnitTests.as` (its collision tests, each a little scene, to port as the tabletop's own tests).
+  What it settles or adds:
+  - **A turn whose second square is a rock** ends on the first square, turned, with a collision (its first unit test).
+  - **Influence**: a sloop only her own square; a brig's 29 squares and a frigate's 49, listed square by square, the
+    same circles as above.
+  - **You can't sink on a rock ram** (CollisionMechanics: rock damage stops short of sinking her) **(to check against
+    the game)**.
+  - **Crews**, three ships by three qualities (weak, normal, elite):
+    moves a turn: sloop 1.4, 2.5, 3.5; brig 1.6, 2.3, 2.9; frigate 1.5, 2.2, 2.8.
+    Guns loaded a turn: sloop 1, 2, 3.5; brig 3, 6, 8; frigate 5, 8, 12 (stores 4, 16, 24).
+    Damage mended a turn, in small shots: sloop 0.1, 0.15, 0.2; brig 0.4, 0.6, 0.8; frigate 1, 1.6, 2.2.
+    Bilge pumped a turn: sloop 12, 16, 25%; brig 10, 18, 23%; frigate 8, 15, 19%.
+  - **A round of 60 turns**; a sink delay as an option.
 
 ## 2. Teaching it: the user's notes (16 Nov)
 

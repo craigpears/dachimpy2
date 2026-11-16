@@ -14,3 +14,4 @@ updated: 16 Nov
 - 16 Nov: added.
 - 16 Nov: 16 Nov: the user's notes on teaching blockade nav (hotspots, dancing, risk, damage management, cluster hopping, a training mode, an interactive story) kept in BLOCKADE.md, its notes section.
 - 16 Nov: 16 Nov: the real rules researched into BLOCKADE.md §1 (YPPedia, and the old cade sim's server, BenBeri/Obsidio-Server, Apache-2.0, with 30-odd real boards). Next: agree the first cut.
+- 16 Nov: 16 Nov: the user's own BlockadeSim (github.com/craigpears/BlockadeSim, ActionScript) is the source to port the mechanics from: collisions, scoring, crews, 26 real boards, its unit tests. Noted in BLOCKADE.md §1.
