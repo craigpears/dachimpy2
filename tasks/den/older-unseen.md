@@ -1,6 +1,6 @@
 ---
 title: Older, still unseen
-status: playtest
+status: done
 asked: 9 Nov
 updated: 15 Nov
 ---
@@ -15,3 +15,4 @@ middle and night sky; the cove (each under "Asked for", below).
 ## Log
 
 - 15 Nov: put on the board.
+- 15 Nov: done: moved on the board
