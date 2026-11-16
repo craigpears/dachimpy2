@@ -2,7 +2,7 @@
 // column for; the board drawn from them, a script's work and no one else's (the user, 15 Nov: "more deterministic").
 import { describe, it, expect } from 'vitest';
 // @ts-expect-error: a plain .mjs tool, untyped
-import { load, board, parse, format, change, dropIn, triage, update, tidy, resume, plainEnv, summary, busy, STATUSES } from '../tools/task.mjs';
+import { load, board, parse, format, change, dropIn, triage, update, tidy, resume, plainEnv, summary, goLinks, busy, STATUSES } from '../tools/task.mjs';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -89,6 +89,21 @@ describe('the task board (the user, 14 Nov: "a clear list of things and what the
     expect(html).toContain('class="through"');
     expect(client).toMatch(/ArrowRight/);
     expect(client).toContain('/api/update');
+  });
+  it('a card links to where to try it, Local and Live, in a new tab (the user, 15 Nov: "link to, like, live or local to test something? Open in a new tab")', () => {
+    const own: string = goLinks('den.html?at=helium&as=dachimpy', 'den.html');
+    expect(own).toContain('href="http://localhost:8642/den.html?at=helium&amp;as=dachimpy"');
+    expect(own).toContain('href="https://dachimpy2.dachimpy.workers.dev/den.html?at=helium&amp;as=dachimpy"');
+    expect(own.match(/target="_blank" rel="noopener"/g)).toHaveLength(2);
+    expect(goLinks(undefined, 'den.html?at=race')).toContain('class="go stream"'); // none of its own: its stream's place
+    expect(goLinks(undefined, undefined)).toBe('');
+    const html: string = board(all);
+    for (const c of all.cards) {
+      const s = all.streams.find((x: any) => x.id === c.stream);
+      if (c.meta.link || s?.link) expect(html, c.id).toMatch(new RegExp(`data-id="${c.id}"[^]*?<div class="links"><a class="go`));
+    }
+    const client = readFileSync(join(__dirname, '..', 'tools', 'board-client.js'), 'utf8');
+    expect(client).toContain("e.code === 'KeyL'");
   });
   it('its headless Claude runs the real node, not npm\'s shim (15 Nov: every update "did nothing", stopped at an approval prompt)', () => {
     const sep = process.platform === 'win32' ? ';' : ':';

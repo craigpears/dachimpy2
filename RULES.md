@@ -18,6 +18,12 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 ## Design rules from playtests
 
+- **The simulation underneath, the drawing on top (16 Nov).** The user, starting the tabletop blockade: "all the
+  simulation should happen underneath, and any 3D-ish stuff or rendering stuff happens on top ... the core
+  simulation should be very logic based, very testable." Every game, puzzle and place: its rules a pure TypeScript
+  module in `src/` with tests, knowing nothing of how it's drawn; the 3D, the flat pages, the bots and the lessons
+  all on top of it, through what it returns, never reaching into it. Distilling (`src/distilling.ts` under its board,
+  its bots and Helium's lesson) and the tabletop blockade (`src/cade.ts`) are the pattern.
 - **It's a game, not a tutorial.** Short, quick-fire, with a journey and a daily puzzle.
 - **Words over percentages.** Don't fill the screen with numbers. Grades, meters and rarity
   words are fine. When rarity is shown, also say how often a piece turns up as "about 1 in X"
@@ -2735,6 +2741,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     moves counted (choosing a ring isn't); constellations' places weighted toward the middle (filled
     from the centre out, its strategy) and never a line of three of a colour among themselves; sizes
     one star, then two, three... a constellation (SIZES, a host can give its own, and fewer colours).
+  - **Stars come in bags of ten, not plain random (the user, 15 Nov, from what players said; not built yet).**
+    "pieces come in, they say come in bags of 10 for this puzzle. So instead of it being random, it's like you get a
+    bag mixed up with two of each colour ... you don't get a third of anything until you get two of each in that
+    cycle." Shuffled within the bag, it seems. It makes combos needing three of a colour slower to set up.
   - A first go is the first three, one, two and three stars (FIRST_GO): the greedy bot takes about 66
     moves over them (15, 21 and 30), a minute or two at the keys, and booches about once in thirteen
     goes.

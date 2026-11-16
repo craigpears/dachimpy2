@@ -54,8 +54,11 @@ tests, add a test for it, named after what they saw, with the date.
 Smoke tests (15 Nov, after `?at=helium` crashed on arrival, live, for a day): `npm run smoke` (`tools/smoke.mjs`,
 Playwright's Chromium on the real GPU) opens every `den.html?at=` link on the front page, as the plain modules and
 as the bundle, played a few seconds with Space pressed, and every other page, failing on any uncaught or console
-error; about a minute and a half, one line when it passes. Run it before every push to main, after `npm run build`;
-`npm run smoke -- helium` for just the pages with that in their address. A link added to the front page is covered.
+error; about a minute and a half, one line when it passes. `npm run smoke -- helium` for just the pages with that in
+their address. A link added to the front page is covered. Git's pre-push hook runs it (`tools/hooks/pre-push`,
+`tools/pre-push.mjs`; `npm run hooks` installs it, once a clone): a push to main changing `js/`, `css/` or a page in the
+root waits on it and is stopped if a page fails; cards, notes and docs go straight up (the user, 15 Nov: "at least
+occasionally"). Run `npm run build` before pushing, so the bundle it tests is the one going live.
 
 Modular, no technical debt (the user, 10 Nov: "we need to make sure I'm not creating spaghetti or just mess"):
 - Each puzzle (Carpentry, Gunnery, Bilge, Swordfight, Treasure Haul, rowing...) is one module with one
@@ -96,6 +99,13 @@ Read [STORY.md](STORY.md) for the den's story, its progression and the principle
 up to date as the story grows. Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
 Distilling, the puzzle Helium teaches, has one too, [DISTILLING.md](DISTILLING.md) (its real rules, look, techniques
 and targets, researched 12 Nov): read it before working on Distilling, and keep it current.
+The tabletop blockade (16 Nov), a faithful Puzzle Pirates blockade kept wholly apart from the den's 3D one, has
+[TABLETOP-BLOCKADE.md](TABLETOP-BLOCKADE.md): its real rules, and the user's notes on teaching blockade nav; read it before working on it.
+Its rules `src/cade.ts` (the cade, the players' word, so its files never meet the 3D blockade's: the board and its
+tiles, every ship by YPPedia's table `KINDS`, a slot resolved by YPPedia's claim rules `resolveSlot`, influence and
+points `influence`, crews and tokens, a round played `Cade`), its 26 real boards `src/cade-boards.ts` (from the user's
+own BlockadeSim, `cadeBoard`); tests `tests/cade.test.ts` (the BlockadeSim's own unit tests ported, then YPPedia's)
+and `tests/cade-boards.test.ts`.
 The sloop race has a design document of its own, [RACE.md](RACE.md) (the user, 11 Nov: "all these kind of
 thoughts, design and balance decisions should all be in some kind of game design document specific to these
 races"): read it before working on the race, and keep it up to date with every design or balance decision and

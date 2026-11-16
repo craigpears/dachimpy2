@@ -88,6 +88,13 @@
     c.classList.add('open'); c.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     try { history.replaceState(null, '', '#' + encodeURIComponent(open)); } catch (e) {}
   }
+  // L tries the open card locally, Shift+L live, in a new tab (the user, 15 Nov: "link to, like, live or local to
+  // test something? Open in a new tab").
+  function tryIt(where) {
+    const c = cardEl(open), a = c && ($(`a.go[data-go="${where}"]`, c) || $('a.go', c));
+    if (!a) return tell('No link on this card, or its stream, to try it at.');
+    window.open(a.href, '_blank', 'noopener');
+  }
   function openCard(id, keepOrder) {
     if (!keepOrder || !order.includes(id)) order = orderFrom(id);
     if (open !== id) { box.value = draft[id] || ''; fit(box); }
@@ -141,6 +148,7 @@
     else if (e.key === 'ArrowLeft' || e.code === 'KeyK') step(-1);
     else if (e.code === 'KeyN') send(true);
     else if (e.code === 'KeyI') { if (box.value.trim()) dropIt(box); }
+    else if (e.code === 'KeyL') tryIt(e.shiftKey ? 'live' : 'local');
     else if (e.key === 'Escape') shut();
     else if (e.key === 'Enter' || e.key === '/') { if (rec) return; box.focus(); }
     else if (n >= 1 && n <= STATUSES.length) moveTo(open, STATUSES[n - 1]);

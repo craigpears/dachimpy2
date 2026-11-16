@@ -68,7 +68,9 @@ it's on (M the mic, N send and next, ← → go through, 1 to 8 move it, I to th
 Click a card (or Tab to it and Enter) and it opens in a panel down the right: everything on it, what was asked and its
 whole log. ← and → go through the cards showing (the stream picked), column by column from that card's own, each
 column's "Go through" starts at its top; 1 to 8 move it (Inbox to Done, the buttons along the top say which); Esc
-closes it; a card's link, `#its-id`, opens it. Below is a box for what's changed, typed or said (the user, 15 Nov:
+closes it; a card's link, `#its-id`, opens it. Local and Live on a card open where to try it in a new tab (L, or
+Shift+L, with it open; the user, 15 Nov: "link to, like, live or local to test something? Open in a new tab"): its
+own `--link`, or its stream's place (`stream <stream> --link`), shown fainter, when it has none. Below is a box for what's changed, typed or said (the user, 15 Nov:
 "some quick way of going between them, even if the quick fire way is then me just having this mic on and dictating
 into here about what the updated status of each thing is"): the Mic button, or M (Alt+M while writing), where the browser can listen (Chrome,
 Edge; "next" said on its own sends it and goes on, "back" goes back), or Windows' dictation (Win+H) anywhere.
