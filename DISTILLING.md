@@ -2385,6 +2385,22 @@ white columns now, so we're switching from quick dragging to ... straightening u
   P30's tail, "four columns of junk waiting get no sorting drag"), so it was narrowed. Six boards is small; a bigger
   run, and when the mode switches (the user: "how many columns have burned ... could likely affect the stage of the
   game"), are next.
+- **Hoisting rather than waiting** (16 Nov, notes/distilling/52-a-black-back-along-the-top.webp: "going backwards across
+  the screen ... is good if it pulls down trapped pieces like that"): with nothing else worth doing in Stage I, the
+  bot hoists (src/distill-bots.ts, `choose`, `P.HOIST_IDLE`), the drag pulling the most browns down from high among
+  the whites first (`pulledDown`), two of them at the least, never a white toward the fire for it; not in the block
+  phase (few small drags there, 13 Nov). Any hoist in place of a wait cost the bots: 6 boards of CC^8, chain mean 3.7
+  against 4.3 without it; narrowed to two browns pulled down, it never came up in those 6 and costs nothing. On the user's board it plays their drag, the black at column 5, row 2 up-left, down-left, up-left,
+  up-left.
+- **The user's pictures as boards** (tests/distill-straighten.test.ts): pictures 1, 3, 4 and 6 copied piece by piece.
+  Picture 3's first move is the user's own sweep, the black down through the whites and up through the browns in one
+  drag. Picture 4 (in the chain: browns to be carried right across clear columns, dropping into the blacks there and
+  leaving one to sort) is a to-do: the chain's planner looks a move ahead and won't spoil a clear column for it.
+- **Run on the one simulation** (16 Nov, after `BotPlayer`; 6 boards, CC^8): everything new off
+  (`PLAN='{"STRAIGHTEN":0,"STRAY":0,"HOIST_IDLE":0}'`), chain mean 4.8, best 8, no white burned 4 of 6, 14.6 points a
+  minute, effort 16.1 a column gone; as built, chain mean 4.3, best 6, no white burned 6 of 6, 15.6 points a minute,
+  effort 17.3. Fewer whites burned and more points, chains a little shorter: too few boards to tell; a 20-board run
+  each way (about 25 minutes) is the user's call.
 - **Left**: two blacks boxed in by a spice at the bank's bottom stay (no single drag reaches them); and the user's next
   note, a chain started while a fifth junk column was easy to finish ("There is no reason to switch until ... you're
   down to, like, even just say 1 or 2 junk columns"), is the stage switch's (`decisionTime`, the let go), not this.

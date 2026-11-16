@@ -46,12 +46,12 @@
    `advise(board)` is the planner for anyone's board, a person's mid-game: the stage, the routine it would
    play now, why in a line, and its drags. "Help, Helium" will show that on the player's own board. */
 import { BLACK, BROWN, COLS, DOWN_LEFT, DOWN_RIGHT, SPICE, TALL, UP_LEFT, UP_RIGHT, WHITE, neighbourOn } from './distilling.js';
-import { M, ROUTINES, burnsClean, canGo, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom, } from './distill-routines.js';
+import { M, ROUTINES, burnsClean, canGo, clear, colourLeft, fillTarget, isJunk, junkTarget, measure, playDrags, swapsIn, whitesFrom, halfOf, } from './distill-routines.js';
 import { blockPhase, boardScore, doneFromRight, keptTools, trappedWhite, wall } from './distill-score.js';
 import { PATH, freed, pairRescue, pathMoves, stuck } from './distill-path.js';
 import { phaseOf, weightIn } from './distill-phase.js';
 import { TACTICS, hoistDrags, hoistOrder, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, sorts, straightenDrags, strayDrags, tailDrags, tipDrags, toolBrowns } from './distill-read.js';
-import { bankJunk, bankStrays } from './distill-patterns.js';
+import { PATTERN, bankJunk, bankStrays } from './distill-patterns.js';
 import { joinPairs } from './distill-teach.js';
 import { channelReason, channelRuns } from './distill-channel.js';
 import { ownGoal, purposeful, stepsFor } from './distill-goals.js';
@@ -126,6 +126,8 @@ export const P = {
     /** Straightening up once white columns are banked (16 Nov; src/distill-read.ts, `straighten`), and the chain's white
         columns straightened up, their junk taken right in one drag (`strayDrags`). */
     STRAIGHTEN: true,
+    /** With nothing else worth doing in Stage I, a hoist rather than a wait (16 Nov). */
+    HOIST_IDLE: true,
     STRAY: true,
     SLACK: 1,
     /** ms left on the furnace below which only what saves its column counts. */
@@ -951,6 +953,29 @@ export function hoists(sit, style, r, admissible) {
 }
 /** The hoist's name for a player. */
 export const HOIST_LABEL = 'Hoist';
+/** How many browns high among the whites a move pulls down (the user, 16 Nov: "using that black to pull them, you know,
+    go pull them down"): each brown in the top PATTERN.THIRD half rows of a column half white or more that a drag's piece
+    passes, moved down a place, or the dragged piece itself if it's one, let go lower. */
+export function pulledDown(cols, drags) {
+    let n = 0, b = cols;
+    const high = (q, x, y) => q[x][y] === BROWN && halfOf(q, x, y) <= PATTERN.THIRD && q[x].filter((p) => p === WHITE).length * 2 >= q[x].length;
+    for (const d of drags) {
+        let [x, y] = [d.x, d.y];
+        const self = high(b, x, y), h0 = halfOf(b, x, y);
+        for (const w of d.ways) {
+            const nb = neighbourOn(b, x, y, w);
+            if (!nb)
+                break;
+            if (high(b, nb[0], nb[1]) && halfOf(b, x, y) > halfOf(b, nb[0], nb[1]))
+                n++;
+            [x, y] = nb;
+        }
+        if (self && halfOf(b, x, y) > h0)
+            n++;
+        b = playDrags(b, [d]) ?? b;
+    }
+    return n;
+}
 /** Straightening up's moves, for a player. */
 export const STRAIGHTEN_LABEL = 'Straighten up';
 /** The chain's danger zones (`weigh`): the column being filled and the one after it, each while it's mostly white
@@ -1153,6 +1178,20 @@ export function choose(sit, ctx, style, focus = null) {
         // A move the tactic picked says so first.
         const why = best.tactic ? `${TACTICS[best.tactic].label.toLowerCase()}: ${best.move.reason}` : best.move.reason;
         return advice('move', label, why + gamble, best);
+    }
+    // Nothing else worth doing in Stage I: hoist, a black brought back to the trapped browns at the top to pull them down
+    // (or a brown sunk through blacks, lifting them), rather than wait (the user, 16 Nov,
+    // notes/distilling/52-a-black-back-along-the-top.webp: "going backwards across the screen ... is good if it pulls
+    // down trapped pieces like that"). Never a white further toward the fire for it.
+    // (Not in the block phase, junk moved in blocks with few small drags: 13 Nov, the twenty-third note.)
+    if (ctx.stage === 'junk' && P.HOIST_IDLE && P.READ && style.path && !blockPhase(cols)) {
+        const safe = (_d, after) => whitesFrom(after, ctx.burnFrom) <= whitesFrom(cols, ctx.burnFrom);
+        // (The drag pulling the most browns down from high among the whites first, then the hoist's own worth.)
+        // (Only a drag pulling two or more of them down: any hoist in place of a wait cost the bots' chains, 16 Nov.)
+        const h = hoists(sit, style, reading, safe).filter((m) => m.value > P.RATE_MIN && pulledDown(cols, m.move.drags) >= 2 && ok(m))
+            .sort((a, b) => pulledDown(cols, b.move.drags) - pulledDown(cols, a.move.drags) || b.value - a.value)[0];
+        if (h)
+            return advice('move', HOIST_LABEL, h.move.reason, h);
     }
     return advice('wait', 'Wait', ready ? 'the column is ready: let the furnace take it' : 'nothing worth moving: wait for the next column');
 }
