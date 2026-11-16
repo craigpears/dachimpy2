@@ -26,15 +26,18 @@ The numbers can't tell a speech bubble that's fine from a menu in the way: that'
    - Find a card already about that page on a phone: `node tools/task.mjs list`, and `node tools/task.mjs show
      <id>` to read one (search the titles for "phone", "mobile", "menu", the place's name). Known ones: the
      blockade (`blockade-test.html`), `the-blockade-on-a-phone-its-buttons-and-list-of-` in primates-rule; the den's
-     menu, `the-dens-menu-as-a-hamburger-menu-on-a-phone-abo` in den; the wolf den, `on-a-phone` in wolf-den. If
+     menu, `the-dens-menu-as-a-hamburger-menu-on-a-phone-abo` in den; the den at sea's controls,
+     `the-den-at-sea-on-a-phone-the-controls-dock-cove` in den; the wolf den, `on-a-phone` in wolf-den. If
      there is one, `node tools/task.mjs note <id> "Phone check (16 Nov): <the problems, in a line or three>"`.
-     Don't change its status, title or anything else on it.
+     Don't change its status, title or anything else on it. Read it first: what it already says needs nothing more.
    - If there isn't, add one in that page's stream (a stream is the folder under `tasks/`; each `_stream.md` says
      what it holds; `den` if none fits): `node tools/task.mjs add <stream> "<page> on a phone: <its worst problem,
      short>" --status asked --asked "Phone check (16 Nov), <the page's address>: <the problems>" --done "<what it
      looks like fixed, in a line>"`. If `add` doesn't take an option, leave it out and `note` it instead.
    - A problem shared by many pages (the den's menu on every place, say) goes once on the card about it, not on
-     every page's; a page's card says only what's its own.
+     every page's; a page's card says only what's its own. The den's own controls (its menu along the top, the
+     Sailing dock and key hints at sea, the big message mid-screen) are already on the two den cards above: on a
+     den page, note only what that place adds.
    - Only the pages above, and only their cards: never a note on a card about a page you weren't given (the known
      cards above are each for their own page; leave the others alone), and never a note saying there's nothing.
 

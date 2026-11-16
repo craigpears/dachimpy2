@@ -12,3 +12,4 @@ updated: 16 Nov
 ## Log
 
 - 16 Nov: added.
+- 16 Nov: Phone check (16 Nov), den.html?at=door/kikkit/rowing: the 'Timber's come: build the rampart' wall toast hangs big and stale mid-screen at sea in every place (also over the door and the rowing boards); fold or clear it away from the sea. Also at the door the dock sits right under the starlit door, 78% of the action covered.
