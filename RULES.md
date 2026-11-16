@@ -4040,6 +4040,20 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
 - **Manoeuvre on the points.** A frigate on the points with an enemy in reach and no broadside bearing turns to bring hers
   round, by a move that keeps the buoy in her reach ("you can still maneuver within the middle, fight things, but just
   ... while you've got the points within your influence").
+- **A fair board.** The board and both fleets, every entry, are each other's turned round its middle: neither side's
+  frigate has a rock to turn for that the other's hasn't ("the map looks very unfair that one ends up having to turn for
+  a rock while the other doesn't").
+- **A ship can always turn where she fits.** A big ship's turn is her wide quarter circle when there's room for it;
+  blocked by rocks or ships, she bumps and turns on the spot about her middle, so long as her hull fits there facing the
+  new way ("they don't need open water to turn. You can at least bounce off rocks or each other's ships"). Two frigates
+  bow to bow between the gates swing round and trade broadsides ("surely frigs should be able to bounce off each other
+  and then start exchanging a broadside in the middle, not camping").
+- **Low rocks keep a frigate in the middle of the heart.** A line of low rocks down each side of the heart's middle, six
+  squares across: too shallow for a frigate, the brigs and sloops slipping over them, every shot flying over them ("you
+  can shoot over them but you can't get past them, just to kind of control where a war frigate can get to in the middle
+  so it stays in that center square area"). No frigate gets into a corner she can't turn in.
+- **A gate gun shows every hit**: from the first, half its battlements gone, its stone blackened, its gun knocked askew,
+  smoking ("I didn't see any visible damage after the first shot from the sloop on one of the cannons").
 - **Guard the brig.** A sloop drives off an enemy sloop at her side's brig lying at anchor, one sloop to each ("I would
   expect them to be protecting the war brig and getting behind [her]").
 - **No fights off the points.** A frigate fires on whoever comes into her broadside, but never picks a fight with an

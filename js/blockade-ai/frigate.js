@@ -1,4 +1,4 @@
-import { squares, drawnAt, shipPath } from '../ship-handling.js';
+import { squares, drawnAt } from '../ship-handling.js';
 import { inHeart, phantom } from '../blockade.js';
 import { BLOCKADE } from '../blockade.js';
 import { BOTS, same } from './config.js';
@@ -8,6 +8,8 @@ export class FrigateAI extends Captain {
     shunsShelter = true;
     settled(b, s, buoy) { return super.settled(b, s, buoy) && !inGateway(s); }
     act(b, s, _dt) {
+        if (this.bounce(b, s))
+            return false;
         // (caught in a gateway, her way on blocked by the ships ahead and no room to turn: straight on into the heart when
         // that's clear, rather than lie there with her stern out)
         if (inGateway(s) && this.goal?.kind === 'buoy' && s.helm.slot < 0 && !s.helm.pin && !s.helm.mine.length && s.sea.clear(s.helm.pose, 'F')) {
@@ -16,6 +18,24 @@ export class FrigateAI extends Captain {
         }
         this.bear(b, s);
         return false;
+    }
+    /** Boxed in, no move of hers clear (bow to bow with another frigate between the gates, say): warped round on the spot,
+        the way that keeps her buoy if either does, so her broadside comes round onto whoever's ahead of her (16 Nov:
+        "nobody's turning ... surely frigs should be able to bounce off each other and then start exchanging a broadside
+        in the middle, not camping"). */
+    bounce(b, s) {
+        const g = this.goal, p = s.helm.pose;
+        if (s.helm.slot >= 0 || s.helm.pin || s.helm.mine.length || g?.kind !== 'buoy')
+            return false;
+        if (['F', 'L', 'R'].some((m) => s.sea.clear(p, m)))
+            return false;
+        const buoy = BLOCKADE.BUOYS[g.i], R = BLOCKADE.INFLUENCE.frigate;
+        const spins = ['L', 'R'].map((m) => ({ m, to: s.sea.move(p, m).to })).filter((x) => x.to.d !== p.d);
+        if (!spins.length)
+            return false;
+        const keeps = (to) => squares(s.h, to).some(([c, r]) => Math.hypot(c - buoy.at[0], r - buoy.at[1]) <= R);
+        s.helm.put((spins.find((x) => keeps(x.to)) ?? spins[0]).m);
+        return true;
     }
     /** On the points, idle, an enemy in reach and neither side bearing on any: a turn that brings her broadside round onto
         the nearest, keeping the buoy in her reach. */
@@ -37,7 +57,8 @@ export class FrigateAI extends Captain {
         const ahead = dc * DC[p.d] + dr * DR[p.d], across = dc * DC[(p.d + 1) % 4] + dr * DR[(p.d + 1) % 4];
         if (Math.abs(ahead) < Math.abs(across))
             return; // (abeam already: rocks or range, not her heading)
-        const R = BLOCKADE.INFLUENCE.frigate, keeps = (mv) => s.sea.clear(p, mv) && squares(s.h, shipPath(s.h, p, mv).to).some(([c, r]) => Math.hypot(c - buoy.at[0], r - buoy.at[1]) <= R);
+        // (her wide turn, or, no room for it, bumping round on the spot where she fits)
+        const R = BLOCKADE.INFLUENCE.frigate, keeps = (mv) => { const to = s.sea.move(p, mv).to; return to.d !== p.d && squares(s.h, to).some(([c, r]) => Math.hypot(c - buoy.at[0], r - buoy.at[1]) <= R); };
         const turn = ['L', 'R'].find(keeps);
         if (turn)
             s.helm.put(turn);

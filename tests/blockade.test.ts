@@ -460,8 +460,10 @@ describe('the bots, a whole round (15 Nov: "you should see sloops hiding out, so
     for (const k of ['raided', 'fought', 'outs', 'sunk', 'back', 'launched', 'rammed', 'faded'] as const) expect(log[k], k).toBeGreaterThan(0);
     // (nobody hides: the user, 15 Nov, "you never hide. There\'s just no tactical reason or benefit to. You lose coverage of points")
     expect(log.hid).toBe(0);
-    // (the brigs out round the islands far more than in the heart: theirs is the middle ground)
-    expect(log.brigOut).toBeGreaterThan(log.brigIn * 2);
+    // (the brigs out round the islands more than in the heart: theirs is the middle ground; since the heart's low rocks,
+    // 16 Nov, a brig lies in its sides more, out of a frigate's way though not her guns: twice as much, 1111 to 204 out
+    // and in before, 859 to 431 after)
+    expect(log.brigOut).toBeGreaterThan(log.brigIn * 1.5);
     expect(b.score.gold).toBeGreaterThan(0);
     expect(b.score.crimson).toBeGreaterThan(0);
     expect(b.over).toBe(true);
@@ -759,6 +761,38 @@ describe('playing a brig (15 Nov: "Are they expected to go on autopilot and you 
 });
 
 describe('island side and ocean side (15 Nov: "for the smaller ships, they should ... be able to spawn ... on any side that they want to ... that\'s probably what\'s creating this one-sided thing where brigs are quite safe")', () => {
+  it('the heart\'s low rocks keep a frigate to its middle six columns, where she always has room to turn, and every shot flies over them (16 Nov: "low rocks ... you can shoot over them but you can\'t get past them ... so it stays in that center square area")', () => {
+    const b = new Blockade(), f = frigate(b), sea = f.sea.bare();
+    for (const g of b.gates) for (const t of g.towers) { while (t.hp > 0) t.hit('large'); for (const [c, r] of t.squares) b.rocks.delete(`${c},${r}`); }
+    sea.touch();
+    const seen = new Set<string>(), todo = [{ ...f.start }], reach = new Set<string>();
+    while (todo.length) {
+      const p = todo.pop()!;
+      for (const [c, r] of squares(f.h, p)) reach.add(`${c},${r}`);
+      for (const m of ['F', 'L', 'R'] as const) { const t = sea.move(p, m).to, k = `${t.c},${t.r},${t.d}`; if (!seen.has(k)) { seen.add(k); todo.push(t); } }
+    }
+    for (let c = B.HEART.c0; c <= B.HEART.c1; c++) for (let r = B.HEART.r0; r <= B.HEART.r1; r++) if (reach.has(`${c},${r}`)) expect(c >= 25 && c <= 30, `${c},${r}`).toBe(true);
+    expect(reach.has(`27,23`)).toBe(true);
+    // (a sloop and a brig slip over them)
+    for (const s of [sloop(b), brig(b)]) expect(s.sea.open(24, 24)).toBe(true);
+    // (and a frigate lying beside them fires over them)
+    clearAway(b, [f]);
+    f.helm.moor({ c: 26, r: 24, d: 0 }); b.notice();
+    expect(b.aim(f.id, 'L').some((x) => x.cells.some(([c]) => c < 24))).toBe(true);
+  });
+  it('the board and both fleets are each other\'s turned round its middle, so neither side has a rock to turn for that the other hasn\'t (16 Nov: "the map looks very unfair that one ends up having to turn for a rock while the other doesn\'t")', () => {
+    const at = ([c, r]: number[]) => `${B.COLS - 1 - c},${B.ROWS - 1 - r}`, set = (xs: number[][], f = (x: number[]) => x.join(',')) => new Set(xs.map(f));
+    expect(set(B.ROCKS, at)).toEqual(set(B.ROCKS));
+    expect(set(B.LOW, at)).toEqual(set(B.LOW));
+    const pose = (p: { c: number; r: number; d: number }) => `${B.COLS - 1 - p.c},${B.ROWS - 1 - p.r},${(p.d + 2) % 4}`, id = (p: { c: number; r: number; d: number }) => `${p.c},${p.r},${p.d}`;
+    const [gold, crimson] = B.TEAMS;
+    expect(gold.ships.length).toBe(crimson.ships.length);
+    for (const s of gold.ships) {
+      const o = crimson.ships.find((x) => id(x.at) === pose(s.at));
+      expect(o, s.name).toBeDefined();
+      expect([o!.kind, !!o!.far, !!o!.raider, o!.other && id(o!.other)], s.name).toEqual([s.kind, !!s.far, !!s.raider, s.other && pose(s.other)]);
+    }
+  });
   it('each side\'s sloops and brigs start on both side edges, a brig on each; its frigates on their own edge', () => {
     const b = new Blockade();
     for (const team of ['gold', 'crimson'] as const) {
@@ -954,6 +988,24 @@ describe('tactics (16 Nov: "I don\'t see very many tactical moves being made")',
     const bot = botFor(b, sl.id, dice(2));
     bot.tick(b, 5);
     expect(bot.goal).toMatchObject({ kind: 'fight', on: foe.id });
+  });
+  it('two frigates bow to bow between the gates bounce off: one swings round and they trade broadsides (16 Nov: "nobody\'s turning ... surely frigs should be able to bounce off each other and then start exchanging a broadside in the middle, not camping")', () => {
+    const b = new Blockade(), f = frigate(b), e = frigate(b, 'crimson');
+    clearAway(b, [f, e]);
+    for (const [g, i] of [[0, 0], [0, 1], [1, 0], [1, 1]]) { const t = b.gates[g].towers[i]; while (t.hp > 0) t.hit('large'); for (const [c, r] of t.squares) b.rocks.delete(`${c},${r}`); }
+    b.battery.forEach((x) => { x.wrecked = true; });
+    for (const o of b.ships) o.sea.touch();
+    // (as the user saw it: hers half in the south gateway, the enemy's half in the north, bow to bow in the heart)
+    f.helm.moor({ c: 28, r: 21, d: 0 }); e.helm.moor({ c: 27, r: 26, d: 2 }); b.notice();
+    const bots = [botFor(b, f.id, dice(1)), botFor(b, e.id, dice(2))], hits = new Map<number, number>();
+    for (let i = 0; i < 400; i++) {
+      for (const x of bots) x.tick(b, 0.1);
+      b.tick(0.1);
+      for (const x of b.fired) for (const s of x.shots) if (s.got === 'hit') hits.set(x.ship, (hits.get(x.ship) ?? 0) + 1);
+      b.fired.length = 0;
+    }
+    expect(f.helm.pose.d % 2 === 1 || e.helm.pose.d % 2 === 1).toBe(true);
+    expect((hits.get(f.id) ?? 0) + (hits.get(e.id) ?? 0)).toBeGreaterThan(0);
   });
   it('no frigate lies long in a gateway, half in and half out ("they seem now to just want to sit in the gate"; "that ship is a sitting duck")', () => {
     const b = new Blockade(), bots = new Bots(b, [], dice(1)), gate: Record<string, number> = {};

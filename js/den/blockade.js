@@ -157,6 +157,20 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
       still.add(m);
     }
   }
+  // ----- the heart's low rocks (BLOCKADE.LOW): a pale ledge just under the water, flat stones awash on it, low enough
+  // to fire over, too shallow for a frigate -----
+  const ledgeM = mat('#9fd0c4', { roughness: 1, transparent: true, opacity: 0.7 });
+  for (const k of b.low) {
+    const [c, r] = k.split(',').map(Number), roll = dice(c + 100, r), at = v3(c, r);
+    const ledge = mesh(new THREE.CylinderGeometry(CELL * 0.62, CELL * 0.7, 0.2, 10), ledgeM, false); ledge.position.set(at.x, -0.02, at.z); ledge.rotation.y = roll() * 3; still.add(ledge);
+    for (let i = 0; i < 5; i++) {
+      const sz = 0.45 + roll() * 0.4, m = mesh(rockGeo, reefRockM[Math.floor(roll() * reefRockM.length)]);
+      m.scale.set(sz * (1.1 + roll() * 0.5), sz * 0.45, sz * (1.1 + roll() * 0.5));
+      m.position.set(at.x + (roll() - 0.5) * 2.8, 0.05, at.z + (roll() - 0.5) * 2.8);
+      m.rotation.set(0, roll() * 3, 0);
+      still.add(m);
+    }
+  }
   // ----- a tiny island by each lagoon's buoy: a round of sand, a tuft of grass, a palm or two -----
   const sandM = mat('#e2cf98', { roughness: 1 }), grassM = mat('#6f9a46', { roughness: 1, flatShading: true }), trunkM = mat('#8a6a44', { roughness: 1 }), leafM = mat('#4f8a3a', { roughness: 1, side: THREE.DoubleSide });
   for (const { islet: [c, r] } of BLOCKADE.REEFS) {

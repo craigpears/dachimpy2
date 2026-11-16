@@ -454,12 +454,31 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   - an enemy frigate half in a gateway, within `RAKE` reach and 15 s, raked from her end by a frigate; one in a gateway or
     lying still a while sniped at by one sloop; an enemy sloop within `GUARD` 7 of a brig at anchor fought by one sloop;
   - after, two games: frigates' time in a gateway 0 to 63 s (one lay there 206 s before);
-  - the heart is cramped for a frigate: from most poses near the prize she can't turn at all, rocks or no ships, so the
-    turning happens where there's room;
+  - the heart was cramped for a frigate: from most poses near the prize she couldn't turn at all (fixed the same day,
+    below);
   - a brig's anchor (js/den/anchor.js): falls from her bow with a splash, her cable taut into spreading rings and a tag
     while she lies there, wound in as she weighs it;
   - the design page draws a brig's turtles boxing a frigate in at her ends (16 Nov: "we need ... something like that for
     the design page, where it shows a war brig with its turtles surrounding a war frigate").
+- **A fair board, turning where she fits, low rocks in the heart** (16 Nov, watching it: "the map looks very unfair that
+  one ends up having to turn for a rock while the other doesn't"; "they don't need open water to turn ... you should
+  always be able to turn as long as there's physically enough space to fit your ship"; "low rocks ... you can shoot over
+  them but you can't get past them ... so it stays in that center square area"):
+  - every entry is the other side's turned round the board's middle, (c, r) to (55 − c, 47 − r): Eldritch Wail's far
+    entry (27,2) ran straight at the rock at (27,10) while Coral Throne's (16,45) had none; now (39,2); the frigates'
+    other entries likewise (Primates Rule's (38,45), Iron Pride's (17,2)). A test checks the rocks, low rocks and fleets;
+  - `ShipSea.move`: a big ship's turn with no room for its quarter circle turns her on the spot about her middle,
+    bumping, if her hull fits facing the new way (before, only when no move at all was clear). The pilot's chart takes
+    these as moves, so she plans with them;
+  - `BLOCKADE.LOW`: a line of low rocks down columns 24 and 31 of the heart (with its rocks and two-pennant buoys there),
+    frigates only (`ShipSea.low`), shots over them; a frigate reaches only columns 25 to 30 of the heart, where she can
+    always turn. Drawn as a pale ledge with flat stones awash. Brigs lie in the heart's sides more since (859 to 431 out
+    and in, from 1111 to 204, seed 6), out of a frigate's way but not her guns;
+  - a frigate with no move clear and a buoy to hold (bow to bow between the gates) turns on the spot, the way that keeps
+    the buoy (`bounce`); `bear` uses the on-the-spot turn too;
+  - a gate gun's crumbling (js/den/turret.js) plain from its first hit at the blockade's distance: more battlements off,
+    the stone blackened, the gun askew, a bigger burst, smoking while it's damaged.
+  - The turtles' box is weaker for it: a frigate with turtles only at her ends can now turn on the spot between them.
 
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 

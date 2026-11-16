@@ -163,6 +163,13 @@ export const BLOCKADE = {
     // there, to launch from: the user, 15 Nov, "an enclosed launching spot for a brig ... one rock in each corner")
     [32, 25], [23, 22],
   ] as [number, number][],
+  /** Low rocks in the heart, awash: too shallow for a frigate, the brigs and sloops slipping over them and every shot
+      flying over them. A line down each side of its middle keeps a frigate there, six squares across, where she
+      always has room to turn (the user, 16 Nov: "the frigate can get here, but there's not enough space for them to
+      really fit sideways ... some low rocks ... you can shoot over them but you can't get past them, just to kind of
+      control where a war frigate can get to in the middle so it stays in that center square area"). The east line's
+      the west's turned round the board's middle, the rocks and buoys on those lines the rest of them. */
+  LOW: [[24, 20], [24, 23], [24, 24], [24, 25], [24, 27], [31, 27], [31, 24], [31, 23], [31, 22], [31, 20]] as [number, number][],
   /** The buoys: in the heart, its prize four and two of two, eight in all; in each lagoon five; off each gate two, the
       sloops' quick spots (a frigate sniping at whoever sits on them). Holding the heart and contesting a lagoon beats
       holding the other lagoon (8 to 5); both lagoons beat the heart (10 to 8): the user, 15 Nov, "if you're controlling
@@ -201,9 +208,11 @@ export const BLOCKADE = {
   TEAMS: [
     // (one frigate a side in at each end, the second by her `other` entry: one runs the other side's gate guns till
     // they're wrecked; the user, 16 Nov: "frigs need to be able to come in on each side ... one frig from each team
-    // should come in on each side")
+    // should come in on each side"); every entry the other side's turned round the board's middle, (c, r) to (55 - c,
+    // 47 - r), so neither has a rock to turn for that the other hasn't (16 Nov: "the map looks very unfair that one
+    // ends up having to turn for a rock while the other doesn't")
     { id: 'gold', name: "Dachimpy's flag", ships: [
-      { name: 'Primates Rule', kind: 'frigate', at: { c: 23, r: 2, d: 0 }, other: { c: 26, r: 45, d: 2 } },
+      { name: 'Primates Rule', kind: 'frigate', at: { c: 23, r: 2, d: 0 }, other: { c: 38, r: 45, d: 2 } },
       { name: 'Coral Throne', kind: 'frigate', at: { c: 33, r: 2, d: 0 }, other: { c: 16, r: 45, d: 2 }, far: true },
       { name: 'Lucky Banana', kind: 'sloop', at: { c: 1, r: 16, d: 1 }, raider: true },
       { name: 'Grin and Bear It', kind: 'sloop', at: { c: 1, r: 22, d: 1 }, far: true },
@@ -215,7 +224,7 @@ export const BLOCKADE = {
     ] },
     { id: 'crimson', name: "Dalnoth's flag", ships: [
       { name: 'Iron Pride', kind: 'frigate', at: { c: 32, r: 45, d: 2 }, other: { c: 17, r: 2, d: 0 } },
-      { name: 'Eldritch Wail', kind: 'frigate', at: { c: 22, r: 45, d: 2 }, other: { c: 27, r: 2, d: 0 }, far: true },
+      { name: 'Eldritch Wail', kind: 'frigate', at: { c: 22, r: 45, d: 2 }, other: { c: 39, r: 2, d: 0 }, far: true },
       { name: 'Red Wake', kind: 'sloop', at: { c: 54, r: 31, d: 3 }, raider: true },
       { name: 'Smoke and Mirrors', kind: 'sloop', at: { c: 54, r: 25, d: 3 }, far: true },
       { name: 'Scarlet Fever', kind: 'sloop', at: { c: 54, r: 21, d: 3 } },
@@ -321,6 +330,8 @@ export function farSide(p: Pose): Pose { return { c: BLOCKADE.COLS - 1 - p.c, r:
 
 export class Blockade {
   rocks = new Set<string>();
+  /** The heart's low rocks (BLOCKADE.LOW): no frigate passes them, shots fly over. */
+  low = new Set<string>();
   wind = new Map<string, number>();
   /** Seconds a ship just back in still waits before she can move (BLOCKADE.RESPAWN_WAIT). */
   waiting = new Map<number, number>();
@@ -371,6 +382,7 @@ export class Blockade {
       for (const reef of B.REEFS) for (const [c, r] of [...reefSquares(reef), reef.islet]) this.rocks.add(key(c, r));
       for (const lane of [...B.WINDS, ...B.EXITS.flat()]) for (const [c, r] of laneSquares(lane)) this.wind.set(key(c, r), lane.d);
       for (const reef of B.REEFS) for (const [c, r] of shoalSquares(reef)) if (!this.rocks.has(key(c, r))) this.shoals.add(key(c, r));
+      for (const [c, r] of B.LOW) this.low.add(key(c, r));
     }
     let id = 0;
     for (const team of teams) for (const s of team.ships) {
@@ -378,7 +390,7 @@ export class Blockade {
       const sea = new ShipSea(h, B.COLS, B.ROWS, this.rocks, (c, r) => { const o = this.taken.get(key(c, r)); return o !== undefined && o !== me; });
       if (s.kind === 'sloop') sea.carriedBy(this.wind);
       // (a frigate's pilot reckons the shoals' toll: her kind's chart is worked out with it)
-      if (s.kind === 'frigate') sea.toll = { squares: this.shoals, secs: B.SHOALS.TOLL };
+      if (s.kind === 'frigate') { sea.toll = { squares: this.shoals, secs: B.SHOALS.TOLL }; sea.low = this.low; }
       sea.chart = this.charts[s.kind] ??= new HullChart(sea.bare());
       sea.near = B.IN_WAY;
       // (a sloop or a brig on the blockade's board can come in by either side's edge: her own, or the same place on the

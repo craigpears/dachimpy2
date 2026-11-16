@@ -60,13 +60,23 @@ export function turretMark(x, z) {
 }
 
 // Standing, or its wreck.
+// (plain from the first hit, at the blockade's distance too: half its battlements gone, its stone blackened, its gun
+// knocked askew, rubble at its foot, smoking; the user, 16 Nov, "I didn't see any visible damage after the first shot
+// from the sloop on one of the cannons")
+const SCORCHED = new THREE.Color('#2e2a27');
 function crumble(V, t) {
   const k = Math.min(1, (t.hits ?? 0) / Math.max(1, t.wreck ?? 3)), tw = V.g.position;
-  if ((t.hits ?? 0) > V.hits) { burst(V3(tw.x, V.ty, tw.z), '#b9ad9a', 14, 3); burst(V3(tw.x, V.ty * 0.5, tw.z), '#8a8178', 8, 2); }
+  if ((t.hits ?? 0) > V.hits) {
+    burst(V3(tw.x, V.ty, tw.z), '#b9ad9a', 26, 4.5); burst(V3(tw.x, V.ty * 0.5, tw.z), '#8a8178', 14, 3);
+    burst(V3(tw.x, V.ty + 0.5, tw.z), '#ffb85a', 10, 3); burst(V3(tw.x, V.ty, tw.z), '#3f3a37', 16, 2.5);
+  }
   V.hits = t.hits ?? 0;
-  V.merls.forEach((m, i) => { m.visible = (i * 0.618 % 1) >= k * 0.75; });
-  V.rubble.forEach((r, i) => { r.visible = i < Math.round(k * V.rubble.length); });
-  V.body.rotation.z = k * 0.06; V.body.rotation.x = k * 0.03;
+  V.merls.forEach((m, i) => { m.visible = (i * 0.618 % 1) >= k * 1.1; });
+  V.rubble.forEach((r, i) => { r.visible = i < Math.ceil(k * V.rubble.length); });
+  V.body.rotation.z = k * 0.12; V.body.rotation.x = k * 0.05;
+  V.stone ??= V.body.material.color.clone();
+  V.body.material.color.copy(V.stone).lerp(SCORCHED, k * 0.75);
+  V.gun.rotation.z = k * 0.35;
 }
 function look(V, wrecked) {
   V.wrecked = wrecked;
@@ -110,7 +120,7 @@ export function turretView(V, t, dt, aim = null) {
   // 15 Nov, "after a shot or two, they start showing some signs of crumbling")
   if (!t.wrecked && V.merls && (t.hits ?? 0) !== V.hits) crumble(V, t);
   if (t.wrecked) { if ((V.smokeT -= dt) < 0) { V.smokeT = 0.14; burst(V3(tw.x + 0.2, V.ty * 0.8, tw.z), '#3f3a37', 4, 0.9); } }
-  else if (t.quiet > 0 && (V.smokeT -= dt) < 0) { V.smokeT = 0.25; burst(V3(tw.x, V.ty + 0.8, tw.z), '#6f6a66', 2, 0.6); }
+  else if ((t.quiet > 0 || (t.hits ?? 0) > 0) && (V.smokeT -= dt) < 0) { V.smokeT = t.quiet > 0 ? 0.18 : 0.35; burst(V3(tw.x, V.ty + 0.8, tw.z), t.quiet > 0 ? '#6f6a66' : '#4a4542', 3, 0.8); }
   if (t.wrecked || !aim) return;
   const gp = V3();
   V.gun.getWorldPosition(gp);

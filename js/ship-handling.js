@@ -31,8 +31,8 @@
      too narrow for her;
    - her guns: shots a side a broadside (YPPedia: the sloop 1, a war frigate 2), their size, their reload.
    Everything she covers on every square of a move has to be open water, so a big ship needs room to turn; a
-   turn she's no room for leaves her as she was (the sloop's turns her on the spot, as the den's does). Only
-   when she can't move at all, a big ship is warped round on the spot, slowly.
+   turn she's no room for turns her on the spot, bumping, if she fits there facing the new way (16 Nov: "you
+   should always be able to turn as long as there's physically enough space to fit your ship").
    Her pilot sails her till the square you plotted is under her, any square of her ("within the silhouette
    of the whole ship", 15 Nov), going straight on when that gets her there; where she'll lie then, her berth,
    is drawn as the block of squares she'll cover ("aim you for like a block of squares, not just one"). */
@@ -193,7 +193,9 @@ export class ShipSea extends Sea {
     }
     /** The winds she's carried by, if she's small enough (windy), shared with the other ships' seas. */
     carriedBy(wind) { this.wind = wind; this.windy = this.ship.long * this.ship.wide === 1; return this; }
-    open(c, r) { return super.open(c, r) && !this.blocked(c, r); }
+    /** Squares too shallow for her (the blockade's low rocks, a frigate's: src/blockade.ts), shots flying over them. */
+    low = null;
+    open(c, r) { return super.open(c, r) && !this.blocked(c, r) && !this.low?.has(`${c},${r}`); }
     /** Every square she'd cover at this pose is open. */
     fits(p) { return squares(this.ship, p).every(([c, r]) => this.open(c, r)); }
     /** She'd get through this move: she fits on every square of it, and where she swings round. */
@@ -201,9 +203,11 @@ export class ShipSea extends Sea {
         const { steps, swing } = shipPath(this.ship, p, m);
         return steps.every((q) => this.fits(q)) && swing.every((q) => this.fits(q));
     }
-    /** A move by her handling: through only if she's room for all of it. Blocked, the sloop's turn turns her
-        where she is (the den's); a bigger ship's leaves her as she was, never pivoting (15 Nov), unless she can't
-        move at all: then she's warped round on the spot, about her middle, if there's room. */
+    /** A move by her handling: through only if she's room for all of it. Blocked, a turn turns her where she is,
+        bumping, any ship's, about her middle, so long as she fits there facing the new way (the sloop's, the den's;
+        a big ship's since 16 Nov: "they don't need open water to turn. You can at least bounce off rocks or each other's
+        ships. So you should always be able to turn as long as there's physically enough space to fit your ship"; a
+        clear turn's still her wide quarter circle, never a pivot, 15 Nov). */
     move(p, m, oars = false, whirls = false) {
         if (this.windy)
             return super.move(p, m, oars, whirls); // (a sloop on a sea of winds: the den's own, carried)
@@ -212,9 +216,8 @@ export class ShipSea extends Sea {
             return { to, bump: false, ride: [] };
         if (m === 'F')
             return { to: { ...p }, bump: true, ride: [] };
-        const stuck = h.radius <= 1 || ['F', 'L', 'R'].every((x) => !this.clear(p, x));
         const M = drawnAt(h, { c: p.c, r: p.r, a: p.d }), spun = poseOf(h, M.c, M.r, to.d);
-        return { to: stuck && this.fits(spun) ? spun : { ...p }, bump: true, ride: [] };
+        return { to: this.fits(spun) ? spun : { ...p }, bump: true, ride: [] };
     }
     /** Her pace: a move's, forward or a turn (moveTime). */
     moveSecs(_oars = false, _p, m) { return (m && m !== 'F' ? this.ship.turn : this.ship.move) * this.drag; }
@@ -355,6 +358,7 @@ export class ShipSea extends Sea {
             if (this.windy)
                 this.twin.carriedBy(this.wind);
             this.twin.toll = this.toll;
+            this.twin.low = this.low;
         }
         return this.twin;
     }

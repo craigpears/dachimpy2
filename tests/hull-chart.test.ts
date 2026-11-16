@@ -78,7 +78,7 @@ describe('a tower falling: only what\'s near it worked out again (15 Nov: "the o
     expect(chart.rebuilt).toBeGreaterThan(0);
     expect(chart.rebuilt).toBeLessThan(chart.N / 3);
     const fresh = new ShipSea(chart.sea.ship, B.COLS, B.ROWS, b.rocks);
-    fresh.toll = chart.sea.toll;
+    fresh.toll = chart.sea.toll; fresh.low = chart.sea.low;
     const afresh = new HullChart(fresh);
     afresh.fresh();
     expect(afresh.rebuilt).toBe(chart.N);
