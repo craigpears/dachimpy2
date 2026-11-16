@@ -954,6 +954,11 @@ names still open the nearest, learner CC^1, master CC^3, grandmaster CC^5, ultim
   through it, so seed 2 with CC^8 is the same game in each, column for column (tests/distill-player.test.ts). On the
   page the 3D board doesn't tick the game while a bot plays (`external`): it shows the player's swaps and columns,
   its animations jumping ahead after a slow frame. `window.played` lists every column gone, with its game time.
+- **A person's effort, beside the results** (16 Nov: "how many moves a bot makes ... can be as important to how well
+  it's doing as the actual result ... one repeated technique, like the swaps should count less than like the little
+  fiddly ones"): `EFFORT` in src/distill-bots.ts, a drag 1, each swap along it 0.1, each turn in it 0.5, counted by the
+  player as moves are made (`Played.effort`, `effortOf`). The runner's SUMMARY ends with moves, swaps and effort a
+  column gone; the test page shows the moves, swaps and effort so far.
 - **The target sets the bank:** the whites banked before the chain, `bankFor`: 4 columns for CC^1, 4.5, 5, then 6
   for CC^5 and CC^8 (7 was tried for CC^8 and kept it in Stage I nearly all session, below).
 - **The target sets the techniques:** CC^1 the four simple ones (save the whites, finish the junk column, the

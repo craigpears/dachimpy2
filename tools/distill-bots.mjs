@@ -13,6 +13,9 @@
    MEASURE='{"STUCK":6}' (the chain's), PLAN='{"SLACK":1}' and TIER='{"reach":16}' try other weights, planner
    settings and a bot's settings; PHASE_W='{"block":{"hook":1.3}}' a phase's weights on the techniques
    (src/distill-phase.ts; PLAN='{"PHASES":0}' switches them off). SEED=n starts the boards at seed n.
+   The SUMMARY line ends with each column gone's moves, swaps and a person's effort for them (16 Nov; EFFORT in
+   src/distill-bots.ts: a drag a move, a little a swap, more a turn), as telling as the chains for how a person would
+   fare.
 
    Run of 12 Nov (40 boards a tier), learner / master / grandmaster / ultimate: longest chain mean 1.5 /
    2.8 / 2.7 / 3.3, best 4 / 6 / 9 / 9, CC^6+ 0 / 4 / 4 / 8 of 40, CC^12 none; score a column 3.9 / 8.6 /
@@ -283,7 +286,7 @@ for (const name of NAMES) {
   for (const x of w) for (const [p, ks] of Object.entries(x.byPhase)) for (const [k, v] of Object.entries(ks)) { const o = (bph[p] ??= {}); o[k] = (o[k] ?? 0) + v; }
   for (const p of ['fire', 'fill', 'block', 'chain']) if (bph[p]) console.log(`    ${p.padEnd(6)} ${Object.entries(bph[p]).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${f1(v / GAMES)}`).join(', ')}`);
   const disasters = burnt.filter((x) => x.at <= EARLY).length;
-  console.log(`SUMMARY ${tier.name} target ${tier.target ?? '-'}: chain mean ${f1(avg(chains))} (best ${Math.max(...chains)}), at target ${tier.target ? runs.filter((r) => r.longest >= tier.target).length : '-'}/${GAMES}; no white burned ${GAMES - burnt.length}/${GAMES}; disasters ${disasters}; whites burned ${f1(avg(runs.map((r) => r.whitesBurned)))} (in the first 3 minutes ${f1(avg(w.map((x) => x.burnedBy3 ?? 0)))}); points a minute ${f1(avg(runs.map((r) => r.points / r.minutes)))}; early burns ${f1(avg(ear.map((e) => e.n)))} (quick ${f1(avg(ear.map((e) => e.quick)))}, whites next ${f1(avg(ear.map((e) => e.whites)))}); weighted ${w.reduce((s, x) => s + x.weighted, 0)}/${w.reduce((s, x) => s + x.stageOneMoves, 0)}; chains a session ${f1(all.length / GAMES)}, mean ${f1(avg(all))}, at target ${all.filter((c) => c >= tier.target).length}/${all.length}`);
+  console.log(`SUMMARY ${tier.name} target ${tier.target ?? '-'}: chain mean ${f1(avg(chains))} (best ${Math.max(...chains)}), at target ${tier.target ? runs.filter((r) => r.longest >= tier.target).length : '-'}/${GAMES}; no white burned ${GAMES - burnt.length}/${GAMES}; disasters ${disasters}; whites burned ${f1(avg(runs.map((r) => r.whitesBurned)))} (in the first 3 minutes ${f1(avg(w.map((x) => x.burnedBy3 ?? 0)))}); points a minute ${f1(avg(runs.map((r) => r.points / r.minutes)))}; early burns ${f1(avg(ear.map((e) => e.n)))} (quick ${f1(avg(ear.map((e) => e.quick)))}, whites next ${f1(avg(ear.map((e) => e.whites)))}); weighted ${w.reduce((s, x) => s + x.weighted, 0)}/${w.reduce((s, x) => s + x.stageOneMoves, 0)}; chains a session ${f1(all.length / GAMES)}, mean ${f1(avg(all))}, at target ${all.filter((c) => c >= tier.target).length}/${all.length}; a column gone: moves ${f1(avg(runs.map((r) => r.drags / Math.max(1, r.columnsUp + r.columnsBurned))))}, swaps ${f1(avg(runs.map((r) => r.swaps / Math.max(1, r.columnsUp + r.columnsBurned))))}, effort ${f1(avg(runs.map((r) => r.effort / Math.max(1, r.columnsUp + r.columnsBurned))))}`);
   console.log(`CHAIN ${tier.name}: waits in the chain ${f1(avg(w.map((x) => x.chainWaits)))} a session, with junk in the column going up ${f1(avg(w.map((x) => x.chainWaitsJunk)))} (${f1(avg(w.map((x) => x.chainWaitMs / 1000)))} s); columns sent up not Crystal Clear ${f1(avg(w.map((x) => x.notClear)))} a session`);
   const used = {};
   for (const r of runs) for (const [k, v] of Object.entries(r.used)) used[k] = (used[k] ?? 0) + v;

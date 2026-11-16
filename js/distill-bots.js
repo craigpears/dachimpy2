@@ -1331,6 +1331,13 @@ export class DistillBot {
     worth at a time on a page (the user, 16 Nov: "the bot does the set X things for ticks ... burning and things like
     that should not be dependent on an animation or real time element at all"). */
 export const STEP_MS = 10;
+/** A person's effort for a bot's moves (the user, 16 Nov: "how many moves a bot makes ... can be as important to how well
+    it's doing as the actual result ... one repeated technique, like the swaps should count less than like the little
+    fiddly ones"): a drag picked up is a move, each swap along it a little more, each turn of direction in it more
+    again; one long straight sweep is little more than one move, three fiddly drags three. */
+export const EFFORT = { DRAG: 1, SWAP: 0.1, TURN: 0.5 };
+/** A person's effort for drags played whole (EFFORT). */
+export const effortOf = (drags) => drags.reduce((n, d) => n + EFFORT.DRAG + EFFORT.SWAP * d.ways.length + EFFORT.TURN * d.ways.filter((w, i) => i > 0 && w !== d.ways[i - 1]).length, 0);
 /** A bot playing a game, the one way bots play anywhere (src/distill-bots.ts's playSession, distilling-test.html): it
     plans a move, takes a moment to spot each drag (its `spot`, or `sweepSpot` swept blind), swaps along it at its hand's
     `rate`, a burn or a wait as planned, and the board's slide after a column goes waited out; the game ticked in
@@ -1344,6 +1351,9 @@ export class BotPlayer {
     bot;
     /** Each technique's cost in Stage I, as playSession reports it. */
     cost = {};
+    /** A person's effort for the moves made so far (EFFORT). */
+    effort = 0;
+    way = null;
     ops = [];
     bank = 0;
     went = false;
@@ -1446,6 +1456,8 @@ export class BotPlayer {
             }
             if (op.kind === 'pick') {
                 this.bot.drags++;
+                this.effort += EFFORT.DRAG;
+                this.way = null;
                 this.at = [op.x, op.y];
                 this.hooks.onHold?.(op.x, op.y);
                 continue;
@@ -1461,6 +1473,8 @@ export class BotPlayer {
                 continue;
             }
             this.at = n;
+            this.effort += EFFORT.SWAP + (this.way !== null && this.way !== op.way ? EFFORT.TURN : 0);
+            this.way = op.way;
             this.hooks.onSwap?.(x, y, n);
             this.hooks.onHold?.(n[0], n[1]);
         }
@@ -1480,6 +1494,6 @@ export function playSession(g, level, cap = 30, onColumn, onPlan) {
     return {
         level: level.name, target: level.target, chains: bot.allChains(), longest: g.longest, score: g.score(), points: g.points, columnsUp: g.columnsUp,
         columnsBurned: g.columns.length - g.columnsUp, whitesBurned: g.whitesBurned, minutes: g.time / 60000,
-        swaps: g.swaps, drags: bot.drags, banked: bot.banked, dismissed: g.dismissed, finished: g.finished, used: bot.used, cost: p.cost,
+        swaps: g.swaps, drags: bot.drags, effort: p.effort, banked: bot.banked, dismissed: g.dismissed, finished: g.finished, used: bot.used, cost: p.cost,
     };
 }

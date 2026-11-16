@@ -3,7 +3,7 @@
    like that should not be dependent on an animation or real time element at all"; "if there's a bit of lag, the front
    end will then catch up with the simulation, not the other way around". */
 import { describe, expect, it } from 'vitest';
-import { BotPlayer, levelNamed, playSession } from '../src/distill-bots';
+import { BotPlayer, effortOf, levelNamed, playSession } from '../src/distill-bots';
 import { Distilling } from '../src/distilling';
 import { seeded } from '../src/mirror-row';
 
@@ -28,5 +28,19 @@ describe('"The bot does the set X things for ticks ... not dependent on an anima
     const g = new Distilling(seeded(2)), out: string[] = [];
     playSession(g, levelNamed('cc3'), 1.5, (c) => out.push(`${g.time} ${c.up ? 'up' : 'burned'} ${c.pieces.map((q) => L[q]).join('')}`));
     expect(out).toEqual(columns(2, 'cc3', 1.5, Infinity));
+  }, 60000);
+});
+
+describe('"How many moves a bot makes ... the swaps should count less than like the little fiddly ones" (16 Nov)', () => {
+  it('one long straight sweep costs a person less than the same swaps in short drags with turns', () => {
+    const sweep = effortOf([{ x: 0, y: 0, ways: [3, 3, 3, 3, 3, 3] }]);
+    const fiddly = effortOf([{ x: 0, y: 0, ways: [3, 0] }, { x: 1, y: 1, ways: [2, 1] }, { x: 2, y: 2, ways: [3, 2] }]);
+    expect(sweep).toBeLessThan(fiddly);
+    expect(sweep).toBeLessThan(2);
+  });
+  it('the runner reports a session\'s effort, counted as its moves are made', () => {
+    const r = playSession(new Distilling(seeded(2)), levelNamed('cc3'), 0.5);
+    expect(r.drags).toBeGreaterThan(0);
+    expect(r.effort).toBeGreaterThanOrEqual(r.drags);
   }, 60000);
 });

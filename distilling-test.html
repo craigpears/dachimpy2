@@ -242,7 +242,9 @@ function frame() {
   const gm = board.game, left = gm.timeLeft();
   $('stats').innerHTML = `Seed <b>${seed}</b>${speed !== 1 ? ` · speed <b>${speed}x</b>` : ''} · <b>${(gm.time / 1000).toFixed(0)}</b> s · burn in <b>${Number.isFinite(left) ? (left / 1000).toFixed(1) : '-'}</b> s<br>`
     + `Flask <b>${gm.flask}</b> / 100 · up <b>${gm.columnsUp}</b>, burned <b>${gm.columns.length - gm.columnsUp}</b><br>`
-    + `Points <b>${gm.points}</b> · score <b>${gm.score().toFixed(2)}</b> · chain <b>${gm.chain}</b> (best ${gm.longest})`;
+    + `Points <b>${gm.points}</b> · score <b>${gm.score().toFixed(2)}</b> · chain <b>${gm.chain}</b> (best ${gm.longest})`
+    // (a bot's moves and a person's effort for them: the user, 16 Nov, "how many moves a bot makes ... can be as important")
+    + (player ? `<br>Moves <b>${player.bot.drags}</b> · swaps <b>${gm.swaps}</b> · effort <b>${player.effort.toFixed(0)}</b>` : '');
   $('prompt').textContent = board.prompt();
   renderer.render(scene, camera);
   requestAnimationFrame(frame);

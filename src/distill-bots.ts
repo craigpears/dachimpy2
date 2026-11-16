@@ -1277,6 +1277,8 @@ export interface Played {
   minutes: number;
   swaps: number;
   drags: number;
+  /** A person's effort for its moves (EFFORT): its drags, their swaps and their turns. */
+  effort: number;
   banked: number | null;
   dismissed: boolean;
   finished: boolean;
@@ -1296,6 +1298,14 @@ export interface Played {
     worth at a time on a page (the user, 16 Nov: "the bot does the set X things for ticks ... burning and things like
     that should not be dependent on an animation or real time element at all"). */
 export const STEP_MS = 10;
+/** A person's effort for a bot's moves (the user, 16 Nov: "how many moves a bot makes ... can be as important to how well
+    it's doing as the actual result ... one repeated technique, like the swaps should count less than like the little
+    fiddly ones"): a drag picked up is a move, each swap along it a little more, each turn of direction in it more
+    again; one long straight sweep is little more than one move, three fiddly drags three. */
+export const EFFORT = { DRAG: 1, SWAP: 0.1, TURN: 0.5 };
+/** A person's effort for drags played whole (EFFORT). */
+export const effortOf = (drags: readonly Drag[]): number =>
+  drags.reduce((n, d) => n + EFFORT.DRAG + EFFORT.SWAP * d.ways.length + EFFORT.TURN * d.ways.filter((w, i) => i > 0 && w !== d.ways[i - 1]).length, 0);
 /** What a bot player tells whoever's showing it: each of the game's events, each swap it makes (the piece from (x, y) to
     `to`), the piece it picks up and lets go, and each plan. Showing is all they do: the game's already moved. */
 export interface BotHooks {
@@ -1316,6 +1326,9 @@ export class BotPlayer {
   readonly bot: DistillBot;
   /** Each technique's cost in Stage I, as playSession reports it. */
   readonly cost: Played['cost'] = {};
+  /** A person's effort for the moves made so far (EFFORT). */
+  effort = 0;
+  private way: number | null = null;
   private ops: BotOp[] = [];
   private bank = 0;
   private went = false;
@@ -1378,12 +1391,14 @@ export class BotPlayer {
       this.ops.shift();
       if (op.kind === 'done') { this.finishMove(); continue; }
       if (op.kind === 'drop') { this.drop(); if (this.went) this.cut(); continue; }
-      if (op.kind === 'pick') { this.bot.drags++; this.at = [op.x, op.y]; this.hooks.onHold?.(op.x, op.y); continue; }
+      if (op.kind === 'pick') { this.bot.drags++; this.effort += EFFORT.DRAG; this.way = null; this.at = [op.x, op.y]; this.hooks.onHold?.(op.x, op.y); continue; }
       // A swap: none once a column's gone or the board's sliding (the rest of the move's for a board that's changed).
       if (this.went || !g.movable || !this.at) { this.cut(); continue; }
       const [x, y] = this.at, n = g.swapToward(x, y, op.way);
       if (!n) { this.cut(); continue; }
       this.at = n;
+      this.effort += EFFORT.SWAP + (this.way !== null && this.way !== op.way ? EFFORT.TURN : 0);
+      this.way = op.way;
       this.hooks.onSwap?.(x, y, n);
       this.hooks.onHold?.(n[0], n[1]);
     }
@@ -1401,6 +1416,6 @@ export function playSession(g: Distilling, level: Level, cap = 30, onColumn?: (c
   return {
     level: level.name, target: level.target, chains: bot.allChains(), longest: g.longest, score: g.score(), points: g.points, columnsUp: g.columnsUp,
     columnsBurned: g.columns.length - g.columnsUp, whitesBurned: g.whitesBurned, minutes: g.time / 60000,
-    swaps: g.swaps, drags: bot.drags, banked: bot.banked, dismissed: g.dismissed, finished: g.finished, used: bot.used, cost: p.cost,
+    swaps: g.swaps, drags: bot.drags, effort: p.effort, banked: bot.banked, dismissed: g.dismissed, finished: g.finished, used: bot.used, cost: p.cost,
   };
 }
