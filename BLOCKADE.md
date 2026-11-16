@@ -23,18 +23,141 @@ little blockade thing set out on a tabletop or something. All separate and modul
 
 ## 1. The real rules
 
-To research (YPPedia, the old guides, and the Global Cade Sim if its rules are open), each marked with its source,
-anything unclear **(to confirm with the user)**:
+Researched 16 Nov. Sources: YPPedia's Sea battle, Blockade, Collision mechanics, Influence, Ramming, Rock, Wind,
+Whirlpool and Maneuver pages ([Y]), and the old cade sim's server, BenBeri's Obsidio-Server (Apache-2.0, last pushed
+2019), whose code resolves a turn as the game does ([S]). Where they differ, the game's own numbers (YPPedia) win, and
+the sim is used for what YPPedia leaves out. Anything unclear is marked **(to confirm with the user)**.
 
-- The board: its squares, big and small rocks, winds, whirlpools, flags (their points), the safe zone and where
-  ships come in.
-- The ships: each kind's size, guns (shot size, guns a side), damage it takes and can stand, its influence on a flag,
-  its moves a turn, its jobbers.
-- A turn: the moves placed (left, forward, right) and shots (each side), in its four slots; how each slot resolves
-  (moving, turning, winds and whirlpools acting, collisions with ships and rocks, then guns), and the turn's clock.
-- Tokens: what the duty puzzles give (Sailing the moves, Gunnery the guns loaded, Carpentry and Bilge the damage
-  and water), how long a token lasts, the auto move.
-- Flags and points: who holds a flag, contested flags, points a turn, the round's end, sinking and coming back.
+### The board [Y][S]
+
+- **20 squares wide, 36 long**: 30 rows of play, with a **safe zone** of 3 rows at each end, lighter, holding
+  nothing. One end is **island-side**, the other **ocean-side**. The sim codes it as 36 rows of 20 numbers.
+- **What's on a square**, the sim's tile codes: open water (0); a **tall rock** (1) and a **small rock** (2); a
+  **wind** blowing west, east, north or south (3 to 6); a **whirlpool**, 2 by 2, its four corners NW, NE, SW, SE
+  (7 to 10); a **buoy** worth 1, 2 or 3 (11 to 13). Buoys only on open water, never in a safe zone; ships sail over
+  them freely.
+- **The sides** of the board act like rocks. Ships come and go only by the ends.
+- **The board's reset each round**; between rounds its buoys are taken off.
+
+### The ships [Y]
+
+The blockade table, the numbers the tabletop uses. Damage in small shots (a medium shot is 1.5, a large 2; YPPedia's
+full-damage table agrees: a war frigate sinks at 50 small, 33.3 medium, 25 large).
+
+| Ship | Class | Budget | Influence ⌀ | Crew for influence | Moves a turn | Guns a side a move | Shot | Sinks at |
+|---|---|---|---|---|---|---|---|---|
+| Sloop | small | 5 | 1 | 3 | 4 | 1 | small | 10 |
+| Cutter | small | 7 | 2 | 4 | 4 | 1 | small | 12 |
+| Dhow | small | 7 | 2 | 4 | 4 | 1 | medium | 12 |
+| Fanchuan | small | 7 | 2 | 4 | 3 | 1 | large | 13.125 |
+| Longship | medium | 10 | 2 | 5 | 4 | 2 | small | 15 |
+| Baghlah | medium | 15 | 4 | 6 | 3 | 2 | medium | 20 |
+| Merchant brig | medium | 15 | 4 | 7 | 3 | 1 | medium | 20 |
+| Junk | medium | 15 | 4 | 6 | 3 | 1 | large | 25 |
+| War brig | medium | 25 | 6 | 8 | 3 | 2 | medium | 25 |
+| Merchant galleon | large | 20 | 6 | 13 | 3 | 1 | large | 30 |
+| Xebec | large | 30 | 6 | 12 | 3 | 2 | medium | 35 |
+| War galleon | large | 30 | 6 | 12 | 3 | 2 | large | 25 |
+| War frigate | large | 40 | 8 | 17 | 3 | 2 | large | 50 |
+| Grand frigate | grand | 60 | 10 | 29 | 3 | 2 | large | 60 |
+
+- **Class** decides collisions (below). **Budget**: a side's ships on the board at once may not cost more than the
+  blockade's budget (it scales with the island; 100 in YPPedia's example).
+- **Ram damage**, what a ship deals when it hits another, in small shots: sloop, cutter, dhow, fanchuan, longship
+  0.5; baghlah, merchant brig 1; junk 1.5; war brig 2; merchant galleon, xebec 2.5; war galleon 2.5 (its medium and
+  large figures don't match, **to confirm**); war frigate 3; grand frigate 4. Both ships in a ram take the other's.
+- **Rock damage**, hitting a rock or a side: a twentieth of what sinks her (a sloop 0.5, a war brig 1.25, a war frigate
+  2.5, a grand frigate 3).
+- **Moves a turn**: a 3-move ship rests one of the four slots, the navigator choosing which (the octagon; the sim
+  defaults it to the last).
+
+### A turn [Y][S]
+
+- **35 seconds to plan** (the sim used 15), then the turn plays out, all ships at once, in **four slots**. In each slot
+  a ship may play one move (forward, left or right; or nothing) and fire guns off either side, up to its guns a side a
+  move. No grapples in a blockade.
+- **Each slot resolves in three steps**: everyone's moves, then winds and whirlpools, then guns.
+- **A move**: forward is one square ahead. A turn (left or right) is one square ahead and then one to that side,
+  ending facing that way: it passes through two squares, and both count for collisions.
+- **Collisions, the moves step** [Y, Collision mechanics; S, CollisionCalculator]:
+  1. Every moving ship claims the square in front of it. Empty and unclaimed: she moves in. A stationary ship there: a
+     **bump**. A ship there claiming her square (head on): neither moves. Claimed by a ship of the same or a larger
+     class: she stops. Claimed only by smaller ships: she moves in (with a collision).
+  2. Then every turning ship that hasn't stopped claims the square to her side. Empty and unclaimed: she moves in. Held
+     by a stationary ship, or one that moved there in step 1, whatever its class: she stops (so a little ship going
+     forward stops a frigate turning). Head on, or claimed by the same or a larger class: she stops. Only smaller
+     ships claiming it: she moves in.
+  3. Every ship that tried to turn faces her new way, even if she stopped.
+  - **A bump**: a turning ship bumping a stationary one stops, both stay, she still turns. A ship going forward into a
+    stationary one of the same class stays put and pushes her back a square. A smaller ship bumping a larger: neither
+    moves. A larger bumping a smaller takes her square and pushes her on a square ahead of her ("a push").
+  - **Rocks and the sides**: never entered; she stays and takes rock damage. A turn whose first square is a rock still
+    turns her where she sits (a half turn on the spot, for damage). If only the second square is a rock, she ends on
+    the first, turned **(to confirm with the user)**.
+  - Rams: two ships of the same class meeting deal one collision's damage each; of different classes, two each.
+- **Winds and whirlpools** act once a slot on a ship sitting on one after the moves. A **wind** pushes her a square
+  downwind, as a forward move does, whichever way she faces. A **whirlpool** carries her clockwise to the opposite
+  corner of its 2 by 2 and turns her 90° clockwise, as a turn does (two squares, both claimed). The same collision
+  rules, wind as forward and whirl as turn. A ship carried onto another wind or whirlpool isn't moved again that slot.
+  Left alone in a whirlpool for a whole turn, a ship ends where she started, facing the same way.
+- **Guns**, after the winds: each side's shots fly straight out from her side up to **3 squares** and **all hit the
+  first ship** in that line. A **tall rock** stops them, a small rock doesn't [S]. A ship in a safe zone can't fire and
+  can't be damaged (she can be rammed, and pushed out). **Friendly fire** does half damage.
+- **Full damage sinks her**, at the end of the slot. In the sim she comes back at once at a random square along her
+  side's outer edge, fresh **(the game: that ship's out of the round, and the side sends another; the tabletop does as
+  the sim)**.
+- **Scoring, at the end of each turn**: a buoy within any ship's influence of one side only scores its points for that
+  side, once, however many of its ships are round it. A buoy both sides influence is **contested** and scores nothing.
+  A ship's **influence** is a circle round her, the squares within half its diameter of her square: 1 square (a sloop
+  must sit on the buoy), 5, 13, 29, 49 for diameters 1, 2, 4, 6, 8 [Y and S agree]. Diameter 10 YPPedia counts as 73
+  squares, which no circle gives (81 within 5) **(to confirm)**.
+
+### Tokens [Y][S]
+
+- **Moves**: the sailors and riggers make them, each a forward, left or right, the kind the navigator picks (or
+  "auto", topping up whichever kind is fewest [S]); a high bilge makes them slower. Unused, a move token is lost
+  after **5 turns** (the sim: 4). The sim's crews: a basic one makes 1.7 moves a turn, an elite one 2.4, slowed by
+  0.9% for each 1% of bilge; a ship starts with 4 forwards, 2 lefts, 2 rights.
+- **Guns**: each gun the gunners load is one shot, fired off either side; guns never expire. The sim: a basic crew
+  loads 11.5 a turn, an elite 17, up to the ship's store (a war frigate 24); she starts with 10.
+- **Damage and bilge**: carpenters and patchers mend damage, bilgers pump. The sim: a basic crew mends 0.5 a turn and
+  pumps 4%, an elite 1 and 7%; damage past 40% (elite 50%) starts the bilge rising.
+- **Maneuvers** (some event blockades turn them off): made by all three duty areas together, a third each, silver
+  then gold. Chain shot (gold, skull shot) destroys the target's move tokens; the in-place turn (gold, a tidal wave
+  filling the bilge of the ship in front by 50%); the double forward (gold, ramming speed, ramming as a bigger
+  class); flotsam behind her, stopping any ship that sails into it for the rest of that turn (gold, burning, damaging
+  too). The tabletop starts without them.
+
+### A round, and the blockade [Y]
+
+- **A round is about 45 minutes** (the sim: 15 minutes), with four one-minute breaks (at 35:00, 26:15, 17:30, 8:45
+  left). The side with the most points takes the round; a tie that isn't nil goes to sudden death; nil to nil goes to
+  the defenders. **Best of three rounds**; the blockade ends early once the attackers can't win.
+- **Entering**: a ship comes in at a random square along the outer edge of her side's safe zone, facing in. Once out
+  of the safe zone she can't go back: sailing into it is leaving the board by that end. Defenders may leave by either
+  end, attackers only ocean-side.
+- **Roles**: the battle admiral (BA, where every ship goes), the land admiral (LA, the fleet in port), the
+  navigators, the XOs (each ship stocked and crewed), the jobbers. And the words the old guides use: **snipers**
+  (hit-and-run from the safe zone), **the back door** (a brig entering ocean-side), **tunnel vision** (watching one
+  enemy), "fire liberally" (shoot whenever an enemy could be in range).
+
+### What the tabletop takes, to start
+
+To shape with the user. A first cut: the board and its tiles, the ships by the table above (the war brig and war
+frigate first, as the sim had), the four slots and the collision rules exactly, winds, whirlpools, guns, influence and
+scoring, sinking and coming back as the sim did; tokens made at a crew's pace, its quality a setting; no maneuvers,
+no budget, a short round.
+
+### Sources
+
+- YPPedia: Sea battle, Blockade, Collision mechanics, Influence, Ramming, Rock, Wind, Whirlpool, Maneuver,
+  Blockade strategy guide (read 16 Nov in the browser pane; YPPedia turns automated fetches away).
+- The old cade sim's server: github.com/BenBeri/Obsidio-Server (Apache-2.0): its board (`BlockadeMap`), turn
+  (`PlayerManager.handleTurns`), collisions (`CollisionCalculator`), tokens (`MoveTokensHandler`, `MoveGenerator`,
+  `JobbersQuality`), ships (`vessel/impl`), and 30-odd real blockade boards in `maps/` (Loggerhead, Melanester,
+  Aimuari...) to set out on the tabletop.
+- Also found: github.com/craigpears/BlockadeSim (2015, GPL-2.0), "a university pet project", a blockade sim with
+  flags, shooting and sinking; not read yet.
 
 ## 2. Teaching it: the user's notes (16 Nov)
 
@@ -113,4 +236,5 @@ Blockade nav challenges:
 
 ## 3. Where it's got to
 
-- 16 Nov: started; the card, this document, the user's notes. Next: research the real rules into §1.
+- 16 Nov: started; the card, this document, the user's notes. The real rules researched into §1, from YPPedia and
+  the old cade sim's server. Next: agree the first cut with the user, then its rules module and tests.
