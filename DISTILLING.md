@@ -942,6 +942,10 @@ PHASE). A burned column brings a new one onto the fire's side, so Stage I goes f
 The tiers are gone (the thirtieth note: "I don't want to say able blah blah blah"). Each bot is its target chain,
 `LEVELS` in `src/distill-bots.ts`: **CC^1, CC^2, CC^3, CC^5, CC^8** (`?bot=cc2` on distilling-test.html; the old
 names still open the nearest, learner CC^1, master CC^3, grandmaster CC^5, ultimate CC^8).
+- **Watched at a speed you pick** (16 Nov: "I never remember asking for this to be a super speed thing, but can I at
+  least have some sort of speed control?"): the bots still play at the one human pace (`PACE`), and the test page's
+  Speed (quarter, half, normal, double, 4x, 8x; `[` and `]`; `?speed=0.5`) runs the whole board at it, hand, furnace
+  and pieces alike, so a bot slowed down plays the same game.
 - **The target sets the bank:** the whites banked before the chain, `bankFor`: 4 columns for CC^1, 4.5, 5, then 6
   for CC^5 and CC^8 (7 was tried for CC^8 and kept it in Stage I nearly all session, below).
 - **The target sets the techniques:** CC^1 the four simple ones (save the whites, finish the junk column, the

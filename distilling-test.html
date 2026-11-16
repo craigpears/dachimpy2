@@ -8,7 +8,9 @@
      (compiled to js/distilling.js); the board's look is js/den/distill-board.js, the one Helium's still
      will use. This page only stands it up on its own, with a seed in the address (?seed=7), a restart,
      and the bots of src/distill-bots.ts to watch at their own pace (?bot=cc3, each named by its target chain): each drag swept as a
-     hand would, the piece held, and the routine it's playing (src/distill-routines.ts) in small text. -->
+     hand would, the piece held, and the routine it's playing (src/distill-routines.ts) in small text. A speed
+     control (16 Nov: "can I at least have some sort of speed control?") runs the whole board slower or faster, the
+     hand, the furnace and the pieces alike, so the bot plays the same game: ?speed=0.5, [ and ] to step it. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -53,6 +55,13 @@
     <label for="bot">Watch a practice player:</label>
     <select id="bot"><option value="">no, I'll play</option></select>
   </div>
+  <div class="row">
+    <label for="speed">Speed:</label>
+    <select id="speed" title="Everything at this speed: the player's hand, the furnace, the pieces ([ slower, ] faster)">
+      <option value="0.25">quarter</option><option value="0.5">half</option><option value="1">normal</option>
+      <option value="2">double</option><option value="4">4x</option><option value="8">8x</option>
+    </select>
+  </div>
   <div id="knows"></div>
   <div id="stats"></div>
   <div id="routine"></div>
@@ -94,8 +103,14 @@ window.screenAt = (col, row) => {
 let seed = Number(params.get('seed')) || 1, board = null, botName = params.get('bot') || '';
 // ?shot: the board alone in the middle, no panel (for a picture of it).
 const shot = params.has('shot');
-// ?fast=n: time n times as fast (to watch a bot's whole session quickly).
-const fast = Number(params.get('fast')) || 1;
+// The speed it's all run at (the user, 16 Nov: "I never remember asking for this to be a super speed thing, but can
+// I at least have some sort of speed control?"): the whole board's time, the bot's hand, the furnace and the pieces
+// alike, so it plays the same game slower or faster. ?speed=n (?fast=n, its old name), the select, or [ and ].
+const SPEEDS = [...$('speed').options].map((o) => Number(o.value));
+let speed = Number(params.get('speed') || params.get('fast')) || 1;
+speed = SPEEDS.reduce((a, b) => (Math.abs(b - speed) < Math.abs(a - speed) ? b : a));
+$('speed').value = String(speed);
+const setSpeed = (v) => { speed = v; $('speed').value = String(v); address(); };
 if (shot) for (const el of document.querySelectorAll('.ui, #prompt')) el.style.display = 'none';
 for (const t of LEVELS) { const o = document.createElement('option'); o.value = t.name; o.textContent = `aiming for ${t.label}`; $('bot').append(o); }
 // (an old tier's name in the address, ?bot=ultimate, is the level nearest it)
@@ -132,14 +147,16 @@ function deal() {
   showKnows();
   botWait = 600; botSteps = [];
   $('routine').textContent = '';
-  history.replaceState(null, '', `?seed=${seed}${botName ? `&bot=${botName}` : ''}`);
+  address();
 }
+function address() { history.replaceState(null, '', `?seed=${seed}${botName ? `&bot=${botName}` : ''}${speed !== 1 ? `&speed=${speed}` : ''}${shot ? '&shot' : ''}`); }
 $('restart').onclick = () => deal();
 $('next').onclick = () => { seed++; deal(); };
 $('dismiss').onclick = () => board.dismiss();
 $('burn').onclick = () => board.burn();
 $('pause').onclick = () => { board.paused = !board.paused; $('pause').classList.toggle('on', board.paused); };
 $('bot').onchange = () => { botName = $('bot').value; deal(); $('bot').blur(); };
+$('speed').onchange = () => { setSpeed(Number($('speed').value)); $('speed').blur(); };
 deal();
 
 /** The routine the bot's playing, in small text under the stats, so its plan can be followed. */
@@ -207,6 +224,11 @@ function driveBot(dt) {
 addEventListener('keydown', (e) => {
   if (e.target.tagName === 'SELECT') return;
   if (e.target.tagName === 'BUTTON') e.target.blur();
+  if (e.key === '[' || e.key === ']') {
+    const i = SPEEDS.indexOf(speed) + (e.key === ']' ? 1 : -1);
+    if (i >= 0 && i < SPEEDS.length) setSpeed(SPEEDS[i]);
+    e.preventDefault(); return;
+  }
   if (board.key(e.key, e)) e.preventDefault();
 });
 const canvas = renderer.domElement;
@@ -226,7 +248,7 @@ fit();
 
 const clock = new THREE.Clock();
 function frame() {
-  const dt = Math.min(0.05, clock.getDelta()) * fast;
+  const dt = Math.min(0.05, clock.getDelta()) * speed;
   driveBot(dt);
   board.tick(dt);
   // Straight on to the board, a little left of the middle so the panel doesn't cover it.
@@ -234,7 +256,7 @@ function frame() {
   camera.position.copy(v.from).add(new THREE.Vector3(side, low, wide ? 0.3 : 1.2));
   camera.lookAt(v.look.clone().add(new THREE.Vector3(side, low, 0)));
   const gm = board.game, left = gm.timeLeft();
-  $('stats').innerHTML = `Seed <b>${seed}</b> · <b>${(gm.time / 1000).toFixed(0)}</b> s · burn in <b>${Number.isFinite(left) ? (left / 1000).toFixed(1) : '-'}</b> s<br>`
+  $('stats').innerHTML = `Seed <b>${seed}</b>${speed !== 1 ? ` · speed <b>${speed}x</b>` : ''} · <b>${(gm.time / 1000).toFixed(0)}</b> s · burn in <b>${Number.isFinite(left) ? (left / 1000).toFixed(1) : '-'}</b> s<br>`
     + `Flask <b>${gm.flask}</b> / 100 · up <b>${gm.columnsUp}</b>, burned <b>${gm.columns.length - gm.columnsUp}</b><br>`
     + `Points <b>${gm.points}</b> · score <b>${gm.score().toFixed(2)}</b> · chain <b>${gm.chain}</b> (best ${gm.longest})`;
   $('prompt').textContent = board.prompt();
