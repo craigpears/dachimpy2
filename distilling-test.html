@@ -246,11 +246,22 @@ function fit() {
 addEventListener('resize', fit);
 fit();
 
+/* The game an underlying simulation in fixed ticks (the user, 16 Nov: "it should be an underlying simulation ... the
+   front end should be showing, especially with the bot involved ... X number of moves per game tick"): the board,
+   its furnace and the bot all step TICK at a time, never by however long a frame took, so a seed and bot play the
+   same game every time, at any speed and frame rate; the frame only draws where it's got to. Speed is how many ticks
+   a second of real time runs. */
+const TICK = 1 / 60;
 const clock = new THREE.Clock();
+let behind = 0;
 function frame() {
-  const dt = Math.min(0.05, clock.getDelta()) * speed;
-  driveBot(dt);
-  board.tick(dt);
+  // (a quarter second at most caught up a frame: a tab back from the background carries on, not races)
+  behind += Math.min(0.25, clock.getDelta()) * speed;
+  while (behind >= TICK) {
+    driveBot(TICK);
+    board.tick(TICK);
+    behind -= TICK;
+  }
   // Straight on to the board, a little left of the middle so the panel doesn't cover it.
   const v = board.camView(camera), wide = innerWidth > 900, side = shot ? 0 : wide ? -0.9 : 0, low = !shot && !wide ? -0.8 : 0;
   camera.position.copy(v.from).add(new THREE.Vector3(side, low, wide ? 0.3 : 1.2));
