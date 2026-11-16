@@ -3,6 +3,22 @@
 // somewhere). Each scene is its own module: their captain's parting shot (map.js), Dignity at the
 // checkpoint (dignity.js). (Pulled out of map.js.)
 import { $, camera, animateWalk, faceTo, v3 } from './world.js';
+import { forTouch } from '../touch-words.js';
+
+// The bar along the bottom says how to go on or skip; on a touch screen in its words for a phone, and tapped,
+// it's Space (RULES.md, "On a phone", 16 Nov: no keys on a phone).
+const TOUCH = matchMedia('(pointer: coarse)').matches;
+export function cineBar(text) {
+  const el = document.querySelector('.cine-bar.bot');
+  if (!el || el.dataset.said === text) return;
+  el.dataset.said = text;
+  el.textContent = TOUCH ? forTouch(text) : text;
+}
+cineBar('Space: skip');
+document.querySelector('.cine-bar.bot')?.addEventListener('click', () => {
+  if (!TOUCH) return;
+  for (const type of ['keydown', 'keyup']) dispatchEvent(new KeyboardEvent(type, { key: ' ', code: 'Space', bubbles: true }));
+});
 
 /* The scene playing, if one is: { cam: { look, dist, tilt, yaw }, tick(dt), end(skip) }. Its cam is
    the camera's shot (den.js eases to it and back); tick plays it; end tidies it away, `skip` when

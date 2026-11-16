@@ -44,6 +44,12 @@
   #say.bad { border-color: #c8572a; }
   [hidden] { display: none !important; }
   @media (max-width: 700px) { .ui { top: auto; bottom: 12px; } p { display: none; } #say { top: 10px; } }
+  /* On a phone (RULES.md, "On a phone", 16 Nov): everything to tap a thumb's size. */
+  @media (pointer: coarse) {
+    button, select { min-height: 44px; }
+    .pad button { min-width: 44px; }
+    input[type=checkbox], input[type=radio] { width: 22px; height: 22px; }
+  }
 </style>
 </head>
 <body>

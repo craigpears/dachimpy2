@@ -20,7 +20,7 @@ import { palm } from './wedding-scene.js';
 import { person } from './props-people.js';
 import { balloonStand } from './balloons.js';
 import { FURNITURE } from './furniture.js';
-import { cine, cinePlay, cineEnd } from './cine.js';
+import { cine, cinePlay, cineEnd, cineBar } from './cine.js';
 
 /* Her ground: a sand slab's top (isle.js's slab tops out at y0 + its height + its bevel's 0.25), as on
    Kikkit's island, so she stands on it. */
@@ -86,7 +86,7 @@ function lessonPlay() {
   cinePlay(c);
 }
 /* What the keys do, in the cutscene's bar at the foot of the screen (den.html's, "Space: skip" as a rule). */
-const bar = (text) => { const el = document.querySelector('.cine-bar.bot'); if (el && el.textContent !== text) el.textContent = text; };
+const bar = cineBar;
 const free = () => sail.on && !cine && !sail.helm.cur?.via && !sail.helm.gusts?.length && !sail.helm.rides?.length;
 
 /** Space off her island: her lesson again (once you've seen it). True if it was for her. */

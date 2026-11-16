@@ -296,7 +296,7 @@ function sailHud() {
   // Her guns either side of the tokens, port on the left: a pip for each shot loaded that side (by
   // Gunnery: 2), lit when there's one ready, the bar filling as her gun runs out again after a shot.
   const pips = (side) => Array.from({ length: sail.guns.most(side) }, (_, i) => `<b class="pip${i < shots(side) ? ' on' : ''}"></b>`).join('');
-  const gun = (side, k) => `<div class="gun${sail.guns.ready(side) ? ' ready' : ''}" title="${side === 'L' ? 'Port' : 'Starboard'} shots loaded (Gunnery: 2)"><kbd>${k}</kbd>${side === 'L' ? 'Port' : 'Starboard'}<span class="pips">${pips(side)}</span><i style="width:${shots(side) ? load(side) * 5 : 0}%"></i></div>`;
+  const gun = (side, k) => `<div class="gun${sail.guns.ready(side) ? ' ready' : ''}" data-side="${side}" title="${side === 'L' ? 'Port' : 'Starboard'} shots loaded (Gunnery: 2)"><kbd>${k}</kbd>${side === 'L' ? 'Port' : 'Starboard'}<span class="pips">${pips(side)}</span><i style="width:${shots(side) ? load(side) * 5 : 0}%"></i></div>`;
   // The wind, at the left end, and the puzzles at the right in their keys' order, 1 2 3: Sailing, her
   // guns, the oars (wind.js).
   $('sailhud').innerHTML = `<div class="turns">${windHud()}${gun('L', 'Q')}<div class="turn"><span>This turn</span>${toks(now, (i) => (i < h.slot ? 'done' : i === lit ? 'now' : ''))}</div>`
@@ -450,4 +450,5 @@ $('sailhud').addEventListener('mousedown', (e) => {
   if (e.target.closest('#oars-btn')) { e.preventDefault(); rowToggle(); }
   else if (e.target.closest('#guns-btn')) { e.preventDefault(); gunneryToggle(haul.on || craneHolds()); }
   else if (e.target.closest('#rig-btn')) { e.preventDefault(); rigToggle(); }
+  else if (e.target.closest('.gun')) { e.preventDefault(); sailFire(e.target.closest('.gun').dataset.side); }   // (a phone's way to fire: tapping a side's guns, den.html)
 });

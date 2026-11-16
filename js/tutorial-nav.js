@@ -27,6 +27,7 @@ const CSS = `
 .tnav button.tn-sec:hover, .tnav button.tn-sec:focus-visible { color: var(--tn-ink); border-color: var(--tn-edge); outline: none; }
 .tnav button.tn-sec[aria-current="true"] { color: var(--tn-gold); }
 .tnav button.tn-sec[aria-expanded="true"] { color: var(--tn-ink); background: var(--tn-panel); border-color: var(--tn-edge); }
+@media (pointer: coarse) { .tnav button.tn-sec { min-height: 44px; } }
 .tnav button.tn-sec::after { content: ' \\25BE'; font-size: 12px; opacity: .7; }
 .tnav .tn-own { margin-left: auto; display: flex; gap: 10px; flex: none; padding-left: 10px; }
 .tnav .tn-own a { color: var(--tn-gold); white-space: nowrap; }

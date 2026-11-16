@@ -152,3 +152,11 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outlin
 }
 /* On a phone held upright, Play, so What's new fits beside it. */
 @media (max-width: 480px) { .sb-the { display: none; } }
+/* On a phone (RULES.md, "On a phone", 16 Nov): the bar's links scroll sideways, faded at the edge so it's plain there
+   are more; a page's Play button and anything else to tap a thumb's size (44px). */
+@media (max-width: 640px) {
+  .sb-go { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); padding-right: 24px; }
+}
+@media (pointer: coarse) {
+  a.play { padding-top: 12px; padding-bottom: 12px; }
+}

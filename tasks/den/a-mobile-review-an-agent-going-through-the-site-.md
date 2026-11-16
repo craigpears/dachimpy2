@@ -1,6 +1,6 @@
 ---
 title: A mobile review: an agent going through the site at phone size, like the smoke tests
-status: doing
+status: playtest
 asked: 16 Nov
 updated: 16 Nov
 session: local_c50dfa1b-cd67-4001-bfd6-81b63c632b87
@@ -19,3 +19,5 @@ session: local_c50dfa1b-cd67-4001-bfd6-81b63c632b87
 - 16 Nov: Reviewed the rest (44 pages, seven batches): 30 new phone cards, all asked, in their streams; notes on the hamburger and den-at-sea cards for the den's shared controls. changelog.html the only page found fine. The prompt now skips the den's shared controls on each place and reads a card before noting.
 - 16 Nov: The user, 16 Nov: "don't spawn lots of little cards, tidy up anything you've created, just go through and fix any UX things that you come across". The 31 phone cards removed; the reviewer now writes mobile-report/review.md, never cards; fixing what it found under this card.
 - 16 Nov: being done
+- 16 Nov: Fixed on a phone: the den's menu behind one Menu button (its credit inside), key hints gone on touch, the prompt says Tap here and is the button for Space (src/touch-words.ts), tap a side's guns to fire, the Sailing dock about half the height, the news below the bar and smaller, the den's timber news held till you're back ashore, wall labels kept on the screen, cutscene bars thinner and tapped to skip, Tzz's note above her board, 44px buttons in houses, lodgings, carpet, race card; site bar and the primer's tabs faded where they scroll, catalogue band slimmer, guide tabs, Play buttons, front page swatches, test pages' buttons 44px, Distilling and Foraging test panels trimmed. The den's wall pages went from ~75% of the screen covered to ~33%.
+- 16 Nov: for you to playtest

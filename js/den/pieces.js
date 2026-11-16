@@ -18,6 +18,8 @@ import { sailPrompt } from './sailing.js';
 import { patch, patchTake } from './sea-puzzles.js';
 import { net, guest, isHost, myId, crewSize, send } from './crew.js';
 import { deco } from './menus.js';
+import { forTouch } from '../touch-words.js';
+const TOUCH = matchMedia('(pointer: coarse)').matches;
 
 // ---------- piles (the toolbox), fire barrel, chest, cannon ----------
 const crateGeo = new RoundedBoxGeometry(1.2, 0.64, 1.2, 2, 0.04);
@@ -687,8 +689,9 @@ export function prompt() {
   if (canRead(G.map) && !carry && !wm && pirate.h < 0.05 && !t.startsWith('Space')) t += " · M: the captain's map";
   t = sailPrompt() || mapPrompt() || bilgePrompt() || swordPrompt() || t;
   const el = $('prompt');
-  if (el.textContent !== t) {
-    el.textContent = t;
+  if (el.dataset.said !== t) {
+    el.dataset.said = t;
+    el.textContent = TOUCH ? forTouch(t) : t;   // (on a phone: no keys, the prompt the button: src/touch-words.ts)
     // Something new to do with a key (10 Nov: "it says space, but it's such a tiny little thing at
     // the bottom. I did not see it"): it stands out, and pulses as it comes up.
     // (Not the running tips while you carry a piece or play a puzzle: only somewhere new to do something.)

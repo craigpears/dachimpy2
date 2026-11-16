@@ -37,6 +37,7 @@
     background: linear-gradient(135deg, var(--a) 0 50%, var(--b) 50% 100%); }
   .themes button[aria-pressed="true"] { border-color: var(--text); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
   .themes button:hover { border-color: var(--dim); }
+  @media (pointer: coarse) { .themes button { width: 44px; height: 44px; } }   /* (a thumb's size: RULES.md, "On a phone") */
   img { display: block; max-width: 100%; }
   .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
   /* The bar, stuck to the top as you scroll (the user, 14 Nov: "I definitely need a sticky navigation menu"; then
