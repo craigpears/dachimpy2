@@ -1326,68 +1326,160 @@ export class DistillBot {
 /** Play a session through with a bot: each drag a moment to spot, then swept at its hand speed;
     the furnace runs on meanwhile. Stops at `cap` minutes of play. `onColumn` sees each column, `onPlan`
     each decision. */
-export function playSession(g, level, cap = 30, onColumn, onPlan) {
-    const bot = new DistillBot(level), swapMs = 1000 / level.rate, cost = {};
-    let went = false;
-    const handle = (ev) => {
+/** The game time a bot's play steps in, ms: the game is ticked in these slices however its time is handed in, so the same
+    seed and bot play the same game whether the whole session's run at once (the bots' runner, the tests) or a frame's
+    worth at a time on a page (the user, 16 Nov: "the bot does the set X things for ticks ... burning and things like
+    that should not be dependent on an animation or real time element at all"). */
+export const STEP_MS = 10;
+/** A bot playing a game, the one way bots play anywhere (src/distill-bots.ts's playSession, distilling-test.html): it
+    plans a move, takes a moment to spot each drag (its `spot`, or `sweepSpot` swept blind), swaps along it at its hand's
+    `rate`, a burn or a wait as planned, and the board's slide after a column goes waited out; the game ticked in
+    STEP_MS slices all the while. `advance(ms)` runs it on by that much game time; the simulation leads, and what shows
+    it catches up (the user: "if there's a bit of lag, the front end will then catch up with the simulation, not the
+    other way around"). */
+export class BotPlayer {
+    g;
+    level;
+    hooks;
+    bot;
+    /** Each technique's cost in Stage I, as playSession reports it. */
+    cost = {};
+    ops = [];
+    bank = 0;
+    went = false;
+    at = null;
+    move = null;
+    constructor(g, level, hooks = {}) {
+        this.g = g;
+        this.level = level;
+        this.hooks = hooks;
+        this.bot = new DistillBot(level);
+    }
+    tick(ms) { this.emit(this.g.tick(ms)); }
+    /** The game's events: a column gone noted (the bot's, and the move cut short), and passed on to show. */
+    emit(ev) {
         for (const e of ev)
             if (e.kind === 'column') {
-                went = true;
-                bot.seen(e.column, g);
-                onColumn?.(e.column);
+                this.went = true;
+                this.bot.seen(e.column, this.g);
             }
-    };
-    while (!g.finished && g.time < cap * 60000) {
-        if (g.sliding > 0) {
-            handle(g.tick(g.sliding));
-            continue;
-        }
-        const a = bot.plan(g);
-        onPlan?.(a);
+        if (ev.length)
+            this.hooks.onEvents?.(ev);
+    }
+    drop() { if (this.at) {
+        this.at = null;
+        this.hooks.onLetGo?.();
+    } }
+    /** The next move planned into steps. */
+    plan() {
+        const g = this.g, l = this.level, a = this.bot.plan(g);
+        this.hooks.onPlan?.(a);
         if (a.kind === 'dismiss') {
             g.dismiss();
-            break;
+            return;
         }
         if (a.kind === 'burn') {
-            handle(g.burnNow());
-            handle(g.tick(level.spot));
-            continue;
+            this.emit(g.burnNow());
+            this.ops.push({ kind: 'wait', ms: l.spot });
+            return;
         }
         if (a.kind === 'wait') {
-            handle(g.tick(Math.max(1, Math.min(250, g.timeLeft()))));
-            continue;
+            this.ops.push({ kind: 'wait', ms: Math.max(1, Math.min(250, g.timeLeft())) });
+            return;
         }
-        went = false;
-        let ok = true;
-        const was = a.stage === 'junk' ? junkAcross(g.cols) : 0, share = colourLeft(g.cols), t0 = g.time;
+        this.went = false;
+        this.move = { a, was: a.stage === 'junk' ? junkAcross(g.cols) : 0, share: colourLeft(g.cols), t0: g.time };
         for (const d of a.drags) {
-            handle(g.tick(a.sweep ? level.sweepSpot : level.spot));
-            bot.drags++;
-            let x = d.x, y = d.y;
-            for (const w of d.ways) {
-                if (went || !g.movable)
-                    break;
-                const n = g.swapToward(x, y, w);
-                if (!n) {
-                    ok = false;
-                    break;
-                }
-                [x, y] = n;
-                handle(g.tick(swapMs));
-            }
-            if (went || !ok)
-                break;
+            this.ops.push({ kind: 'wait', ms: a.sweep ? l.sweepSpot : l.spot }, { kind: 'pick', x: d.x, y: d.y });
+            for (const w of d.ways)
+                this.ops.push({ kind: 'swap', way: w }, { kind: 'wait', ms: 1000 / l.rate });
+            this.ops.push({ kind: 'drop' });
         }
-        if (a.stage === 'junk' && !went && a.routine) {
-            const k = a.sweep ? 'sweep' : (a.technique ?? a.routine), c = (cost[k] ??= { plenty: 0, middle: 0, scarce: 0, ms: 0, over: 0 });
-            c[share > 0.45 ? 'plenty' : share > M.SCARCE ? 'middle' : 'scarce']++;
-            c.ms += g.time - t0 + P.TURN_MS * turnsIn(a.drags);
-            c.over += junkAcross(g.cols) - was;
+        this.ops.push({ kind: 'done' });
+    }
+    /** A move's drags over (played, or cut short by a column going or a swap that couldn't be made): its cost noted. */
+    finishMove() {
+        const m = this.move;
+        this.move = null;
+        this.drop();
+        if (!m || m.a.stage !== 'junk' || this.went || !m.a.routine)
+            return;
+        const k = m.a.sweep ? 'sweep' : (m.a.technique ?? m.a.routine), c = (this.cost[k] ??= { plenty: 0, middle: 0, scarce: 0, ms: 0, over: 0 });
+        c[m.share > 0.45 ? 'plenty' : m.share > M.SCARCE ? 'middle' : 'scarce']++;
+        c.ms += this.g.time - m.t0 + P.TURN_MS * turnsIn(m.a.drags);
+        c.over += junkAcross(this.g.cols) - m.was;
+    }
+    /** Run on by `ms` of game time (on till the game's done, or `until` ms of it played, at the most). */
+    advance(ms, until = Infinity) {
+        const g = this.g;
+        this.bank += ms;
+        while (this.bank >= STEP_MS && !g.finished && g.time < until) {
+            const op = this.ops[0];
+            if (!op) {
+                // (The board sliding after a column went: waited out, then the next move planned.)
+                if (g.sliding > 0) {
+                    this.tick(STEP_MS);
+                    this.bank -= STEP_MS;
+                    continue;
+                }
+                this.plan();
+                continue;
+            }
+            if (op.kind === 'wait') {
+                this.tick(STEP_MS);
+                this.bank -= STEP_MS;
+                op.ms -= STEP_MS;
+                if (op.ms <= 1e-9)
+                    this.ops.shift();
+                continue;
+            }
+            this.ops.shift();
+            if (op.kind === 'done') {
+                this.finishMove();
+                continue;
+            }
+            if (op.kind === 'drop') {
+                this.drop();
+                if (this.went)
+                    this.cut();
+                continue;
+            }
+            if (op.kind === 'pick') {
+                this.bot.drags++;
+                this.at = [op.x, op.y];
+                this.hooks.onHold?.(op.x, op.y);
+                continue;
+            }
+            // A swap: none once a column's gone or the board's sliding (the rest of the move's for a board that's changed).
+            if (this.went || !g.movable || !this.at) {
+                this.cut();
+                continue;
+            }
+            const [x, y] = this.at, n = g.swapToward(x, y, op.way);
+            if (!n) {
+                this.cut();
+                continue;
+            }
+            this.at = n;
+            this.hooks.onSwap?.(x, y, n);
+            this.hooks.onHold?.(n[0], n[1]);
         }
     }
+    /** Burn now (a button, a key), the bot told of the column as it goes. */
+    burn() { this.emit(this.g.burnNow()); }
+    /** The rest of the move dropped. */
+    cut() { this.ops = this.ops.filter((o) => o.kind === 'done').slice(0, 1); if (!this.ops.length)
+        this.finishMove(); }
+}
+export function playSession(g, level, cap = 30, onColumn, onPlan) {
+    const p = new BotPlayer(g, level, { onPlan, onEvents: (ev) => { for (const e of ev)
+            if (e.kind === 'column')
+                onColumn?.(e.column); } });
+    p.advance(Infinity, cap * 60000);
+    const bot = p.bot;
     return {
         level: level.name, target: level.target, chains: bot.allChains(), longest: g.longest, score: g.score(), points: g.points, columnsUp: g.columnsUp,
         columnsBurned: g.columns.length - g.columnsUp, whitesBurned: g.whitesBurned, minutes: g.time / 60000,
-        swaps: g.swaps, drags: bot.drags, banked: bot.banked, dismissed: g.dismissed, finished: g.finished, used: bot.used, cost,
+        swaps: g.swaps, drags: bot.drags, banked: bot.banked, dismissed: g.dismissed, finished: g.finished, used: bot.used, cost: p.cost,
     };
 }

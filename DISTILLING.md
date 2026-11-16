@@ -945,10 +945,15 @@ names still open the nearest, learner CC^1, master CC^3, grandmaster CC^5, ultim
 - **Watched at a speed you pick** (16 Nov: "I never remember asking for this to be a super speed thing, but can I at
   least have some sort of speed control?"): the bots still play at the one human pace (`PACE`), and the test page's
   Speed (quarter, half, normal, double, 4x, 8x; `[` and `]`; `?speed=0.5`) runs the whole board at it, hand, furnace
-  and pieces alike, so a bot slowed down plays the same game. The page runs the game as an underlying simulation in
-  fixed ticks (1/60 s; the user: "it should be an underlying simulation ... X number of moves per game tick"), the
-  frame only drawing it, so a seed and bot (`?seed=3&bot=cc3`) play the same game every time, a link to a bot's
-  mistake showing that mistake.
+  and pieces alike, so a bot slowed down plays the same game.
+- **One simulation for a bot's play** (16 Nov: "the bot does the set X things for ticks ... burning and things like
+  that should not be dependent on an animation or real time element at all"; "if there's a bit of lag, the front end
+  will then catch up with the simulation, not the other way around"): src/distill-bots.ts's `BotPlayer` plans a move,
+  spots each drag, swaps at its hand's rate, waits out a column's slide, and ticks the game in `STEP_MS` (10 ms) slices
+  of game time however its time is handed in. The bots' runner (`playSession`), the tests and the test page all play
+  through it, so seed 2 with CC^8 is the same game in each, column for column (tests/distill-player.test.ts). On the
+  page the 3D board doesn't tick the game while a bot plays (`external`): it shows the player's swaps and columns,
+  its animations jumping ahead after a slow frame. `window.played` lists every column gone, with its game time.
 - **The target sets the bank:** the whites banked before the chain, `bankFor`: 4 columns for CC^1, 4.5, 5, then 6
   for CC^5 and CC^8 (7 was tried for CC^8 and kept it in Stage I nearly all session, below).
 - **The target sets the techniques:** CC^1 the four simple ones (save the whites, finish the junk column, the

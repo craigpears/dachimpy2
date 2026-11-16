@@ -78,7 +78,7 @@
 import * as THREE from 'three';
 import { seeded } from './js/mirror-row.js';
 import { Distilling, MESSAGES } from './js/distilling.js';
-import { LEVELS, levelNamed, bankFor, PER_COLUMN, DistillBot } from './js/distill-bots.js';
+import { LEVELS, levelNamed, bankFor, PER_COLUMN, BotPlayer } from './js/distill-bots.js';
 import { ROUTINES } from './js/distill-routines.js';
 import { STATES, TACTICS } from './js/distill-read.js';
 import { stepLines } from './js/distill-goals.js';
@@ -125,27 +125,36 @@ function showKnows() {
 
 const log = (t) => { const li = document.createElement('li'); li.textContent = t; $('log').prepend(li); while ($('log').children.length > 9) $('log').lastChild.remove(); };
 const L = 'wbK*x';
-/** A bot playing through the board, at its pace: a moment to spot each drag, then a swap each 1 / rate s. */
-let bot = null, botWait = 0, botSteps = [], botSpot = 0;
+/** A bot playing the board (src/distill-bots.ts's BotPlayer, the one way bots play anywhere: the same seed and bot play the
+    same game here as in the bots' runner and the tests): it ticks the game; the board only shows what it did. */
+let player = null;
 
 function deal() {
   board?.dispose();
   $('log').innerHTML = '';
+  window.played = [];
   board = distillBoard({
     game: new Distilling(seeded(seed)), at: new THREE.Vector3(0, 0, 0), size: 3,
     onColumn: (c, finished) => {
+      window.played.push({ t: board.game.time, up: c.up, pieces: c.pieces.map((p) => L[p]).join('') });   // (every column gone, for checking a run)
       const what = c.message ? (c.message === 'clear' && c.chain > 1 ? `${MESSAGES.clear} x${c.chain}` : MESSAGES[c.message]) : c.up ? 'up' : 'burned';
       log(`${c.up ? 'up' : 'burned'}: ${c.pieces.map((p) => L[p]).join('')}, ${what}${c.spice ? `, ${MESSAGES[c.spice]}` : ''}, ${c.points + c.bonus} points`);
-      bot?.seen(c, board.game);
-      botSteps = [];
       if (finished) log(`finished: ${board.game.points} points in ${board.game.columnsUp} columns, ${board.game.score().toFixed(2)} a column`);
     },
     onFinish: (gm) => { if (gm.dismissed) log(`dismissed: ${gm.points} points in ${gm.columnsUp} columns, ${gm.score().toFixed(2)} a column`); },
   });
   scene.add(board.group);
-  bot = botName ? new DistillBot(levelNamed(botName)) : null;
+  player = botName ? new BotPlayer(board.game, levelNamed(botName), {
+    onEvents: (ev) => board.show(ev),
+    onSwap: (x, y, to) => board.showSwap(x, y, to[0], to[1]),
+    onHold: (x, y) => board.hold(x, y),
+    onLetGo: () => board.letGo(),
+    onPlan: (p) => showRoutine(p),
+  }) : null;
+  board.external = !!player;
+  // (a burn by hand while a bot plays: the bot told of the column)
+  if (player) board.burn = () => player.burn();
   showKnows();
-  botWait = 600; botSteps = [];
   $('routine').textContent = '';
   address();
 }
@@ -189,38 +198,6 @@ function showRoutine(p) {
     $('routine').append(ol);
   }
 }
-function driveBot(dt) {
-  if (!bot || board.game.finished || board.paused) return;
-  botWait -= dt * 1000;
-  if (botWait > 0 || !board.game.movable) return;
-  const t = bot.level;
-  if (botSteps.length) {
-    // A drag as a hand sweeps it: the piece held, a swap as the mouse passes each place, no pause.
-    const [x, y, w] = botSteps.shift();
-    const to = board.swapAt(x, y, w);
-    if (!to) { botSteps = []; board.letGo(); return; }
-    board.hold(...to);
-    botWait = 1000 / t.rate;
-    // The drag's done: let go, and a moment to spot the next.
-    if (!botSteps.length || botSteps[0][0] !== to[0] || botSteps[0][1] !== to[1]) {
-      board.letGo();
-      if (botSteps.length) botWait += botSpot;
-    }
-    return;
-  }
-  const p = bot.plan(board.game);
-  showRoutine(p);
-  if (p.kind === 'dismiss') { board.dismiss(); return; }
-  if (p.kind === 'burn') { board.burn(); botWait = t.spot; return; }
-  if (p.kind === 'wait') { botWait = 250; return; }
-  for (const d of p.drags) {
-    let x = d.x, y = d.y;
-    for (const w of d.ways) { botSteps.push([x, y, w]); [x, y] = board.game.neighbour(x, y, w); }
-  }
-  // A sweep is played blind, one drag straight after another; a technique is spotted first.
-  botSpot = p.sweep ? t.sweepSpot : t.spot;
-  botWait = botSpot;
-}
 addEventListener('keydown', (e) => {
   if (e.target.tagName === 'SELECT') return;
   if (e.target.tagName === 'BUTTON') e.target.blur();
@@ -246,22 +223,18 @@ function fit() {
 addEventListener('resize', fit);
 fit();
 
-/* The game an underlying simulation in fixed ticks (the user, 16 Nov: "it should be an underlying simulation ... the
-   front end should be showing, especially with the bot involved ... X number of moves per game tick"): the board,
-   its furnace and the bot all step TICK at a time, never by however long a frame took, so a seed and bot play the
-   same game every time, at any speed and frame rate; the frame only draws where it's got to. Speed is how many ticks
-   a second of real time runs. */
-const TICK = 1 / 60;
+/* The game an underlying simulation (the user, 16 Nov: "it should be an underlying simulation ... the front end should
+   be showing, especially with the bot involved"; "if there's a bit of lag, the front end will then catch up with the
+   simulation, not the other way around"): with a bot, its player ticks the game in fixed steps of game time
+   (src/distill-bots.ts's STEP_MS), the same seed and bot the same game every time, at any speed or frame rate, as in
+   the bots' runner; the board only draws where it's got to, its animations jumping ahead after a slow frame. Speed is
+   how much game time a second of real time runs. */
 const clock = new THREE.Clock();
-let behind = 0;
 function frame() {
-  // (a quarter second at most caught up a frame: a tab back from the background carries on, not races)
-  behind += Math.min(0.25, clock.getDelta()) * speed;
-  while (behind >= TICK) {
-    driveBot(TICK);
-    board.tick(TICK);
-    behind -= TICK;
-  }
+  // (a second at most caught up a frame: a tab back from the background carries on, not races)
+  const dt = Math.min(1, clock.getDelta()) * speed;
+  if (player && !board.paused) player.advance(dt * 1000);
+  board.tick(dt);
   // Straight on to the board, a little left of the middle so the panel doesn't cover it.
   const v = board.camView(camera), wide = innerWidth > 900, side = shot ? 0 : wide ? -0.9 : 0, low = !shot && !wide ? -0.8 : 0;
   camera.position.copy(v.from).add(new THREE.Vector3(side, low, wide ? 0.3 : 1.2));
