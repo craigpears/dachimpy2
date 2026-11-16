@@ -254,15 +254,19 @@ describe('her turn drawn moving forward (15 Nov: "it should always be moving for
       expect(went).toBeCloseTo(Math.PI / 2 * FR.radius, 1);   // (the quarter circle's length)
     }
   });
-  it('a turn she\'s no room for leaves her as she was, never pivoting while she can go on', () => {
-    // A rock two squares off her starboard bow: no room to turn right, room to go on.
+  it('a turn she\'s no room for turns her on the spot, bumping, where her hull fits (16 Nov: "they don\'t need open water to turn. You can at least bounce off rocks or each other\'s ships"); where it doesn\'t, she stays as she was', () => {
+    // A rock two squares off her starboard bow: no room for her wide turn right, room to go on, and to turn where she is.
     const rocks = new Set(['11,12']), sea = new ShipSea(FR, 20, 20, rocks), p = { c: 10, r: 10, d: 0 };
     expect(sea.move(p, 'F').bump).toBe(false);
     const got = sea.move(p, 'R');
     expect(got.bump).toBe(true);
-    expect(got.to).toEqual(p);
+    expect(got.to).toEqual({ c: 10, r: 9, d: 1 });
+    // (and a rock where she'd lie across: she stays as she was)
+    const tight = new ShipSea(FR, 20, 20, new Set(['11,12', '8,9'])).move(p, 'R');
+    expect(tight.bump).toBe(true);
+    expect(tight.to).toEqual(p);
   });
-  it('only when she can\'t move at all is she warped round on the spot', () => {
+  it('with no move at all she turns on the spot', () => {
     // Bows on the board's edge, rocks either side ahead: nowhere to go.
     const sea = new ShipSea(FR, 20, 20, new Set(['6,18', '6,19', '13,18', '13,19'])), p = { c: 10, r: 18, d: 0 };
     for (const m of MOVES) expect(sea.clear(p, m)).toBe(false);
