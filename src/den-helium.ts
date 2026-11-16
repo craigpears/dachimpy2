@@ -27,7 +27,7 @@ import { ROUTINES, clear, isJunk, junkTarget, playDrags } from './distill-routin
 import { routesInto } from './distill-path.js';
 import { PHASES, type Phase } from './distill-phase.js';
 import { teach, type Aim, type Shown, type TeachMove, type Trick } from './distill-teach.js';
-import { AFTER, BEST, GOAL, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, MAKE_WAY, PLAN, PRAISE, SPOT, STEP_ONE, TEACH, TELL, TUTOR, WATCH } from './lines/helium.js';
+import { AFTER, BEST, GOAL, HELP, HELP_ELSE, HINT, LESSON, MISHAP, NERVES, ONWARD, OPENING, PHASE, MAKE_WAY, PLAN, PRAISE, SPOT, STEP_ONE, TEACH, TELL, WATCH } from './lines/helium.js';
 import { AT_HELIUMS } from './lines/you.js';
 
 const H = LAY.HELIUM;
@@ -235,8 +235,6 @@ export function lessonPlan(game: Distilling = afterOpening()): Beat[] {
     beats.push({ name: 'clear', says: S.clear, note: S.note, act: { kind: 'drags', drags }, step: S.n, marks });
   }
   beats.push({ name: 'why', says: S.why, note: S.note, act: { kind: 'none' }, step: S.n, ...(drags.length ? { rings: whitesMoved(before, drags) } : {}) });
-  // (what else they can show you, said once, beside the lesson, never a question in front of it: the user, 15 Nov)
-  beats.push({ name: 'else', says: TUTOR.else, note: S.note, act: { kind: 'none' }, step: S.n });
   beats.push({ name: 'burner', ...LESSON.burner, act: { kind: 'none' }, step: S.n });
   beats.push({ name: 'yours', ...LESSON.yours, act: { kind: 'none' }, step: S.n });
   return beats;

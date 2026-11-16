@@ -45,16 +45,19 @@ you can't get to.
   lesson is "the get into it quick version", the read guide the one with the structure and the links. So no
   question stands between arriving and a board moving ("I don't want to have to ask 3 questions to see something
   happen"): the teacher plays their first part (Helium's step one) as soon as their opening's done.
-- **The choice, beside the lesson, never in front of it** (`TutorialMenu`, drawn by `js/tutorial-choice.js`, a panel
-  any teacher can show, over a scene or a page): a small "Show me something else (T)", a button and the key, all
-  through the lesson and at the puzzle after it, the teacher mentioning it once. Up, it's their question in their
-  voice, an answer a button. Not a chatbot. Pick one, and they say their line over that part's list: its phases, its
-  scenarios, its single tricks, in tabs when there's more than one (scenarios before tricks: "here are the
-  scenario[s] ... Are you wanting the individual tricks?"). Pick one, and the teacher plays it on a real board, from
-  its `shows`, in place of the rest of what they were showing; Esc, and the lesson goes on where it was. Keys:
-  arrows (or W A S D) to move, Enter or Space to pick, a digit for its row, Esc back a level, then shut; every other
-  key goes through to the game. Touch: tap. A link can open it on a choice's list (`open`) or straight on a part
-  (`play`), and the read guide's "show me this" lands in the lesson playing that part, no question.
+- **Lessons, a button among the puzzle's own, a single level, then Next** (15 Nov, after a button floating beside
+  the cutscene went down badly; RULES.md, "A lesson's other parts"; the wolf den's way: "click, click, and in"):
+  nothing over the lesson or its cutscene. Once the puzzle's yours, "Lessons" (T) in its row of buttons opens the
+  choice (`TutorialMenu`, drawn by `js/tutorial-choice.js`, a panel any teacher can show, over a scene or a page):
+  their question in their voice, an answer a button. Not a chatbot. Pick one, and they say their line over its list.
+  A description marked `flat` (Distilling's, 15 Nov) has a single level: one list in a game's order (`lessonOrder`:
+  its basics, those met any time, then each phase with its scenarios and tricks after it), no tabs; otherwise its
+  phases, scenarios and single tricks in tabs (scenarios before tricks). Pick one, and the teacher plays it on a real
+  board, from its `shows`; then "Next" (N, a button beside Lessons) plays the one after it in that list
+  (`nextPart`), till its end. Keys: arrows (or W A S D) to move, Enter or Space to pick, a digit for its row, Esc
+  back a level, then shut; every other key goes through to the game. Touch: tap. A link can open it on a choice's
+  list (`open`) or straight on a part (`play`), and the read guide's "show me this" lands in the lesson playing that
+  part, no question, Next after it from its list.
 - **Every part played says what it's for** (15 Nov; RULES.md, "Every trick shown says what it's for"; "It just kind
   of jumped into it without any context of what it was doing, what it was achieving, what the point was"): three
   beats, the board laid and its `point.before` said, the pieces it's about ringed; the move; then `point.after`, the
@@ -65,8 +68,8 @@ you can't get to.
 
 The description is `src/distill-tutorial.ts` (14 Nov), drawn from what's there, so it can't drift
 (tests/tutorial.test.ts). Wired the same day: distilling-guide.html's sticky nav is drawn from it, Helium's lesson
-offers its choice (beside the lesson since 15 Nov, on T), and every part it links to on the guide has a "Show me
-this" into the lesson on that part.
+offers its choice (at the still since 15 Nov, Lessons on T, a single level, then Next), and every part it links to on
+the guide has a "Show me this" into the lesson on that part.
 
 - **Basics:** the guide's rules (the pieces, the swap rule, the furnace, Crystal Clears and chains), setting a
   target, and "At Helium's still: a goal, and a plan for it".
@@ -96,10 +99,12 @@ this" into the lesson on that part.
   contents; the rules' four articles have their ids (`b-pieces` ...), each trick tile its own (`d-climb` ...); a
   "Show me this" on each part's place, `den.html?at=helium&learn=<id>`.
 - **The lesson** (15 Nov): Helium's opening, then straight into step one (`lessonBeats`: the opening and
-  `lessonPlan`), no question. "Show me something else (T)" beside it (`TUTOR.button`, a button and T in the bar,
-  `TUTOR.barKey`), and Helium says so once as step one's done (`TUTOR.else`, its beat `else`); T opens the choice
-  (`tutorialChoice`, loaded when it's first asked) over the lesson, which holds while it's up; at the still, the same
-  button and key put it again. What's picked is played by src/den-helium-tutor.ts's `tutorBeats`, three beats: the
+  `lessonPlan`), no question, nothing else on the screen; handing you the still they say "T for lessons" once
+  (`LESSON.yours`). At the still, "Lessons (T)" first in their row of buttons (`TUTOR.button`) opens the choice
+  (`tutorialChoice`, loaded when it's first asked), Distilling's description `flat`: a choice, then one list. Once a
+  lesson's played, "Next lesson (N)" beside it (`TUTOR.next`; `nextOf`, src/den-helium-tutor.ts) plays the one after
+  it in that list (after step one, the next on the fire's side), their hand-over saying so (`TUTOR.afterNext`). What's
+  picked is played by src/den-helium-tutor.ts's `tutorBeats`, three beats: the
   part's own board laid (`distillShows`) and its `point.before`, the pieces it's about ringed (the picture's rings,
   else the pieces about to be dragged); its drags played at PACE_LESSON (or its column burned); its `point.after`,
   the same pieces ringed where the move left them (`ringedAfter`, by src/den-helium.ts's `follow`); then a fresh

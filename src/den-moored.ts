@@ -8,14 +8,16 @@
    [To] make it clear, it's kind of a to-do item." So she lies at anchor, sails furled, out past Port
    Decorum, to its left (moved there 11 Nov from just off the trade winds' first run out from the beach:
    "if you go over to the left, you'll ... find the [war frig]"), a sign over her saying she's coming soon; sailing up near
-   her, you say she's not ready yet. Nothing to do there yet: no boarding her. */
+   her, you say she's not ready yet. Since 15 Nov she's ready for a test run (src/den-frigate-run.ts: "park this
+   sloop there and then take the war frig on a test run"): the sign and what you say tell you so, and Space by
+   her takes her out. */
 import { LAY } from './den-sail.js';
 
 const P = LAY.PRIMATES.AT;
 export const MOORED = {
   /** The sign over her. */
-  SIGN: { name: 'Primates Rule', note: 'coming soon' },
-  /** How near (squares, any way) you come before you say she's not ready yet. */
+  SIGN: { name: 'Primates Rule', note: 'ready for a test run' },
+  /** How near (squares, any way) you come before you say she's ready for a test run, and can take her out. */
   NEAR: 2,
   /** Her bow's way: along her squares, out to the right (+c), broadside on to the den. */
   HEADING: 0,

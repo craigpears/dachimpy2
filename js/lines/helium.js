@@ -27,7 +27,7 @@ export const LESSON = {
         note: 'The fire\'s held: nothing burns till you press X. F starts it burning on its own.',
     },
     yours: {
-        says: 'X burns it by hand. When you feel ready, F, and it burns on its own. Your go: keep those three clear. H for me.',
+        says: 'X burns it by hand. When you feel ready, F, and it burns on its own. Your go: keep those three clear. H for me, T for lessons.',
         note: 'Your go: keep the three right-hand columns clear of white, and burn them (X) once they\'re all junk. The fire\'s held to start: F starts it burning on its own. H: Help, Helium. G: a hint. W: watch Helium play.',
     },
 };
@@ -64,18 +64,18 @@ export const TELL = 'Any questions, send me a tell on Emerald. Any time.';
 export const TUTOR = {
     opening: 'Right. What are you after?',
     basics: { asks: 'The basics?', then: 'The basics, then. Pick one.' },
-    early: { asks: 'Help with the early or mid game?', then: 'Early on, then. A board where it goes wrong, or one trick at a time?' },
+    early: { asks: 'Help with the early or mid game?', then: 'Early on, then. From the fire in. Pick one.' },
     higher: { asks: 'Trying to get your CC higher?', then: 'Longer chains. That\'s banking, then the chain. Pick one.' },
     end: { asks: 'The end game?', then: 'The end game. A gamble, that. Pick one.' },
     chooseNote: 'Helium\'s island. Pick what to see: arrows and Enter, a number, or tap. Esc: back.',
-    /** Said once in their lesson, as step one's done (the user, 15 Nov: the choice beside the lesson, never in front
-        of it: "I don't want to have to ask 3 questions to see something happen"). */
-    else: 'Something else you\'re after? T, any time, and I\'ll show you.',
-    /** The button beside their lesson and at the still, and the bar's word for T while their lesson plays. */
-    button: 'Show me something else (T)',
-    barKey: 'T: something else',
-    after: 'Your go now. T if you want another.',
-    afterNote: 'Your still: a fresh board. T: Helium shows you something else. H: Help, Helium. G: a hint. W: watch Helium play.',
+    /** Their lessons' button in the row at the still, with Hint, Watch and Help (the user, 15 Nov, of the wolf den's:
+        "it's got like lessons at the bottom ... click, click, and in"), and Next once a lesson's played. */
+    button: 'Lessons (T)',
+    next: 'Next lesson (N)',
+    after: 'Your go now. T for another.',
+    /** Handing you the still after a lesson with one after it in its list. */
+    afterNext: 'Your go now. N for the next one.',
+    afterNote: 'Your still: a fresh board. T: Helium\'s lessons. N: the next one. H: Help, Helium. G: a hint. W: watch Helium play.',
     notNow: 'Suit yourself. The still\'s yours. T if you change your mind.',
 };
 /** At your still, getting nervous as a white sits in the furnace's column and the fire comes round (the user,
@@ -443,7 +443,7 @@ export const CHARACTER = {
         { when: 'Your first batch at the still done, the goal met, after their "done": the rest is from other pirates', says: [ONWARD] },
         { when: 'The last thing they say when a lesson ends, always, after the other pirates', says: [TELL] },
         {
-            when: 'Their choice of what to show you, on T (or its button) during their lesson or at the still: their question (opening, then each choice\'s asks), their line over its list once it\'s picked (then); said once in their lesson as step one\'s done (else), the button and the bar\'s word for T (button, barKey); the part picked played on a real board (its point, below), then your go (after, afterNote in the bar), or not now',
+            when: 'Their lessons, on T (or its button) at the still: their question (opening, then each choice\'s asks), their line over its list once it\'s picked (then); their lessons\' button at the still and Next once one\'s played (button, next); the part picked played on a real board (its point, below), then your go (after; afterNext when there\'s a next one; afterNote in the bar), or not now',
             says: TUTOR,
         },
         { when: 'A part of their tutorial played on a board of its own, by its id: as it\'s laid, what\'s wrong or wanted there (before), and once the move\'s played, what it did (after)', says: POINT },

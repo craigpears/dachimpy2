@@ -69,9 +69,9 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 
 - "Is there anyone out here who could explain that with fewer tangents?"
 
-### Sailing up near Primates Rule at anchor, still to come (once a voyage)
+### Sailing up near Primates Rule at anchor, ready for a test run (once a voyage)
 
-- "Primates Rule, at anchor. She's not ready yet: coming soon!"
+- "Primates Rule, at anchor, ready for a test run: Space leaves your sloop here and takes you aboard her"
 
 ### Off Helium's island the first time, their still just gone bang: between their lines
 
@@ -1041,7 +1041,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
 
 - "Any questions, send me a tell on Emerald. Any time."
 
-### Their choice of what to show you, on T (or its button) during their lesson or at the still: their question (opening, then each choice's asks), their line over its list once it's picked (then); said once in their lesson as step one's done (else), the button and the bar's word for T (button, barKey); the part picked played on a real board (its point, below), then your go (after, afterNote in the bar), or not now
+### Their lessons, on T (or its button) at the still: their question (opening, then each choice's asks), their line over its list once it's picked (then); their lessons' button at the still and Next once one's played (button, next); the part picked played on a real board (its point, below), then your go (after; afterNext when there's a next one; afterNote in the bar), or not now
 
 - *opening:* "Right. What are you after?"
 - *basics:*
@@ -1049,7 +1049,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
   - *then:* "The basics, then. Pick one."
 - *early:*
   - *asks:* "Help with the early or mid game?"
-  - *then:* "Early on, then. A board where it goes wrong, or one trick at a time?"
+  - *then:* "Early on, then. From the fire in. Pick one."
 - *higher:*
   - *asks:* "Trying to get your CC higher?"
   - *then:* "Longer chains. That's banking, then the chain. Pick one."
@@ -1057,11 +1057,11 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
   - *asks:* "The end game?"
   - *then:* "The end game. A gamble, that. Pick one."
 - *chooseNote:* "Helium's island. Pick what to see: arrows and Enter, a number, or tap. Esc: back."
-- *else:* "Something else you're after? T, any time, and I'll show you."
-- *button:* "Show me something else (T)"
-- *barKey:* "T: something else"
-- *after:* "Your go now. T if you want another."
-- *afterNote:* "Your still: a fresh board. T: Helium shows you something else. H: Help, Helium. G: a hint. W: watch Helium play."
+- *button:* "Lessons (T)"
+- *next:* "Next lesson (N)"
+- *after:* "Your go now. T for another."
+- *afterNext:* "Your go now. N for the next one."
+- *afterNote:* "Your still: a fresh board. T: Helium's lessons. N: the next one. H: Help, Helium. G: a hint. W: watch Helium play."
 - *notNow:* "Suit yourself. The still's yours. T if you change your mind."
 
 ### A part of their tutorial played on a board of its own, by its id: as it's laid, what's wrong or wanted there (before), and once the move's played, what it did (after)
@@ -1151,7 +1151,7 @@ Teaches Distilling as if it were nothing: offhand, by the by, a maker proud of t
   - *says:* "Tell you what. I'll hold the burner for now. So we don't have any more of those... mishaps."
   - *note:* "The fire's held: nothing burns till you press X. F starts it burning on its own."
 - *Handing you the board: step one first, then your goal:*
-  - *says:* "X burns it by hand. When you feel ready, F, and it burns on its own. Your go: keep those three clear. H for me."
+  - *says:* "X burns it by hand. When you feel ready, F, and it burns on its own. Your go: keep those three clear. H for me, T for lessons."
   - *note:* "Your go: keep the three right-hand columns clear of white, and burn them (X) once they're all junk. The fire's held to start: F starts it burning on its own. H: Help, Helium. G: a hint. W: watch Helium play."
 
 ### At your still, a white left in the furnace's column as the fire comes round: uneasy with a while to go, panic just before (they cower), phew if you get it out in time; each in turn

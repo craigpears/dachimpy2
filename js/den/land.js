@@ -7,6 +7,7 @@ import { CarpentryFrame } from '../carpentry-frame.js';
 import { HIGH } from '../den-bilge.js';
 import { beachFloor } from '../den-beach.js';
 import { dyeHex } from '../den-look.js';
+import { rock, rockMats, ROCK_COLOURS } from './rock.js';
 import { C, S, WOOD_D, STONE_D, WALL_Z, DEN_BACK, PAY, k, rand, $, denLook, scene, camera, hemi, paintSky, mat, mesh, canvasTex, woodTex, groundTex, WOOD, woodMat, pieceGroup, outline, xrMat, addXray, V3, basis, flags, flagpole, pirate, HOP, carry, obstacles, G, wm, burst, toast, tween, fatOutline, v3, worldLets, redrawRoom } from './world.js';
 import { wall, X, cellPlane, updateStats } from './wall.js';
 import { GD, GUN_FRAME_Z, gd, gunX0, gunZ0, partR0, gunShape, makeGunDeck, gundeckLets } from './gundeck.js';
@@ -33,16 +34,8 @@ const floor = mesh(new THREE.PlaneGeometry(70, 29 - SHORE), mat('#ffffff', { map
 floor.rotation.x = -Math.PI / 2;
 floor.position.z = (29 + SHORE) / 2;
 den.add(floor);
-// The rocks' colours (a reef's drawn in them too: reef.js).
-export const ROCK_COLOURS = ['#5d5048', '#6b5c50', '#4f443d', '#73655a'];
-const rockMats = ROCK_COLOURS.map((c) => mat(c, { flatShading: true }));
-export function rock(x, y, z, s) {
-  const r = mesh(new THREE.DodecahedronGeometry(s, 0), rockMats[rand(rockMats.length)]);
-  r.position.set(x, y, z);
-  r.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
-  r.scale.y = 0.7 + Math.random() * 0.5;
-  return r;
-}
+// A rock, and the rocks' colours: rock.js (re-exported, as they were here).
+export { rock, ROCK_COLOURS };
 export function torch(x, z) {
   const t = new THREE.Group();
   const stick = mesh(new THREE.CylinderGeometry(0.05, 0.07, 1.6, 8), mat('#4a2f1a'));
