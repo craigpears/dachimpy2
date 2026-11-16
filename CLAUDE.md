@@ -59,6 +59,14 @@ their address. A link added to the front page is covered. Git's pre-push hook ru
 `tools/pre-push.mjs`; `npm run hooks` installs it, once a clone): a push to main changing `js/`, `css/` or a page in the
 root waits on it and is stopped if a page fails; cards, notes and docs go straight up (the user, 15 Nov: "at least
 occasionally"). Run `npm run build` before pushing, so the bundle it tests is the one going live.
+The phone check (16 Nov, the user: menus and controls take "a disproportionate amount of the space" on a phone):
+`npm run mobile` (`tools/mobile.mjs`, the same pages as the smoke tests, `tools/site.mjs` what they share) opens each
+at a phone's size with touch and measures, with no tokens, how much of the action panels cover, tap targets under
+44px, words under 12px, anything off the edge; screenshots and a report ranking the worst in `mobile-report/`
+(gitignored), its thresholds `THRESHOLDS` in one place; it flags, never fails. `-- blockade` filters, `--landscape`
+both ways round, `--root <checkout>` another branch's pages. `--review <pages>` then has a headless Claude
+(`tools/mobile-review.md`) judge their screenshots against RULES.md's "On a phone" and put each page's problems on
+cards: token heavy, so a few pages at a time, asked first.
 
 Modular, no technical debt (the user, 10 Nov: "we need to make sure I'm not creating spaghetti or just mess"):
 - Each puzzle (Carpentry, Gunnery, Bilge, Swordfight, Treasure Haul, rowing...) is one module with one

@@ -125,6 +125,24 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   sea and the puzzle getting the screen, not the menus (a bar along the top kept slim; buttons that do nothing in
   that moment hidden; the camera movable by touch).
 
+- **On a phone (16 Nov):** "menus or like control things, just taking a disproportionate amount of the space ...
+  can I actually see the action? Is the menu following good UX principles?" (the blockade's buttons and its list of
+  ships, the wolf den's panels before it). What every page and place is held to on a phone, checked by `npm run
+  mobile` (tools/mobile.mjs, its numbers) and judged by its reviewer (tools/mobile-review.md, the screenshots):
+  1. **The action is the screen.** The sea, the board, the room: most of the screen, its middle clear. Panels,
+     buttons and words over it are the exception, short and to the side (the check flags a quarter covered, or a
+     sixth of its middle).
+  2. **Controls at the thumb, along the bottom.** What you press while playing sits along the bottom edge (or
+     the sides, turned sideways), at least 44px to tap, spaced so a thumb hits one; not up in the corners.
+  3. **Lists and menus behind one button.** A list of ships, a menu of the den, a page of controls: folded behind
+     one button (a ☰, "Ships", "Help"), closed when you arrive, closing again when you go back to playing.
+  4. **Nothing covering what you're playing.** No panel, line or prompt over the board or the ship you're
+     steering; a line said beside or below it, a toast short and out of the middle.
+  5. **Only what this moment needs.** Buttons that do nothing now are hidden; key hints ("Space to...") aren't
+     shown on a touch screen, a button is.
+  6. **Readable, and on the screen.** Words 12px or more; nothing cut off at an edge or the foot; no sideways
+     scroll; both ways round.
+
 ## Pirate Den (3D prototype, `den.html`)
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.

@@ -10,6 +10,7 @@
     "board": "node tools/task.mjs board",
     "board:serve": "node tools/task.mjs serve",
     "smoke": "node tools/smoke.mjs",
+    "mobile": "node tools/mobile.mjs",
     "hooks": "git config core.hooksPath tools/hooks"
   },
   "devDependencies": {
