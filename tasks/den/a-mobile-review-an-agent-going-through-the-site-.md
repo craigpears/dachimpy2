@@ -1,6 +1,6 @@
 ---
 title: A mobile review: an agent going through the site at phone size, like the smoke tests
-status: review
+status: doing
 asked: 16 Nov
 updated: 16 Nov
 session: local_c50dfa1b-cd67-4001-bfd6-81b63c632b87
@@ -17,3 +17,5 @@ session: local_c50dfa1b-cd67-4001-bfd6-81b63c632b87
 - 16 Nov: Built: npm run mobile (tools/mobile.mjs, sharing tools/site.mjs with the smoke tests) measures all 46 pages at 390x844 with touch in about a minute: action covered, its middle, fixed chrome, taps under 44px, words under 12px, off the edge; shots and a ranked report in mobile-report/ (gitignored); --landscape, --root for another branch's checkout. RULES.md 'On a phone', six principles. The reviewer, npm run mobile -- --review <pages> (tools/mobile-review.md, headless Sonnet), tried on the blockade, the den at sea and the wolf den: notes on the blockade's, the den's menu and the wolf den's phone cards, and a new card, the-den-at-sea-on-a-phone-the-controls-dock-cove. Worst pages: the den's own places (60-80% of the sea under the menu, the dock, the key hints and the toast). The rest not reviewed yet: token heavy, ask first.
 - 16 Nov: for you to review
 - 16 Nov: Reviewed the rest (44 pages, seven batches): 30 new phone cards, all asked, in their streams; notes on the hamburger and den-at-sea cards for the den's shared controls. changelog.html the only page found fine. The prompt now skips the den's shared controls on each place and reads a card before noting.
+- 16 Nov: The user, 16 Nov: "don't spawn lots of little cards, tidy up anything you've created, just go through and fix any UX things that you come across". The 31 phone cards removed; the reviewer now writes mobile-report/review.md, never cards; fixing what it found under this card.
+- 16 Nov: being done

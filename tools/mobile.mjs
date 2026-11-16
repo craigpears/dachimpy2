@@ -287,17 +287,19 @@ function report(fresh, secs) {
   return rank(fresh);
 }
 
-/** The reviewer: a headless Claude (Sonnet) given tools/mobile-review.md and these pages' measurements, allowed to
- *  read the report and screenshots and change cards only through the task script, as the board's inbox is sorted. */
+/** The reviewer: a headless Claude (Sonnet) given tools/mobile-review.md and these pages' measurements, allowed only
+ *  to read the report and screenshots; what it says is written to mobile-report/review.md (no cards: the user, 16 Nov). */
 function review(results) {
   const pagesText = JSON.stringify(results.map(({ url, orient, from, shot, flags, cover, middle, chrome, panels, tapExamples, textExamples, edgeExamples, sideways, error }) =>
     ({ url, orient, from, shot, flags, cover, middle, chrome, panels, tapExamples, textExamples, edgeExamples, sideways, error })), null, 1);
   const prompt = fs.readFileSync(path.join(HERE, 'tools', 'mobile-review.md'), 'utf8').replaceAll('{{pages}}', pagesText).replaceAll('{{root}}', ROOT);
-  const tools = ['Read', 'Grep', 'Glob', 'Bash(node tools/task.mjs:*)'].join(',');
+  const tools = ['Read', 'Grep', 'Glob'].join(',');
   return new Promise((ok) => {
-    const child = spawn('claude', ['-p', '--model', 'sonnet', '--allowedTools', tools], { cwd: HERE, env: plainEnv(), stdio: ['pipe', 'inherit', 'inherit'], windowsHide: true });
+    const child = spawn('claude', ['-p', '--model', 'sonnet', '--allowedTools', tools], { cwd: HERE, env: plainEnv(), stdio: ['pipe', 'pipe', 'inherit'], windowsHide: true });
+    let said = '';
+    child.stdout.on('data', (d) => { said += d; process.stdout.write(d); });
     child.on('error', (e) => { console.error(`mobile: couldn't start Claude: ${e.message}`); ok(1); });
-    child.on('close', ok);
+    child.on('close', (code) => { fs.writeFileSync(path.join(OUT, 'review.md'), said); console.log(`review: ${path.relative(HERE, path.join(OUT, 'review.md'))}`); ok(code); });
     child.stdin.end(prompt);
   });
 }

@@ -65,8 +65,10 @@ at a phone's size with touch and measures, with no tokens, how much of the actio
 44px, words under 12px, anything off the edge; screenshots and a report ranking the worst in `mobile-report/`
 (gitignored), its thresholds `THRESHOLDS` in one place; it flags, never fails. `-- blockade` filters, `--landscape`
 both ways round, `--root <checkout>` another branch's pages. `--review <pages>` then has a headless Claude
-(`tools/mobile-review.md`) judge their screenshots against RULES.md's "On a phone" and put each page's problems on
-cards: token heavy, so a few pages at a time, asked first.
+(`tools/mobile-review.md`) judge their screenshots against RULES.md's "On a phone" and write what's wrong into
+`mobile-report/review.md`, never cards (the user, 16 Nov: "don't spawn lots of little cards ... just go through and
+fix any UX things that you come across"): token heavy, so a few pages at a time, asked first. What it finds is fixed
+in the same work, under the one card for it.
 
 Modular, no technical debt (the user, 10 Nov: "we need to make sure I'm not creating spaghetti or just mess"):
 - Each puzzle (Carpentry, Gunnery, Bilge, Swordfight, Treasure Haul, rowing...) is one module with one
