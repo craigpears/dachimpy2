@@ -186,7 +186,16 @@ export function shipPose(h: Handling, p: Pose, m: Move, u: number, bump = false,
   }
   const R = h.radius, e = R > 1 && !bump ? glide(u) : smooth(u), s = m === 'L' ? -1 : 1, a = p.d + s * e;
   if (bump) return own(M.c, M.r, a);
-  const side = (p.d + (m === 'L' ? 3 : 1)) % 4, mc = M.c + DC[side] * R, mr = M.r + DR[side] * R;
+  const side = (p.d + (m === 'L' ? 3 : 1)) % 4;
+  // (round to where her move really leaves her middle, so long as that's known: as far ahead and across as that is, not
+  // her radius, which for a hull two squares long isn't where she ends, and a war brig snapped into the next square as
+  // her turn finished: the user, 15 Nov, "it turns, then it seems like it gets snapped into an adjacent square")
+  if (to) {
+    const T = drawnAt(h, { c: to.c, r: to.r, a: to.d }), dc = T.c - M.c, dr = T.r - M.r;
+    const ra = dc * DC[p.d] + dr * DR[p.d], rx = dc * DC[side] + dr * DR[side], th = e * Math.PI / 2, f = Math.sin(th), g = 1 - Math.cos(th);
+    return own(M.c + DC[p.d] * ra * f + DC[side] * rx * g, M.r + DR[p.d] * ra * f + DR[side] * rx * g, a);
+  }
+  const mc = M.c + DC[side] * R, mr = M.r + DR[side] * R;
   const x = -DC[side] * R, y = -DR[side] * R, th = (m === 'L' ? 1 : -1) * e * Math.PI / 2;
   return own(mc + x * Math.cos(th) - y * Math.sin(th), mr + x * Math.sin(th) + y * Math.cos(th), a);
 }

@@ -16,14 +16,16 @@ const CELL = SAIL.CELL, stoneGeo = new THREE.DodecahedronGeometry(1, 0);
 /** The gate (`gate`, an imperial-gate.ts Gate), its bastion guns (`battery`, den-turret.ts Turrets), laid in
     `parent` by `v3(c, r, y)` (a square's middle in metres). Returns { bastions (turret.js views), knock(i,
     crumbled), tick(dt) }. */
-export function gateLook(parent, gate, battery, v3) {
+export function gateLook(parent, gate, battery, v3, colour = null) {
   const [ta, tb] = gate.middles(), R = gate.r0, gz = v3(0, (gate.r0 + gate.r1) / 2).z, stoneM = mat('#d8cdb8', { flatShading: true, roughness: 0.95 });
   const gh = gatehouse({ xa: v3(ta, 0).x, xb: v3(tb, 0).x, z: gz, archY: 11, tw: CELL * 1.7, bannerH: 5 });
   parent.add(gh);
   const { sides, arch } = gh.userData, shake = [0, 0], fall = [-1, -1], hp0 = gate.towers.map((t) => t.hp);
   let archFall = -1, archWay = 1, clock = 0;
   const plinths = [ta, tb].map((c) => { const p = mesh(new THREE.BoxGeometry(CELL * 1.95, 1.2, CELL * (gate.r1 - gate.r0 + 1)), stoneM); p.position.set(v3(c, 0).x, 0.3, gz); parent.add(p); return p; });
-  const bastions = battery.map((gun) => { const V = turretMesh(bastionLook()); V.g.position.copy(v3(...gun.at)); parent.add(V.g); return V; });
+  // (its guns' side's colour, if they're a side's: on their band and their flag, 15 Nov)
+  const own = colour ? { band: colour, flag: mat(colour, { side: THREE.DoubleSide, roughness: 0.9 }) } : {};
+  const bastions = battery.map((gun) => { const V = turretMesh(bastionLook(own)); V.g.position.copy(v3(...gun.at)); parent.add(V.g); return V; });
   return {
     bastions,
     /** Tower `i` knocked by a shot; `crumbled`, its last. */

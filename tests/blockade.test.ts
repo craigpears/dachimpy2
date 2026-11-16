@@ -217,7 +217,7 @@ describe('the gates\' guns doubled, punishing campers (15 Nov: "training on peop
     for (const gun of b.battery) expect(b.rocks.has(`${gun.at[0]},${gun.at[1]}`)).toBe(true);
   });
   it('a gun paints a target on the square of the nearest ship in its reach and fires on it, the shot GATE_AIM coming down: lying still, she\'s hit (15 Nov: "paint a target on a square and then just take quite a while to fire")', () => {
-    const b = new Blockade(), s = sloop(b), gun = b.battery[0];
+    const b = new Blockade(), s = sloop(b, 'crimson'), gun = b.battery[0];   // (Dalnoth's, under Dachimpy's guns at the south gate: a gun fires on the other side only)
     b.ships.filter((x) => x !== s).forEach((x, i) => x.helm.moor({ c: 36 + (i % 8), r: 36 + Math.floor(i / 8) * 3, d: 1 }));
     s.helm.moor({ c: gun.at[0], r: gun.at[1] - 2, d: 1 }); b.notice();
     let fired: { to: [number, number]; secs: number } | null = null, t = 0;
@@ -231,7 +231,7 @@ describe('the gates\' guns doubled, punishing campers (15 Nov: "training on peop
     expect(hit).toBe(true);
   });
   it('a sloop that moves off the painted square before the shot comes down is missed: keep moving and the guns can\'t touch her (15 Nov: "it\'s clear that a sloop will move quickly before it shoots")', () => {
-    const b = new Blockade(), s = sloop(b), gun = b.battery[0];
+    const b = new Blockade(), s = sloop(b, 'crimson'), gun = b.battery[0];
     b.ships.filter((x) => x !== s).forEach((x, i) => x.helm.moor({ c: 36 + (i % 8), r: 36 + Math.floor(i / 8) * 3, d: 1 }));
     s.helm.moor({ c: gun.at[0], r: gun.at[1] - 2, d: 1 }); b.notice();
     let fired = false;
@@ -318,19 +318,21 @@ describe('admiral mode: an order for each ship (15 Nov: "you need to be able to 
   it('the bots carry their orders out: a frigate to the far gate, not her nearest; a sloop to camp where she\'s told and stay; a sloop to hold a far buoy', () => {
     const b = new Blockade(), bots = new Bots(b, [], dice(4)), f = frigate(b), sl = sloop(b), other = b.ships.find((x) => x.team === 'gold' && x.kind === 'sloop' && x !== sl && !x.raider)!;
     bots.order(f.id, { kind: 'gate', g: 1 });
-    // (her camp out on the open sea; the far buoy, off the south gate)
+    // (her camp out on the open sea; a lagoon's buoy)
     bots.order(sl.id, { kind: 'camp', at: [16, 17] });
-    bots.order(other.id, { kind: 'hold', buoy: 3 });
+    bots.order(other.id, { kind: 'hold', buoy: 6 });
     for (let i = 0; i < 2; i++) { bots.tick(b, 0.1); b.tick(0.1); }
     const goal = (id: number) => bots.bots.find((x) => x.id === id)!.goal;
     expect(goal(f.id)).toMatchObject({ kind: 'gate', g: 1 });
-    let camped = 0;
+    let camped = 0, held = 0;
     for (let i = 0; i < 900; i++) {
       bots.tick(b, 0.1); b.tick(0.1);
+      // (on it most of the last half minute: a lagoon's, not the buoy off a gate, under its guns since 15 Nov)
+      if (i >= 600 && (b.reaches(other, B.BUOYS[6]) || other.away > 0)) held++;
       if (i > 600 && sl.away <= 0 && !sl.dmg.out && squares(sl.h, sl.helm.pose).some(([c, r]) => c === 16 && r === 17)) camped++;
     }
     expect(camped).toBeGreaterThan(100);
-    expect(b.reaches(other, B.BUOYS[3]) || other.dmg.out || other.away > 0).toBe(true);
+    expect(held).toBeGreaterThan(60);
     expect(bots.doing(b, sl.id)).toMatch(/camp|knocked|sunk/);
   }, 60000);
 
@@ -819,5 +821,54 @@ describe('turtles get to their frigates (15 Nov: 3 or 4 rams on frigates a game 
     for (let t = 0; t < B.LAUNCH.LIFE.ram && at < 0; t += 0.1) { bot.tick(b, 0.1); const ev = b.tick(0.1); b.still.set(f.id, 9); if (ev.rams.some((r) => r.ram === id)) at = t; }
     expect(at).toBeGreaterThan(0);
     expect(at).toBeLessThan(B.LAUNCH.LIFE.ram * 0.75);
+  });
+});
+
+describe('nobody hangs about under the gate guns (15 Nov: "a lot of foolish ships just hanging out when there are cannons shooting at them ... more of an incentive to destroy these cannons for the war frigates")', () => {
+  it('a frigate a gate\'s guns are firing on goes to wreck them', () => {
+    const b = new Blockade(), f = frigate(b, 'crimson');   // (Dalnoth's, off Dachimpy's gate)
+    clearAway(b, [f]);
+    // (lying off the south gate, in its guns' reach)
+    f.helm.moor({ c: 22, r: 14, d: 1 }); b.notice();
+    let fired = false;
+    for (let t = 0; t < 4 && !fired; t += 0.1) fired = b.tick(0.1).guns.some((x) => x.e.kind === 'fire' && b.gunOn[x.gun] === f.id);
+    expect(fired).toBe(true);
+    const bot = new Bot(f.id, dice(2));
+    bot.tick(b, 4);
+    expect(bot.goal?.kind).toBe('guns');
+  });
+  it('a sloop on a square a gate gun has painted is off it before the shot lands', () => {
+    const b = new Blockade(), sl = sloop(b, 'crimson');
+    clearAway(b, [sl]);
+    sl.helm.moor({ c: 22, r: 15, d: 1 }); b.notice();
+    let painted: [number, number] | null = null;
+    for (let t = 0; t < 4 && !painted; t += 0.1) { const e = b.tick(0.1).guns.find((x) => x.e.kind === 'fire'); if (e && e.e.kind === 'fire') painted = e.e.to; }
+    expect(painted).toEqual([sl.helm.pose.c, sl.helm.pose.r]);
+    const bot = new Bot(sl.id, dice(2));
+    let hit = false;
+    for (let t = 0; t < B.GATE_AIM + 0.5; t += 0.1) { bot.tick(b, 0.1); hit = b.tick(0.1).guns.some((x) => x.hit === sl.id) || hit; }
+    expect(hit).toBe(false);
+  });
+});
+
+describe('the gate guns have a side (15 Nov: "it\'s for everybody\'s gain to destroy them ... Hence the dilemma. The turrets need to have a side ... more of an incentive to destroy the other team\'s turrets")', () => {
+  it('each gate\'s guns are the side\'s whose frigates come in at that end, and fire on the other side\'s ships only', () => {
+    expect(B.GATES.map((g) => g.side)).toEqual(['gold', 'crimson']);
+    for (const team of ['gold', 'crimson'] as const) {
+      const b = new Blockade(), s = sloop(b, team);
+      clearAway(b, [s]);
+      s.helm.moor({ c: 28, r: 15, d: 1 }); b.notice();
+      let fired = false;
+      for (let t = 0; t < 5 && !fired; t += 0.1) fired = b.tick(0.1).guns.some((x) => x.e.kind === 'fire');
+      expect(fired, team).toBe(team === 'crimson');
+    }
+  });
+  it('a frigate goes to wreck the other side\'s guns, never her own', () => {
+    const b = new Blockade(), f = frigate(b);
+    clearAway(b, [f]);
+    f.helm.moor({ c: 22, r: 14, d: 1 }); b.notice();
+    const bot = new Bot(f.id, dice(2));
+    for (let t = 0; t < 6; t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
+    expect(bot.goal?.kind === 'guns' && BLOCKADE.GATES[bot.goal.g].side).not.toBe('gold');
   });
 });

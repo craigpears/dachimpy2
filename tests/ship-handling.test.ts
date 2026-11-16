@@ -3,7 +3,7 @@
    frigate battling her way through, the sloop slipping through the narrow ways. */
 import { describe, expect, it } from 'vitest';
 import { SAIL, Sea, path, poseAt, pauseFor, type Move, type Pose } from '../src/den-sail';
-import { SLOOP_HANDLING as SL, FRIGATE_HANDLING as FR, HANDLING, ShipSea, ShipHelm, Guns, squares, shipPath, shipPose, drawnAt, broadside, groundSecs, type Handling } from '../src/ship-handling';
+import { SLOOP_HANDLING as SL, FRIGATE_HANDLING as FR, SLOOP_HANDLING, FRIGATE_HANDLING, BRIG_HANDLING, HANDLING, ShipSea, ShipHelm, Guns, squares, shipPath, shipPose, drawnAt, broadside, groundSecs, type Handling } from '../src/ship-handling';
 import { TwoShips, TWO_SEA, Tower, seaXZ, seaCR } from '../src/two-ships';
 import { TURRET } from '../src/den-turret';
 
@@ -365,5 +365,18 @@ describe('the imperial gate to shoot at (15 Nov: "put like a ... destructible. T
     for (let i = 0; i < TURRET.WRECK; i++) expect(g.hit()).toBe(i < TURRET.WRECK - 1 ? 'quiet' : 'wrecked');
     expect(t.stopAt('sloop', ...g.at)).toBe('rock');
     expect(t.towers[0].hit('small')).toBe('bounced');
+  });
+});
+
+describe('a turn ends where it ends (15 Nov: a war brig "turns, then it seems like it gets snapped into an adjacent square")', () => {
+  it('every kind of ship, drawn through a turn, finishes on the square and heading her move leaves her on', () => {
+    for (const h of [SLOOP_HANDLING, BRIG_HANDLING, FRIGATE_HANDLING]) for (const m of ['L', 'R'] as const) for (const d of [0, 1, 2, 3]) {
+      const p = { c: 20, r: 20, d }, to = shipPath(h, p, m).to, end = shipPose(h, p, m, 1, false, to);
+      expect(end.c, `${h.name} ${m} ${d}`).toBeCloseTo(to.c, 6);
+      expect(end.r, `${h.name} ${m} ${d}`).toBeCloseTo(to.r, 6);
+      // (and no jump on the way: her middle moves smoothly frame to frame)
+      let last = drawnAt(h, shipPose(h, p, m, 0, false, to));
+      for (let u = 0.02; u <= 1.0001; u += 0.02) { const now = drawnAt(h, shipPose(h, p, m, u, false, to)); expect(Math.hypot(now.c - last.c, now.r - last.r), `${h.name} ${m} ${d} at ${u.toFixed(2)}`).toBeLessThan(0.2); last = now; }
+    }
   });
 });

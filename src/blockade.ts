@@ -113,8 +113,8 @@ export const BLOCKADE = {
       camping. I almost partly think that we need to double up on the [cannons] ... stop people camping. And provide
       more of a barrier to the war frigates"): two by the gate's towers, two further along. */
   GATES: [
-    { way: 27, r0: 18, r1: 19, guns: [[22, 18], [24, 18], [30, 18], [32, 18]] as [number, number][] },
-    { way: 28, r0: 28, r1: 29, guns: [[23, 29], [25, 29], [31, 29], [33, 29]] as [number, number][] },
+    { way: 27, r0: 18, r1: 19, guns: [[22, 18], [24, 18], [30, 18], [32, 18]] as [number, number][], side: 'gold' as TeamId },
+    { way: 28, r0: 28, r1: 29, guns: [[23, 29], [25, 29], [31, 29], [33, 29]] as [number, number][], side: 'crimson' as TeamId },
   ],
   /** Seconds a gate gun's shot is coming down on the square it painted: a sloop on the move is gone from it (a move a
       second or so), a frigate in the middle of hers (two and a half) and a ship lying still aren't. Camping by a gate,
@@ -331,6 +331,11 @@ export class Blockade {
   /** Every gate's bastion guns, and whose gate each is. */
   battery: Turret[] = BLOCKADE.GATES.flatMap((x) => x.guns.map((at) => new Turret({ at, alert: true, flight: BLOCKADE.GATE_AIM })));
   gunGate: number[] = BLOCKADE.GATES.flatMap((x, i) => x.guns.map(() => i));
+  /** Whose each gate gun is: the side whose frigates come in at that end; it fires on the other side's ships only, so
+      wrecking the enemy's is worth a frigate's while (the user, 15 Nov: "it's for everybody's gain to destroy them, so
+      the opponent benefits from their destruction as much as you do. Hence the dilemma. The turrets need to have a
+      side"). */
+  gunSide: TeamId[] = BLOCKADE.GATES.flatMap((x) => x.guns.map(() => x.side));
   ships: Ship[] = [];
   score: Record<TeamId, number> = { gold: 0, crimson: 0 };
   /** Seconds into the round, and into this blockade turn. */
@@ -355,7 +360,7 @@ export class Blockade {
   constructor(setup: Setup = {}) {
     const B = BLOCKADE, teams = setup.teams ?? B.TEAMS, open = !!setup.open;
     this.skirmish = !!setup.skirmish; this.open = open;
-    if (open) { this.gates = []; this.battery = []; this.gunGate = []; }
+    if (open) { this.gates = []; this.battery = []; this.gunGate = []; this.gunSide = []; }
     const side = new Set([...B.SIDEWAYS, ...B.POSTERNS, ...B.EXITS.flat().flatMap(laneSquares)].map(([c, r]) => key(c, r))), ways = new Set(B.GATES.flatMap((x) => [key(x.way, x.r0), key(x.way, x.r1)]));
     if (!open) {
       for (const w of B.WALLS) for (let c = w.c0; c <= w.c1; c++) for (let r = w.r0; r <= w.r1; r++) if (!side.has(key(c, r)) && !ways.has(key(c, r))) this.rocks.add(key(c, r));
@@ -464,10 +469,11 @@ export class Blockade {
     this.battery.forEach((g, i) => {
       // (the nearest ship in its reach: it paints her square and fires, the shot GATE_AIM coming down; moving, she's gone
       // from it, lying still she isn't)
-      const target = this.gunTarget(g, on);
+      const target = this.gunTarget(g, on, (id) => this.ships[id].team !== this.gunSide[i]);
       this.gunOn[i] = target?.id ?? -1;
       for (const e of g.tick(dt, target, !!target)) {
-        const hit = e.kind === 'land' ? this.under(...e.to) : null;
+        // (only an enemy of its side's hurt by its shot)
+        const under = e.kind === 'land' ? this.under(...e.to) : null, hit = under && under.team !== this.gunSide[i] ? under : null;
         let hole: Hole | undefined, sunk = false;
         if (hit) ({ hole, sunk } = this.hurt(hit, BLOCKADE.GATE_GUNS, e.to, g.at));
         out.guns.push({ gun: i, e, hit: hit?.id ?? null, hole, sunk });

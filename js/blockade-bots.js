@@ -72,8 +72,12 @@ export const BOTS = {
     ENGAGE: 9, FIGHT: 3,
     /** How much a fight's worth to a big ship with an enemy on no buoy (one on a buoy, or contesting it, 1). */
     OFF_POINTS: 0.35,
+    /** A gate's guns' worth to a frigate, each one still standing: while they're firing on her, and otherwise. */
+    GUNS: { ON: 3.5, W: 1 },
     /** How much longer than her way itself a big ship's way round the ships in it can be before she'd rather wait. */
     DETOUR: 1.6,
+    /** The longest (seconds) a big ship waits for them before she takes the long way. */
+    PATIENCE: 6,
     /** How near (squares) an enemy has to come for a frigate holding a buoy in the heart to leave it to fight her. */
     HOLD: 5,
     /** How much more a fight's worth to finish an enemy who's knocked out, or to save a friend who is (an enemy within
@@ -228,6 +232,15 @@ export class Bot {
         if (s.kind === 'sloop' && !s.craft && this.dodge(b, s)) {
             this.shoot(b, s);
             return;
+        }
+        // (a brig under way with a gate gun's shot coming down on her: a move on, off its square)
+        if (s.kind === 'brig' && !b.anchored(s) && s.helm.slot < 0 && !s.helm.mine.length) {
+            const mine = new Set(squares(s.h, s.helm.pose).map(([c, r]) => `${c},${r}`));
+            if (b.battery.some((gun) => !gun.wrecked && gun.shots.some((x) => mine.has(`${x.to[0]},${x.to[1]}`)))) {
+                const m = ['F', 'L', 'R'].find((x) => s.sea.clear(s.helm.pose, x));
+                if (m)
+                    s.helm.put(m);
+            }
         }
         // (a turtle: no guns, only her prey, looked for often)
         // (her prey looked for every RAM.THINK; steered at every frame, a move put in the moment she's free for one: looking
@@ -445,6 +458,23 @@ export class Bot {
                 const left = gate.towers[berth.tower].hp;
                 best.push({ goal: { kind: 'gate', ...berth }, score: gateW * prize / (4 + eta + left * s.h.reload * 0.5) });
             }
+        // A frigate wrecks a gate's guns: worth more the more of them stand, and far more while they're firing on her (the
+        // user, 15 Nov: "a lot of foolish ships just hanging out when there are cannons shooting at them ... more of an
+        // incentive to destroy these cannons for the war frigates"); from either side of the wall, the heart's side too.
+        if (s.kind === 'frigate' && post !== 'outside')
+            for (const g of b.gates.keys()) {
+                // (the other side's guns only: her own fire on her enemies)
+                if (b.gates[g] && BLOCKADE.GATES[g].side === s.team)
+                    continue;
+                const live = b.battery.filter((x, i) => b.gunGate[i] === g && !x.wrecked).length;
+                if (!live)
+                    continue;
+                const onHer = b.battery.some((x, i) => b.gunGate[i] === g && !x.wrecked && b.gunOn[i] === s.id);
+                const got = this.gunBerth(b, s, g);
+                if (!got || !(got.eta < Infinity))
+                    continue;
+                best.push({ goal: { kind: 'guns', ...got.berth }, score: (onHer ? BOTS.GUNS.ON : BOTS.GUNS.W) * live / (4 + got.eta + s.h.reload) });
+            }
         // A frigate fights an enemy close by (the nearest; a frigate before a sloop), lying off her side; a brig another
         // brig, her craft the frigates (rock, paper, scissors: she leaves the sloops, too quick for her, be).
         if (s.kind === 'frigate' || s.kind === 'brig') {
@@ -462,8 +492,12 @@ export class Bot {
                 const big = s.kind === 'brig' ? (o.kind === 'brig' ? 1.5 : 0.25) : o.kind === 'sloop' ? 1.6 : o.kind === 'frigate' ? 1.3 : 0.8;
                 // (more for one more damaged than she is, less for one she'd lose to: her nerve; and a fight's for the points: one
                 // on a buoy, or contesting one, is worth it, one off them far less: 15 Nov, "this is a game about the points")
-                const onPoints = BLOCKADE.BUOYS.some((x) => b.reaches(o, x)) ? 1 : BOTS.OFF_POINTS;
-                best.push({ goal: { kind: 'fight', on: fight.on, at: was && this.goal?.kind === 'fight' ? this.goal.at : fight.at }, score: fightW * BOTS.FIGHT * big * why * this.nerve(s, o) * onPoints / (4 + eta) });
+                const onPoints = BLOCKADE.BUOYS.some((x) => b.reaches(o, x)) ? 1 : s.kind === 'frigate' ? 0 : BOTS.OFF_POINTS;
+                // (a frigate never picks a fight off the points: she fires on whoever comes into her broadside, and goes for the
+                // buoys; the user, 15 Nov, "You don't hang around off points getting into fights. That is not the blockade ...
+                // way ... not wanting to put yourself in a vulnerable position ... turning into an enemy broadside")
+                if (onPoints > 0)
+                    best.push({ goal: { kind: 'fight', on: fight.on, at: was && this.goal?.kind === 'fight' ? this.goal.at : fight.at }, score: fightW * BOTS.FIGHT * big * why * this.nerve(s, o) * onPoints / (4 + eta) });
             }
         }
         // Best first.
@@ -515,15 +549,8 @@ export class Bot {
                 const g = shut.map(({ g }) => ({ g, eta: s.sea.etaAny(p, gatePlace(b, s, g).key, gatePlace(b, s, g).poses) })).sort((a, z) => a.eta - z.eta)[0]?.g;
                 if (g === undefined)
                     return null;
-                const all = gunBerths(b, s).filter((x) => x.g === g), rows = s.sea.rows;
-                if (!all.length)
-                    return null;
-                const here = all.find((x) => x.pose.c === p.c && x.pose.r === p.r && x.pose.d === p.d);
-                const mine = this.goal?.kind === 'guns' ? all.find((x) => same({ kind: 'guns', ...x }, this.goal)) : undefined;
-                const key = `guns${g}|${b.battery.map((x) => x.wrecked ? 0 : 1).join('')}|${towersSig(b)}`;
-                const way = here || mine ? null : s.sea.plotAny(p, key, () => all.map((x) => (x.pose.c * rows + x.pose.r) * 4 + x.pose.d));
-                const berth = here ?? mine ?? (way ? all.find((x) => x.pose.c === way.to.c && x.pose.r === way.to.r && x.pose.d === way.to.d) : undefined);
-                return berth ? { kind: 'guns', ...berth } : null;
+                const berth = this.gunBerth(b, s, g);
+                return berth ? { kind: 'guns', ...berth.berth } : null;
             }
             case 'hunt': {
                 const t = b.ship(o.ship);
@@ -594,6 +621,22 @@ export class Bot {
             .filter((x) => x.eta < Infinity && !this.blocked(b, x.at)).sort((a, z) => a.eta - z.eta);
         return spots[0]?.at ?? null;
     }
+    /** Where she'd lie to wreck one of a gate's guns still standing: her berth there if she's in one, the one she's making
+        for, else the nearest (and how long it is to it); none, if no gun's left or there's no way. */
+    gunBerth(b, s, g) {
+        const p = s.helm.pose, all = gunBerths(b, s).filter((x) => x.g === g), rows = s.sea.rows;
+        if (!all.length)
+            return null;
+        const here = all.find((x) => x.pose.c === p.c && x.pose.r === p.r && x.pose.d === p.d);
+        if (here)
+            return { berth: here, eta: 0 };
+        const mine = this.goal?.kind === 'guns' ? all.find((x) => same({ kind: 'guns', ...x }, this.goal)) : undefined;
+        if (mine)
+            return { berth: mine, eta: s.sea.eta(p, mine.pose.c, mine.pose.r, mine.pose) };
+        const key = `guns${g}|${b.battery.map((x) => x.wrecked ? 0 : 1).join('')}|${towersSig(b)}`, poses = () => all.map((x) => (x.pose.c * rows + x.pose.r) * 4 + x.pose.d);
+        const way = s.sea.plotAny(p, key, poses), berth = way ? all.find((x) => x.pose.c === way.to.c && x.pose.r === way.to.r && x.pose.d === way.to.d) : undefined;
+        return berth ? { berth, eta: s.sea.etaAny(p, key, poses) } : null;
+    }
     /** Her nerve against an enemy: more than 1 if he's more damaged than she is (she presses in), less if she's the more
         damaged (she takes fewer risks); the user, 15 Nov: "being more or less aggressive depending on your damage level ...
         if you know the person next to you is more damaged than you are, you get more aggressive. If you're damaged, you
@@ -602,6 +645,9 @@ export class Bot {
         const d = (o.dmg.out ? 1 : o.dmg.share()) - s.dmg.share();
         return Math.max(BOTS.NERVE.MIN, Math.min(BOTS.NERVE.MAX, 1 + BOTS.NERVE.K * d));
     }
+    /** Where she's waiting for the ships in her way to move, and since when. */
+    waitFor = '';
+    waitFrom = 0;
     /** Till when a raider's back on the buoys after a raid. */
     rest = -1;
     /** A raid (or a frigate's fight): the nearest enemy frigate in reach (`any`: any enemy ship, frigates first), and
@@ -763,6 +809,10 @@ export class Bot {
                             danger.add(`${c},${r}`);
             }
         }
+        // (and the squares the gate guns have painted, their shots coming down: a sloop's quick enough to be off them)
+        b.battery.forEach((gun, i) => { if (!gun.wrecked && b.gunSide[i] !== s.team)
+            for (const x of gun.shots)
+                danger.add(`${x.to[0]},${x.to[1]}`); });
         if (!danger.has(here))
             return false;
         // (a duck: whichever of her moves next ends her out of it, one ending beside a rock first, straight on before a turn)
@@ -816,8 +866,17 @@ export class Bot {
         // (a big ship's way round the ships in hers far longer than the way itself (a gateway full, say): they'll have moved
         // long before she's got round, so she waits for them rather than setting off right round the fort, 15 Nov: "one's
         // really out there, near the edge of the map. Like, what is going on again?")
-        if (got && s.kind !== 'sloop' && got.length * s.h.move > s.sea.eta(s.helm.after(), ...at) * BOTS.DETOUR + 6)
-            return null;
+        // (but not for ever: after PATIENCE seconds she takes the long way, or her next look finds her somewhere else to go)
+        if (got && s.kind !== 'sloop' && got.length * s.h.move > s.sea.eta(s.helm.after(), ...at) * BOTS.DETOUR + 6) {
+            if (this.waitFor !== k) {
+                this.waitFor = k;
+                this.waitFrom = b.clock;
+            }
+            if (b.clock - this.waitFrom < BOTS.PATIENCE)
+                return null;
+        }
+        else if (this.waitFor === k)
+            this.waitFor = '';
         if (got)
             this.noway.delete(k);
         else

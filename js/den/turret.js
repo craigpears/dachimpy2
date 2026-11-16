@@ -17,7 +17,11 @@ export function turretMesh({ stone = '#8a8178', top = 1.15, foot = 1.35, height 
   const intact = [body];
   if (band) { const b = mesh(new THREE.CylinderGeometry(top + 0.03, top + 0.03, 0.3, 14), mat(band, { roughness: 0.8 })); b.position.y = height - 0.5; g.add(b); intact.push(b); }
   const rim = top * 0.9, ty = height - 0.2;
-  for (let i = 0; i < merlons; i++) { const a = i / merlons * Math.PI * 2, m = mesh(new THREE.BoxGeometry(0.42, 0.45, 0.42), st); m.position.set(Math.cos(a) * rim, ty + 0.22, Math.sin(a) * rim); m.rotation.y = -a; g.add(m); intact.push(m); }
+  const merls = [];
+  for (let i = 0; i < merlons; i++) { const a = i / merlons * Math.PI * 2, m = mesh(new THREE.BoxGeometry(0.42, 0.45, 0.42), st); m.position.set(Math.cos(a) * rim, ty + 0.22, Math.sin(a) * rim); m.rotation.y = -a; g.add(m); intact.push(m); merls.push(m); }
+  // (rubble at its foot, shown a little more with each hit as it crumbles: hidden till then)
+  const rubble = [];
+  for (let i = 0; i < 6; i++) { const a = i * 2.1 + 0.4, k = foot + 0.15 + (i % 2) * 0.3, b = mesh(new THREE.BoxGeometry(0.38, 0.32, 0.38), st); b.position.set(Math.cos(a) * k, 0.35, Math.sin(a) * k); b.rotation.set(i * 0.8, i * 1.1, i * 0.5); b.visible = false; g.add(b); rubble.push(b); }
   const gun = gunMesh(); gun.scale.setScalar(0.9); gun.position.y = ty;
   g.add(gun); intact.push(gun);
   if (flag) { const fl = flagpole(1.6, flag); fl.position.set(-top * 0.6, ty, top * 0.6); g.add(fl); intact.push(fl); }
@@ -36,7 +40,7 @@ export function turretMesh({ stone = '#8a8178', top = 1.15, foot = 1.35, height 
   g.add(ruin);
   // (a shot's ball and ring, its shaders built ahead: its wreck's are, with the scene's)
   if (!warmed) { warmed = true; warm(new THREE.Mesh(ballGeo, ballMat), new THREE.Mesh(ringGeo, ringMat())); }
-  return { g, gun, body, intact, ruin, ty, wrecked: false, fall: undefined, smokeT: 0 };
+  return { g, gun, body, intact, ruin, ty, merls, rubble, hits: 0, wrecked: false, fall: undefined, smokeT: 0 };
 }
 
 /* A square a gun's trained on, marked on the water at (x, z): a red ring and cross on it, a little
@@ -56,6 +60,14 @@ export function turretMark(x, z) {
 }
 
 // Standing, or its wreck.
+function crumble(V, t) {
+  const k = Math.min(1, (t.hits ?? 0) / Math.max(1, t.wreck ?? 3)), tw = V.g.position;
+  if ((t.hits ?? 0) > V.hits) { burst(V3(tw.x, V.ty, tw.z), '#b9ad9a', 14, 3); burst(V3(tw.x, V.ty * 0.5, tw.z), '#8a8178', 8, 2); }
+  V.hits = t.hits ?? 0;
+  V.merls.forEach((m, i) => { m.visible = (i * 0.618 % 1) >= k * 0.75; });
+  V.rubble.forEach((r, i) => { r.visible = i < Math.round(k * V.rubble.length); });
+  V.body.rotation.z = k * 0.06; V.body.rotation.x = k * 0.03;
+}
 function look(V, wrecked) {
   V.wrecked = wrecked;
   V.fall = undefined;
@@ -94,6 +106,9 @@ export function turretView(V, t, dt, aim = null) {
   const tw = V.g.position;
   if (V.fall !== undefined) fall(V, dt);
   else if (t.wrecked !== V.wrecked) look(V, t.wrecked);
+  // (crumbling as it's hit, short of wrecked: battlements knocked off, rubble at its foot, a lean, stone dust; the user,
+  // 15 Nov, "after a shot or two, they start showing some signs of crumbling")
+  if (!t.wrecked && V.merls && (t.hits ?? 0) !== V.hits) crumble(V, t);
   if (t.wrecked) { if ((V.smokeT -= dt) < 0) { V.smokeT = 0.14; burst(V3(tw.x + 0.2, V.ty * 0.8, tw.z), '#3f3a37', 4, 0.9); } }
   else if (t.quiet > 0 && (V.smokeT -= dt) < 0) { V.smokeT = 0.25; burst(V3(tw.x, V.ty + 0.8, tw.z), '#6f6a66', 2, 0.6); }
   if (t.wrecked || !aim) return;

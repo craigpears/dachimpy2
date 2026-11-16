@@ -4022,6 +4022,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   having them just float around there". A ship at full damage spins down and comes back in at an edge, in a safe zone
   four squares deep where nobody can fire or be shot, waiting a moment before she can move ("the safe zone around the
   edge ... you can't shoot each other ... one turn before they can move again").
+- **The gate guns have a side.** Each gate's guns are the side's whose frigates come in at that end, and fire on the
+  other side only ("it's for everybody's gain to destroy them, so the opponent benefits from their destruction as much
+  as you do. Hence the dilemma. The turrets need to have a side"), so wrecking the enemy's is worth the detour.
+- **No fights off the points.** A frigate fires on whoever comes into her broadside, but never picks a fight with an
+  enemy who isn't on or contesting a buoy ("You don't hang around off points getting into fights").
 - **A sheltered spot has a way in from outside.** The heart's corners are out of any frigate's reach inside the fort,
   a brig's launching spot; each has a gap through the wall from the open sea, a postern or a way out, so a sloop can
   slip in at her ("balance that with another kind of gap coming from the outside").

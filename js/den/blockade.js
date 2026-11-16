@@ -168,7 +168,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
   }
   g.add(bake(still));
   // ----- the imperial gates and their bastion guns -----
-  const gls = b.gates.map((gate, gi) => gateLook(g, gate, b.battery.filter((_, i) => b.gunGate[i] === gi), v3));
+  const gls = b.gates.map((gate, gi) => gateLook(g, gate, b.battery.filter((_, i) => b.gunGate[i] === gi), v3, TEAM_COL[B.GATES[gi].side]));
   const bastions = b.battery.map((_, i) => { const gi = b.gunGate[i], k = b.battery.slice(0, i).filter((__, j) => b.gunGate[j] === gi).length; return gls[gi].bastions[k]; });
 
   // ----- the winds: chevrons blowing along each, quick -----

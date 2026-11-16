@@ -394,6 +394,31 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   - the red broadside reach off: only with `?reach` in the address, for the blind spots' picture ("I really don't see
     what that's adding ... the only reason for adding it, was for one screenshot").
 
+- **Nobody hangs about under the gate guns** (15 Nov: "a lot of foolish ships just hanging out when there are cannons
+  shooting at them ... more of an incentive to destroy these cannons for the war frigates"): watched, the gate guns
+  fired 258 to 284 shots a game, most hitting frigates (122 to 175 hits, holding the heart's buoys within their reach or
+  waiting at a gateway), and the frigates wrecked 3 of the 8 (only an admiral's siege order sent them to). Now:
+  - a frigate's free to wreck a gate's guns, worth `GUNS.W` a gun still standing, `GUNS.ON` while they're firing on her,
+    from her nearest berth either side of the wall (`gunBerth`, shared with the siege order);
+  - a sloop's dodge counts the squares the guns have painted, and a brig under way steps off one;
+  - after, two games: 68 and 83 shots, 33 and 34 hits on frigates, none sunk by them, 7 of 8 guns wrecked.
+
+- **The gate guns have a side; frigates keep to the points; a brig's turn smooth** (15 Nov: "The turrets need to have a
+  side, and each side has a few turrets ... more of an incentive to destroy the other team's turrets"; "You don't hang
+  around off points getting into fights"; "the [war frig's] just getting stuck and not going back in again"; a war brig
+  "turns, then it seems like it gets snapped into an adjacent square"; "after a shot or two, they start showing some
+  signs of crumbling"):
+  - each gate's guns the side's whose frigates come in at that end (`GATES[].side`, `gunSide`): they paint and fire on
+    the other side's ships only, and their shots hurt the other side only; a frigate goes for the other side's guns only;
+    a sloop's dodge counts only the enemy's painted squares; drawn in their side's colour, band and flag;
+  - a gun crumbles as it's hit: battlements knocked off, rubble at its foot, a lean, stone dust (`crumble` in turret.js);
+  - a frigate never picks a fight with an enemy off the points (`OFF_POINTS` 0 for her); waiting for a gateway, she
+    gives it `PATIENCE` 6 seconds, then takes the long way or her next look sends her elsewhere;
+  - a brig's turn drawn to where her move really ends (`shipPose`, the arc's size from her real end, ahead and across):
+    the biggest jump between frames 0.71 squares, now 0.04;
+  - after, two games: frigates fighting 23 and 117 seconds a game (were 156 to 444), in the heart 34 and 38%, gate-gun
+    hits on frigates 0 and 20, 4 and 6 of the 8 guns wrecked.
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of
