@@ -1,6 +1,6 @@
 ---
 title: Sailing between places, for real
-status: idea
+status: done
 asked: 9 Nov
 updated: 15 Nov
 ---
@@ -171,3 +171,5 @@ moving. It gives such a nostalgia." What's next:
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "if there's anything really novel in here but I think this is just early dreaming which largely done"
+- 15 Nov: done: early dreaming, largely built (sailing, lanes, locks, crane, checkpoint, bribe, race); nothing novel left that's not on its own card

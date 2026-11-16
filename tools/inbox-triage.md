@@ -22,5 +22,6 @@ ideas list or a document, depending on what it is that I've put.")
 
 Rules: keep the user's words (quoted, lightly trimmed), plain English, pirate names only (CLAUDE.md). Cards are only
 changed through `node tools/task.mjs`, never edited by hand. Edit only the documents named above, never code, and
-don't commit (the main session does). Nothing else: no simulations, no browser, no other files. Finish with one line
-saying where it all went.
+don't commit (the main session does). Nothing else: no simulations, no browser, no other files. Finish with a single
+short line, under 25 words, saying where it all went ("An idea card, <id>; a note on <id>."), and nothing after it:
+it's shown on the board.

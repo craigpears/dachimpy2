@@ -16,7 +16,7 @@
    charted points a werewolf in the next pack; each chart takes its points off, and as it wanes they turn back to
    wolf-kin, the guide's), and the lesson's boards, each laid for a part of the tutorial and the moves Multibella plays on
    it, and when she says what as they play (her cues, `stageCues`; the words are src/lines/multibella.ts's LESSON).
-   The deeper mechanics (15 Nov, after the user played the basics): a cascade making wild slots, the outer ring where
+   The deeper mechanics (15 Nov, after the user played the basics): a cascade making wild targets, the outer ring where
    stars wait, a constellation charted by a cascade's last clear, and Umami's evil constellation. Not yet (to come, with the user): the rumbles, the den's Foraging, the funny cutscenes. */
 import { Navigation, bottomRow, type Mark, type NextStar, type Place, type Stage } from './navigation.js';
 import type { Plan, Piece } from './den-houses.js';

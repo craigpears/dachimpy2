@@ -21,7 +21,7 @@ const BASICS = [
     { id: 'rings', title: 'Four rings', line: 'Four-tier: a fourth, outer ring with no slots of its own, where stars wait over a full spoke, turning with their ring, to drop in when a clear opens under them.', shows: moves('outer') },
     { id: 'constellations', title: 'The den\'s constellations', line: 'Three slots in the centre ring, two in the middle, one in the third; a fresh board\'s first only three and one.', shows: board('rings') },
     { id: 'chains', title: 'Why chains pay', line: 'A constellation\'s points are times its step in the move: charted by a cascade\'s third clear, triple. Lines alone score next to nothing.', shows: moves('lastClear') },
-    { id: 'wilds', title: 'Wild slots', line: 'Slots ringed in every colour take any star. A chart in a chain makes the next one\'s centre wild; a combo\'s clear makes the slots on and beside it wild.', shows: moves('cascade') },
+    { id: 'wilds', title: 'Wild targets', line: 'Slots ringed in every colour take any star. A chart in a chain makes the next one\'s centre wild; a combo\'s clear makes the slots on and beside it wild.', shows: moves('cascade') },
     { id: 'moon', title: 'The moon', line: 'Every constellation charted takes its points off the moon; as it wanes, the werewolves turn back to wolf-kin.', shows: board('rings') },
 ];
 const PHASES = [
@@ -39,7 +39,7 @@ const SCENARIOS = [
     { id: 'evil', title: 'Umami\'s evil constellation', line: 'Six reds side by side round the centre, made with Umami in mind: a star at a time, three always line up first, so it only goes in a combo, two reds dropping in at once.', shows: moves('evilTry'), phase: 'window', tag: 'x2' },
 ];
 /** The steps of how it all works, in the order she shows them, each on a board of its own (the user, 15 Nov, after
-    playing the basics: the cascade and its wild slots, a constellation and the new ring, filling it with a cascade's
+    playing the basics: the cascade and its wild targets, a constellation and the new ring, filling it with a cascade's
     last clear, and Umami's evil constellation). */
 export const MECHANICS = ['cascade', 'rings', 'chains', 'evil'];
 export const WOLF_DEN_TUTORIAL = {

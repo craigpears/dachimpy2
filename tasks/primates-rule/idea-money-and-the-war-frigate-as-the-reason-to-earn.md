@@ -1,6 +1,6 @@
 ---
 title: Money, and the war frigate as the reason to earn it
-status: idea
+status: done
 asked: 11 Nov
 updated: 15 Nov
 ---
@@ -17,3 +17,5 @@ buy her, crew her or win her, what money is in the den, and what each way of ear
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "Yeah we decided these things don't fit, money is for a persistent game and this is more short quick fun,"
+- 15 Nov: done: dropped: money is for a persistent game; the den is short, quick fun

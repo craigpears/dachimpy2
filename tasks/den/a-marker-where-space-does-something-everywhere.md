@@ -1,6 +1,6 @@
 ---
 title: A marker where Space does something, everywhere
-status: asked
+status: ready
 asked: 14 Nov
 updated: 15 Nov
 ---
@@ -18,3 +18,5 @@ Space starts something: every quest's next stop, every place's starting point, t
 ## Log
 
 - 15 Nov: moved over from TODO.md, its column a first guess.
+- 15 Nov: you said: "didn't we do this? I saw it briefly but not seen it since. Seems something definitely ready to start just to have some subtle action tile indicator."
+- 15 Nov: ready to start: no shared marker found in code; wanted as a subtle action-tile indicator, ready to start

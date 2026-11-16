@@ -1,6 +1,6 @@
 ---
 title: What Puzzle Pirates Adventures should have been: many little adventures
-status: idea
+status: done
 asked: 13 Nov
 updated: 15 Nov
 ---
@@ -30,3 +30,4 @@ The sloop race is something else: "more of a full-on fun feature", not an advent
 Per your note ("a brain dump… can be removed"), I'd run this once approved:
 
 `node tools/task.mjs set idea-what-puzzle-pirates-adventures-should-have-been done --note "brain-dump, nothing to action; the user says it can be removed"`
+- 15 Nov: done: brain-dump, nothing to action; the user says it can be removed

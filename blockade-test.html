@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blockade test</title>
+<!-- A blockade, a proof of concept, unlinked like frigate-test.html (BLOCKADE.md): two sides, two war frigates, two
+     war brigs launching their little craft and five sloops each, coming in from two edges each, fighting for the buoys of a blockade board, the best of them in
+     a walled fort in its heart with imperial gates the frigates shoot their way through and side ways the sloops'
+     winds carry them through, lagoons inside reefs for the sloops to hide in and the brigs to fight them for, and
+     winds out of the heart to each. You spectate (the camera following the
+     action, or any ship you click), or sail any of them (its Sail button; ?ship= its number); bots sail the rest. Rules src/blockade.ts, bots src/blockade-ai/, damage src/ship-damage.ts; its 3D
+     js/den/blockade.js. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #f6ead2; --dim: #cbb894; --gold: #e0a92a; --crimson: #e2564a; --panel: rgba(28, 19, 12, 0.86); --edge: #5a412a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0e1a24; font: 500 16px/1.4 'Alegreya Sans', system-ui, sans-serif; color: var(--ink); }
+  canvas { display: block; touch-action: none; }
+  .ui { position: fixed; left: 12px; top: 12px; width: min(320px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 10px 12px; }
+  h1 { font: 700 22px 'Alegreya', serif; color: var(--gold); margin: 0 0 4px; }
+  p { margin: 0 0 8px; color: var(--dim); font-size: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  button { font: 700 14px 'Alegreya Sans', sans-serif; color: var(--ink); background: #3b2a1b; border: 1px solid #c9a35c; border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+  button.on { background: #6a4a1a; }
+  .score { display: flex; justify-content: space-between; align-items: baseline; font: 700 18px 'Alegreya', serif; margin-bottom: 4px; }
+  .gold { color: var(--gold); } .crimson { color: var(--crimson); }
+  .bar { height: 5px; background: #241810; border-radius: 3px; overflow: hidden; margin: 2px 0 8px; }
+  .bar i { display: block; height: 100%; background: var(--gold); }
+  .ships { font-size: 13px; color: var(--dim); }
+  .ship { display: grid; grid-template-columns: 1fr 70px 38px; gap: 0 8px; padding: 3px 0; border-top: 1px solid rgba(201, 163, 92, 0.18); cursor: pointer; }
+  .ship b { color: var(--ink); } .ship.me b { text-decoration: underline; } .ship.seen { background: rgba(224, 169, 42, 0.12); }
+  .ship button { font-size: 11px; padding: 0 4px; }
+  .ship i { grid-column: 1 / -1; font-style: normal; font-size: 12px; }
+  .meter { position: relative; height: 7px; background: #241810; border-radius: 3px; overflow: hidden; align-self: center; }
+  .meter .dmg { position: absolute; left: 0; top: 0; bottom: 0; background: #c8572a; }
+  .meter .wat { position: absolute; left: 0; bottom: 0; height: 2px; background: #6fb9d8; }
+  .out { color: #e8875a; }
+  .toks { display: flex; gap: 4px; margin: 2px 0 8px; }
+  .tok { width: 30px; height: 30px; border: 1px solid var(--edge); border-radius: 6px; display: grid; place-items: center; font: 700 18px 'Alegreya Sans', sans-serif; background: #241810; color: var(--dim); }
+  .tok.lit { background: #6a4a1a; color: var(--ink); border-color: var(--gold); }
+  .tok.mine { color: var(--gold); }
+  .pad button { min-width: 40px; }
+  .gun { position: relative; overflow: hidden; }
+  .gun i { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--gold); width: 100%; }
+  .gun.loading { color: var(--dim); }
+  .buoys { display: flex; gap: 5px; margin-bottom: 8px; font-size: 12px; }
+  .buoys span { border: 1px solid var(--edge); border-radius: 5px; padding: 1px 5px; color: var(--dim); }
+  .buoys span.gold { border-color: var(--gold); color: var(--gold); } .buoys span.crimson { border-color: var(--crimson); color: var(--crimson); } .buoys span.contested { color: var(--ink); border-color: var(--ink); }
+  #say { position: fixed; left: 50%; top: 14px; transform: translateX(-50%); width: max-content; max-width: min(560px, calc(100vw - 32px)); background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; padding: 6px 12px; font-size: 15px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  #say.on { opacity: 1; } #say.bad { border-color: #c8572a; }
+  [hidden] { display: none !important; }
+  @media (max-width: 700px) { .ui { top: auto; bottom: 12px; max-height: 45vh; } p { display: none; } }
+  /* the brawl, watched as a cinematic (?watch=brawl): the panel put away, a caption and a way back to the whole */
+  body.cinema .ui { display: none; }
+  #cinema { display: none; position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 8px 14px; text-align: center; }
+  body.cinema #cinema { display: block; }
+  /* the round's end, plain to see: who won, the score, another round (15 Nov: "for quite a few times I thought it had
+     frozen") */
+  #over { display: none; position: fixed; left: 50%; top: 38%; transform: translate(-50%, -50%); width: max-content; max-width: calc(100vw - 32px); background: var(--panel); border: 2px solid var(--gold); border-radius: 14px; padding: 16px 26px; text-align: center; z-index: 5; }
+  body.over #over { display: block; }
+  #over b { display: block; font-size: 26px; color: var(--gold); margin-bottom: 4px; }
+  #over span { display: block; font-size: 15px; margin-bottom: 10px; }
+  /* the admiral's (?admiral): your side's ships each an order, picked and drawn on the board */
+  #admiral { display: none; margin: 8px 0; padding: 8px; border: 1px solid var(--edge); border-radius: 8px; }
+  body.admiral #admiral { display: block; }
+  #admiral b { display: block; }
+  #admiral p { display: block; font-size: 13px; margin: 4px 0; }
+  .ship .order { display: block; font-style: normal; font-size: 12px; opacity: .9; }
+  #admiral .strat { margin: 6px 0; }
+  #admiral .strat > span { display: block; font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  #admiral .strat .row { flex-wrap: wrap; gap: 4px; }
+  .ship.picked { outline: 2px solid var(--accent, #d9a441); }
+  #cinema b { display: block; font-size: 16px; }
+  #cinema span { display: block; font-size: 13px; opacity: .85; margin: 2px 0 6px; }
+</style>
+</head>
+<body>
+<div class="ui">
+  <h1>Blockade</h1>
+  <p>Hold the buoys: each turn, a buoy only one side's ships reach scores its pennants, the best in the fort in the middle. Sloops ride the winds in by the side ways; a war frigate has to shoot a tower of an imperial gate down. War brigs launch their craft at the frigates: Tidecaller's turtles ram a ship lying still, Grave Lantern's phantom sloops can't be hit. Nobody hides: a ship sunk spins down and sails back in from the edge, where nobody can shoot. Click a ship below to follow her, or Sail to take her helm: click the sea to sail, W A D moves, Q E broadsides, X stops; in a brig, L launches her craft, Tab takes the helm of one of them (the rest on autopilot) and G calls them home. Watching, W A S D move the camera about and Q E turn it.</p>
+  <div class="score"><span class="gold" id="sg">0</span><span id="clock">5:00</span><span class="crimson" id="sc">0</span></div>
+  <div class="bar" title="This blockade turn: scored when it fills"><i id="turn"></i></div>
+  <div class="buoys" id="buoys"></div>
+  <div id="mine">
+    <div class="toks" id="toks"></div>
+    <div class="row pad">
+      <button data-key="a" title="Turn left (A)">↰</button>
+      <button data-key="w" title="Forward (W)">↑</button>
+      <button data-key="d" title="Turn right (D)">↱</button>
+      <button data-key="x" title="Stop (X)">Stop</button>
+      <button data-key="q" class="gun" id="gunL" title="Port broadside (Q)">◀ Fire<i></i></button>
+      <button data-key="e" class="gun" id="gunR" title="Starboard broadside (E)">Fire ▶<i></i></button>
+    </div>
+    <div class="row pad" id="brigKeys" hidden>
+      <button data-key="l" title="Drop anchor and launch her craft (L)">Launch</button>
+      <button data-key="tab" title="Take the helm of the next of her craft out, or her own (Tab)">Next helm</button>
+      <button data-key="g" title="Weigh anchor, calling her craft home (G)">Weigh anchor</button>
+    </div>
+  </div>
+  <div class="row"><button id="watch">Spectate</button><button id="director" title="The camera follows the action">Director</button><button id="whole">Whole board</button><button id="again">New round</button></div>
+  <div id="admiral">
+    <b>Admiral of Dachimpy's flag</b>
+    <p id="plan">Your plan: a strategy for your sloops, one for your war brig and one for your war frigates, then start the round.</p>
+    <div class="strat"><span>Your sloops</span><div class="row" id="stratSloop"></div></div>
+    <div class="strat"><span>Your war brig</span><div class="row" id="stratBrig"></div></div>
+    <div class="strat"><span>Your war frigates</span><div class="row" id="stratFrigate"></div></div>
+    <div class="row"><button id="startRound">Start the round</button></div>
+    <p>Or give one ship an order of her own: click her on the board, then what she's to do there (a buoy to hold, open water to camp on, a gate to shoot down, a friend to escort, an enemy to hunt); click her again when you're done.</p>
+  </div>
+  <div class="ships" id="ships"></div>
+</div>
+<div id="say"></div>
+<div id="over"><b id="overTitle"></b><span id="overScore"></span><button id="overAgain">New round</button></div>
+<div id="cinema"><b id="cineTitle"></b><span id="cineLine"></span><button id="cineAll">Watch the whole blockade</button></div>
+<script src="js/engine.js"></script>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { renderer, scene, camera, paintSky, pirate, tickSparks } from './js/den/world.js';
+import { blockadeSea } from './js/den/blockade.js';
+import { BLOCKADE } from './js/blockade.js';
+
+const $ = (id) => document.getElementById(id), params = new URLSearchParams(location.search), showReach = params.has('reach');
+paintSky('#4f8fd0', '#cfe2ee');
+camera.far = 640; camera.updateProjectionMatrix();
+scene.fog.near = 200; scene.fog.far = 460;   // (out past the bigger board, 15 Nov: seen whole from above, not lost in the haze)
+pirate.g.visible = false;
+const sea = new THREE.Mesh(new THREE.CircleGeometry(260, 48).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#2f78a8', roughness: 0.35, metalness: 0.1 }));
+sea.receiveShadow = true;
+scene.add(sea);
+
+let sayT = 0;
+const say = (text, bad = false) => { const el = $('say'); el.textContent = text; el.classList.add('on'); el.classList.toggle('bad', bad); sayT = 3 + text.length / 30; };
+// Spectating to start (the user, 15 Nov: "you should be able to just spectate and watch"), the director moving the
+// camera to whatever's happening; ?ship= a number to sail her (any of both fleets', the brigs too; not a brig's craft).
+const fleet = BLOCKADE.TEAMS.reduce((n, t) => n + t.ships.length, 0);
+const start = params.has('ship') ? Math.max(0, Math.min(fleet - 1, Number(params.get('ship')) || 0)) : -1;
+// ?watch=brawl: a cinematic (the user, 15 Nov: "I want to see two of the big ships really having a brawl and fighting it
+// out to see what that damage looks like"; "That needs to be like one of the shortcuts so people can actually see a
+// cinematic of the blockade"): two war frigates broadside to broadside, the camera slowly round them both.
+const brawling = start < 0 && params.get('watch') === 'brawl';
+// ?admiral: you command Dachimpy's side, an order for each ship (the user, 15 Nov: "some kind of admiral mode where ...
+// you need to be able to give each ship a target or directive ... drawing up those sorts of plans, and then you watch
+// the things unfold and can ... update and tweak things or take over"). The round waits for your plan.
+const admiral = start < 0 && !brawling && params.has('admiral');
+const bk = blockadeSea({ you: start, say, brawl: brawling, admiral: admiral ? 'gold' : null, sailed: (id) => sail(id) });
+
+const FOLLOW = { yaw: 0.35, pitch: 0.55, dist: 46 }, WHOLE = { yaw: 0, pitch: 1.05, dist: 265 };
+const cam = { yaw: 0.35, pitch: 0, dist: 0, at: new THREE.Vector3(), follow: true, director: start < 0 && !brawling && !admiral, watching: 0, cut: 0, cinema: brawling };
+Object.assign(cam, FOLLOW);
+// (the brawl: its caption, and the way out of it to the whole blockade, the director on)
+const cinema = (on) => {
+  cam.cinema = on; document.body.classList.toggle('cinema', on);
+  if (!on) { cam.director = true; $('director').classList.add('on'); Object.assign(cam, FOLLOW); params.delete('watch'); history.replaceState(null, '', params.toString() ? '?' + params : location.pathname); }
+};
+$('cineAll').onclick = () => cinema(false);
+// (the admiral's: the whole board to plan on; a ship picked, Snipe or her own choice for her; then start)
+if (admiral) {
+  document.body.classList.add('admiral');
+  Object.assign(cam, WHOLE); cam.follow = false; cam.at.set(0, 0, 0); $('whole').classList.add('on');
+  say('Your plan: a strategy for your sloops, one for your war brig and one for your war frigates, then start');
+}
+const pickShip = (id) => { bk.pick(id); sig = ''; };
+$('startRound').onclick = () => { bk.start(); $('startRound').hidden = true; $('plan').textContent = 'Under way: change a strategy as it plays, give one ship an order of her own, or Sail to take her helm.'; say('The round\'s begun: your orders are being carried out'); };
+// (a strategy for each kind of ship: a button each, the one picked lit; 15 Nov: "keep the Admiral mode relatively
+// simple ... like choosing just a strategy ... a handful of ... choices of each")
+for (const [kind, el] of [['sloop', $('stratSloop')], ['brig', $('stratBrig')], ['frigate', $('stratFrigate')]]) {
+  el.innerHTML = bk.strategies[kind].map((st, i) => `<button data-i="${i}" title="${st.says}" class="${i ? '' : 'on'}">${st.name}</button>`).join('');
+  el.onclick = (e) => {
+    const btn = e.target.closest('[data-i]');
+    if (!btn) return;
+    const st = bk.strategy(kind, Number(btn.dataset.i));
+    el.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === btn));
+    say(`Your ${{ sloop: 'sloops', brig: 'war brig', frigate: 'war frigates' }[kind]}: ${st.name.toLowerCase()}, ${st.says}`);
+    sig = '';
+  };
+}
+if (brawling) { const [a, z] = bk.duel.map((id) => bk.b.ship(id).name); $('cineTitle').textContent = `${a} and ${z}: a brawl`; cinema(true); Object.assign(cam, { yaw: -0.9, pitch: 0.55, dist: 34 }); }
+const sail = (id) => {
+  bk.sail(id);
+  $('mine').hidden = id < 0;
+  $('watch').classList.toggle('on', id < 0);
+  if (id >= 0) { cam.director = false; cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on'); say(`You're sailing ${bk.b.ship(id).name}`); }
+  $('director').classList.toggle('on', cam.director);
+  // (one of a brig's craft: the brig in the address, since her craft start aboard her)
+  params.delete('ship'); if (id >= 0) params.set('ship', bk.b.ship(id).craft?.by ?? id);
+  history.replaceState(null, '', params.toString() ? '?' + params : location.pathname);
+};
+sail(start);
+$('watch').onclick = () => { sail(-1); cam.director = true; $('director').classList.add('on'); };
+$('director').onclick = () => { cam.director = !cam.director; $('director').classList.toggle('on', cam.director); if (cam.director && !cam.follow) { cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on'); } };
+$('whole').onclick = () => {
+  cam.follow = !cam.follow; $('whole').classList.toggle('on', !cam.follow);
+  Object.assign(cam, cam.follow ? FOLLOW : WHOLE); if (!cam.follow) cam.at.set(0, 0, 0);
+};
+$('again').onclick = () => location.reload();
+$('overAgain').onclick = () => location.reload();
+document.querySelectorAll('[data-key]').forEach((b) => { b.onclick = () => bk.key(b.dataset.key); });
+// (spectating: W A S D, or the arrows, move the camera about over the sea, Q E turn it; the user, 15 Nov: "when I'm
+// spectating, I want to be able to like WASD my way around"; at a helm, they're her moves)
+const PAN = { w: 1, s: 1, a: 1, d: 1, q: 1, e: 1, arrowup: 'w', arrowdown: 's', arrowleft: 'a', arrowright: 'd' }, held = new Set();
+addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (bk.you() < 0 && PAN[k]) {
+    held.add(PAN[k] === 1 ? k : PAN[k]);
+    if (cam.follow || cam.director) { cam.follow = false; cam.director = false; $('director').classList.remove('on'); $('whole').classList.remove('on'); }
+    e.preventDefault(); return;
+  }
+  if (bk.key(k)) e.preventDefault();
+});
+addEventListener('keyup', (e) => { const k = e.key.toLowerCase(); held.delete(PAN[k] === 1 ? k : PAN[k] ?? k); });
+addEventListener('blur', () => held.clear());
+
+// ----- the panel: the score and the clock, the buoys, your moves and guns, every ship -----
+const TOK = { F: '↑', L: '↰', R: '↱' }, P = ['', 'I', 'II', 'III', 'IIII', 'V'];
+let sig = '';
+const hud = () => {
+  const s = bk.hud(), left = Math.max(0, 300 - s.clock);
+  $('sg').textContent = `Dachimpy's ${s.score.gold}`; $('sc').textContent = `${s.score.crimson} Dalnoth's`;
+  if (s.over && !document.body.classList.contains('over')) {
+    document.body.classList.add('over');
+    $('overTitle').textContent = s.leader ? `${s.leader === 'gold' ? "Dachimpy's flag" : "Dalnoth's flag"} wins the blockade` : "The blockade's a draw";
+    $('overScore').textContent = `Dachimpy's ${s.score.gold}, Dalnoth's ${s.score.crimson}`;
+  }
+  $('clock').textContent = s.over ? (s.leader ? `${s.leader === 'gold' ? 'Dachimpy\'s' : 'Dalnoth\'s'} win` : 'A draw') : `${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`;
+  $('turn').style.width = `${(s.turn / 10) * 100}%`;
+  if (s.me) {
+    // (a brig's, or one of her craft's: launching, the next helm, weighing anchor)
+    $('brigKeys').hidden = !s.me.brig;
+    for (const side of ['L', 'R']) { const b = $('gun' + side); b.classList.toggle('loading', s.me.load[side] > 0); b.querySelector('i').style.width = `${(1 - s.me.load[side]) * 100}%`; }
+    $('toks').innerHTML = Array.from({ length: s.me.h.tokens }, (_, i) => `<div class="tok${i === s.me.lit ? ' lit' : ''}${s.me.lit < 0 && i < s.me.mine ? ' mine' : ''}">${s.me.moves[i] ? TOK[s.me.moves[i]] : '·'}</div>`).join('');
+  }
+  const next = JSON.stringify([s.buoys.map((x) => x.hold), s.ships.map((x) => [Math.round(x.share * 20), Math.round(x.water * 20), x.out, x.doing, x.order]), bk.you(), s.gates.map((g) => g.towers), cam.watching, bk.picked()]);
+  if (next === sig) return;
+  sig = next;
+  $('buoys').innerHTML = s.buoys.map((x) => `<span class="${x.hold ?? ''}" title="${x.heart ? 'In the heart' : 'Out on the open sea'}">${P[x.pennants]}${x.heart ? '♥' : ''}</span>`).join('') + s.gates.map((g, i) => `<span title="The ${i ? 'north' : 'south'} gate's towers">${i ? 'N' : 'S'} ${g.open ? 'down' : g.towers.join('·')}</span>`).join('');
+  // (a brig's craft listed only while she's out on the sea)
+  $('ships').innerHTML = s.ships.filter((x) => !(x.craft && x.away)).map((x) => `<div class="ship${x.id === bk.you() ? ' me' : ''}${x.id === cam.watching && bk.you() < 0 ? ' seen' : ''}${x.id === bk.picked() ? ' picked' : ''}" data-id="${x.id}"><b class="${x.team}">${x.name}</b>`
+    + `<span class="meter" title="Damage, and water in her bilge"><span class="dmg" style="width:${x.share * 100}%"></span><span class="wat" style="width:${x.water * 100}%"></span></span>`
+    + (x.craft ? '' : `<button data-sail="${x.id}" title="Take her helm">Sail</button>`)
+    + `<i class="${x.out ? 'out' : ''}">${x.craft ? (x.craft === 'ram' ? 'Sea turtle' : 'Phantom sloop') : { frigate: 'War frigate', brig: 'War brig', sloop: 'Sloop' }[x.kind]} · ${x.doing}${x.order ? `<span class="order">Orders: ${x.order}</span>` : ''}</i></div>`).join('');
+};
+// (a ship's row: follow her; its Sail button: take her helm)
+$('ships').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-sail]');
+  if (b) { sail(Number(b.dataset.sail)); return; }
+  const el = e.target.closest('[data-id]');
+  if (!el) return;
+  if (bk.you() >= 0) sail(-1);
+  // (the admiral's own ships: picked, to be given an order; the whole board kept while planning)
+  if (admiral && bk.b.ship(Number(el.dataset.id)).team === 'gold') { pickShip(Number(el.dataset.id)); if (bk.planning()) return; }
+  cam.director = false; $('director').classList.remove('on');
+  cam.watching = Number(el.dataset.id); cam.follow = true; Object.assign(cam, FOLLOW); $('whole').classList.remove('on');
+  sig = '';
+});
+
+// ----- the camera: drag to turn, wheel or pinch to zoom; a click on the sea sails your ship there -----
+const canvas = renderer.domElement, pts = new Map();
+let pinch = 0, down = null;
+const ray = new THREE.Raycaster(), water = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+canvas.addEventListener('pointerdown', (e) => { pts.set(e.pointerId, [e.clientX, e.clientY]); canvas.setPointerCapture(e.pointerId); down = { x: e.clientX, y: e.clientY, n: pts.size }; });
+canvas.addEventListener('pointerup', (e) => {
+  pts.delete(e.pointerId); pinch = 0;
+  if (down && down.n === 1 && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6) {
+    ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), camera);
+    const at = ray.ray.intersectPlane(water, new THREE.Vector3());
+    // (the admiral's, a ship picked and not sailing: what's clicked is her order)
+    const on = at && admiral && bk.you() < 0 ? bk.shipAt(at) : -1;
+    if (on >= 0 && on === bk.picked()) pickShip(-1);
+    else if (on >= 0 && bk.picked() < 0 && bk.b.ship(on).team === 'gold') { pickShip(on); say(`${bk.b.ship(on).name}: click on the board what she's to do`); }
+    else if (at && admiral && bk.you() < 0 && bk.picked() >= 0) { const o = bk.orderAt(bk.picked(), at); say(o ? `${bk.b.ship(bk.picked()).name}: ${o}` : 'Nowhere she can lie there', !o); sig = ''; }
+    else if (at) bk.click(at);
+  }
+  down = null;
+});
+canvas.addEventListener('pointercancel', (e) => { pts.delete(e.pointerId); pinch = 0; down = null; });
+canvas.addEventListener('pointermove', (e) => {
+  const p = pts.get(e.pointerId);
+  if (!p) return;
+  if (pts.size === 2) {
+    const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+    if (pinch) cam.dist = Math.min(300, Math.max(6, cam.dist * pinch / d));
+    pinch = d;
+  } else {
+    cam.yaw -= (e.clientX - p[0]) * 0.006;
+    cam.pitch = Math.min(1.45, Math.max(0.05, cam.pitch + (e.clientY - p[1]) * 0.005));
+  }
+  p[0] = e.clientX; p[1] = e.clientY;
+});
+canvas.addEventListener('wheel', (e) => { e.preventDefault(); cam.dist = Math.min(300, Math.max(6, cam.dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+
+const clock = new THREE.Clock();
+function frame() {
+  const dt = Math.min(0.05, clock.getDelta());
+  bk.tick(dt);
+  tickSparks(dt);
+  // (the camera moved about by hand, spectating: along the sea the way it's looking, quicker the further out it is)
+  if (held.size && bk.you() < 0) {
+    const f = (held.has('w') ? 1 : 0) - (held.has('s') ? 1 : 0), r = (held.has('d') ? 1 : 0) - (held.has('a') ? 1 : 0), v = Math.max(cam.dist, 30) * 0.9 * dt;
+    cam.at.x += (-Math.sin(cam.yaw) * f + Math.cos(cam.yaw) * r) * v;
+    cam.at.z += (-Math.cos(cam.yaw) * f - Math.sin(cam.yaw) * r) * v;
+    cam.yaw += ((held.has('q') ? 1 : 0) - (held.has('e') ? 1 : 0)) * dt * 1.4;
+  }
+  // Spectating with the director: on to whatever's happening, never cutting more often than every few seconds, the
+  // camera drifting slowly round her.
+  if (bk.you() < 0 && cam.director && (cam.cut -= dt) <= 0) { const id = bk.director(undefined, cam.watching); cam.cut = 4; if (id !== cam.watching) { cam.watching = id; cam.cut = 12; sig = ''; } }
+  if (bk.you() < 0 && cam.director) cam.yaw += dt * 0.05;
+  if (cam.cinema) {
+    // (the brawl: between the two while they're close, else on whichever's knocked out, her crew at work; the camera
+    // drawn back to keep both in, and drifting slowly round)
+    const [a, z] = bk.duel.map((id) => bk.b.ship(id)), fa = bk.focus(a.id), fz = bk.focus(z.id), apart = fa.distanceTo(fz);
+    // (one sunk: on the other; far apart, on whichever's knocked out, else Primates Rule on her way)
+    const gone = a.away > 0 ? a : z.away > 0 ? z : null, out = a.dmg.out ? a : z.dmg.out ? z : null;
+    const mid = gone ? bk.focus((gone === a ? z : a).id) : apart < 50 ? fa.clone().lerp(fz, 0.5) : bk.focus((out ?? a).id);
+    cam.at.lerp(mid.setY(2), Math.min(1, dt * 1.5));
+    cam.dist += ((apart < 50 && !gone ? Math.max(26, Math.min(64, 18 + apart * 0.85)) : 30) - cam.dist) * Math.min(1, dt * 0.8);
+    cam.yaw += dt * 0.06;
+    $('cineLine').textContent = [a, z].map((s) => `${s.name} ${s.away > 0 ? `sunk, back in ${Math.ceil(s.away)}s` : s.dmg.out ? 'knocked out, her crew rebuilding her' : `${Math.round(s.dmg.share() * 100)}% damaged`}`).join(' · ');
+  } else if (cam.follow) cam.at.lerp(bk.focus(bk.you() >= 0 ? bk.you() : cam.watching).setY(2), Math.min(1, dt * 2.5));
+  // (?reach only: the frigate you follow or sail, her broadside reach shaded, her blind spots plain; for the design
+  // page's picture of them, not otherwise: the user, 15 Nov, "I really don't see what that's adding")
+  if (showReach) bk.showReach(bk.you() >= 0 ? bk.you() : cam.follow ? cam.watching : -1);
+  hud();
+  if ((sayT -= dt) <= 0) $('say').classList.remove('on');
+  camera.position.set(cam.at.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cam.at.y + Math.sin(cam.pitch) * cam.dist, cam.at.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist);
+  camera.lookAt(cam.at);
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+frame();
+window.bk = bk; window.cam = cam;   // (for poking at it from the console)
+</script>
+</body>
+</html>

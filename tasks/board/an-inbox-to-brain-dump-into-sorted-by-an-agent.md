@@ -1,6 +1,6 @@
 ---
 title: An inbox to brain-dump into, sorted by an agent
-status: playtest
+status: done
 asked: 15 Nov
 updated: 15 Nov
 ---
@@ -13,3 +13,4 @@ updated: 15 Nov
 
 - 15 Nov: added.
 - 15 Nov: for you to playtest: the box on the served board; a test drop sorted into an idea card in about a minute
+- 15 Nov: done: moved on the board

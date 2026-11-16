@@ -2642,8 +2642,8 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   - Constellations of 3 places in the centre, 2 in the middle, 1 in the third; a fresh board's first 3 and 1.
   - Points: each ring's weight (3, 5, 9) times (1.5 times its places) squared, rounded down (71 the first, 125 the
     usual), times the chart's step in the move's cascade; lines a point a star times their step. No par.
-  - Wild places (ringed in every colour, a paw print), filled by any star: a chart in a chain (a clear before or
-    after it in the same move) deals the next with its centre all wild, two or more clears a fourth wild place in it;
+  - Wild targets (ringed in every colour, a paw print), filled by any star: a chart in a chain (a clear before or
+    after it in the same move) deals the next with its centre all wild, two or more clears a fourth wild target in it;
     a combo's clear (the move's second step or later) turns wild the constellation's places on and beside what it
     cleared. A plain chart deals plain.
   - The cascade named over the stars as it goes: "Single! +3", "Double! +6", "Triple! Constellation! +18".
@@ -2655,12 +2655,12 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     going up), the board waiting while she talks (Space moves her on). Her words are src/lines/multibella.ts's
     `LESSON`, by board and cue; a slot turned wild by a clear is drawn wild only once that clear's shown. "How it
     works" is four steps in order (`MECHANICS`), N or Next for the next one: a cascade, lines only, +3, +6, +9, its
-    combo clears leaving wild slots; the fourth ring, a star waiting up there, carried round, dropped in by a clear
+    combo clears leaving wild targets; the fourth ring, a star waiting up there, carried round, dropped in by a clear
     under it (250), then the next constellation going up; the same cascade charting the last slot on its third clear
     (375, a line's 3); and Umami's evil constellation (below), first a star at a time (the fifth red makes a line and
     they go), then by her combo, both reds landing together (486).
-  - **"Wild slot"** in her words and the guide's: the Wolf Dens Guide's word, and the players' (the user's too). The
-    code still says wild places.
+  - **"Wild target"** in her words, the guide's and the code's: YPPedia's word (the user, 15 Nov: "Go with yppedia and
+    wild targets"), over "wild slot", the Wolf Dens Guide's and the players'.
   - **Umami's evil constellation at the wolf den (15 Nov):** the user's combo-only constellation (11 Nov, "The
     starlit door"; IDEAS.md), made with Umami in mind, at last somewhere in the world: shown in her lesson, credited
     to Umami in the changelog. Not yet dealt in play.
@@ -4013,3 +4013,80 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   original tune if it ever gets music, no lyrics.
 - Still to come (the task board, tasks/carpet-ride/): the second leg to the blockade; Gravee painting her portrait ("Naturally [Gravee] taking
   a portrait").
+
+### A blockade's about the points (15 Nov)
+
+- **You hang on the points, and die on them if you must.** The user: "this is a game about the points. You will hang to
+  the points. You die practically on the points. As long as doing so would not mean the other person gets more points
+  indirectly than it's worth ... sinking's not the end of the world. Being dead in the water, away from flags, not
+  covering anything. Oof." So no ship ever hides ("you never hide. There's just no tactical reason or benefit to. You
+  lose coverage of points"): a hurt one is patched where she is. What damage changes is her nerve: "being more or less
+  aggressive depending on your damage level ... if you know the person next to you is more damaged than you are, you get
+  more aggressive. If you're damaged, you might kind of take fewer risks". Nobody wanders off to a corner of the sea.
+- **Sinking costs travel, not just time.** Open sea round the board (six squares a side), the big ships coming back in
+  by an edge and sailing in ("there needs to be a bit of a buffer travel zone"), the sloops quick on the edge winds;
+  every ship can come in by either end (frigates by either gate's side, sloops and brigs by either side's edge: "island
+  and oceanside spawns").
+- **Full damage sinks her, and the edge is safe.** No lying dead in the water: "we were supposed to be sinking ships, not
+  having them just float around there". A ship at full damage spins down and comes back in at an edge, in a safe zone
+  four squares deep where nobody can fire or be shot, waiting a moment before she can move ("the safe zone around the
+  edge ... you can't shoot each other ... one turn before they can move again").
+- **The gate guns have a side.** Each gate's guns are the side's whose frigates come in at that end, and fire on the
+  other side only ("it's for everybody's gain to destroy them, so the opponent benefits from their destruction as much
+  as you do. Hence the dilemma. The turrets need to have a side"), so wrecking the enemy's is worth the detour. One
+  frigate a side comes in at each end ("frigs need to be able to come in on each side ... one frig from each team
+  should come in on each side"), so one runs the enemy's guns till they're wrecked; not the guns defending whoever
+  comes in ("then it just makes the whole game too lopsided ... you'd never take the two-point cluster on the other
+  side").
+- **A brig's craft clear the enemy's guns.** A turtle rams a gate gun of the other side's as she would a ship, a hit
+  to its wrecking that doesn't quieten it, so it fires on her as she rams; a phantom's broadside wrecks them too. Her
+  brig launches at them in reach as at a frigate ("they're the standoff hunters").
+- **A turtle rams where the broadsides don't bear**: off a ship's nearer end, bow or stern, her side only if there's
+  nothing else ("let's stay at the front of the war frig and start ramming it from the front").
+- **Never half in a gateway.** A frigate holding a buoy from a gateway goes on in; caught there, she moves straight on
+  when she can; an enemy frigate stuck there is raked from astern by a frigate and sniped at by a sloop ("that ship is a
+  sitting duck for somebody else to just swing around behind it").
+- **Manoeuvre on the points.** A frigate on the points with an enemy in reach and no broadside bearing turns to bring hers
+  round, by a move that keeps the buoy in her reach ("you can still maneuver within the middle, fight things, but just
+  ... while you've got the points within your influence").
+- **A fair board.** The board and both fleets, every entry, are each other's turned round its middle: neither side's
+  frigate has a rock to turn for that the other's hasn't ("the map looks very unfair that one ends up having to turn for
+  a rock while the other doesn't").
+- **A ship can always turn where she fits.** A big ship's turn is her wide quarter circle when there's room for it;
+  blocked by rocks or ships, she bumps and turns on the spot about her middle, so long as her hull fits there facing the
+  new way ("they don't need open water to turn. You can at least bounce off rocks or each other's ships"). Two frigates
+  bow to bow between the gates swing round and trade broadsides ("surely frigs should be able to bounce off each other
+  and then start exchanging a broadside in the middle, not camping").
+- **Low rocks keep a frigate in the middle of the heart.** A line of low rocks down each side of the heart's middle, six
+  squares across: too shallow for a frigate, the brigs and sloops slipping over them, every shot flying over them ("you
+  can shoot over them but you can't get past them, just to kind of control where a war frigate can get to in the middle
+  so it stays in that center square area"). No frigate gets into a corner she can't turn in.
+- **A gate gun shows every hit**: from the first, half its battlements gone, its stone blackened, its gun knocked askew,
+  smoking ("I didn't see any visible damage after the first shot from the sloop on one of the cannons").
+- **Guard the brig.** A sloop drives off an enemy sloop at her side's brig lying at anchor, one sloop to each ("I would
+  expect them to be protecting the war brig and getting behind [her]").
+- **No fights off the points.** A frigate fires on whoever comes into her broadside, but never picks a fight with an
+  enemy who isn't on or contesting a buoy ("You don't hang around off points getting into fights").
+- **A sheltered spot has a way in from outside.** The heart's corners are out of any frigate's reach inside the fort,
+  a brig's launching spot; each has a gap through the wall from the open sea, a postern or a way out, so a sloop can
+  slip in at her ("balance that with another kind of gap coming from the outside").
+
+### The blockade's balance: emergent, never a rule (15 Nov)
+
+- **Rock, paper, scissors comes from how the ships handle, never from a rule about what a ship may attack.** The user,
+  of turtles told to leave sloops alone: "it feels a bit artificial ... rather than it being a mechanical advantage".
+  So every craft and ship goes for whatever her bot thinks best, and the triangle emerges: a frigate's slow, long turns
+  give a turtle the moment it needs to ram her (a ram only lands on a ship lying still a second), while a sloop that
+  keeps moving slips her, and one that sits still foolishly is rammed just the same ("that makes it ... emergent
+  rather than some magical rule"); a brig anchored to launch is a sitting duck for a sloop quick into position; a
+  sloop that duels a frigate is sunk by her weight of shot.
+- **The gate guns paint a target and are slow to fire,** so moving is plainly the answer: the nearest ship's square
+  marked, the shot down 2.4 s later. A sloop on the move dodges it; a frigate's move is too long ("paint a target on a
+  square and then just take quite a while to fire ... for a [war frig] ... that's basically an entire turn, so they
+  can't dodge it"). No camping count: what's punished is what doesn't move.
+- **Head-on, a brig should beat sloops** ("brigs should just be able to shoot ... sloops"); the triangle's third side
+  comes out of tactics in a full blockade, when frigates force the brigs out of the centre.
+- **Balance is proved fleet against fleet, terrain included** (tests/blockade-balance.test.ts, BLOCKADE.md §3): equal
+  points, both ways round, on open sea and on the blockade's own board, guns and all ("brigs being able to use the
+  terrain to launch from a protected position is very key to the balance test"). When a side of the triangle doesn't
+  hold, the fix is in handling, terrain or price, and the test says so.

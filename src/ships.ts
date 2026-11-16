@@ -39,6 +39,13 @@ export const WAR_FRIGATE: ShipClass = {
   // (the main deck has 12 Gunnery stations, the galley below 10: her 24 guns, 12 on top)
   stations: { nav: 1, sailing: 18, carpentry: 18, bilge: 12, gunnery: 6 }, mainDeckGuns: 12,
 };
+/** A war brig, the blockade's middle class of ship (15 Nov). YPPedia's: 16 cannons, medium, two shots a side a move;
+    the rest (her crew, hold, tokens, cloth, stations) not checked yet, put between the sloop's and the war frigate's. */
+export const WAR_BRIG: ShipClass = {
+  name: 'War brig', crew: 30, minCrew: 8, holdLitres: 108000, holdKg: 72000,
+  guns: 16, gunSize: 'medium', shotsPerSide: 2, tokens: 4, sailCloth: 200,
+  stations: { nav: 1, sailing: 8, carpentry: 6, bilge: 4, gunnery: 3 }, mainDeckGuns: 8,
+};
 
 /** A hull as drawn (metres): its length and beam at her deck, its depth keel to deck, the deck's
     height above the water, how much of its length the bow takes to taper, and its curves (`shape`;

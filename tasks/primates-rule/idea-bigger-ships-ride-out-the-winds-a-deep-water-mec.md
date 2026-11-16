@@ -1,6 +1,6 @@
 ---
 title: Bigger ships ride out the winds: a deep-water mechanic
-status: idea
+status: done
 asked: 11 Nov
 updated: 15 Nov
 ---
@@ -21,3 +21,5 @@ the flip side.)
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 15 Nov: you said: "the water mechanics as we found just by having you know the fact that they're wider so they can't get through small gaps but soon enough of a mechanic on its own meaningful I think"
+- 15 Nov: done: not wanted: a ship's width (can't fit small gaps) is mechanic enough on its own, no deep-water wind rule

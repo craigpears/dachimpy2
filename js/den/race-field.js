@@ -18,6 +18,7 @@ import { capybaraMesh } from './capybara-model.js';
 import { person } from './props-people.js';
 import { Sparkle, SURGE, surgeFor } from '../den-sailing.js';
 import { sparkleOn, sparkleFx, sparkleWhoosh } from './sail-sparkle.js';
+import { holedLook, holedTick, holedFx } from './holed.js';
 
 const RC = LAY.RACE, CELL = SAIL.CELL;
 /** Each rival's sloop (by her number in the field, 1 up), as drawn; how near you have to be to hear her. */
@@ -47,15 +48,11 @@ export function rivalBoat(R, shown = null) {
     u.rotation.set(0, 0, 0.12);   // (sat up on her foredeck, looking ahead, as aboard yours)
     g.add(u);
   }
-  // Holed: stars over her as over you (sailing.js), and her smoke.
-  const stars = new THREE.Group(), sm = new THREE.MeshBasicMaterial({ color: '#ffe066' });
-  for (let i = 0; i < 3; i++) { const s = mesh(new THREE.OctahedronGeometry(0.14, 0), sm, false); s.position.set(Math.cos(i * 2.1) * 0.45, 0, Math.sin(i * 2.1) * 0.45); stars.add(s); }
-  stars.position.set(-1.15, SLOOP_DECK + 2.6, 0);
-  stars.visible = false;
-  g.add(stars);
+  // Holed: stars over her as over you (sailing.js), and her smoke (holed.js, any ship's).
+  const H = holedLook(g, { x: -1.15, y: SLOOP_DECK + 2.6, deck: [0.2, SLOOP_DECK + 0.6] });
   g.visible = false;
   scene.add(g);
-  const B = { R, g, who, stars, low: 0, heel: 0, smokeT: 0, at: null };
+  const B = { R, g, who, H, heel: 0, at: null };
   return B;
 }
 const near = (B) => B.g.visible && Math.hypot(B.g.position.x - sail.g.position.x, B.g.position.z - sail.g.position.z) < field.hear * CELL;
@@ -154,16 +151,11 @@ export function fieldTick(dt, Rc, on) {
 export function boatAt(B, k, p, lift, dazed, dt) {
   const t = performance.now() / 1000;
   B.at = xyz(p, lift);
-  B.low += ((dazed ? -0.3 : 0) - B.low) * Math.min(1, dt * 2);
-  B.g.position.set(B.at.x, B.at.y + B.low + Math.sin(t * 0.9 + k * 2) * 0.06, B.at.z);
+  const { low, list } = holedTick(B.H, dazed, dt);
+  B.g.position.set(B.at.x, B.at.y + low + Math.sin(t * 0.9 + k * 2) * 0.06, B.at.z);
   B.g.rotation.y = Math.PI / 2 - p.d * Math.PI / 2;
   B.g.rotation.x = Math.sin(t * 0.7 + k) * 0.02;
-  B.g.rotation.z = Math.sin(t * 0.55 + k) * 0.02 + (dazed ? 0.08 : 0);
-  B.stars.visible = dazed;
-  if (dazed) {
-    B.stars.rotation.y += dt * 4;
-    if ((B.smokeT -= dt) < 0) { B.smokeT = 0.25; burst(B.g.localToWorld(V3(0.2, SLOOP_DECK + 0.6, 0)), '#6f6a66', 3, 0.7); }
-  }
+  B.g.rotation.z = Math.sin(t * 0.55 + k) * 0.02 + list;
 }
 
 /** Her Sailing's gusts on her sloop, as they take her (any racer's: the race's rivals here, the watched race's
@@ -212,15 +204,8 @@ function fly(from, to, done) {
   scene.add(ball);
   tween(0.35 + d * 0.03, (u) => { ball.position.lerpVectors(from, to, u); ball.position.y += Math.sin(u * Math.PI) * (0.8 + d * 0.08); }, () => { scene.remove(ball); done(); });
 }
-/** A hit on a sloop: a flash, timber and smoke flying, and a shudder. */
-function holed(g) {
-  const at = g.localToWorld(V3(0, SLOOP_DECK + 0.4, 0));
-  burst(at, '#ffb85a', 16, 4);
-  burst(at, '#6b5c50', 18, 4);
-  burst(at, '#3d3530', 10, 2);
-  const x0 = g.rotation.x;
-  tween(0.5, (u) => { g.rotation.x = x0 + Math.sin(u * Math.PI * 6) * 0.12 * (1 - u); });
-}
+/** A hit on a sloop: a flash, timber and smoke flying, and a shudder (holed.js, any ship's). */
+const holed = (g) => holedFx(g, SLOOP_DECK + 0.4);
 /** Whose sloop that is (0 yours), drawn. */
 const sloopOf = (i) => (i === 0 ? sail.g : field.boats[i - 1]?.g);
 

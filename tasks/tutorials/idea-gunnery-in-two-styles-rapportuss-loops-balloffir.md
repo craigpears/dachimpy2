@@ -49,3 +49,6 @@ a real Gunnery board. The detail waits on her videos.
 - 15 Nov: acting on it did nothing: er it creates a stream that doesn't exist yet.
 
 If you approve the command, I'll run `npm run task -- move idea-gunnery-in-two-styles-rapportuss-loops-balloffir tutorials`. I'd then add a `note` that you want it grouped with the tutorials, and check whether the other tutorial cards belong there too.
+- 15 Nov: moved to the new tutorials stream: it's a tutorials idea, not about the den specifically (15 Nov)
+- 15 Nov: done: moved to the tutorials stream: tutorials/gunnery-in-two-styles-rapportuss-loops-balloffir (a new stream; the script only makes one by add)
+- 15 Nov: ideas: back to an idea, moved into the tutorials stream whole (a copy made by the update, shortened, was removed)

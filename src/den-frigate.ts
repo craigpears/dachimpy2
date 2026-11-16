@@ -37,8 +37,8 @@ export interface Plan {
   stripes: { at: [number, number]; h: number };
   /** Her gun ports, two rows a side, each in the middle of its band of black (portRows): how many in
       each, their size, from and to along her. The upper row is the gun deck's (her 12 guns below);
-      the lower, staggered, shut. */
-  ports: { each: number; size: number; from: number; to: number };
+      the lower, staggered, shut. `rows` 1: the upper only (a brig's: src/den-brig.ts). */
+  ports: { each: number; size: number; from: number; to: number; rows?: 1 };
   masts: Mast[];
   /** The ship's wheel, on the quarterdeck. */
   helm: { x: number };
@@ -46,6 +46,10 @@ export interface Plan {
   stairs: { quarter: { len: number }; fore: { len: number; w: number } };
   /** Hatches in the main deck, down to the gun deck. */
   hatches: { x: number; z: number; w: number }[];
+  /** A smaller ship's few fixed sizes at her stern and bow, where they differ from a war frigate's (js/den/frigate.js):
+      her cabin's windows along her (x), her stern windows and taffrail lanterns across it (z), her name plate's width,
+      her bowsprit's length as a share of the frigate's. */
+  stern?: { cabin?: number[]; windows?: number[]; lanterns?: number[]; plate?: number; sprit?: number };
 }
 
 /** A war frigate's hull, from the sloop's by YPPedia's numbers. */
@@ -113,6 +117,7 @@ export interface Placed { kind: string; x: number; z: number; yaw?: number; opts
 export const FOOT: Record<string, number> = {
   skeletalCannon: 0.55, gibbet: 0.5, skeletonChair: 0.3, armour: 0.35, grandPiano: 0.6, anchorChair: 0.3,
   table: 0.42, jar: 0.25, toolChest: 0.35,
+  bronzeCannon: 0.55, clam: 0.45, coral: 0.3, trident: 0.3, ghost: 0.4, candelabra: 0.25, skeleton: 0.3, lantern: 0.3,
 };
 
 /** A war frigate's config: her name, her paints, her guns' places and what's on her deck. */
@@ -122,13 +127,17 @@ export interface Frigate {
       frames) and railing; and the rest: her bare wood below the paint, her deck, her sails, the gold
       of her figurehead's scrollwork. */
   paint: { hull: string; sideboard: string; railing: string; bottom: string; deck: string; sails: string; gold: string };
-  /** Her figurehead: a beast's head (Primates Rule's, black). */
-  figurehead: { kind: 'beast'; col: string };
+  /** Her figurehead: a beast's head (Primates Rule's, black), a mermaid with a trident (an Atlantean's), a skull
+      (a Phantom's). */
+  figurehead: { kind: 'beast' | 'mermaid' | 'skull'; col: string };
   /** Where along her the main deck's guns stand (one each side at each). */
   guns: number[];
-  /** The guns' look (js/den/furniture.js, skeletalCannon). */
+  /** The guns' look (js/den/furniture.js, skeletalCannon), and its options. */
   gunKind: string;
+  gunOpts?: Record<string, unknown>;
   furniture: Placed[];
+  /** A ghost ship's: see-through, glowing faintly (a Phantom class's). */
+  ghost?: boolean;
 }
 
 /** Primates Rule, from the user's picture of her deck (TODO.md, "Pictures of Primates Rule"): black
@@ -167,6 +176,105 @@ export const PRIMATES_RULE: Frigate = {
     { kind: 'toolChest', x: 4.25, z: -0.6, yaw: 0 },
   ],
 };
+
+/** Iron Pride, Dalnoth's war frigate in the blockade (src/blockade.ts): a proud ship, crimson and gold, her deck
+    plainer than Primates Rule's. */
+export const IRON_PRIDE: Frigate = {
+  name: 'Iron Pride',
+  paint: { hull: '#5b1619', sideboard: '#d8b04e', railing: '#ead9a6', bottom: '#8f6a45', deck: '#b98e5e', sails: '#efe2d2', gold: '#e2b23a' },
+  figurehead: { kind: 'beast', col: '#7a1d20' },
+  guns: PRIMATES_RULE.guns,
+  gunKind: 'skeletalCannon',
+  furniture: [
+    { kind: 'table', x: -2.95, z: 0, opts: { cup: true, bottles: 2 } },
+    { kind: 'toolChest', x: 0.95, z: -0.75, yaw: Math.PI },
+    { kind: 'toolChest', x: 4.25, z: -0.6, yaw: 0 },
+  ],
+};
+
+/* War frigates by style, each just a config of her paints, figurehead, guns and furniture, as Primates Rule is (the
+   user, 15 Nov: "a [war frig] should have a config for its decoration. Primates Rule ... should just be a config of
+   this is all the cannons and the furniture where they're placed, the same with an Atlantean type and a haunted seas
+   type. So you should be able to go play in a haunted seas ghost-like frigate"). By YPPedia: the Atlantean class war
+   frigate (sea-themed, sold ready painted) and the Phantom class war frigate (a ghost aboard for good). Their furniture
+   stands where Primates Rule's does, the places her deck has room for (onDeck: tests/den-frigate.test.ts). */
+
+/** Coral Throne, an Atlantean class war frigate: sea green and sand gold, a mermaid at her bow, verdigris guns, and
+    her deck all clams, coral and tridents. */
+export const CORAL_THRONE: Frigate = {
+  name: 'Coral Throne',
+  paint: { hull: '#1f6f74', sideboard: '#e9d8a6', railing: '#f2e8cc', bottom: '#7a5a3c', deck: '#c8b07e', sails: '#d9f1ec', gold: '#e3b53f' },
+  figurehead: { kind: 'mermaid', col: '#3fa69a' },
+  guns: PRIMATES_RULE.guns,
+  gunKind: 'bronzeCannon',
+  gunOpts: { col: '#3f8f7f', band: '#d9a93a' },
+  furniture: [
+    { kind: 'trident', x: -6.55, z: 0 },
+    { kind: 'coral', x: -6.75, z: -1.15, opts: { col: '#ef7a6a' } },
+    { kind: 'coral', x: -6.75, z: 1.15, opts: { col: '#f2b05a' } },
+    { kind: 'clam', x: -5.8, z: 0, yaw: Math.PI / 2 },
+    { kind: 'clam', x: -2.95, z: 0, yaw: Math.PI / 2, opts: { col: '#bfe3f0' } },
+    { kind: 'coral', x: -2.05, z: -0.8, opts: { col: '#d46aa8' } },
+    { kind: 'coral', x: -2.05, z: 0.8, opts: { col: '#ef7a6a' } },
+    { kind: 'jar', x: 0.95, z: 0.7, opts: { creature: '#3fd0c8' } },
+    { kind: 'coral', x: -0.9, z: 0.95, opts: { col: '#f2b05a', h: 0.7 } },
+    { kind: 'clam', x: 2.05, z: 0, yaw: -Math.PI / 2, opts: { col: '#e8c8e0' } },
+    { kind: 'toolChest', x: 0.95, z: -0.75, yaw: Math.PI },
+    { kind: 'trident', x: 6.1, z: -0.6 },
+    { kind: 'coral', x: 3.95, z: 0.55, opts: { col: '#d46aa8' } },
+    { kind: 'coral', x: 6.1, z: 0.72, opts: { col: '#ef7a6a', h: 0.7 } },
+    { kind: 'clam', x: 7.0, z: 0, yaw: -Math.PI / 2 },
+    { kind: 'toolChest', x: 4.25, z: -0.6, yaw: 0 },
+  ],
+};
+
+/** Eldritch Wail, a Phantom class war frigate, a ghost ship: grey-green and see-through, glowing faintly, a skull at
+    her bow, her deck all candles, skeletons and gibbets, and a ghost or two aboard for good. */
+export const ELDRITCH_WAIL: Frigate = {
+  name: 'Eldritch Wail',
+  paint: { hull: '#3d4a48', sideboard: '#9fd8c0', railing: '#c8e8da', bottom: '#4a4440', deck: '#6e746a', sails: '#d3ecdf', gold: '#9fd8c0' },
+  figurehead: { kind: 'skull', col: '#e8e4d0' },
+  guns: PRIMATES_RULE.guns,
+  gunKind: 'skeletalCannon',
+  ghost: true,
+  furniture: [
+    { kind: 'ghost', x: -6.55, z: 0, yaw: Math.PI / 2 },
+    { kind: 'candelabra', x: -6.75, z: -1.15 },
+    { kind: 'candelabra', x: -6.75, z: 1.15 },
+    { kind: 'skeletonChair', x: -5.45, z: -0.32, yaw: -Math.PI / 2 - 0.3, opts: { sitter: true } },
+    { kind: 'skeletonChair', x: -5.45, z: 0.32, yaw: -Math.PI / 2 + 0.3 },
+    { kind: 'table', x: -2.95, z: 0, opts: { cup: false, bottles: 2, black: true } },
+    { kind: 'skeleton', x: -2.05, z: -0.8, yaw: Math.PI / 2 },
+    { kind: 'skeleton', x: -2.05, z: 0.8, yaw: Math.PI / 2 },
+    { kind: 'jar', x: 0.95, z: 0.7, opts: { creature: '#7dffb0' } },
+    { kind: 'jar', x: -0.9, z: 0.95, opts: { creature: '#9fd8c0' } },
+    { kind: 'ghost', x: 2.05, z: 0, yaw: -Math.PI / 2, opts: { col: '#d8fff2' } },
+    { kind: 'toolChest', x: 0.95, z: -0.75, yaw: Math.PI },
+    { kind: 'gibbet', x: 6.1, z: -0.6, yaw: Math.PI / 2 },
+    { kind: 'gibbet', x: 3.95, z: 0.55, yaw: -Math.PI / 2 },
+    { kind: 'skeletonChair', x: 6.1, z: 0.72, yaw: -Math.PI / 2 - 0.5, opts: { sitter: true } },
+    { kind: 'lantern', x: 7.0, z: 0 },
+    { kind: 'toolChest', x: 4.25, z: -0.6, yaw: 0 },
+  ],
+};
+
+/** Golden Grin, Dachimpy's flag's third war frigate in the blockade (src/blockade.ts): cream and gold, a gold beast at
+    her bow, Primates Rule's deck. */
+export const GOLDEN_GRIN: Frigate = {
+  ...PRIMATES_RULE,
+  name: 'Golden Grin',
+  paint: { hull: '#efe3c4', sideboard: '#b8862a', railing: '#fbf3df', bottom: '#9c7448', deck: '#c99f6c', sails: '#f4ead2', gold: '#d6a63c' },
+  figurehead: { kind: 'beast', col: '#c9962e' },
+};
+/** Crimson Tide, Dalnoth's flag's third war frigate in the blockade: deep red and cream, Iron Pride's deck. */
+export const CRIMSON_TIDE: Frigate = {
+  ...IRON_PRIDE,
+  name: 'Crimson Tide',
+  paint: { hull: '#7a1f1f', sideboard: '#f0e2c0', railing: '#f6ecd6', bottom: '#8f6a45', deck: '#b98e5e', sails: '#f2e6da', gold: '#e2b23a' },
+};
+
+/** Every war frigate there's a config for, by name. */
+export const FRIGATES: Record<string, Frigate> = Object.fromEntries([PRIMATES_RULE, IRON_PRIDE, CORAL_THRONE, ELDRITCH_WAIL, GOLDEN_GRIN, CRIMSON_TIDE].map((f) => [f.name, f]));
 
 /** Everything standing on her decks (masts, stairs, hatches, the wheel, the guns and the furniture),
     each where it is and how far it reaches: for checking nothing's in anything else's way. */

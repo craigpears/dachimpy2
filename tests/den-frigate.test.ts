@@ -3,7 +3,7 @@
    "Primates Rule, as Puzzle Pirates drew her". */
 import { describe, expect, it } from 'vitest';
 import { SLOOP, WAR_FRIGATE, SLOOP_HULL, SLOOP_SAIL, hullVolume, halfBeam, sailArea, widthAt, sideY, liftAt, stemX, BOX_SHAPE, SHIP_SHAPE, SHAPES, hullFor } from '../src/ships';
-import { WAR_FRIGATE_PLAN as P, PRIMATES_RULE as PR, FRIGATE_HULL, deckGuns, portXs, portRows, onDeck, deckAt, deckY, insideAt } from '../src/den-frigate';
+import { WAR_FRIGATE_PLAN as P, PRIMATES_RULE as PR, FRIGATES, CORAL_THRONE, ELDRITCH_WAIL, FOOT, FRIGATE_HULL, deckGuns, portXs, portRows, onDeck, deckAt, deckY, insideAt } from '../src/den-frigate';
 
 describe('"I want everything physically proportional" (11 Nov): the war frigate beside the sloop', () => {
   it('holds sixteen times the sloop, as her hold does by YPPedia', () => {
@@ -148,5 +148,28 @@ describe('"is it intentional ... such a square back? ... I\'d like to see it may
     expect(hullVolume(hullFor(WAR_FRIGATE, 3.4, 2, { ...S, shape: BOX_SHAPE })) / hullVolume({ ...S, shape: BOX_SHAPE })).toBeCloseTo(16, 6);
     expect(F.deep).toBeCloseTo(hullFor(WAR_FRIGATE, 3.4, 2, { ...S, shape: BOX_SHAPE }).deep, 6);   // (as deep as before: the same shape grown)
     expect(deckY(P, 'waist')).toBeCloseTo(F.deck, 9);
+  });
+});
+
+describe('war frigates by style, each a config of her decoration (15 Nov: "a [war frig] should have a config for its decoration ... the same with an Atlantean type and a haunted seas type")', () => {
+  it('has an Atlantean class and a Phantom class beside Primates Rule, each her own name, paints, figurehead and furniture', () => {
+    expect(Object.keys(FRIGATES)).toEqual(expect.arrayContaining(['Primates Rule', 'Coral Throne', 'Eldritch Wail']));
+    expect(CORAL_THRONE.figurehead.kind).toBe('mermaid');
+    expect(CORAL_THRONE.furniture.map((f) => f.kind)).toEqual(expect.arrayContaining(['clam', 'coral', 'trident']));
+    expect(ELDRITCH_WAIL.ghost).toBe(true);
+    expect(ELDRITCH_WAIL.figurehead.kind).toBe('skull');
+    expect(ELDRITCH_WAIL.furniture.some((f) => f.kind === 'ghost')).toBe(true);
+  });
+  for (const f of Object.values(FRIGATES)) it(`keeps ${f.name}'s deck clear: everything inside her bulwarks, nothing in anything else's way, each piece sized`, () => {
+    const all = onDeck(P, f);
+    for (const o of f.furniture) expect(FOOT[o.kind], o.kind).toBeTruthy();
+    for (const [i, a] of all.entries()) for (const b of all.slice(i + 1)) {
+      if (a.deck !== b.deck) continue;
+      expect(Math.hypot(a.x - b.x, a.z - b.z), `${a.what} (${a.x}, ${a.z}) and ${b.what} (${b.x}, ${b.z})`).toBeGreaterThanOrEqual(a.r + b.r - 0.05);
+    }
+    for (const o of all) {
+      if (o.what === f.gunKind || o.what === 'stairs') continue;
+      for (const x of [o.x - o.r * 0.8, o.x, o.x + o.r * 0.8]) expect(Math.abs(o.z) + o.r * 0.8, `${o.what} at ${o.x}, ${o.z}`).toBeLessThanOrEqual(insideAt(P, x));
+    }
   });
 });

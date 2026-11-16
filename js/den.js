@@ -13,7 +13,7 @@ import { countingDown } from './den-raids.js';
 import { BILGE } from './den-bilge.js';
 import { beachStep } from './den-beach.js';
 import { cleanLook, cleanDen } from './den-look.js';
-import { C, S, SPEED, HP, BUILD_SECS, tune, k, $, myLook, denLook, renderer, scene, camera, skyDome, PILE_SC, rotCW, rotCCW, flip, animateWalk, faceTo, V3, pirate, HOP, STEP, view, carry, bounds, obstacles, G, keys, tweens, sparks, raiders, ghostKey, ghost, target, shake, mouseMode, mouse, topView, keyAt, wm, wmBlock, wmLinger, wallView, ray, wallPlane, toast, v3, L0, L1, L2, worldLets, roomGlow, hazeAt } from './den/world.js';
+import { C, S, SPEED, HP, BUILD_SECS, tune, k, $, myLook, denLook, renderer, scene, camera, skyDome, PILE_SC, rotCW, rotCCW, flip, animateWalk, faceTo, V3, pirate, HOP, STEP, view, carry, bounds, obstacles, G, keys, tweens, sparks, tickSparks, raiders, ghostKey, ghost, target, shake, mouseMode, mouse, topView, keyAt, wm, wmBlock, wmLinger, wallView, ray, wallPlane, toast, v3, L0, L1, L2, worldLets, roomGlow, hazeAt } from './den/world.js';
 import { ramp, frames, frameAt, openJob, frameState, frameFits, putFramePiece, finishFrame, heightAt, onRampart, startHouse, houseState, plotLabel, atPlot, biomeTick, waveFlags, outside, throughGate, gateTick, towerLegs, selfSeen } from './den/land.js';
 import { wall, X, Y, newWall, doorOf, fits, layerOpen, curLayer, patchFits, nextMat, nextLayer, barFrac, labelFor, frameLabel, updateStats, breakHole, dropPiece, dropBoard, holeX } from './den/wall.js';
 import { GD, gd, gdCell, atGunDeck, gunOn, onGunDeck, gunSq, deckBlocks, loopsOf, gunTick, addStore, updateGunDeck, gunLabels, chalk, chalkAhead, turnArrowAhead, chalkRelease, wheelDeck, pointChalk, gundeckLets } from './den/gundeck.js';
@@ -533,15 +533,7 @@ function update(dt) {
     t.step(s);
     if (s >= 1) { tweens.splice(i, 1); t.done?.(); }
   }
-  for (let i = sparks.length - 1; i >= 0; i--) {
-    const s = sparks[i];
-    s.userData.v.y -= 7 * dt;
-    s.position.addScaledVector(s.userData.v, dt);
-    s.rotation.x += dt * 6; s.rotation.y += dt * 4;
-    s.userData.life -= dt;
-    s.scale.setScalar(Math.max(0, s.userData.life));
-    if (s.userData.life <= 0) { scene.remove(s); sparks.splice(i, 1); }
-  }
+  tickSparks(dt);
 
   mapTick(dt);
   cineTick(dt);   // (a cutscene playing: js/den/cine.js)
@@ -627,9 +619,10 @@ function update(dt) {
   // At sea: following her from behind and above, out over the water (turn and zoom as ever).
   sailView += ((sail.on ? 1 : 0) - sailView) * Math.min(1, dt * 2);
   if (sailView > 0.001 && sail.g) {
-    L2.set(sail.g.position.x, Math.max(0.6, sail.g.position.y - 1), sail.g.position.z - 2);   // (up in the clifftop lagoon, looking at her there)
+    const fg = sail.follow ?? sail.g;   // (or Primates Rule, out on her test run: js/den/frigate-run.js)
+    L2.set(fg.position.x, Math.max(0.6, fg.position.y - 1), fg.position.z - 2);   // (up in the clifftop lagoon, looking at her there)
     look.lerp(L2, sailView);
-    dist += (26 * view.zoom - dist) * sailView;
+    dist += ((sail.follow ? 40 : 26) * view.zoom - dist) * sailView;   // (further back for a ship her size)
     tilt += (Math.max(0.3, Math.min(1.45, 0.78 + view.pitch)) - tilt) * sailView;
   }
   // The Sailing board open: her slid into the part of the screen it leaves (js/den/sail-station.js).

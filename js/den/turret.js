@@ -5,7 +5,7 @@
 // smoking stump. A place puts one down and sets its look (the checkpoint's bastions: checkpoint.js).
 import * as THREE from 'three';
 import { scene, mat, mesh, V3, burst, worldLets, shake, flagpole, warm } from './world.js';
-import { rock } from './land.js';
+import { rock } from './rock.js';
 import { gunMesh } from './gun.js';
 
 /* `look`: the stone's colour, the tower's top and foot radius and height, a coloured band below its
@@ -17,7 +17,11 @@ export function turretMesh({ stone = '#8a8178', top = 1.15, foot = 1.35, height 
   const intact = [body];
   if (band) { const b = mesh(new THREE.CylinderGeometry(top + 0.03, top + 0.03, 0.3, 14), mat(band, { roughness: 0.8 })); b.position.y = height - 0.5; g.add(b); intact.push(b); }
   const rim = top * 0.9, ty = height - 0.2;
-  for (let i = 0; i < merlons; i++) { const a = i / merlons * Math.PI * 2, m = mesh(new THREE.BoxGeometry(0.42, 0.45, 0.42), st); m.position.set(Math.cos(a) * rim, ty + 0.22, Math.sin(a) * rim); m.rotation.y = -a; g.add(m); intact.push(m); }
+  const merls = [];
+  for (let i = 0; i < merlons; i++) { const a = i / merlons * Math.PI * 2, m = mesh(new THREE.BoxGeometry(0.42, 0.45, 0.42), st); m.position.set(Math.cos(a) * rim, ty + 0.22, Math.sin(a) * rim); m.rotation.y = -a; g.add(m); intact.push(m); merls.push(m); }
+  // (rubble at its foot, shown a little more with each hit as it crumbles: hidden till then)
+  const rubble = [];
+  for (let i = 0; i < 6; i++) { const a = i * 2.1 + 0.4, k = foot + 0.15 + (i % 2) * 0.3, b = mesh(new THREE.BoxGeometry(0.38, 0.32, 0.38), st); b.position.set(Math.cos(a) * k, 0.35, Math.sin(a) * k); b.rotation.set(i * 0.8, i * 1.1, i * 0.5); b.visible = false; g.add(b); rubble.push(b); }
   const gun = gunMesh(); gun.scale.setScalar(0.9); gun.position.y = ty;
   g.add(gun); intact.push(gun);
   if (flag) { const fl = flagpole(1.6, flag); fl.position.set(-top * 0.6, ty, top * 0.6); g.add(fl); intact.push(fl); }
@@ -36,7 +40,7 @@ export function turretMesh({ stone = '#8a8178', top = 1.15, foot = 1.35, height 
   g.add(ruin);
   // (a shot's ball and ring, its shaders built ahead: its wreck's are, with the scene's)
   if (!warmed) { warmed = true; warm(new THREE.Mesh(ballGeo, ballMat), new THREE.Mesh(ringGeo, ringMat())); }
-  return { g, gun, body, intact, ruin, ty, wrecked: false, fall: undefined, smokeT: 0 };
+  return { g, gun, body, intact, ruin, ty, merls, rubble, hits: 0, wrecked: false, fall: undefined, smokeT: 0 };
 }
 
 /* A square a gun's trained on, marked on the water at (x, z): a red ring and cross on it, a little
@@ -56,6 +60,24 @@ export function turretMark(x, z) {
 }
 
 // Standing, or its wreck.
+// (plain from the first hit, at the blockade's distance too: half its battlements gone, its stone blackened, its gun
+// knocked askew, rubble at its foot, smoking; the user, 16 Nov, "I didn't see any visible damage after the first shot
+// from the sloop on one of the cannons")
+const SCORCHED = new THREE.Color('#2e2a27');
+function crumble(V, t) {
+  const k = Math.min(1, (t.hits ?? 0) / Math.max(1, t.wreck ?? 3)), tw = V.g.position;
+  if ((t.hits ?? 0) > V.hits) {
+    burst(V3(tw.x, V.ty, tw.z), '#b9ad9a', 26, 4.5); burst(V3(tw.x, V.ty * 0.5, tw.z), '#8a8178', 14, 3);
+    burst(V3(tw.x, V.ty + 0.5, tw.z), '#ffb85a', 10, 3); burst(V3(tw.x, V.ty, tw.z), '#3f3a37', 16, 2.5);
+  }
+  V.hits = t.hits ?? 0;
+  V.merls.forEach((m, i) => { m.visible = (i * 0.618 % 1) >= k * 1.1; });
+  V.rubble.forEach((r, i) => { r.visible = i < Math.ceil(k * V.rubble.length); });
+  V.body.rotation.z = k * 0.12; V.body.rotation.x = k * 0.05;
+  V.stone ??= V.body.material.color.clone();
+  V.body.material.color.copy(V.stone).lerp(SCORCHED, k * 0.75);
+  V.gun.rotation.z = k * 0.35;
+}
 function look(V, wrecked) {
   V.wrecked = wrecked;
   V.fall = undefined;
@@ -94,8 +116,11 @@ export function turretView(V, t, dt, aim = null) {
   const tw = V.g.position;
   if (V.fall !== undefined) fall(V, dt);
   else if (t.wrecked !== V.wrecked) look(V, t.wrecked);
+  // (crumbling as it's hit, short of wrecked: battlements knocked off, rubble at its foot, a lean, stone dust; the user,
+  // 15 Nov, "after a shot or two, they start showing some signs of crumbling")
+  if (!t.wrecked && V.merls && (t.hits ?? 0) !== V.hits) crumble(V, t);
   if (t.wrecked) { if ((V.smokeT -= dt) < 0) { V.smokeT = 0.14; burst(V3(tw.x + 0.2, V.ty * 0.8, tw.z), '#3f3a37', 4, 0.9); } }
-  else if (t.quiet > 0 && (V.smokeT -= dt) < 0) { V.smokeT = 0.25; burst(V3(tw.x, V.ty + 0.8, tw.z), '#6f6a66', 2, 0.6); }
+  else if ((t.quiet > 0 || (t.hits ?? 0) > 0) && (V.smokeT -= dt) < 0) { V.smokeT = t.quiet > 0 ? 0.18 : 0.35; burst(V3(tw.x, V.ty + 0.8, tw.z), t.quiet > 0 ? '#6f6a66' : '#4a4542', 3, 0.8); }
   if (t.wrecked || !aim) return;
   const gp = V3();
   V.gun.getWorldPosition(gp);
@@ -109,13 +134,19 @@ export function turretView(V, t, dt, aim = null) {
 // afresh and never freed, they piled up with every shot.)
 const ballGeo = new THREE.SphereGeometry(0.24, 10, 8), ballMat = mat('#2a2d31', { metalness: 0.6 });
 const ringGeo = new THREE.RingGeometry(1.5, 1.9, 32).rotateX(-Math.PI / 2);   // (wide enough to show round her hull)
-const ringMat = () => new THREE.MeshBasicMaterial({ color: '#e0412e', transparent: true, opacity: 0.85, depthWrite: false, fog: false });
+// (drawn over everything: painted on the square a ship's lying on, it'd be hidden under her hull otherwise)
+const ringMat = () => new THREE.MeshBasicMaterial({ color: '#e0412e', transparent: true, opacity: 0.85, depthWrite: false, depthTest: false, fog: false });
+// (inside the ring, a disc filling it as the shot comes down: how long there is to get off the square, at a glance; the
+// user, 15 Nov: "paint a target on a square and then just take quite a while to fire ... it's clear that a sloop will
+// move quickly before it shoots")
+const discGeo = new THREE.CircleGeometry(1.5, 32).rotateX(-Math.PI / 2);
 const shots = [];
 let warmed = false;
 // A shot's done: off the water, its ring's material freed.
 function gone(v) {
   scene.remove(v.ball);
   if (v.ring) { scene.remove(v.ring); v.ring.material.dispose(); }
+  if (v.disc) { scene.remove(v.disc); v.disc.material.dispose(); }
 }
 /* A shot fired (a 'fire' event from its Turret): out of its muzzle, onto the square `to` (in the world:
    `where`), on an arc; one aimed at her has a red ring on the water where it'll come down, so you can
@@ -126,14 +157,18 @@ export function turretFire(V, e, where, owner = V) {
   burst(from, '#ffcf6a', 14, 3); burst(from, '#cfc6b8', 10, 1.8);
   const ball = mesh(ballGeo, ballMat);
   scene.add(ball);
-  let ring = null;
+  let ring = null, disc = null;
   if (e.aimed) {
     ring = new THREE.Mesh(ringGeo, ringMat());
     ring.position.copy(where).setY(where.y + 0.1);
-    ring.renderOrder = 3;
+    ring.renderOrder = 9;
     scene.add(ring);
+    disc = new THREE.Mesh(discGeo, Object.assign(ringMat(), { opacity: 0.35 }));
+    disc.position.copy(where).setY(where.y + 0.09); disc.scale.setScalar(0.05);
+    disc.renderOrder = 8;
+    scene.add(disc);
   }
-  shots.push({ owner, to: e.to, t: 0, secs: e.secs, from, at: where.clone(), ball, ring, aimed: e.aimed });
+  shots.push({ owner, to: e.to, t: 0, secs: e.secs, from, at: where.clone(), ball, ring, disc, aimed: e.aimed });
 }
 // A shot comes down (a 'land' event): a splash, or a hit on her.
 export function turretLand(owner, e) {
@@ -153,7 +188,8 @@ export function turretShotsTick(dt) {
     const u = Math.min(1, v.t / v.secs), to = v.at.clone().setY(v.at.y + 0.3);
     v.ball.position.lerpVectors(v.from, to, u);
     v.ball.position.y += Math.sin(u * Math.PI) * (v.aimed ? 4 : 1.5);
-    if (v.ring) v.ring.material.opacity = 0.5 + 0.4 * Math.sin(v.t * 14);
+    if (v.ring) v.ring.material.opacity = 0.5 + 0.4 * Math.sin(v.t * (8 + 14 * u));   // (flashing faster as it comes)
+    if (v.disc) { v.disc.scale.setScalar(0.05 + 0.95 * u); v.disc.material.opacity = 0.25 + 0.35 * u; }
   }
 }
 export const shotComing = (c, r) => shots.some((v) => v.to[0] === c && v.to[1] === r);

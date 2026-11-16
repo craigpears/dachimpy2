@@ -147,7 +147,7 @@ Like, how does it work? What are the differences to main [Duty Nav]? That should
 we'll probably do something more broadly at some point for the werewolves and how those work."
 
 So a variant's tutorial keeps the same shape but its **basics aren't left to the game's own tutorial**: they're
-taught, as what's different from the plain puzzle (here: the fourth, outer ring; wild slots and how a chain makes
+taught, as what's different from the plain puzzle (here: the fourth, outer ring; wild targets and how a chain makes
 them; the moon and turning werewolves back; why every constellation should end a chain), with plain Duty
 Navigation's rules taken as known. Probably a `differs` part (or the basics marked as a variant's) in
 `src/tutorial.ts`, and a choice for it ("What's different here?"). The werewolves themselves (the expedition, the
@@ -164,7 +164,7 @@ Sailing lesson shows its chain: the build and its plan marked on the board as it
 ### Built, a first version (14 Nov)
 
 `src/wolf-den-tutorial.ts`, in the one shape: its basics are what's different (four rings, the den's constellations,
-why chains pay, wild places, the moon), a phase (between the rumbles; the rumbles themselves `todo`), the tricks (the
+why chains pay, wild targets, the moon), a phase (between the rumbles; the rumbles themselves `todo`), the tricks (the
 Trapdoor, the Echo, a combo beside the wrong star, don't reset the board) and the scenario (the run in the
 screenshots). Every part's shown on one of the lesson's boards, `src/den-wolfden.ts`'s BOARDS, each tested to do
 what its part says. Multibella's opening choice (she teaches it on her island, 14 Nov; it was Dignity at first): what's different, the chains, a run. Her lesson lays the part's board
@@ -177,7 +177,7 @@ quick way as a choice beside the combo way.
 After the user played the basics: the deeper mechanics as steps of her lesson, each on a real board of its own and
 tested to do what it says (tests/den-wolfden.test.ts). A choice, "How it works" (her "Or how it all works underneath,
 a step at a time?"), covering `MECHANICS` in order: Cascades (board `cascade`: +3, +6, +9, lines only, its combo
-clears leaving wild slots), Four rings (`outer`: a star waiting in the fourth ring, carried round, dropped into its
+clears leaving wild targets), Four rings (`outer`: a star waiting in the fourth ring, carried round, dropped into its
 slot by a clear under it, then the next constellation going up), Why chains pay (`lastClear`: the cascade's third
 clear charts it, 375), and the scenario Umami's evil constellation (`evilTry`, then `evil`: a board's `then` lays the
 next). After each step N or Next plays the next (`nextStep`).
