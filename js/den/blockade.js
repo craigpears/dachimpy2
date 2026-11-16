@@ -1,5 +1,5 @@
 // A blockade, in 3D: the proof of concept on the unlinked blockade-test.html (its rules src/blockade.ts, its bots
-// src/blockade-bots.ts; BLOCKADE.md). Drawn here: the board's squares faintly, its rocks, the fort round the heart,
+// src/blockade-ai/; BLOCKADE.md). Drawn here: the board's squares faintly, its rocks, the fort round the heart,
 // its imperial gates (gate-look.js) and their bastion guns, the islands and their coves, the winds blowing in through
 // the side ways, the buoys (their pennants, coloured by whose they are), every ship (each war frigate by her config,
 // src/den-frigate.ts: Primates Rule, Coral Throne the Atlantean, Eldritch Wail the ghost ship...; each war brig by
@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { SAIL } from '../den-sail.js';
 import { Blockade, BLOCKADE, reefSquares } from '../blockade.js';
-import { Bots } from '../blockade-bots.js';
+import { Bots } from '../blockade-ai/index.js';
 import { FREE, STRATEGIES, orderAt, orderText, orderTarget } from '../blockade-orders.js';
 import { drawnAt } from '../ship-handling.js';
 import { FRIGATES, WAR_FRIGATE_PLAN, deckY } from '../den-frigate.js';
@@ -22,6 +22,7 @@ import { blastTick } from './blast.js';
 import { turretView, turretWrecked, turretFire, turretLand, turretShotsTick } from './turret.js';
 import { gateLook } from './gate-look.js';
 import { damageLook } from './ship-damage.js';
+import { anchorLook } from './anchor.js';
 import { frigateMesh } from './frigate.js';
 import { sloopMesh, SLOOP_DECK } from './sloop.js';
 import { turtleMesh, ghostSloopMesh } from './sea-craft.js';
@@ -47,6 +48,9 @@ const label = (text, col) => {
   s.scale.set(6, 6 * 96 / 512, 1); s.renderOrder = 6;
   return s;
 };
+
+/** A smaller tag, as a ship's name is: what she's at (a brig at anchor). */
+const smallLabel = (text, col) => { const s = label(text, col); s.scale.multiplyScalar(0.6); return s; };
 
 /** The blockade: `you`, the ship you sail (its number; -1 to watch the bots alone), `say(text, bad)` what's said;
     `brawl`, two war frigates put broadside to broadside to fight it out (Blockade.brawl), the rest going on round them;
@@ -234,7 +238,9 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     mark.visible = false; mark.renderOrder = 3; g.add(mark);
     // (a craft starts aboard her brig, unseen)
     if (craft) { m.visible = false; name.visible = false; ring.visible = false; }
-    return { s, m, look, dl, helm, name, ring, line, mark, big, brig, craft, heel: 0, pending: new Set(), fadeT: craft ? 99 : undefined };
+    // (a brig's anchor: dropped when she launches, plain to see while she lies at anchor, weighed when she's done)
+    const anchor = brig ? anchorLook(g, { bow: WAR_BRIG_PLAN.hull.len / 2, deck: deckY(WAR_BRIG_PLAN, 'waist'), tag: smallLabel('at anchor', col) }) : null;
+    return { s, m, look, dl, helm, name, ring, line, mark, big, brig, craft, anchor, heel: 0, pending: new Set(), fadeT: craft ? 99 : undefined };
   });
 
   // ----- a frigate's broadside reach, shaded red on the water (the one you're following): her blind spots plain, off her
@@ -386,6 +392,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
           if (V.butt.t >= BUTT) V.butt = null;
         }
         V.look?.tick(dt);
+        V.anchor?.tick(dt, V.m, s.away > 0 ? 'up' : (s.weigh ?? 0) > 0 ? 'weighing' : b.anchored(s) ? 'down' : 'up', 1 - (s.weigh ?? 0) / B.LAUNCH.WEIGH);
         V.name.position.set(x, V.big ? 16 : V.brig ? 10 : V.craft === 'ram' ? 4 : 7.5, z);
         V.name.material.opacity = s.dmg.out ? 0.5 : 1;
         V.ring.position.set(x, 0.05, z); V.ring.visible = !s.dmg.out && !V.craft;   // (a brig's craft hold no buoy)

@@ -1,6 +1,6 @@
 ---
 title: Blockade: gate guns rebalanced so a war frigate takes a pummelling coming in again
-status: asked
+status: playtest
 asked: 16 Nov
 updated: 16 Nov
 ---
@@ -10,3 +10,5 @@ updated: 16 Nov
 ## Log
 
 - 16 Nov: added.
+- 16 Nov: for you to playtest
+- 16 Nov: Built (pushed): one frigate a side starts at the far end (the user's pick, 16 Nov). Two games: gate-gun hits on frigates 39 and 19 (were 0-20).

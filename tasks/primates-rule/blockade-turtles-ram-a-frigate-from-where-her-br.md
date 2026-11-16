@@ -12,3 +12,4 @@ updated: 16 Nov
 - 16 Nov: added.
 - 16 Nov: for you to playtest
 - 16 Nov: Built (pushed): a turtle makes for the square past a ship's nearer end, bow or stern, then a corner, her side last. Tested.
+- 16 Nov: 16 Nov, the user loved it: a brig's turtles boxing a frigate in at her ends till she 'had to bounce off the turtles to try and escape ... This is how a [war brig] should be to [war] frigate ... very standoffish ... I've got my turtles. You're surrounded. You can't even turn. What are you going to do?'

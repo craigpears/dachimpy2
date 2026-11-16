@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import { BLOCKADE, Blockade } from '../src/blockade';
 import { HullChart } from '../src/hull-chart';
-import { bombardBerths } from '../src/blockade-bots';
+import { bombardBerths } from '../src/blockade-ai/index';
 import { ShipSea, squares } from '../src/ship-handling';
 import type { Pose } from '../src/den-sail';
 

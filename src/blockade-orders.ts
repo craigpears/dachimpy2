@@ -1,12 +1,12 @@
 /* Pirate Den: the admiral's orders in a blockade (src/blockade.ts), one a ship, carried out by her bot
-   (src/blockade-bots.ts). TypeScript, compiled to js/blockade-orders.js; tested in tests/blockade.test.ts. Its page is
+   (src/blockade-ai/). TypeScript, compiled to js/blockade-orders.js; tested in tests/blockade.test.ts. Its page is
    blockade-test.html?admiral.
 
    The user (15 Nov): "we're going to need some kind of admiral mode where ... similar to the route planning thing ...
    you need to be able to give each ship a target or directive, where it's going, what it's doing"; "you could give
    sloops orders like ... camping somewhere, sniping ... being in kind of snipe mode ... starting from the middle,
    drawing up those sorts of plans, and then you watch the things unfold and can ... update and tweak things or take
-   over specific [ships] and detail." So an order is what a bot would have picked for herself (src/blockade-bots.ts's
+   over specific [ships] and detail." So an order is what a bot would have picked for herself (src/blockade-ai/'s
    goals), picked for her:
    - free: her bot's own choice, as ever;
    - hold a buoy: there, and stay in its reach;

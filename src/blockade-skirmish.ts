@@ -12,12 +12,12 @@
    - open sea, the board's size, no fort, gates, reefs, rocks or winds: only the ships; or the blockade's own board, its
      lagoons, reefs, shoals, winds, walls and gate guns (which fire on a ship lying still in their reach, not on one
      moving through: the user, 15 Nov, "if the sloops are constantly moving, they shouldn't be vulnerable to the guns");
-   - a ship sunk stays sunk; every bot goes for the nearest enemy as her kind best can (src/blockade-bots.ts,
+   - a ship sunk stays sunk; every bot goes for the nearest enemy as her kind best can (src/blockade-ai/,
      `skirmish`);
    - a side's strength is its ships' points still afloat, each by how whole she is (knocked out, a quarter); the side
      with more when the other's gone, or the time's up, wins. */
 import { Blockade, BLOCKADE, type Kind, type Team, type TeamId, type FleetShip, type Ship } from './blockade.js';
-import { Bots } from './blockade-bots.js';
+import { Bots } from './blockade-ai/index.js';
 import type { Pose } from './den-sail.js';
 
 export const SKIRMISH = {

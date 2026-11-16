@@ -1,7 +1,7 @@
 # Blockades: the design
 
 A proof of concept on the unlinked `blockade-test.html` (15 Nov). Its rules are `src/blockade.ts`, its bots
-`src/blockade-bots.ts`, every ship's damage `src/ship-damage.ts`, the imperial gate `src/imperial-gate.ts`, each
+`src/blockade-ai/` (an AI for each kind of ship), every ship's damage `src/ship-damage.ts`, the imperial gate `src/imperial-gate.ts`, each
 ship's handling `src/ship-handling.ts`, each kind of ship's chart of the board (her moves worked out once, and how far
 to anywhere) `src/hull-chart.ts`. Its 3D is `js/den/blockade.js`, the gate's `js/den/gate-look.js` and the
 damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-damage.test.ts`,
@@ -301,7 +301,7 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   should not be rewarded. There are blind spots, there are vulnerabilities"):
   - a sloop bot reads every enemy frigate within 7 squares whose side is loaded (or within 1.5 s of it): the squares
     her broadsides reach from where she lies and where her move leaves her; on one, the sloop takes a single move out
-    of them, a square beside a rock first, firing as she goes (`dodge` in `blockade-bots.ts`; tested);
+    of them, a square beside a rock first, firing as she goes (`dodge`, now in `blockade-ai/sloop.ts`; tested);
   - two rocks in the heart, (18,16) and (25,19), one off each end of a frigate lying on the prize, to tuck in by;
   - following a frigate (or sailing one) shades her reach red on the water, her blind spots plain;
   - the balance as before: the dodge measured head-on and in whole blockades with no change, and the balance tests

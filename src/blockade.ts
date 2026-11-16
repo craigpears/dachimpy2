@@ -1,5 +1,5 @@
 /* Pirate Den: a blockade, a proof of concept, kept close to Puzzle Pirates' (YPPedia: "Blockades", "Buoy"). TypeScript,
-   compiled to js/blockade.js; tested in tests/blockade.test.ts; its bots src/blockade-bots.ts; drawn by
+   compiled to js/blockade.js; tested in tests/blockade.test.ts; its bots src/blockade-ai/; drawn by
    js/den/blockade.js on the unlinked blockade-test.html. BLOCKADE.md is its design.
 
    The user (15 Nov): "go study blockading and how blockade boards look ... where you've got sideways for the sloops and

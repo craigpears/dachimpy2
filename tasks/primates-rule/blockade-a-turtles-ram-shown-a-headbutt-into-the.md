@@ -1,6 +1,6 @@
 ---
 title: Blockade: a turtle's ram shown, a headbutt into the ship and back to her square
-status: asked
+status: playtest
 asked: 16 Nov
 updated: 16 Nov
 ---
@@ -10,3 +10,5 @@ updated: 16 Nov
 ## Log
 
 - 16 Nov: added.
+- 16 Nov: for you to playtest
+- 16 Nov: Built (pushed): a lunge two thirds of the way at what she strikes, head down, and back, 0.45 s. Smoke-tested; not looked at in the browser.

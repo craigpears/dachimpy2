@@ -1,4 +1,4 @@
-/* The blockade proof of concept (src/blockade.ts, src/blockade-bots.ts). The user, 15 Nov: "go study blockading and
+/* The blockade proof of concept (src/blockade.ts, src/blockade-ai/). The user, 15 Nov: "go study blockading and
    how blockade boards look ... sideways for the sloops and ... a few bots ... competing, trying to get to the points.
    The [war frig] bots are there trying to blast their way through while the sloops are more nimble, taking the
    shortcuts, taking those sideways in, just like winds"; then "blockading is a bit more epic ... a good handful of
@@ -7,7 +7,7 @@
    shots". */
 import { describe, expect, it } from 'vitest';
 import { BLOCKADE, Blockade, inHeart, reefSquares, laneSquares } from '../src/blockade';
-import { Bot, Bots, bombardBerths } from '../src/blockade-bots';
+import { botFor, Bots, bombardBerths } from '../src/blockade-ai/index';
 import { orderAt, orderText, FREE, STRATEGIES } from '../src/blockade-orders';
 import { squares, alongs, SLOOP_HANDLING, BRIG_HANDLING, FRIGATE_HANDLING } from '../src/ship-handling';
 import { DAMAGE } from '../src/ship-damage';
@@ -110,11 +110,11 @@ describe('the board, as a blockade board is, and more epic (15 Nov: "three or fo
     const b = new Blockade(), s = sloop(b), foe = frigate(b, 'crimson');
     clearAway(b, [s, foe]);
     s.helm.moor({ c: 27, r: 22, d: 0 }); b.notice();
-    const bot = new Bot(s.id, dice(1)), goalAt = () => { bot.tick(b, 0.1); const g = bot.goal; return g?.kind === 'buoy' ? B.BUOYS[g.i].at : null; };
+    const bot = botFor(b, s.id, dice(1)), goalAt = () => { bot.tick(b, 0.1); const g = bot.goal; return g?.kind === 'buoy' ? B.BUOYS[g.i].at : null; };
     for (let i = 0; i < 40; i++) goalAt();
     expect(inHeart(...goalAt()!)).toBe(true);
     foe.helm.moor({ c: 28, r: 25, d: 1 }); b.notice();
-    const fresh = new Bot(s.id, dice(1));
+    const fresh = botFor(b, s.id, dice(1));
     for (let i = 0; i < 40; i++) fresh.tick(b, 0.1);
     const g = fresh.goal;
     expect(g).not.toBeNull();
@@ -290,7 +290,7 @@ describe('a sinking blockade (15 Nov: "that sense of working your way back in wo
     b.ships.filter((s) => s !== f && s !== g).forEach((s, i) => s.helm.moor({ c: 36 + (i % 8), r: 36 + Math.floor(i / 8) * 3, d: 1 }));
     g.helm.moor({ c: 13, r: 16, d: 1 }); f.helm.moor({ c: 13, r: 20, d: 1 }); b.notice();
     knockOut(b, f);
-    const bot = new Bot(g.id, dice(2));
+    const bot = botFor(b, g.id, dice(2));
     let fired = 0;
     for (let i = 0; i < 300 && f.away <= 0; i++) { bot.tick(b, 0.1); b.fired.splice(0).forEach((x) => { if (x.ship === g.id) fired++; }); b.tick(0.1); }
     expect(fired).toBeGreaterThan(0);
@@ -393,7 +393,7 @@ describe('a raider snipes from off a frigate\'s bow or stern (15 Nov: "they snip
     foe.helm.moor({ c: 14, r: 16, d: 1 });
     raider.helm.moor({ c: 8, r: 19, d: 1 });
     b.notice();
-    const bot = new Bot(raider.id, dice(3));
+    const bot = botFor(b, raider.id, dice(3));
     bot.tick(b, 5);
     expect(bot.goal?.kind).toBe('raid');
     const g = bot.goal as { kind: 'raid'; on: number; pose?: { c: number; r: number; d: number } };
@@ -666,7 +666,7 @@ describe('dip, duck and dodge (15 Nov: "in the open water, it would be suicide, 
     const [c, r] = [...reach(b, f)].map((k) => k.split(',').map(Number)).find(([x, y]) => x === 26)!;
     sl.helm.moor({ c, r, d: 0 }); b.notice();
     expect(reach(b, f).has(`${sl.helm.pose.c},${sl.helm.pose.r}`)).toBe(true);
-    const bot = new Bot(sl.id, dice(1));
+    const bot = botFor(b, sl.id, dice(1));
     for (let i = 0; i < 25; i++) { bot.tick(b, 0.1); b.tick(0.1); }
     expect(reach(b, f).has(`${sl.helm.pose.c},${sl.helm.pose.r}`)).toBe(false);
   });
@@ -677,7 +677,7 @@ describe('dip, duck and dodge (15 Nov: "in the open water, it would be suicide, 
     f.helm.moor({ c: 27, r: 7, d: 1 }); b.notice();
     expect(b.rocks.has('27,10')).toBe(true);
     sl.helm.moor({ c: 26, r: 10, d: 0 }); b.notice();
-    const bot = new Bot(sl.id, dice(1));
+    const bot = botFor(b, sl.id, dice(1));
     let safe = false;
     for (let i = 0; i < 30 && !safe; i++) { bot.tick(b, 0.1); b.tick(0.1); safe = !reach(b, f).has(`${sl.helm.pose.c},${sl.helm.pose.r}`); }
     expect(safe).toBe(true);
@@ -697,7 +697,7 @@ describe('playing for the points (15 Nov: "people aren\'t really paying attentio
     clearAway(b, [f]);
     crumble(b, 0, 1);
     b.battery.forEach((x) => { x.wrecked = true; });
-    const bot = new Bot(f.id, dice(3));
+    const bot = botFor(b, f.id, dice(3));
     let t = 0;
     for (; t < 60 && !b.reaches(f, B.BUOYS[0]); t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
     expect(b.reaches(f, B.BUOYS[0])).toBe(true);
@@ -708,7 +708,7 @@ describe('playing for the points (15 Nov: "people aren\'t really paying attentio
     f.helm.moor({ c: 27, r: 23, d: 1 });
     sl.helm.moor({ c: 27, r: 31, d: 1 }); b.notice();
     expect(b.reaches(f, B.BUOYS[0])).toBe(true);
-    const bot = new Bot(f.id, dice(5));
+    const bot = botFor(b, f.id, dice(5));
     for (let t = 0; t < 15; t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
     expect(b.reaches(f, B.BUOYS[0])).toBe(true);
   });
@@ -716,7 +716,7 @@ describe('playing for the points (15 Nov: "people aren\'t really paying attentio
     const b = new Blockade(), br = brig(b), f = frigate(b, 'crimson');
     clearAway(b, [br, f]);
     f.helm.moor({ c: 27, r: 23, d: 1 }); b.notice();
-    const bot = new Bot(br.id, dice(7));
+    const bot = botFor(b, br.id, dice(7));
     for (let t = 0; t < 90 && !b.anchored(br); t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
     expect(b.anchored(br)).toBe(true);
     // (inside the west lagoon, its side nearest the fort)
@@ -730,7 +730,7 @@ describe('playing for the points (15 Nov: "people aren\'t really paying attentio
     br.helm.moor({ c: 14, r: 24, d: 1 }); f.helm.moor({ c: 24, r: 24, d: 0 }); sl.helm.moor({ c: 18, r: 24, d: 0 }); b.notice();
     expect(b.launch(br.id)).toBeTruthy();
     const turtle = b.ships.find((s) => s.craft?.kind === 'ram' && s.team === 'gold' && s.away <= 0)!;
-    const bot = new Bot(turtle.id, dice(9));
+    const bot = botFor(b, turtle.id, dice(9));
     b.still.set(f.id, 5); b.still.set(sl.id, 0);
     bot.tick(b, 5);
     expect(bot.goal?.kind === 'ram' && bot.goal.on).toBe(f.id);
@@ -796,7 +796,7 @@ describe('nobody off in a corner (15 Nov: "three sloops, two of which are repair
     sl.helm.moor({ c: reef.hide[0], r: reef.hide[1], d: 1 });
     f.helm.moor({ c: reef.at[0] + reef.ring + reef.shoal + 2, r: reef.at[1] - 5, d: 0 }); b.notice();
     expect(b.sheltered(sl)).toBe(true);
-    const bot = new Bot(f.id, dice(2));
+    const bot = botFor(b, f.id, dice(2));
     for (let t = 0; t < 8; t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
     expect(bot.goal?.kind === 'fight' && bot.goal.on === sl.id).toBe(false);
   });
@@ -809,7 +809,7 @@ describe('turtles get to their frigates (15 Nov: 3 or 4 rams on frigates a game 
     br.helm.moor({ c: 14, r: 12, d: 1 }); f.helm.moor({ c: 26, r: 12, d: 0 }); sl.helm.moor({ c: 19, r: 12, d: 0 }); b.notice();
     expect(b.launch(br.id)).toBeTruthy();
     const turtle = b.ships.find((s) => s.craft?.kind === 'ram' && s.team === 'gold' && s.away <= 0)!;
-    const bot = new Bot(turtle.id, dice(9));
+    const bot = botFor(b, turtle.id, dice(9));
     b.still.set(f.id, 5); b.still.set(sl.id, 5);
     bot.tick(b, 0.1);
     expect(bot.goal?.kind === 'ram' && bot.goal.on).toBe(f.id);
@@ -818,7 +818,7 @@ describe('turtles get to their frigates (15 Nov: 3 or 4 rams on frigates a game 
     const b = new Blockade(), br = brig(b), f = frigate(b, 'crimson');
     clearAway(b, [br, f]);
     br.helm.moor({ c: 8, r: 6, d: 1 }); f.helm.moor({ c: 25, r: 6, d: 0 }); b.notice();
-    const [id] = b.launch(br.id), bot = new Bot(id, dice(3));
+    const [id] = b.launch(br.id), bot = botFor(b, id, dice(3));
     let at = -1;
     for (let t = 0; t < B.LAUNCH.LIFE.ram && at < 0; t += 0.1) { bot.tick(b, 0.1); const ev = b.tick(0.1); b.still.set(f.id, 9); if (ev.rams.some((r) => r.ram === id)) at = t; }
     expect(at).toBeGreaterThan(0);
@@ -835,7 +835,7 @@ describe('nobody hangs about under the gate guns (15 Nov: "a lot of foolish ship
     let fired = false;
     for (let t = 0; t < 4 && !fired; t += 0.1) fired = b.tick(0.1).guns.some((x) => x.e.kind === 'fire' && b.gunOn[x.gun] === f.id);
     expect(fired).toBe(true);
-    const bot = new Bot(f.id, dice(2));
+    const bot = botFor(b, f.id, dice(2));
     bot.tick(b, 4);
     expect(bot.goal?.kind).toBe('guns');
   });
@@ -846,7 +846,7 @@ describe('nobody hangs about under the gate guns (15 Nov: "a lot of foolish ship
     let painted: [number, number] | null = null;
     for (let t = 0; t < 4 && !painted; t += 0.1) { const e = b.tick(0.1).guns.find((x) => x.e.kind === 'fire'); if (e && e.e.kind === 'fire') painted = e.e.to; }
     expect(painted).toEqual([sl.helm.pose.c, sl.helm.pose.r]);
-    const bot = new Bot(sl.id, dice(2));
+    const bot = botFor(b, sl.id, dice(2));
     let hit = false;
     for (let t = 0; t < B.GATE_AIM + 0.5; t += 0.1) { bot.tick(b, 0.1); hit = b.tick(0.1).guns.some((x) => x.hit === sl.id) || hit; }
     expect(hit).toBe(false);
@@ -869,7 +869,7 @@ describe('the gate guns have a side (15 Nov: "it\'s for everybody\'s gain to des
     const b = new Blockade(), f = frigate(b);
     clearAway(b, [f]);
     f.helm.moor({ c: 22, r: 14, d: 1 }); b.notice();
-    const bot = new Bot(f.id, dice(2));
+    const bot = botFor(b, f.id, dice(2));
     for (let t = 0; t < 6; t += 0.1) { bot.tick(b, 0.1); b.tick(0.1); }
     expect(bot.goal?.kind === 'guns' && BLOCKADE.GATES[bot.goal.g].side).not.toBe('gold');
   });
@@ -925,7 +925,7 @@ describe('a turtle rams a frigate where her broadsides don\'t bear (16 Nov: "tur
     const hers = squares(f.h, f.helm.pose), bowR = Math.max(...hers.map(([, r]) => r)), cols = hers.map(([c]) => c);
     x.helm.moor({ c: 24, r: Math.min(B.ROWS - 2, bowR + 4), d: 2 }); b.notice();
     b.still.set(f.id, 5);
-    const bot = new Bot(id, dice(9));
+    const bot = botFor(b, id, dice(9));
     bot.tick(b, 5);
     expect(bot.goal?.kind === 'ram' && bot.goal.on).toBe(f.id);
     const at = bot.goal?.kind === 'ram' ? bot.goal.at : [0, 0];
