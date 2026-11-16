@@ -288,7 +288,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     V.sinking = true;
   }
   /** How long she takes going under, seen; and a craft fading, her time up. */
-  const SINK_SECS = 5, FADE_SECS = 1.6, SPIN_TURNS = 3;
+  const SINK_SECS = 5, FADE_SECS = 1.6, SPIN_TURNS = 3, BUTT = 0.45;
   const SAY_GUN = { L: 'port', R: 'starboard' };
   /** What's just happened worth a look (for the camera's director, spectating): { at (clock), ship, what, weight }. */
   const action = [];
@@ -336,6 +336,8 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
       }
       for (const r of ev.rams) {
         // (a gate's gun rammed: spray and stone; its crumbling is the gun's own to draw)
+        // (the turtle headbutts it: a lunge at the square she strikes and back to her own, BUTT seconds)
+        { const T = ships[r.ram], p = v3(...r.at, 0); T.butt = { t: 0, x: p.x - T.m.position.x, z: p.z - T.m.position.z }; }
         if (r.gun !== undefined) { ships[r.ram].fadeT = 0; const p = v3(...r.at, 0.6); burst(p, '#e8f4fa', 20, 5); burst(p, '#b9ad9a', 10, 3); continue; }
         const V = ships[r.ram], O = ships[r.on], p = v3(...r.at, 0.6);
         V.fadeT = 0;
@@ -377,6 +379,12 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         const aboard = s.craft && s.away > 0 && !V.sinking, under = s.away > 0 && (aboard || (V.sinkT ?? 0) > SINK_SECS + 0.7), d = under ? { low: 0, list: 0, turn: 0 } : V.dl.tick(dt, s.dmg, { pending: V.pending, near });
         V.m.position.set(x, d.low + Math.sin(clock * (V.big ? 0.8 : 1.1) + s.id) * 0.05, z);
         V.m.rotation.set(V.heel + d.list, Math.PI / 2 - at.a * Math.PI / 2 + d.turn, Math.sin(clock * 0.6 + s.id) * 0.012, 'YXZ');
+        // (a turtle's ram: in at what she strikes, two thirds of the way, head down, and back)
+        if (V.butt) {
+          const k = Math.sin(Math.PI * Math.min(1, (V.butt.t += dt) / BUTT)), n = Math.hypot(V.butt.x, V.butt.z) || 1, reach = Math.min(n, CELL) * 0.66;
+          V.m.position.x += V.butt.x / n * reach * k; V.m.position.z += V.butt.z / n * reach * k; V.m.position.y -= k * 0.15;
+          if (V.butt.t >= BUTT) V.butt = null;
+        }
         V.look?.tick(dt);
         V.name.position.set(x, V.big ? 16 : V.brig ? 10 : V.craft === 'ram' ? 4 : 7.5, z);
         V.name.material.opacity = s.dmg.out ? 0.5 : 1;

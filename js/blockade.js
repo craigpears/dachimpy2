@@ -111,9 +111,12 @@ export const BLOCKADE = {
     ROUND: 360,
     /** The sides, and their fleets: where each ship comes in (a frigate's config by her name: src/den-frigate.ts). */
     TEAMS: [
+        // (one frigate a side in at each end, the second by her `other` entry: one runs the other side's gate guns till
+        // they're wrecked; the user, 16 Nov: "frigs need to be able to come in on each side ... one frig from each team
+        // should come in on each side")
         { id: 'gold', name: "Dachimpy's flag", ships: [
                 { name: 'Primates Rule', kind: 'frigate', at: { c: 23, r: 2, d: 0 }, other: { c: 26, r: 45, d: 2 } },
-                { name: 'Coral Throne', kind: 'frigate', at: { c: 33, r: 2, d: 0 }, other: { c: 16, r: 45, d: 2 } },
+                { name: 'Coral Throne', kind: 'frigate', at: { c: 33, r: 2, d: 0 }, other: { c: 16, r: 45, d: 2 }, far: true },
                 { name: 'Lucky Banana', kind: 'sloop', at: { c: 1, r: 16, d: 1 }, raider: true },
                 { name: 'Grin and Bear It', kind: 'sloop', at: { c: 1, r: 22, d: 1 }, far: true },
                 { name: 'Cheeky Monkey', kind: 'sloop', at: { c: 1, r: 26, d: 1 } },
@@ -124,7 +127,7 @@ export const BLOCKADE = {
             ] },
         { id: 'crimson', name: "Dalnoth's flag", ships: [
                 { name: 'Iron Pride', kind: 'frigate', at: { c: 32, r: 45, d: 2 }, other: { c: 17, r: 2, d: 0 } },
-                { name: 'Eldritch Wail', kind: 'frigate', at: { c: 22, r: 45, d: 2 }, other: { c: 27, r: 2, d: 0 } },
+                { name: 'Eldritch Wail', kind: 'frigate', at: { c: 22, r: 45, d: 2 }, other: { c: 27, r: 2, d: 0 }, far: true },
                 { name: 'Red Wake', kind: 'sloop', at: { c: 54, r: 31, d: 3 }, raider: true },
                 { name: 'Smoke and Mirrors', kind: 'sloop', at: { c: 54, r: 25, d: 3 }, far: true },
                 { name: 'Scarlet Fever', kind: 'sloop', at: { c: 54, r: 21, d: 3 } },

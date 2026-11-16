@@ -1,6 +1,6 @@
 ---
 title: Blockade: war brigs' turtles and ghost sloops clear the enemy's gate guns, a good standoff job
-status: doing
+status: playtest
 asked: 16 Nov
 updated: 16 Nov
 ---
@@ -11,3 +11,5 @@ updated: 16 Nov
 
 - 16 Nov: added.
 - 16 Nov: being done
+- 16 Nov: for you to playtest
+- 16 Nov: Built (pushed): turtles ram the other side's gate guns (a hit each, three wreck one, and the gun keeps firing on them), phantoms shoot them when nearer than their raid, brigs launch at them in reach. Two games: 6-8 gun rams, 2-4 guns wrecked by craft, 2-4 turtles sunk by the guns. Tested.

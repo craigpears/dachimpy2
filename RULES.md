@@ -4024,7 +4024,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   edge ... you can't shoot each other ... one turn before they can move again").
 - **The gate guns have a side.** Each gate's guns are the side's whose frigates come in at that end, and fire on the
   other side only ("it's for everybody's gain to destroy them, so the opponent benefits from their destruction as much
-  as you do. Hence the dilemma. The turrets need to have a side"), so wrecking the enemy's is worth the detour.
+  as you do. Hence the dilemma. The turrets need to have a side"), so wrecking the enemy's is worth the detour. One
+  frigate a side comes in at each end ("frigs need to be able to come in on each side ... one frig from each team
+  should come in on each side"), so one runs the enemy's guns till they're wrecked; not the guns defending whoever
+  comes in ("then it just makes the whole game too lopsided ... you'd never take the two-point cluster on the other
+  side").
 - **A brig's craft clear the enemy's guns.** A turtle rams a gate gun of the other side's as she would a ship, a hit
   to its wrecking that doesn't quieten it, so it fires on her as she rams; a phantom's broadside wrecks them too. Her
   brig launches at them in reach as at a frigate ("they're the standoff hunters").

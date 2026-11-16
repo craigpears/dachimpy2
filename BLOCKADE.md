@@ -431,6 +431,15 @@ damage's `js/den/ship-damage.js`. Tests: `tests/blockade.test.ts`, `tests/ship-d
   - a turtle comes at a ship's nearer end, bow or stern, then a corner, her side last;
   - after, two games: 6 and 8 gun rams, 2 to 4 guns wrecked by the craft, 2 to 4 turtles sunk by the guns.
 
+- **One frigate a side at each end; a turtle's ram shown** (16 Nov: "It's lost some of that early energy to war frigate
+  risk ... war frigates ... could be taking a pummeling as they were entering, which is not the case now because they
+  just enter on the friendly side"; the guns swapped to defend a gate turned down: "too lopsided"; "one frig from each
+  team should come in on each side"; "is there no ramming animation for the turtles? ... almost like headbutting the
+  ship and then going back"):
+  - Coral Throne and Eldritch Wail start at their far end (`far`): two games, gate-gun hits on frigates 39 and 19
+    (were 0 to 20), 4 and 5 of the enemy's guns wrecked by frigates;
+  - a turtle's ram drawn as a lunge two thirds of the way at what she strikes, head down, and back (`butt`, 0.45 s).
+
 ## 4. Balance and cost, as it plays (bots, four seeded six-minute rounds)
 
 - Sloops in the heart by a side way at 10 to 11 s; a gate down at 30 to 107 s; a frigate in the heart in two rounds of

@@ -36,8 +36,9 @@ describe('the board, as a blockade board is, and more epic (15 Nov: "three or fo
       expect(mine.filter((s) => s.kind === 'sloop')).toHaveLength(5);
       const edges = new Set(mine.map(({ helm: { pose: p } }) => (p.r <= 2 ? 'south' : p.c <= 2 ? 'west' : p.r >= B.ROWS - 3 ? 'north' : p.c >= B.COLS - 3 ? 'east' : 'none')));
       expect(edges.has('none')).toBe(false);
-      // (the frigates by their own edge; the small ships by both side edges, island side and ocean side, 15 Nov)
-      expect(edges.size).toBe(3);
+      // (the small ships by both side edges, island side and ocean side, 15 Nov; one frigate by each end since 16 Nov:
+      // "one frig from each team should come in on each side")
+      expect(edges.size).toBe(4);
       for (const s of mine) for (const [c, r] of squares(s.h, s.helm.pose)) expect(b.rocks.has(`${c},${r}`), s.name).toBe(false);
     }
   });
