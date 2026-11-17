@@ -2437,6 +2437,12 @@ white columns now, so we're switching from quick dragging to ... straightening u
   on the user's board the bot used to straighten up round them for eight moves and more, leaving them; now it frees
   both first and doesn't take their way out away again. The path search already found the user's own move once number two counted as
   trapped: a brown dragged back through both, lifting each a place.
+- **Run, 20 boards each** (CC^8, `SCORE='{"TRAP_GROUP":0}'` the old; the runner now prints each board's line, `SEED n`):
+  whites burned 0.4 to 0.2 a session (no white burned 13 to 17 of 20), chain mean 4.3 to 4.5, best 7 to 8 (seed 5012,
+  2 before), at target 0 to 1 of 20, points a minute 15.4 to 16.5. Seed 5009 the one worse (no white burned to 2).
+- **Found on the way** (17 Nov): the chain's channel moves (`P.CHANNEL_SORT`) slow Helium's Crystal Clear 1, seed 269's
+  first chain 56 moves to 81, past tests/helium-goal.test.ts's 80 (failing on main since the channels went up); gating
+  them to targets of 3 or more fixes it but cost the CC^1 opening test (P.BUFFER on) two whites on seed 1. To settle.
 - **Next, the chain's end: when to give it up** (17 Nov, a CC^8 about to be a CC^9 with no room left): "this is when I
   would start ... going back to quick move strategy ... there's no way we're sending the crystal clear past 9. Let's
   start moving the junk into that column"; "the bot keeps trying to send ... whites into that column later. It's
