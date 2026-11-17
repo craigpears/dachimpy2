@@ -14,7 +14,7 @@
 import * as THREE from 'three';
 import { scene, mat, mesh, canvasTex, burst, makePirate } from './world.js';
 import { bake } from './bake.js';
-import { windMarks, swirlMesh } from './sea-marks.js';
+import { windMarks, swirlMesh, buoyLook, faceCamera } from './sea-marks.js';
 import { damageLook } from './ship-damage.js';
 import { sloopMesh, SLOOP_DECK } from './sloop.js';
 import { frigateMesh } from './frigate.js';
@@ -131,15 +131,14 @@ export function cadeView(table) {
     o.position.set(p.x, 0.06, p.z); g.add(o); swirls.push(o);
   }
 
-  // ----- the buoys: a float, a pole, its pennants; all coloured by whose it is -----
+  // ----- the buoys: a float, a pole, its pennants (both blockades' one look, sea-marks.js), coloured by whose it is,
+  // and a ring on the water in the same colour -----
   const buoys = influence(b, []).buoys.map((bu) => {
-    const o = new THREE.Group(), M = new THREE.MeshStandardMaterial({ color: NONE_COL, roughness: 0.5 }), white = mat('#f3ecdc');
-    o.add(mesh(new THREE.CylinderGeometry(0.9, 1.2, 1.8, 14), M), mesh(new THREE.CylinderGeometry(0.08, 0.08, 5.6, 6).translate(0, 3.3, 0), mat('#4a2f1a')));
-    o.add(mesh(new THREE.CylinderGeometry(1.0, 1.02, 0.36, 14).translate(0, 0.36, 0), white));
-    for (let i = 0; i < bu.points; i++) { const p = mesh(new THREE.ConeGeometry(0.55, 1.6, 3).rotateZ(-Math.PI / 2), M); p.scale.set(1, 1, 0.15); p.position.set(0.85, 5.7 - i * 1.1, 0); o.add(p); }
+    const { o, M } = buoyLook(bu.points, NONE_COL, CELL / 4 * 0.85);
     const ring = new THREE.Mesh(new THREE.RingGeometry(CELL * 0.34, CELL * 0.4, 36).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: NONE_COL, transparent: true, opacity: 0.6, depthWrite: false }));
-    ring.position.y = 0.08; ring.renderOrder = 2; o.add(ring);
-    o.position.copy(at(bu.x, bu.y)); g.add(o);
+    const p = at(bu.x, bu.y);
+    ring.position.set(p.x, 0.08, p.z); ring.renderOrder = 2; g.add(ring);
+    o.position.copy(p); g.add(o);
     return { ...bu, o, M, ring, ph: Math.random() * 6 };
   });
   const paintBuoys = (held) => {
@@ -211,7 +210,16 @@ export function cadeView(table) {
   };
 
   // ----- a turn played back -----
-  const SLOT = 1.3, MOVE = 0.42, WIND = [0.42, 0.66], GUNS = 0.68;
+  // (a slot's pace: her move, then the winds, then the guns. Every motion the same beat, a wind's push or a whirlpool's
+  // carry as long as a turn of her own, the user, 17 Nov: "a whirlpool animation to turn them should take the exact
+  // same amount of time as turning left yourself", and "the wind pushing you should be the same speed as the forward
+  // move yourself"; a slot with a wind or a whirlpool in it so one beat longer)
+  const BEAT = 0.85, SHOTS = 0.65;
+  const PACE = {
+    calm: { secs: BEAT + SHOTS, move: BEAT / (BEAT + SHOTS), wind: [BEAT / (BEAT + SHOTS), BEAT / (BEAT + SHOTS)], guns: BEAT / (BEAT + SHOTS) },
+    windy: { secs: 2 * BEAT + SHOTS, move: BEAT / (2 * BEAT + SHOTS), wind: [BEAT / (2 * BEAT + SHOTS), 2 * BEAT / (2 * BEAT + SHOTS)], guns: 2 * BEAT / (2 * BEAT + SHOTS) },
+  };
+  const paceOf = (sl) => ([...sl.tracks.values()].some((tr) => tr.wind) ? PACE.windy : PACE.calm);
   let playing = null;
   const balls = [];
   const ballGeo = new THREE.SphereGeometry(1, 10, 8), ballM = mat('#1b1a1c', { metalness: 0.5, roughness: 0.4 });
@@ -260,9 +268,11 @@ export function cadeView(table) {
 
   function tick(dt, camera) {
     for (const tex of lanes) tex.offset.y -= dt * 2.2;
-    for (const o of swirls) o.rotation.z += dt * o.userData.speed;
+    // (the whirlpools turning slowly: the den's pace, a turn every four seconds, was "really far too fast" seen from
+    // above a whole board, the user, 17 Nov; a turn every forty)
+    for (const o of swirls) o.rotation.z += dt * o.userData.speed * 0.1;
     const clock = performance.now() / 1000;
-    for (const bu of buoys) { bu.o.position.y = Math.sin(clock * 1.4 + bu.ph) * 0.12; bu.o.rotation.z = Math.sin(clock * 1.1 + bu.ph) * 0.04; }
+    for (const bu of buoys) { bu.o.position.y = Math.sin(clock * 1.4 + bu.ph) * 0.12; if (camera) faceCamera(bu.o, camera); bu.o.rotation.z = Math.sin(clock * 1.1 + bu.ph) * 0.04; }
     for (const V of ships.values()) {
       if (!V.holder.visible) continue;
       const near = !camera || camera.position.distanceTo(V.holder.position) < 110;
@@ -285,7 +295,7 @@ export function cadeView(table) {
     for (let i = balls.length - 1; i >= 0; i--) if (balls[i].done) { g.remove(balls[i].m); balls.splice(i, 1); }
     if (!playing) return;
     const P = playing;
-    P.t += dt / SLOT;
+    P.t += dt / paceOf(P.log.slots[Math.min(3, Math.floor(P.t))]).secs;
     if (P.t >= 4) {
       // the turn's end: everyone where the rules have them, the sunk back on their edges, the buoys repainted
       playing = null;
@@ -294,7 +304,7 @@ export function cadeView(table) {
       P.done();
       return;
     }
-    const slot = Math.floor(P.t), f = P.t - slot, sl = P.log.slots[slot];
+    const slot = Math.floor(P.t), f = P.t - slot, sl = P.log.slots[slot], { move: MOVE, wind: WIND, guns: GUNS } = paceOf(sl);
     for (const [id, tr] of sl.tracks) {
       const V = ships.get(id);
       if (!V || V.sinking) continue;

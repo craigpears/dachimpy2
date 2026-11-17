@@ -23,6 +23,7 @@ import { turretView, turretWrecked, turretFire, turretLand, turretShotsTick } fr
 import { gateLook } from './gate-look.js';
 import { damageLook } from './ship-damage.js';
 import { anchorLook } from './anchor.js';
+import { buoyLook, faceCamera } from './sea-marks.js';
 import { frigateMesh } from './frigate.js';
 import { sloopMesh, SLOOP_DECK } from './sloop.js';
 import { turtleMesh, ghostSloopMesh } from './sea-craft.js';
@@ -205,12 +206,10 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
     return tex;
   });
 
-  // ----- the buoys: a float, a pole, its pennants; all coloured by whose it is -----
+  // ----- the buoys: a float, a pole, its pennants; all coloured by whose it is (their look sea-marks.js's, the
+  // tabletop blockade's too; bigger, 17 Nov: "all the flags are a bit too subtle and hard to see") -----
   const buoys = B.BUOYS.map((x) => {
-    const o = new THREE.Group(), M = new THREE.MeshStandardMaterial({ color: NONE_COL, roughness: 0.5 }), white = mat('#f3ecdc');
-    o.add(mesh(new THREE.CylinderGeometry(0.7, 0.95, 1.5, 14), M), mesh(new THREE.CylinderGeometry(0.06, 0.06, 4.4, 6).translate(0, 2.6, 0), mat('#4a2f1a')));
-    o.add(mesh(new THREE.CylinderGeometry(0.8, 0.82, 0.3, 14).translate(0, 0.3, 0), white));
-    for (let i = 0; i < x.pennants; i++) { const p = mesh(new THREE.ConeGeometry(0.45, 1.3, 3).rotateZ(-Math.PI / 2), M); p.scale.set(1, 1, 0.15); p.position.set(0.7, 4.5 - i * 0.9, 0); o.add(p); }
+    const { o, M } = buoyLook(x.pennants, NONE_COL);
     o.position.copy(v3(...x.at)); g.add(o);
     return { o, M };
   });
@@ -450,6 +449,7 @@ export function blockadeSea({ you = 0, say = () => {}, brawl = false, admiral = 
         const hold = b.hold(x), col = hold === 'contested' ? (Math.sin(clock * 8) > 0 ? CONTEST_COL : NONE_COL) : hold ? TEAM_COL[hold] : NONE_COL;
         buoys[i].M.color.set(col);
         buoys[i].o.position.y = Math.sin(clock * 1.2 + i) * 0.1;
+        faceCamera(buoys[i].o, camera);   // (its pennants full on to you, 17 Nov)
       });
       for (const t of lanes) t.offset.y -= dt * 2.2;
       for (const q of reefSheets) q.material.opacity = 0.92 + Math.sin(clock * 0.9) * 0.08;   // (the surf, breathing)
