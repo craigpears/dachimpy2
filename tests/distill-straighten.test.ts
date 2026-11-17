@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { P, advise, chainContext, choose, contextFor, decisionTime, levelNamed, pulledDown } from '../src/distill-bots';
 import { channelOrder } from '../src/distill-goals';
 import { playDrags } from '../src/distill-routines';
-import { readBoard, strayDrags, trappedJunk } from '../src/distill-read';
+import { readBoard, straightened as progressOf, strayDrags, trappedJunk } from '../src/distill-read';
 import { S, trapped } from '../src/distill-score';
 import { bankJunk, bankOf, solidColumns } from '../src/distill-patterns';
 import { BROWN, Distilling } from '../src/distilling';
@@ -150,11 +150,51 @@ describe(`"If I move number one up without number two, that's going to leave num
     const was = S.TRAP_GROUP;
     try { S.TRAP_GROUP = 0; expect(trapped(cols, 1, 8)).toBe(false); } finally { S.TRAP_GROUP = was; }   // (the old reading)
   });
-  it('straightening up frees them both, and never one by leaving the other trapped', () => {
+  it('straightening up frees them both, never one by leaving the other trapped', () => {
     const run = playOn(PIC55, 4), bank = bankOf(B(PIC55)), to = bank[bank.length - 1] + 1;
-    const n0 = trappedJunk(B(PIC55), to);   // (the two, and a brown at the top of column 2)
-    // (the first move frees both: a brown back beside them, number one's way out and number two's after it)
-    expect(trappedJunk(run[0].cols, to), run[0].a.reason).toBe(n0 - 2);
-    for (const { a, cols } of run) expect(trappedJunk(cols, to), a.reason).toBeLessThanOrEqual(n0 - 2);
+    // (the two, and a brown at the top of column 2; the junk left of the white columns got over first since 17 Nov's
+    // seed 5008, "get it over", the pair freed within a few moves, the count never rising on the way)
+    let was = trappedJunk(B(PIC55), to);
+    expect(was).toBe(3);
+    for (const { a, cols } of run) { const n = trappedJunk(cols, to); expect(n, a.reason).toBeLessThanOrEqual(was); was = n; }
+    expect(was).toBe(0);
+  });
+});
+
+// Seed 5008, CC^8, Stage I, the user's pictures (17 Nov) copied piece by piece. 56: the white columns banked with three
+// browns stuck at their tops, a whole column of browns beside a whole column of blacks (notes/distilling/56-...); 57: the
+// user's own board a few moves on, the blacks dragged up into the browns' places (notes/distilling/57-...); then a burn
+// later, the junk still left of the white columns, the bot moving nothing; and the bot waiting, "nothing worth moving",
+// three junk columns deep by the fire (those two pictures weren't saved).
+const PIC56 = '*KKbKwwb KwbKKwbKb wwwwwwww bwwwwwwww bwwwwwww bwwwwwwww bbbbbbbb KKKKKbbbb KK*KKKKK bbbKKb*bb';
+const PIC57 = '*KKbKwwb KwbKKwbKb wwwwwwww KKwwwwwww wwwwwwww wKwwwwwww KKbbbbbb KbbbKbbbb Kb*bKKKK bbbKKb*bb';
+const LATER = 'wwwKbwbKb *KKbKwwb KKbKKwbKb wwwwwwww wwwwwwwww wwwwwbww wwwwwbwww KKKKKbbb Kbbbbbbbb Kb*KbKKK';
+const IDLE = 'bKwbKwbb wKbwwwKKb bbwwKwKK bwwwwwwKK bwwwwwww wbwwbwwww wwwwwwbw KKKKwKwKK bbbbbKbb bbbbbbbbb';
+describe('seed 5008 (17 Nov): "There\'s no such thing as nothing worth moving"', () => {
+  it('"Just drag those blacks up ... it\'s markedly better": a black in a brown\'s place at the top of the white columns counts as cleaner', () => {
+    const xs = [2, 3, 4, 5];
+    expect(bankJunk(B(PIC57), xs)).toBeLessThan(bankJunk(B(PIC56), xs));
+  });
+  it('"Get it over. It\'s not moving anything": the junk left of the white columns is carried over, never a wait', () => {
+    const run = playOn(LATER, 8), left = (c: number[][]) => c.slice(0, 3).flat().filter((p) => p === 1 || p === 2).length;
+    expect(run.length).toBe(8);
+    expect(left(run[run.length - 1].cols)).toBeLessThan(left(B(LATER)));
+  });
+  for (const [name, s] of [['the junk beside the white columns', PIC56], ['three junk columns deep by the fire', IDLE], ['a burn later', LATER]] as const) {
+    it(`"You've got such a safe position here, you can just go for it" (${name}): it keeps moving till the column's ready to burn`, () => {
+      const g = new Distilling(() => 0.5, { timer: false }).lay(B(s));
+      for (let i = 0; i < 10; i++) {
+        const a = advise({ cols: g.cols, chain: 0, timeLeft: 40000 }, { target: 8 });
+        expect(a.reason, `move ${i + 1}`).not.toMatch(/nothing worth moving/);
+        if (a.kind !== 'move') break;
+        for (const d of a.drags) { g.dragWays(d.x, d.y, d.ways); g.settle(1000); }
+      }
+    });
+  }
+  it('"Those blacks up at the top were fine. Why did it have to drag them into a column?": sorting the junk columns is no progress of its own', () => {
+    const r = readBoard(B(PIC56), { stage: 'junk', timeLeft: 40000 });
+    // (the two junk columns side by side sorted blacks over browns, nothing else changed: straightening up gets nothing)
+    const sorted = B(PIC56); sorted[6] = [2, 2, 1, 1, 1, 1, 1, 1]; sorted[7] = [2, 2, 2, 1, 1, 1, 1, 1, 1];
+    expect(progressOf(r, B(PIC56), sorted)).toBe(0);
   });
 });

@@ -41,6 +41,11 @@ export const PATTERN = {
     /** The bank: a column this share white or more counts as almost white (`solidColumns`; "several columns of almost
         white pieces", six of eight or nine). */
     SOLID: 0.66,
+    /** A black in a bank column's top half (`bankJunk`): 2 till 17 Nov, as a black anywhere. */
+    BLACK_HIGH: 1,
+    /** Getting it over (`junkOver`, src/distill-read.ts's `straightened`): each piece of junk left of the bank carried past
+        it, worth a black out of the bank; 0 counts only the bank's own junk, as till 17 Nov. */
+    OVER: 2,
 };
 /** The colour's side starts at the straight wall's place (src/distill-score.ts, `wall`), or past the whites by the
     fire if that's further right. */
@@ -241,16 +246,18 @@ export const bankSettled = (cols, xs) => xs.length > 0 && cols.slice(0, xs[0]).e
 export const bankEnd = (xs) => (xs.length ? xs[xs.length - 1] + 1 : 0);
 /** The bank's columns that are solid white, PATTERN.SOLID white or more. */
 export const solidColumns = (cols, xs = bankOf(cols)) => xs.filter((x) => cols[x].filter((p) => p === WHITE).length >= PATTERN.SOLID * cols[x].length).length;
-/** The junk spoiling the bank's columns `xs`, each piece where it is: a black anywhere 2 (it sinks through the whites
-    and sticks at the bottom), a brown in the top half 2 (it rises and sticks at the top), a brown in the bottom half 1
-    (it can go on rising: the next to come out). Lower is cleaner; 0 is solid white columns. */
+/** The junk spoiling the bank's columns `xs`, each piece where it is: a black in the bottom half 2 (it's sunk through the
+    whites and sticks there), a brown in the top half 2 (it's risen and sticks there), a brown in the bottom half 1 (it
+    can go on rising: the next to come out), and a black in the top half PATTERN.BLACK_HIGH (it can go on sinking, and a
+    brown stuck at the top swapped for one is the user's own move, 17 Nov, seed 5008: "just drag those blacks up").
+    Lower is cleaner; 0 is solid white columns. */
 export function bankJunk(cols, xs) {
     let n = 0;
     for (const x of xs)
-        cols[x].forEach((p, y) => { if (p === BLACK)
-            n += 2;
+        cols[x].forEach((p, y) => { const high = y * 2 < cols[x].length; if (p === BLACK)
+            n += high ? PATTERN.BLACK_HIGH : 2;
         else if (p === BROWN)
-            n += y * 2 < cols[x].length ? 2 : 1; });
+            n += high ? 2 : 1; });
     return n;
 }
 /** The junk in the bank's columns `xs`, each piece's place. */

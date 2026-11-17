@@ -57,7 +57,7 @@ import { PATH, freed, pairRescue, pathMoves, stuck } from './distill-path.js';
 import type { PathMove, Stuck } from './distill-path.js';
 import { phaseOf, weightIn } from './distill-phase.js';
 import type { Phase } from './distill-phase.js';
-import { TACTICS, hoistDrags, hoistOrder, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, sorts, straightenDrags, strayDrags, tailDrags, tipDrags, toolBrowns } from './distill-read.js';
+import { TACTICS, hoistDrags, hoistOrder, junkOver, ladderDrags, moves as movesAny, nearDrags, progress, quickFills, readBoard, sorts, straightenDrags, strayDrags, tailDrags, tipDrags, toolBrowns } from './distill-read.js';
 import { PATTERN, bankJunk, bankStrays } from './distill-patterns.js';
 import type { BoardState, Reading, Tactic } from './distill-read.js';
 import { joinPairs } from './distill-teach.js';
@@ -173,6 +173,12 @@ export const P = {
       move must get to be worth it, and the most for a ready column to burn at once rather than wait while
       it's done. */
   RATE_MIN: 0.15,
+  /** In Stage I, never "nothing worth moving" with the column not ready and the furnace's clock running: the best move
+      with a goal however little it gets (17 Nov, seed 5008). 0 off. */
+  NEVER_IDLE: 1,
+  /** The chain's channel moves (P.CHANNEL_SORT) from this target up (17 Nov: on Helium's Crystal Clear 1 they slowed the
+      lesson's first chain by half again). */
+  CHANNEL_FROM: 3,
   /** Straightening up once white columns are banked (16 Nov; src/distill-read.ts, `straighten`), and the chain's white
       columns straightened up, their junk taken right in one drag (`strayDrags`). */
   STRAIGHTEN: true,
@@ -729,7 +735,9 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style, reading?: Reading)
   // (After the stuck pieces' fallback, which plays each move on offer: these many drags would cost it four times the time.)
   // The channels to the column being filled (17 Nov, M.CHANNEL): browns sunk through blacks and blacks lifted through
   // browns left of it, the hoist's drags, weighed by the chain's measure like any move.
-  if (!one && P.CHANNEL_SORT && style.path && ctx.fill > 0) {
+  // (For the longer chains only, as the long sweeps below: on Helium's Crystal Clear 1 they made the lesson's first chain
+  // take half as many moves again, seed 269's 56 to 81, tests/helium-goal.test.ts.)
+  if (!one && P.CHANNEL_SORT && style.path && ctx.fill > 0 && (style.target ?? DEFAULT_TARGET) >= P.CHANNEL_FROM) {
     // (No stranding check: the chain's measure counts trapped junk itself, and the check cost four times the time.)
     for (const d of hoistDrags(cols, ctx.fill, ctx.fill - M.CHANNEL_NEAR, false)) {
       const p = cols[d[0].x][d[0].y] === BROWN ? 'brown' : 'black';
@@ -924,7 +932,8 @@ export function byTactic(sit: Situation, ctx: Ctx, style: Style, r: Reading, out
   // Straightening up: the junk got out of the white columns first, sorting the junk columns only once none can be
   // ("step one, get it over. Step two, kind of resort and straighten the line").
   if (r.tactic === 'straighten' && r.bank) {
-    const xs = r.bank, b0 = bankJunk(cols, xs), outs = ranked(cands.filter((c) => bankJunk(c.after, xs) < b0));
+    // (Out of the bank, or from left of it carried past it: `junkOver`.)
+    const xs = r.bank, outs = ranked(cands.filter((c) => junkOver(xs, cols, c.after) > 0));
     if (outs.length) return outs;
   }
   if (r.tactic !== 'freeTrapped') return ranked(cands);
@@ -1130,6 +1139,17 @@ export function choose(sit: Situation, ctx: Ctx, style: Style, focus: { x: numbe
     if (first) read = seeing;
   }
   if (!first) { moves = weigh(sit, ctx, style, reading); stepsOf = stepsWith(reading); first = firstOk(); }
+  // Straightening up with nothing worth doing for it: the board read as before it (quick sorting), not a wait (the user,
+  // 17 Nov, seed 5008: "there's no such thing as nothing worth moving", P.NEVER_IDLE).
+  // (Only with the furnace's clock running: with the fire held, as in Helium's lessons, a wait is the burn that moves the
+  // lesson on.)
+  const idleOff = !P.NEVER_IDLE || !Number.isFinite(sit.timeLeft);
+  if (!idleOff && reading.tactic === 'straighten' && (!first || (!first.saves && first.value <= P.RATE_MIN))) {
+    const plain = readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft, straighten: false }), was = { moves, stepsOf, first };
+    moves = weigh(sit, ctx, style, plain); stepsOf = stepsWith(plain); first = firstOk();
+    if (first && (!was.first || first.value > was.first.value)) read = plain;
+    else ({ moves, stepsOf, first } = was);
+  }
   const ok = (m: Weighed) => !P.GOALS || purposeful(stepsOf(m));
   // A move saving a white from the furnace is played whatever it scores.
   const top = first && (first.saves || first.value > (ctx.stage === 'junk' ? P.RATE_MIN : P.MIN)) ? first : null;
@@ -1179,6 +1199,14 @@ export function choose(sit: Situation, ctx: Ctx, style: Style, focus: { x: numbe
     const worth = (m: Weighed) => m.value * P.HOIST_PULLED[Math.min(2, pulledDown(cols, m.move.drags))] * block;
     const h = hoists(sit, style, reading, safe).filter((m) => worth(m) > P.RATE_MIN && ok(m)).sort((a, b) => worth(b) - worth(a))[0];
     if (h) return advice('move', HOIST_LABEL, h.move.reason, { ...h, value: worth(h) });
+  }
+  // There's no such thing as nothing worth moving (the user, 17 Nov, seed 5008, the bot waiting with three junk columns
+  // by the fire: "What do you mean, nothing worth moving? There's no such thing as nothing worth moving ... browns can go
+  // up, and then you can get the blacks ... you've got such a safe position here, you can just go for it"): in Stage I
+  // with the column not ready, the best move with a goal, however little it gets, rather than a wait (P.NEVER_IDLE).
+  if (!idleOff && ctx.stage === 'junk' && !ready && first && first.value > 0 && ok(first)) {
+    const label = first.move.routine === 'path' ? ((first.move as PathMove).pair ? PAIR_LABEL : PATH_LABEL) : ((first.move as Move).label ?? ROUTINES[first.move.routine].label);
+    return advice('move', label, `${first.tactic ? `${TACTICS[first.tactic].label.toLowerCase()}: ` : ''}${first.move.reason}`, first);
   }
   return advice('wait', 'Wait', ready ? 'the column is ready: let the furnace take it' : 'nothing worth moving: wait for the next column');
 }

@@ -1238,6 +1238,25 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   unit." A black (or brown) with only another of its colour on its right, itself trapped, is trapped too, not joined to
   the colour through it. Straightening up counts trapped junk freed as getting it done, and trapped as undoing it, so it
   frees the pair together (a brown brought back beside them, their way out), never one by leaving the other.
+- **Distilling: there's no such thing as nothing worth moving (17 Nov, seed 5008, CC^8 waiting three junk columns deep
+  by the fire).** "What do you mean, nothing worth moving? There's no such thing as nothing worth moving. Like, browns can
+  go up, and then you can get the blacks ... you've got such a safe position here, you can just go for it." In Stage I
+  with the furnace's clock running and the column not ready, the bot always makes its best move with a goal, however
+  little it gets; with nothing to straighten up, it quick sorts. (With the fire held, as in Helium's lessons, a wait is
+  the burn that moves the lesson on.)
+- **Distilling: getting it over means the junk left of the white columns too (17 Nov, seed 5008).** "There's all this
+  stuff on the left-hand side. Get it over. It's not moving anything." Straightening up counts junk carried from the
+  white columns, or from left of them, past them; dropped into them it counts nothing ("never more put in").
+- **Distilling: sorting the junk columns is no goal of its own (17 Nov, seed 5008, notes/distilling/56-...).** "Why is
+  it doing things like these weird whole column of black, whole column of brown"; "it's just trying to sort blacks and
+  browns ... those blacks up at the top were fine. Why did it have to drag them into a column? That's just wasting
+  moves." Against the clock, a move that only sorts junk (blacks over browns in a column) gets nothing done; the sorting
+  only decides between moves that get junk out. Junk left at the top and bottom of the junk is fine while it isn't stuck
+  ("it's not stuck junk ... you've got plenty of pieces to do the straightening up").
+- **Distilling: a black at the top of the white columns is cleaner than a brown there (17 Nov, seed 5008,
+  notes/distilling/57-...).** "Just drag those blacks up ... within a few moves ... I get to this quite quickly, and it's
+  markedly better": a black lifted up through the browns into the place of a brown stuck at the top lets the brown down
+  and can sink out itself; a brown at the top can't. The bank's junk counts a black in its top half half a brown there.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one

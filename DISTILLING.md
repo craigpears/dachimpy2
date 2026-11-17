@@ -2440,9 +2440,25 @@ white columns now, so we're switching from quick dragging to ... straightening u
 - **Run, 20 boards each** (CC^8, `SCORE='{"TRAP_GROUP":0}'` the old; the runner now prints each board's line, `SEED n`):
   whites burned 0.4 to 0.2 a session (no white burned 13 to 17 of 20), chain mean 4.3 to 4.5, best 7 to 8 (seed 5012,
   2 before), at target 0 to 1 of 20, points a minute 15.4 to 16.5. Seed 5009 the one worse (no white burned to 2).
+- **Seed 5008's Stage I, straightened out** (17 Nov, the user watching CC^8 on seed 5008, notes/distilling/56-... and
+  57-...; RULES.md's four notes of the day): getting it over counts the junk from left of the bank carried past it
+  (`junkOver`, PATTERN.OVER, src/distill-read.ts); a black in a bank column's top half counts half a brown there
+  (PATTERN.BLACK_HIGH), with a black lifted up through the browns into a stuck top brown's place among straightening up's
+  drags; sorting the junk columns only between moves that get junk out, with the clock running (READ.SORT_CREDIT; a move
+  of its own still with the fire held, Helium's lessons' plain move: tests/distill-teach.test.ts); and never a wait in
+  Stage I with the column not ready and the clock running (P.NEVER_IDLE), quick sorting when straightening up has
+  nothing. The chain's channel moves kept to targets of 3 and up (P.CHANNEL_FROM): Helium's CC^1 lesson back to 56 moves
+  on seed 269; over ten CC^1 boards with the buffer on, no white burned 4 to 7 of 10. The CC^1 opening test counts the
+  opening's whites, up to its first Crystal Clear (seed 1 burns two later, at 92 and 107 s).
+- **Run, 20 boards each** (CC^8, the live 8746181 against this): chain mean 4.5 to 4.4, best 8 to 9 (seed 5007, a CC^9),
+  at target 1 to 2 of 20; no white burned 17 of 20 both, whites burned 0.2 to 0.1; points a minute 16.5 to 16.9; a column
+  gone, moves 9.3 to 8.5 and effort down a tenth (Stage I's moves 3115 to 2496 in all). Seed 5008 itself worse: longest
+  7 to 3. Seeds 5000 (3 to 6), 5009 (4 to 6, no white burned now), 5013 (2 to 5) better; 5003 (7 to 3), 5017 (6 to 3)
+  worse.
 - **Found on the way** (17 Nov): the chain's channel moves (`P.CHANNEL_SORT`) slow Helium's Crystal Clear 1, seed 269's
   first chain 56 moves to 81, past tests/helium-goal.test.ts's 80 (failing on main since the channels went up); gating
-  them to targets of 3 or more fixes it but cost the CC^1 opening test (P.BUFFER on) two whites on seed 1. To settle.
+  them to targets of 3 or more fixes it but cost the CC^1 opening test (P.BUFFER on) two whites on seed 1. Settled the
+  same day: see seed 5008's Stage I, above.
 - **Next, the chain's end: when to give it up** (17 Nov, a CC^8 about to be a CC^9 with no room left): "this is when I
   would start ... going back to quick move strategy ... there's no way we're sending the crystal clear past 9. Let's
   start moving the junk into that column"; "the bot keeps trying to send ... whites into that column later. It's

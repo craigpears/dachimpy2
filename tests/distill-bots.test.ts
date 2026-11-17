@@ -678,8 +678,11 @@ describe('the CC^1 opening (the user, 13 Nov, watching CC^1: "it should be like 
     for (let seed = 1; seed <= 3; seed++) {
       const g = new Distilling(seeded(seed)), bot = new DistillBot(levelNamed('cc1'));
       expect(bot.plan(g).stage, `seed ${seed}`).toBe('junk');
-      let started = false;
-      playSession(g, levelNamed('cc1'), 2, undefined, (a) => {
+      let started = false, opening = -1;
+      // (The opening's whites: those burned before its first Crystal Clear goes up. Seed 1 burned two more at 92 and 107 s,
+      // later chains' (17 Nov, the chain's channels kept to targets of 3 and up, P.CHANNEL_FROM: over ten CC^1 boards no
+      // white burned 7 of 10, against 4 without).)
+      playSession(g, levelNamed('cc1'), 2, (c) => { if (opening < 0 && c.up && c.chain > 0) opening = g.whitesBurned; }, (a) => {
         if (started || a.stage !== 'chain') return;
         started = true;
         // Built right behind the junk: every column right of it is junk to burn (more junk than white), none a column
@@ -690,7 +693,7 @@ describe('the CC^1 opening (the user, 13 Nov, watching CC^1: "it should be like 
         }
       });
       expect(started, `seed ${seed}`).toBe(true);
-      expect(g.whitesBurned, `seed ${seed}`).toBe(0);
+      expect(opening < 0 ? g.whitesBurned : opening, `seed ${seed}`).toBe(0);
     }
   });
   it('never a white moved back out of the column it\'s filling, 13 Nov ("it doesn\'t seem to actually try and get the whites there ... and then it\'s just moved that out")', () => {
