@@ -51,7 +51,7 @@ import { BLACK, BROWN, COLS, DOWN_LEFT, DOWN_RIGHT, UP_LEFT, UP_RIGHT, WHITE, ca
 import { copyBoard, halfOf, isJunk, junkTarget, playDrags } from './distill-routines.js';
 import { RISK, burnsIn, flagged, freeCost, whiteRisk, whiteRisks } from './distill-risk.js';
 import { PATTERN, bankEnd, bankJunk, bankOf, bankSettled, bankStrays, junkDisorder, ladderBad, patternsOf, solidColumns, stranded, tailOrder } from './distill-patterns.js';
-import { blockPhase } from './distill-score.js';
+import { S, blockPhase, trapped } from './distill-score.js';
 /** Each state and tactic in plain words, for the pages and Helium. */
 export const STATES = {
     healthy: { label: 'Healthy', about: 'nothing at risk: quick, simple moves' },
@@ -316,7 +316,19 @@ export function straightened(r, cols, after) {
     const out = bankJunk(cols, xs) - bankJunk(after, xs);
     if (out < 0)
         return 0;
-    return out + (junkDisorder(cols, bankEnd(xs)) - junkDisorder(after, bankEnd(xs))) / 2;
+    // (Trapped junk freed, in the bank's columns and left of them, each worth as much as a brown out of the bank's bottom
+    // half; trapped, as much against: picture 55's two blacks, "they move as one continuous unit", S.TRAP_GROUP.)
+    const freed = S.TRAP_GROUP ? trappedJunk(cols, bankEnd(xs)) - trappedJunk(after, bankEnd(xs)) : 0;
+    return Math.max(0, out + freed + (junkDisorder(cols, bankEnd(xs)) - junkDisorder(after, bankEnd(xs))) / 2);
+}
+/** Trapped junk (src/distill-score.ts, `trapped`) in columns 0 to `to`. */
+export function trappedJunk(cols, to) {
+    let n = 0;
+    for (let x = 0; x <= Math.min(to, COLS - 1); x++)
+        for (let y = 0; y < cols[x].length; y++)
+            if (trapped(cols, x, y))
+                n++;
+    return n;
 }
 // ---------------------------------------------------------------- moves the tactics look for themselves
 /** Every drag of the piece at (x, y) up to `most` swaps, along legal swaps, kept when `keep` likes where it is. */

@@ -55,7 +55,7 @@ import type { Drag } from './distill-routines.js';
 import { RISK, burnsIn, flagged, freeCost, whiteRisk, whiteRisks } from './distill-risk.js';
 import type { WhiteRisk } from './distill-risk.js';
 import { PATTERN, bankEnd, bankJunk, bankOf, bankSettled, bankStrays, junkDisorder, ladderBad, patternsOf, solidColumns, stranded, tailOrder } from './distill-patterns.js';
-import { blockPhase } from './distill-score.js';
+import { S, blockPhase, trapped } from './distill-score.js';
 import type { At, Patterns } from './distill-patterns.js';
 
 export type BoardState = 'healthy' | 'atRisk' | 'cracked' | 'damageControl';
@@ -321,7 +321,16 @@ export function straightened(r: Reading, cols: Board, after: Board): number {
   if (whites(after) < whites(cols)) return 0;
   const out = bankJunk(cols, xs) - bankJunk(after, xs);
   if (out < 0) return 0;
-  return out + (junkDisorder(cols, bankEnd(xs)) - junkDisorder(after, bankEnd(xs))) / 2;
+  // (Trapped junk freed, in the bank's columns and left of them, each worth as much as a brown out of the bank's bottom
+  // half; trapped, as much against: picture 55's two blacks, "they move as one continuous unit", S.TRAP_GROUP.)
+  const freed = S.TRAP_GROUP ? trappedJunk(cols, bankEnd(xs)) - trappedJunk(after, bankEnd(xs)) : 0;
+  return Math.max(0, out + freed + (junkDisorder(cols, bankEnd(xs)) - junkDisorder(after, bankEnd(xs))) / 2);
+}
+/** Trapped junk (src/distill-score.ts, `trapped`) in columns 0 to `to`. */
+export function trappedJunk(cols: Board, to: number): number {
+  let n = 0;
+  for (let x = 0; x <= Math.min(to, COLS - 1); x++) for (let y = 0; y < cols[x].length; y++) if (trapped(cols, x, y)) n++;
+  return n;
 }
 
 // ---------------------------------------------------------------- moves the tactics look for themselves

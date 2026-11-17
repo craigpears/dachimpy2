@@ -2426,11 +2426,17 @@ white columns now, so we're switching from quick dragging to ... straightening u
   session 2.9 to 3.3, their mean 2.9 to 2.6; points a minute 14.9 to 15.4; a column gone, effort 17.6 to 16.6 (moves
   9.8 to 9.3). More, shorter chains for less effort; the longest lost. Left on until the user has watched it (17 Nov: "I
   might see something the metrics don't when I judge the moves").
-- **Next: trapped pieces as a group** (17 Nov, notes/distilling/55-two-blacks-move-as-one.webp): "it eventually rescues
+- **Trapped pieces as a group, built** (17 Nov, notes/distilling/55-two-blacks-move-as-one.webp): "it eventually rescues
   black number one, but then leaves number two. Like I would just be moving the brown back and moving those trap blacks
   as like one unit upwards ... It doesn't seem to have any method of predicting ... if I move number one up without
   number two, that's going to leave number two stranded ... so I've got to go grab number two at the same time because
-  they move as one continuous unit." A move ahead for stranded junk that touches.
+  they move as one continuous unit." A move ahead for stranded junk that touches. src/distill-score.ts's `trapped`: junk
+  on a trapped piece's right, the same colour and trapped itself, is no way out (`S.TRAP_GROUP`; before, number two
+  counted as joined to the colour through number one, so the bot only saw it trapped once number one had gone).
+  src/distill-read.ts's `straightened` counts trapped junk freed (`trappedJunk`) as progress, and trapped as undoing it:
+  on the user's board the bot used to straighten up round them for eight moves and more, leaving them; now it frees
+  both first and doesn't take their way out away again. The path search already found the user's own move once number two counted as
+  trapped: a brown dragged back through both, lifting each a place.
 - **Next, the chain's end: when to give it up** (17 Nov, a CC^8 about to be a CC^9 with no room left): "this is when I
   would start ... going back to quick move strategy ... there's no way we're sending the crystal clear past 9. Let's
   start moving the junk into that column"; "the bot keeps trying to send ... whites into that column later. It's

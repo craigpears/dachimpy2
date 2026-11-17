@@ -1233,6 +1233,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   the block phase. Early on, browns at the top aren't trapped yet (17 Nov, seed 2 at 41 s, the bot waiting for the burn):
   "there's likely going to be more blacks to appear. So those browns at the top are not trapped, but in a later game
   that you would probably want to try and rescue them. But for now, it's fine." 
+- **Distilling: trapped pieces that touch are trapped together (17 Nov, notes/distilling/55-two-blacks-move-as-one.webp).**
+  "If I move number one up without number two, that's going to leave number two stranded ... they move as one continuous
+  unit." A black (or brown) with only another of its colour on its right, itself trapped, is trapped too, not joined to
+  the colour through it. Straightening up counts trapped junk freed as getting it done, and trapped as undoing it, so it
+  frees the pair together (a brown brought back beside them, their way out), never one by leaving the other.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one

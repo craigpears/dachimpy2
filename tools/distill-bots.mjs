@@ -243,13 +243,15 @@ for (const name of NAMES) {
       // A column sent up not Crystal Clear: a chain broken, or never started.
       if (c.up && c.chain === 0) watch.notClear++;
       if (!c.up && g.time <= 180000) watch.burnedBy3 = (watch.burnedBy3 ?? 0) + (c.whites ?? 0);
-      if (first.at === null && !c.up && c.whites > 0) { first.at = first.gone + 1; first.junkBefore = first.junk; }
+      if (first.at === null && !c.up && c.whites > 0) { first.at = first.gone + 1; first.junkBefore = first.junk; first.time = g.time; }
       first.gone++;
       if (!c.up && !(c.whites > 0)) first.junk++;
       if (trace) console.log(`  ${(g.time / 1000).toFixed(0).padStart(4)}s ${c.up ? 'up  ' : 'burn'} ${c.pieces.map((p) => L[p]).join('')} ${c.message ?? ''}${c.chain > 1 ? ` x${c.chain}` : ''} ${c.points + c.bonus}`);
     };
     const r = playSession(g, tier, CAP, onColumn, onPlan);
     runs.push({ ...r, watch, first });
+    // (each board on a line, to watch on distilling-test.html: ?seed=<n>&bot=<name>)
+    console.log(`  SEED ${SEED + i}: longest ${r.longest}, chains [${r.chains.join(' ')}], whites burned ${r.whitesBurned}${first.time != null ? ` (the first at ${(first.time / 1000).toFixed(0)} s)` : ''}, points a minute ${f1(r.points / r.minutes)}`);
   }
   const chains = runs.map((r) => r.longest), at = (n) => runs.filter((r) => r.longest >= n).length;
   const full = runs.filter((r) => r.longest >= 12);

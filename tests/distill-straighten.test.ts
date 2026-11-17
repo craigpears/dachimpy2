@@ -5,7 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { P, advise, chainContext, choose, contextFor, decisionTime, levelNamed, pulledDown } from '../src/distill-bots';
 import { channelOrder } from '../src/distill-goals';
 import { playDrags } from '../src/distill-routines';
-import { readBoard, strayDrags } from '../src/distill-read';
+import { readBoard, strayDrags, trappedJunk } from '../src/distill-read';
+import { S, trapped } from '../src/distill-score';
 import { bankJunk, bankOf, solidColumns } from '../src/distill-patterns';
 import { BROWN, Distilling } from '../src/distilling';
 
@@ -135,5 +136,25 @@ describe('the chain (17 Nov, seed 2 CC^8, the user\'s pictures copied)', () => {
     expect(c.ctx.over).toEqual([6, 8]);
     const a = choose({ cols, chain: 8, timeLeft: 15000 }, c.ctx, levelNamed('cc8')), after = playDrags(cols, a.drags)!;
     expect(after[8].filter((p) => p === 0).length).toBeLessThanOrEqual(cols[8].filter((p) => p === 0).length);   // (no white into column 9)
+  });
+});
+
+// (notes/distilling/55-two-blacks-move-as-one.webp, the user's picture copied: black number one at the bottom of column 3,
+// number two at the bottom of column 2 beside it, both under whites, the brown that was their way out taken away)
+const PIC55 = 'KwKbbKbw bKwKb*bwK wwwwwwwK wwwwwwww* wwwwwwwK bwwwwwbKb bbKbbbbb KK*KKKKKK KKKKKbbb Kbbbb*K*b';
+describe(`"If I move number one up without number two, that's going to leave number two stranded ... they move as one continuous unit" (17 Nov, picture 55)`, () => {
+  it('both blacks are seen trapped, number two walled in by number one, not joined to the colour through it', () => {
+    const cols = B(PIC55);
+    expect(trapped(cols, 2, 7)).toBe(true);   // (number one)
+    expect(trapped(cols, 1, 8)).toBe(true);   // (number two)
+    const was = S.TRAP_GROUP;
+    try { S.TRAP_GROUP = 0; expect(trapped(cols, 1, 8)).toBe(false); } finally { S.TRAP_GROUP = was; }   // (the old reading)
+  });
+  it('straightening up frees them both, and never one by leaving the other trapped', () => {
+    const run = playOn(PIC55, 4), bank = bankOf(B(PIC55)), to = bank[bank.length - 1] + 1;
+    const n0 = trappedJunk(B(PIC55), to);   // (the two, and a brown at the top of column 2)
+    // (the first move frees both: a brown back beside them, number one's way out and number two's after it)
+    expect(trappedJunk(run[0].cols, to), run[0].a.reason).toBe(n0 - 2);
+    for (const { a, cols } of run) expect(trappedJunk(cols, to), a.reason).toBeLessThanOrEqual(n0 - 2);
   });
 });
