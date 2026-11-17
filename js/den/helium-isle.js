@@ -41,7 +41,7 @@ import { person } from './props-people.js';
 import { FURNITURE } from './furniture.js';
 import { distillery } from './distillery.js';
 import { distillBoard } from './distill-board.js';
-import { cine, cinePlay, cineEnd, bubble, bubbleAt } from './cine.js';
+import { cine, cinePlay, cineEnd, bubble, bubbleAt, cineBar } from './cine.js';
 
 /* The choice every tutorial has (TUTORIALS.md; js/tutorial-choice.js), beside their lesson on T, and the parts it plays
    (src/den-helium-tutor.ts, from src/distill-tutorial.ts): set going only when it's first asked, so the den starts up
@@ -382,7 +382,7 @@ const you = {
   },
 };
 /* What the keys do, in the cutscene's bar at the foot of the screen (den.html's, "Space: skip" as a rule). */
-const bar = (text) => { const el = document.querySelector('.cine-bar.bot'); if (el && el.textContent !== text) el.textContent = text; };
+const bar = cineBar;
 const free = () => sail.on && !cine && !sail.helm.cur?.via && !sail.helm.gusts?.length && !sail.helm.rides?.length;
 
 // ---------- the still, yours ----------

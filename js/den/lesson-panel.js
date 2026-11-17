@@ -93,11 +93,13 @@ export function lessonPanel() {
       const pts = corners.map((p) => { v.copy(p).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; });
       const x0 = Math.min(...pts.map((p) => p[0])), x1 = Math.max(...pts.map((p) => p[0]));
       const y0 = Math.min(...pts.map((p) => p[1]));
-      const gap = 14, top = innerHeight * 0.1 + 10, bot = innerHeight * 0.9 - 10;
+      const bars = document.querySelector('.cine-bar.top')?.offsetHeight ?? innerHeight * 0.1;   // (thinner on a phone: den.html)
+      const gap = 14, top = bars + 10, bot = innerHeight - bars - 10;
       // (left of it; else above it, where there's room for it; else right of it, over the sea, where the
       // performer's bubble may be; else at the top)
       const roomL = x0 - gap - 8, roomR = innerWidth - 8 - x1 - gap, roomUp = y0 - gap - top;
-      const side = roomL >= 190 ? -1 : roomUp >= 150 ? 0 : roomR >= 190 ? 1 : 0;
+      // (on a phone, above it always: beside it, it lands on the performer's bubble, the phone check, 16 Nov)
+      const side = innerWidth < 620 ? 0 : roomL >= 190 ? -1 : roomUp >= 150 ? 0 : roomR >= 190 ? 1 : 0;
       const wide = `${Math.round(side < 0 ? Math.min(300, roomL) : side > 0 ? Math.min(300, roomR) : Math.min(420, innerWidth * 0.92))}px`;
       if (el.style.maxWidth !== wide) el.style.maxWidth = wide;
       const w = el.offsetWidth, h = el.offsetHeight;

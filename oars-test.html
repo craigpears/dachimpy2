@@ -30,6 +30,11 @@
   #timer { height: 4px; background: #e0d6c2; margin-top: 4px; }
   #timer i { display: block; height: 100%; width: 0; background: var(--wood); }
   .key { font-size: 13px; color: var(--mute); margin-top: 6px; }
+  /* On a phone (RULES.md, "On a phone", 16 Nov): everything to tap a thumb's size. */
+  @media (pointer: coarse) {
+    button, select { min-height: 44px; }
+    input[type=checkbox], input[type=radio] { width: 22px; height: 22px; }
+  }
 </style>
 </head>
 <body>

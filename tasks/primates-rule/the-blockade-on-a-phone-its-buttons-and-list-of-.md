@@ -12,3 +12,4 @@ updated: 16 Nov
 ## Log
 
 - 16 Nov: added.
+- 16 Nov: Phone check (16 Nov): the panel is a block at the foot covering 39% of the screen and 45% of the sea's middle, hiding the ship you steer. Its list of ships (a row each, with a Sail button) runs on, cut off at the bottom: fold it behind one Ships button, closed at first. Spectate, Director, Whole board, New round are 25px tall and Sail is 38x18 at 11px, so make them 44px and 12px or more. The row of tiny chips is hard to read and tap. Show only what the moment needs: New round only when a round ends.

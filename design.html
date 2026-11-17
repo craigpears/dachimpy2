@@ -27,6 +27,7 @@
   .play.ghost:hover { color: var(--on-accent); background: var(--accent); }
   nav.toc { margin: 18px 0 0; color: var(--dim); font-size: 15px; }
   nav.toc a { margin-right: 4px; }
+  @media (pointer: coarse) { nav.toc { line-height: 2.6; } nav.toc a { display: inline-block; padding: 0 2px; } }   /* (far enough apart for a thumb) */
   h2 { display: flex; align-items: center; gap: 14px; margin: 38px 0 14px; font: 700 22px 'Alegreya', serif; color: var(--dim); }
   h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
   article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid var(--paper-edge); border-radius: 12px;

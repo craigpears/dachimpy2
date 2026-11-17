@@ -876,7 +876,12 @@ function nextPart() {
   const j = ramp.jobs[ramp.next];
   return !j || j.kind === 'house' ? null : j.kind === 'deck' ? 'walk' : 'later';
 }
+// The den's news that can wait (timber come in peace) waits while you're away at sea, said once you're back: out
+// there it hung mid-screen over the sea and the race (the phone check, 16 Nov).
+let held = null;
+const news = (text) => { if (sail.on) held = text; else say(text); };
 export function updateWaves(dt) {
+  if (held && !sail.on) { say(held); held = null; }
   const mended = wall.holes.every((h) => h.status !== 'open');
   if (!G.fairOver && mended) G.fairOver = true;   // see fairDeal
   const timber = mended && timberComes(nextPart(), 'mended') && openJob(ramp.next);
@@ -888,7 +893,7 @@ export function updateWaves(dt) {
   if (G.phase === 'peace') {
     // The siege is over: no more waves, so each part's timber comes once the one before is built.
     const f = !timber && timberComes(nextPart(), 'peace') && openJob(ramp.next);
-    if (f) say(`Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}`);
+    if (f) news(`Timber's come: ${f.kind === 'gun' ? 'build a gun tower in its frame' : 'build the rampart in its frame'}`);
     stragglers(dt);
     return;
   }
