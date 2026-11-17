@@ -290,3 +290,14 @@ Blockade nav challenges:
   - Ships in the safe zone don't fire; ships in it take no damage, rams included.
   - No bilge yet, no maneuvers, no budget, no crew needed for influence.
 - Next: a flat test page to play it on (its look on top of `Cade`), then bots, then the island.
+- 17 Nov: **the test page**, `cade-test.html` (unlinked), the user: "a flat play test ... 2D-ish graphics, but still
+  ... in the kind of 3D style we've got ... nice looking ships, but mechanically the same", and "I definitely want
+  the beauty of ... the 3D new concept one ... carrying through". A real board seen from above on the den's sea; the
+  3D blockade's stones and ledges, the den's wind lanes and whirlpools (their look pulled out into
+  `js/den/sea-marks.js`, shared, not copied), its buoys; the den's sloop, war brig and war frigate, each fitted to her
+  one square, helmsman, crew at work, holes where she's struck (`ship-damage.js`, fed the rules' damage). Your
+  plan's pad: four slots, a move and the guns off each side in each, your tokens counted down, your route drawn ahead
+  of you as you plan; Sail plays the turn back slot by slot. The other five ships are stand-ins (`standIn` in
+  `src/cade-play.ts`: the best move sequence for the buoys with everyone else still, guns at any enemy in line), not
+  the teaching bots. On a phone the pad sits at the bottom, the board above.
+- Next: the teaching bots by tier (the user's notes, §2: hotspots, risk, dancing), then the tabletop on an island.
