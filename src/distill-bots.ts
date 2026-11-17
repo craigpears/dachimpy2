@@ -176,6 +176,11 @@ export const P = {
   /** Straightening up once white columns are banked (16 Nov; src/distill-read.ts, `straighten`), and the chain's white
       columns straightened up, their junk taken right in one drag (`strayDrags`). */
   STRAIGHTEN: true,
+  /** The chain's channels built: hoist drags left of the column being filled (17 Nov; M.CHANNEL). */
+  CHANNEL_SORT: true,
+  /** A chain that can't go on let go even with nowhere fit to start the next: it starts letGoFor(target) columns left
+      all the same (17 Nov; `nextChainAt`). */
+  FUTILE: true,
   /** With nothing else worth doing in Stage I, a hoist rather than a wait (16 Nov). */
   HOIST_IDLE: true,
   /** An idle hoist's worth by the browns it pulls down from high among the whites (none, one, two or more), and in the
@@ -358,6 +363,11 @@ export function nextChainAt(cols: Board, x: number, target: number): number {
   const most = x - letGoFor(target);
   let s = x - 1;
   while (s >= 0 && !clear(cols[s]) && (chainOver(cols, s) || s > most)) s--;
+  // (Nowhere it could go on: it starts letGoFor(target) columns left all the same, built from the whites to come, not
+  // the futile column carried on with: the user, 17 Nov, a CC^8 about to be a CC^9, "there's no way we're sending the
+  // crystal clear past 9. Let's start moving the junk into that column"; "the bot keeps trying to send ... whites into
+  // that column later. It's obviously futile".)
+  if (s < 0 && P.FUTILE && x > 0) s = Math.max(0, most);
   return s;
 }
 /** The chain's context with the rule of thumb applied: a chain going (`chain` > 0) whose next column can't be filled
@@ -704,6 +714,28 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style, reading?: Reading)
       consider({ routine: 'rescue', drags: d, reason: `quick sorting: the ${p} at column ${d[0].x + 1}, row ${d[0].y + 1} ${p === 'black' ? 'down' : 'up'} into a white's place by the fire, and it's out left` });
     }
   }
+  // The fallback: a piece stuck that nothing the routines offer unsticks (it's still stuck where it is after
+  // every one of them): bring a piece round to take its place.
+  if (style.path) {
+    let left = stuck(cols, ctx);
+    const at = (s: { x: number; y: number }) => `${s.x},${s.y}`;
+    for (const m of out) {
+      if (!left.length) break;
+      const still = new Set(stuck(playDrags(cols, m.move.drags)!, ctx).map(at));
+      left = left.filter((s) => still.has(at(s)));
+    }
+    if (left.length) for (const found of pathMoves(cols, ctx, style, left)) consider(found);
+  }
+  // (After the stuck pieces' fallback, which plays each move on offer: these many drags would cost it four times the time.)
+  // The channels to the column being filled (17 Nov, M.CHANNEL): browns sunk through blacks and blacks lifted through
+  // browns left of it, the hoist's drags, weighed by the chain's measure like any move.
+  if (!one && P.CHANNEL_SORT && style.path && ctx.fill > 0) {
+    // (No stranding check: the chain's measure counts trapped junk itself, and the check cost four times the time.)
+    for (const d of hoistDrags(cols, ctx.fill, ctx.fill - M.CHANNEL_NEAR, false)) {
+      const p = cols[d[0].x][d[0].y] === BROWN ? 'brown' : 'black';
+      consider({ routine: 'turnOver', label: CHANNEL_SORT_LABEL, drags: d, reason: `the ${p} at column ${d[0].x + 1}, row ${d[0].y + 1} ${p === 'brown' ? 'sunk down through the blacks' : 'lifted up through the browns'}: a channel for the whites to column ${ctx.fill + 1}` });
+    }
+  }
   // The chain's own white columns straightened up (the user, 16 Nov, seed 2's CC^8 frozen with browns in them: "just
   // worry about getting them to the right hand side as far as you can ... the blacks are there at the top ... to
   // essentially rescue the brown pieces"): the junk in the column being filled and the two after it, each taken right
@@ -716,18 +748,6 @@ export function weigh(sit: Situation, ctx: Ctx, style: Style, reading?: Reading)
       const p = cols[d[0].x][d[0].y] === BROWN ? 'brown' : 'black';
       consider({ routine: 'turnOver', label: STRAIGHTEN_LABEL, drags: d, reason: `the ${p} at column ${d[0].x + 1}, row ${d[0].y + 1} taken right out of the whites, ${p === 'brown' ? 'up through the whites and down through the blacks' : 'down through the whites and up through the browns'}, to burn` });
     }
-  }
-  // The fallback: a piece stuck that nothing the routines offer unsticks (it's still stuck where it is after
-  // every one of them): bring a piece round to take its place.
-  if (style.path) {
-    let left = stuck(cols, ctx);
-    const at = (s: { x: number; y: number }) => `${s.x},${s.y}`;
-    for (const m of out) {
-      if (!left.length) break;
-      const still = new Set(stuck(playDrags(cols, m.move.drags)!, ctx).map(at));
-      left = left.filter((s) => still.has(at(s)));
-    }
-    if (left.length) for (const found of pathMoves(cols, ctx, style, left)) consider(found);
   }
   // The phase's weights on the techniques, for ranking (the user, 13 Nov: "different techniques have different
   // weights depending on the stage"), every one even only for real danger, a white in a danger zone ("it can
@@ -967,6 +987,8 @@ export function pulledDown(cols: Board, drags: readonly Drag[]): number {
   }
   return n;
 }
+/** The chain's channel building, for a player. */
+export const CHANNEL_SORT_LABEL = 'Build a channel';
 /** Straightening up's moves, for a player. */
 export const STRAIGHTEN_LABEL = 'Straighten up';
 

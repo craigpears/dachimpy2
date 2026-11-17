@@ -277,6 +277,14 @@ export const M = {
         right (every junk a column left). */
     FILL_JUNK: 10,
     FLOW: 0.5,
+    /** Stage II: the junk in the CHANNEL_NEAR columns left of the column being filled, browns low and blacks high, each a
+        share of CHANNEL by its depth (a brown) or height (a black): the channels the whites come through to it, up
+        through the blacks and down through the browns (the user, 17 Nov: "creating a channel of browns ... pulling the
+        browns into the bottom right ... and ... getting blacks up to that top right"; "from a pathfinding perspective ...
+        there's far more paths from any point where the white can appear on the left to getting it into the right
+        column"). Over the board, not column by column ("one column black, one column brown ... not column by column"). */
+    CHANNEL: 2,
+    CHANNEL_NEAR: 3,
 };
 const near = (x) => M.NEAR[Math.min(2, COLS - 1 - x)];
 /** How good a board is in the chain (Stage II), whites heading right: higher is better. The planner weighs
@@ -324,6 +332,8 @@ export function measure(cols, ctx) {
                     v -= (M.LOW * (h - 10)) / 6;
                 if (inWhites && p === BROWN && h < 6)
                     v -= (M.LOW * (6 - h)) / 6;
+                if (x < ctx.fill && ctx.fill - x <= M.CHANNEL_NEAR)
+                    v += (M.CHANNEL * (p === BROWN ? h : p === BLACK ? 16 - h : 0)) / 16;
             }
         }
         if (burning && x === COLS - 1 && !col.some((p) => p === WHITE) && col.reduce((s, p) => s + weightOf(p), 0) <= 0)

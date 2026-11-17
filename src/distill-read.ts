@@ -442,16 +442,16 @@ export function hoistOrder(cols: Board, to: number): number {
 /** Hoisting's drags: a brown sunk down through blacks, lifting them, or a black lifted up through browns, left of column
     `to` (the colour, or the gaps being filled), READ.HOIST_SWAPS swaps at most, bringing blacks and browns together
     rather than splitting them further: each piece's drag that betters `hoistOrder` the most a swap, nothing stranded. */
-export function hoistDrags(cols: Board, to: number): Drag[][] {
-  const out: Drag[][] = [], base = hoistOrder(cols, to), s0 = stranded(cols).length;
-  for (let x = 0; x < Math.min(to, COLS); x++) cols[x].forEach((p, y) => {
+export function hoistDrags(cols: Board, to: number, from = 0, strandCheck = true): Drag[][] {
+  const out: Drag[][] = [], base = hoistOrder(cols, to), s0 = strandCheck ? stranded(cols).length : 0;
+  for (let x = Math.max(0, from); x < Math.min(to, COLS); x++) cols[x].forEach((p, y) => {
     if (p !== BROWN && p !== BLACK) return;
     let best: { d: Drag; v: number } | null = null;
     for (const d of trace(cols, x, y, READ.HOIST_SWAPS, (n) => n[0] < to, (b) => hoistOrder(b, to) > base, 120)) {
       const v = (hoistOrder(playDrags(cols, [d])!, to) - base) / (d.ways.length + 2);
       if (!best || v > best.v) best = { d, v };
     }
-    if (best && stranded(playDrags(cols, [best.d])!).length <= s0) out.push([best.d]);
+    if (best && (!strandCheck || stranded(playDrags(cols, [best.d])!).length <= s0)) out.push([best.d]);
   });
   return out;
 }

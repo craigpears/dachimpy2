@@ -106,9 +106,10 @@ describe('the bots are their target chains, 13 Nov (the thirtieth note: "I want 
   });
   it('never dismisses: when a chain breaks it goes back to building toward the next ("then it will start working on the next one")', () => {
     let chained = false, rebuilt = false;
-    // (Seed 5002: on 5000, since the late game's channels (14 Nov), its chains break with whites still banked, so it
-    // chains them again and never needs to rebuild in 8 minutes; it was 5000 since the pair rescue did the same on 5002.)
-    const r = playSession(new Distilling(seeded(5002)), levelNamed('cc2'), 8, undefined, (a) => {
+    // (Seed 5003: on 5000, since the late game's channels (14 Nov), its chains break with whites still banked, so it
+    // chains them again and never needs to rebuild in 8 minutes; it was 5000 since the pair rescue did the same on 5002,
+    // and 5002 since the chain's channels (17 Nov) did the same there.)
+    const r = playSession(new Distilling(seeded(5003)), levelNamed('cc2'), 8, undefined, (a) => {
       expect(a.kind).not.toBe('dismiss');
       expect(a.target).toBe(2);
       expect(a.whitesNeeded).toBeGreaterThanOrEqual(0);

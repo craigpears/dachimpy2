@@ -2406,6 +2406,26 @@ white columns now, so we're switching from quick dragging to ... straightening u
 - **The bot's mode in view** (17 Nov: "more debugging on like what its evaluation is, like what mood it's in, what it's
   trying to do"): distilling-test.html's bottom bar, while a bot plays, says its stage, how it reads the board and the
   tactic in play, and the move it's making ("Stage I: banking whites · Healthy: Straighten up · The sweep").
+- **Channels in the chain, built** (17 Nov): `M.CHANNEL` (2) in src/distill-routines.ts's `measure`, the junk in the
+  `M.CHANNEL_NEAR` (3) columns left of the column being filled, browns by depth and blacks by height; the hoist's drags
+  there offered in the chain (`P.CHANNEL_SORT`, `hoistDrags` from those columns, no stranding check, after the stuck
+  pieces' fallback: in it they cost four times the time), each drag's goal "build a channel" (`channelOrder`,
+  src/distill-goals.ts). On the user's board, where it waited, it now builds one.
+- **The chain let go with nowhere to start the next** (17 Nov, `P.FUTILE`, `nextChainAt`): the next chain starts
+  letGoFor(target) columns left all the same. A count of the whites left to bring in (only columns not yet clear) was
+  tried and dropped: a clear column's whites can be passed right a column at a time (the mirror), so it gave up
+  chains that could go on. On the user's CC^9 board it no longer brings a white round into column 9; it lets columns 7
+  to 9 go and starts the next in column 6.
+- **Run** (6 boards each, `PLAN='{"CHANNEL_SORT":0,"FUTILE":0}'` the old): CC^8 chain mean 4.0 to 4.2, best 6 to 7,
+  chains a session's mean 2.5 to 2.6, 12.6 to 13.6 points a minute, effort 17.4 to 17.5; CC^3 chain mean 3.8 to 3.5,
+  its chains' mean 2.1 to 2.7, at target 8 of 22 to 10 of 18, 11.9 to 14.0 points a minute. But whites burned 0.2 to
+  0.7 a session for CC^8 (no white burned 5 to 3 of 6), 0.3 to 0.5 for CC^3: the channels' (the same with the let go
+  off), not their weight's (M.CHANNEL 1: 0.7 too, and worse throughout). Six boards; a 20-board run each way is next.
+- **Next: trapped pieces as a group** (17 Nov, notes/distilling/55-two-blacks-move-as-one.webp): "it eventually rescues
+  black number one, but then leaves number two. Like I would just be moving the brown back and moving those trap blacks
+  as like one unit upwards ... It doesn't seem to have any method of predicting ... if I move number one up without
+  number two, that's going to leave number two stranded ... so I've got to go grab number two at the same time because
+  they move as one continuous unit." A move ahead for stranded junk that touches.
 - **Next, the chain's end: when to give it up** (17 Nov, a CC^8 about to be a CC^9 with no room left): "this is when I
   would start ... going back to quick move strategy ... there's no way we're sending the crystal clear past 9. Let's
   start moving the junk into that column"; "the bot keeps trying to send ... whites into that column later. It's

@@ -1212,6 +1212,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   to, like, even just say 1 or 2 junk columns, even if you're being incredibly anxious." Whites banked for the target,
   the chain starts only when the finished junk columns waiting for the furnace are down to two, or the junk can't
   finish the next one.
+- **Distilling: channels to the column going up (17 Nov, watching CC^8 in the chain).** "Creating a channel of browns
+  ... pulling the browns into the bottom right to create a nice channel to drag white pieces down through later, and
+  doing a similar kind of channel of getting blacks up to that top right"; "from a pathfinding perspective ... there's
+  far more paths from any point where the white can appear on the left to getting it into the right column." In the
+  three columns left of the column being filled, browns low and blacks high count in the chain's measure, over the
+  board, not column by column ("one column black, one column brown ... not column by column"); a brown sunk through
+  blacks or a black lifted through browns there is "build a channel".
+- **Distilling: a chain that can't go on is let go (17 Nov, a CC^8 about to be a CC^9).** "There's no way we're sending
+  the crystal clear past 9. Let's start moving the junk into that column"; "the bot keeps trying to send ... whites into
+  that column later. It's obviously futile." Its next column more junk than white, the chain's let go even with
+  nowhere fit to start the next one: that starts a few columns left (three for CC^8), from the whites to come.
 - **Distilling: going backwards to pull trapped browns down (16 Nov, notes/distilling/52-a-black-back-along-the-top.webp).**
   Browns stuck at the top of the white columns sink only through a black: a black taken back left along the top, up
   through each brown, pulls them down ("going backwards across the screen ... is good if it pulls down trapped pieces

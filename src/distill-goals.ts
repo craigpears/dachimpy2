@@ -32,7 +32,7 @@
 
 import { BLACK, BROWN, COLS, WHITE, neighbourOn } from './distilling.js';
 import type { Board } from './distilling.js';
-import { isJunk, junkTarget, playDrags } from './distill-routines.js';
+import { M, halfOf, isJunk, junkTarget, playDrags } from './distill-routines.js';
 import type { Ctx, Drag } from './distill-routines.js';
 import { dragTricks } from './distill-teach.js';
 import type { DragTrick } from './distill-teach.js';
@@ -120,6 +120,13 @@ function stuckKeys(b: Board, ctx: Ctx): number[] {
   return keys;
 }
 
+/** The channels' order left of column `fill` (src/distill-routines.ts, M.CHANNEL): browns' depth and blacks' height in
+    the M.CHANNEL_NEAR columns before it. */
+export function channelOrder(b: Board, fill: number): number {
+  let v = 0;
+  for (let x = Math.max(0, fill - M.CHANNEL_NEAR); x < fill; x++) b[x].forEach((p, y) => { const h = halfOf(b, x, y); if (p === BROWN) v += h; else if (p === BLACK) v += 16 - h; });
+  return v;
+}
 /** A drag's own goal, played on board `b` (the board as it starts), leaving `a`; null if it gets nothing done. */
 export function ownGoal(b: Board, d: Drag, a: Board, aims: Aims): Goal | null {
   const { ctx, reading: r } = aims, p = b[d.x][d.y], end = endOf(b, d), burns = burnsAt(ctx), one = ctx.stage === 'junk';
@@ -189,6 +196,10 @@ export function ownGoal(b: Board, d: Drag, a: Board, aims: Aims): Goal | null {
   }
   if (!one) {
     if (p === WHITE && end[0] > d.x && end[0] <= ctx.fill) return { kind: 'build', says: `bring a white over toward column ${ctx.fill + 1}` };
+    // (The channels to the column being filled: browns down and blacks up left of it, the 17 Nov note.)
+    if (isJunk(p) && d.x < ctx.fill && end[0] < ctx.fill && channelOrder(a, ctx.fill) > channelOrder(b, ctx.fill)) {
+      return { kind: 'buildChannel', says: p === BROWN ? `build a channel to column ${ctx.fill + 1}: the brown down through the blacks, for whites to come down through` : `build a channel to column ${ctx.fill + 1}: the black up through the browns, for whites to come up through` };
+    }
     if (isJunk(p) && end[0] < d.x) return { kind: 'build', says: `take the ${what} back left, out of the chain's way` };
     return null;
   }

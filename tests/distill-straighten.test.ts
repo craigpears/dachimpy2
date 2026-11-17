@@ -2,7 +2,9 @@
    junk stuck in them, the bot still quick sorting. src/distill-read.ts's `straighten`, src/distill-patterns.ts's bank
    (`bankOf`, `bankJunk`), src/distill-bots.ts's moves for it. */
 import { describe, expect, it } from 'vitest';
-import { P, advise, decisionTime, pulledDown } from '../src/distill-bots';
+import { P, advise, chainContext, choose, contextFor, decisionTime, levelNamed, pulledDown } from '../src/distill-bots';
+import { channelOrder } from '../src/distill-goals';
+import { playDrags } from '../src/distill-routines';
 import { readBoard, strayDrags } from '../src/distill-read';
 import { bankJunk, bankOf, solidColumns } from '../src/distill-patterns';
 import { BROWN, Distilling } from '../src/distilling';
@@ -116,5 +118,22 @@ describe(`"If you've got an easily completed junk column, you don't do that ever
     // (the same, two of the finished junk columns gone to the furnace)
     const two = B('KKKKwwwww wwwwwwww wwwwwwwww wwwwwwww wwwwwwwww wwwwwwww wwwwwwwww wwwwKKKK KbKKbbbbb KbKbbbbK');
     expect(decisionTime(two, 4)).toBe(true);
+  });
+});
+
+describe('the chain (17 Nov, seed 2 CC^8, the user\'s pictures copied)', () => {
+  it('"Creating a channel of browns ... and ... getting blacks up to that top right": where it waited, it builds a channel to the column being filled', () => {
+    const cols = B('bwbbbbKKK bKKbbKKK bbbwKKKbK bbwKKwKK KbwwwwKbK wwwwwwww wwwwwwwww wwwwwwww w*wwwwwww wwwwwwww');
+    const ctx = contextFor(cols, 'chain', 0, 40), a = choose({ cols, chain: 3, timeLeft: 15000 }, ctx, levelNamed('cc8'));
+    expect(a.kind).toBe('move');
+    expect(channelOrder(playDrags(cols, a.drags)!, ctx.fill)).toBeGreaterThan(channelOrder(cols, ctx.fill));
+  });
+  it('"There\'s no way we\'re sending the crystal clear past 9. Let\'s start moving the junk into that column": a chain whose next column can\'t be filled is let go, its whites no more sent into it', () => {
+    const cols = B('bwbKKKbbb wKbKbKbK KKKbK*bKK bbbbKbbK KbKKKKKKK KbwwKKwb bKKwKKbbb bKwwKKbK bKwwKKbbb wwwwwwww');
+    const c = chainContext(cols, 8, 0, 8, 40);
+    expect(c.letGo).toBe(true);
+    expect(c.ctx.over).toEqual([6, 8]);
+    const a = choose({ cols, chain: 8, timeLeft: 15000 }, c.ctx, levelNamed('cc8')), after = playDrags(cols, a.drags)!;
+    expect(after[8].filter((p) => p === 0).length).toBeLessThanOrEqual(cols[8].filter((p) => p === 0).length);   // (no white into column 9)
   });
 });
