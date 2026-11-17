@@ -2421,6 +2421,11 @@ white columns now, so we're switching from quick dragging to ... straightening u
   its chains' mean 2.1 to 2.7, at target 8 of 22 to 10 of 18, 11.9 to 14.0 points a minute. But whites burned 0.2 to
   0.7 a session for CC^8 (no white burned 5 to 3 of 6), 0.3 to 0.5 for CC^3: the channels' (the same with the let go
   off), not their weight's (M.CHANNEL 1: 0.7 too, and worse throughout). Six boards; a 20-board run each way is next.
+- **Run, 20 boards each** (CC^8, the same off and on): whites burned 0.4 a session both ways (no white burned 15 to 13
+  of 20), so six boards' rise was mostly noise. Chain mean 4.8 to 4.3, best 8 to 7, at target 2 of 20 to none; chains a
+  session 2.9 to 3.3, their mean 2.9 to 2.6; points a minute 14.9 to 15.4; a column gone, effort 17.6 to 16.6 (moves
+  9.8 to 9.3). More, shorter chains for less effort; the longest lost. Left on until the user has watched it (17 Nov: "I
+  might see something the metrics don't when I judge the moves").
 - **Next: trapped pieces as a group** (17 Nov, notes/distilling/55-two-blacks-move-as-one.webp): "it eventually rescues
   black number one, but then leaves number two. Like I would just be moving the brown back and moving those trap blacks
   as like one unit upwards ... It doesn't seem to have any method of predicting ... if I move number one up without
