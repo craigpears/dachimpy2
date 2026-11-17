@@ -2392,6 +2392,13 @@ white columns now, so we're switching from quick dragging to ... straightening u
   phase (few small drags there, 13 Nov). Any hoist in place of a wait cost the bots: 6 boards of CC^8, chain mean 3.7
   against 4.3 without it; narrowed to two browns pulled down, it never came up in those 6 and costs nothing. On the user's board it plays their drag, the black at column 5, row 2 up-left, down-left, up-left,
   up-left.
+- **Early, a top brown isn't trapped** (17 Nov, notes/distilling/53-seed-2-waits-at-41-s.webp, seed 2's CC^8 at 41 s,
+  `bwwwKwbK* bwwwbwwK wwwwwwwKb bwwbwwwK wK*bbKbKK wwKKbbbK bbKKK*b*K bK*Kbbbb b*bbKbKKK bKbKbKbK`, the bot waiting
+  the last 5 s for the burn): at first "why doesn't it do a very simple ... rescue of the browns along the top", or
+  "moving that brown and black into place" (54-a-brown-and-black-into-place.webp), "and then tidy up ... the blacks at
+  the bottom if you've got the spare energy"; then "that's a fair move in this context because there's likely going
+  to be more blacks to appear. So those browns at the top are not trapped, but in a later game ... you would probably
+  want to try and rescue them. But for now, it's fine." Left as it is; the rescue's for later in the game.
 - **The user's pictures as boards** (tests/distill-straighten.test.ts): pictures 1, 3, 4 and 6 copied piece by piece.
   Picture 3's first move is the user's own sweep, the black down through the whites and up through the browns in one
   drag. Picture 4 (in the chain: browns to be carried right across clear columns, dropping into the blacks there and
