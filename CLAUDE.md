@@ -115,7 +115,10 @@ Its rules `src/cade.ts` (the cade, the players' word, so its files never meet th
 tiles, every ship by YPPedia's table `KINDS`, a slot resolved by YPPedia's claim rules `resolveSlot`, influence and
 points `influence`, crews and tokens, a round played `Cade`), its 26 real boards `src/cade-boards.ts` (from the user's
 own BlockadeSim, `cadeBoard`); tests `tests/cade.test.ts` (the BlockadeSim's own unit tests ported, then YPPedia's)
-and `tests/cade-boards.test.ts`.
+and `tests/cade-boards.test.ts`; the table `src/cade-play.ts` (a round set out, your planning pad and its preview, the
+stand-ins sailing the other ships until the teaching bots come, `Table`), drawn on the unlinked `cade-test.html` by
+`js/den/cade.js` in the den's and the 3D blockade's look (the den's ships, `ship-damage.js`'s holes and crew, the
+den's wind lanes and whirlpools from `js/den/sea-marks.js`, their one look, shared with sea.js and whirlpools.js).
 The sloop race has a design document of its own, [RACE.md](RACE.md) (the user, 11 Nov: "all these kind of
 thoughts, design and balance decisions should all be in some kind of game design document specific to these
 races"): read it before working on the race, and keep it up to date with every design or balance decision and
