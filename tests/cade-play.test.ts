@@ -1,7 +1,7 @@
 // The tabletop blockade at the table (src/cade-play.ts): the planning pad, its preview, the stand-ins, a round.
 import { describe, expect, it } from 'vitest';
 import { boardFromText, freshTokens, KINDS, type Seat } from '../src/cade.js';
-import { cycleGuns, cycleMove, emptyPlan, left, preview, setMove, standIn, Table } from '../src/cade-play.js';
+import { cycleGuns, cycleMove, dropGun, emptyPlan, left, pressMove, preview, setMove, standIn, Table } from '../src/cade-play.js';
 
 const seeded = (seed: number) => () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
 const seat = (id: number, kind: string, x: number, y: number, face: 0 | 1 | 2 | 3, side: 0 | 1 = 0): Seat =>
@@ -10,14 +10,32 @@ const seat = (id: number, kind: string, x: number, y: number, face: 0 | 1 | 2 | 
 describe('the planning pad', () => {
   const brig = KINDS.warBrig, t = freshTokens(0, 16);   // four forwards, two lefts, two rights, ten guns
 
-  it('a slot clicked goes round none, forward, left, right, skipping what she has none of', () => {
+  it('a slot clicked goes round none, left, forward, right, skipping what she has none of', () => {
     let p = emptyPlan();
     const seen = [];
     for (let i = 0; i < 4; i++) { p = cycleMove(brig, t, p, 0); seen.push(p.moves[0]); }
-    expect(seen).toEqual(['F', 'L', 'R', null]);
+    expect(seen).toEqual(['L', 'F', 'R', null]);
     p = setMove(brig, t, setMove(brig, t, emptyPlan(), 0, 'L'), 1, 'L');
     expect(cycleMove(brig, t, p, 2).moves[2]).toBe('F');
     expect(cycleMove(brig, t, cycleMove(brig, t, p, 2), 2).moves[2]).toBe('R');   // no lefts left
+  });
+
+  it("the mouse as the game's, 17 Nov (\"quite confusing, especially being the first click being forward ... left mouse is left, and then it cycles through. Middle mouse is forward, right mouse click is right\")", () => {
+    expect(pressMove(brig, t, emptyPlan(), 0, 0).moves[0]).toBe('L');
+    expect(pressMove(brig, t, emptyPlan(), 0, 1).moves[0]).toBe('F');
+    expect(pressMove(brig, t, emptyPlan(), 0, 2).moves[0]).toBe('R');
+    const f = pressMove(brig, t, emptyPlan(), 0, 1);
+    expect(pressMove(brig, t, f, 0, 1).moves[0]).toBeNull();   // a forward clicked off again
+    expect(pressMove(brig, t, f, 0, 2).moves[0]).toBe('R');    // a right over it
+    expect(pressMove(brig, t, f, 0, 0).moves[0]).toBe('R');    // the left button cycles on from where it is
+  });
+
+  it('a gun right-clicked comes back out', () => {
+    let p = cycleGuns(brig, t, cycleGuns(brig, t, emptyPlan(), 1, 0), 1, 0);
+    expect(p.guns![1]).toEqual([2, 0]);
+    p = dropGun(p, 1, 0);
+    expect(p.guns![1]).toEqual([1, 0]);
+    expect(dropGun(dropGun(p, 1, 0), 1, 0).guns![1]).toEqual([0, 0]);
   });
 
   it('a 3-move ship rests a slot: the fourth move won\'t go in', () => {
@@ -67,7 +85,7 @@ describe('the table', () => {
     const tb = new Table({ board: 'Gallows16_3', turns: 12, random: seeded(5) });
     expect(tb.cade.ships).toHaveLength(6);
     expect(tb.you.kind.id).toBe('warBrig');
-    tb.move(0); tb.move(1);
+    tb.press(0, 1); tb.press(1, 1);
     expect(tb.pad.moves.slice(0, 2)).toEqual(['F', 'F']);
     expect(tb.tokensLeft.F).toBe(2);
     for (let i = 0; i < 12; i++) tb.sail();

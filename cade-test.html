@@ -34,8 +34,9 @@
   .pad button { height: 34px; padding: 0; font-size: 20px; }
   .pad .mv { font-size: 24px; }
   .pad .rest { font-size: 12px; color: var(--dim); }
-  .pad .gun { font-size: 14px; letter-spacing: 1px; }
-  .pad .gun.lit { background: #6a2a1a; border-color: var(--crimson); }
+  .pad .gun { display: flex; justify-content: center; align-items: center; gap: 7px; }
+  .pad .dot { display: block; width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--dim); }
+  .pad .dot.on { background: var(--gold); border-color: var(--gold); }
   .toks { display: flex; gap: 6px; margin-bottom: 8px; font-size: 14px; }
   .toks span { border: 1px solid var(--edge); border-radius: 6px; padding: 1px 7px; background: #241810; }
   .toks b { color: var(--gold); }
@@ -66,7 +67,7 @@
 <body>
 <div class="ui">
   <h1>Tabletop blockade</h1>
-  <p class="about">Puzzle Pirates' blockade, as it plays. Each turn, put a move in each of its four slots (a 3-move ship rests one) and the guns you'll fire off each side, then Sail: everyone moves at once, slot by slot; winds push you a square, whirlpools carry you round; then the guns. A buoy only your side's ships reach scores its pennants every turn; a sloop has to sit on it, a frigate holds the most. Keys: A W D a move in the next slot, Q E a gun off the left or right in the last slot you set, X clears, Space sails.</p>
+  <p class="about">Puzzle Pirates' blockade, as it plays. Each turn, put a move in each of its four slots (a 3-move ship rests one) and the guns you'll fire off each side, then Sail: everyone moves at once, slot by slot; winds push you a square, whirlpools carry you round; then the guns. A buoy only your side's ships reach scores its pennants every turn; a sloop has to sit on it, a frigate holds the most. A slot: left click a left (again to go round), middle click a forward, right click a right; a gun's circle: click it on, right-click it off. Keys: A W D a move in the next slot, Q E a gun off the left or right in the last slot you set, X clears, Space sails.</p>
   <div class="score"><span class="gold" id="s0">0</span><small id="turn">Turn 1 of 60</small><span class="crimson" id="s1">0</span></div>
   <div class="buoys" id="buoys"></div>
   <div class="pad" id="pad"></div>
@@ -126,11 +127,13 @@ function draw() {
   $('turn').textContent = table.cade.over ? 'The round is over' : `Turn ${table.cade.turn + 1} of ${table.cade.turns}`;
   $('pad').innerHTML = [0, 1, 2, 3].map((i) => {
     const m = pad.moves[i], [gl, gr] = pad.guns[i], rest = !m && k.moves === 3 && moves >= 3;
-    const dots = (n) => n ? '●'.repeat(n) : '○';
+    // (her guns a side, a circle each, filled as they're picked: the user, 17 Nov, "just two empty circles and then fill
+    // them as they get selected")
+    const dots = (n) => Array.from({ length: k.guns }, (_, j) => `<i class="dot${j < n ? ' on' : ''}"></i>`).join('');
     return `<span class="n">${i + 1}</span>`
-      + `<button class="gun${gl ? ' lit' : ''}" data-gun="${i},0" title="Guns off her left in slot ${i + 1}">${dots(gl)} ◀</button>`
-      + `<button class="mv" data-mv="${i}" title="Her move in slot ${i + 1}">${m ? ARROW[m] : rest ? '<span class="rest">rest</span>' : ''}</button>`
-      + `<button class="gun${gr ? ' lit' : ''}" data-gun="${i},1" title="Guns off her right in slot ${i + 1}">▶ ${dots(gr)}</button>`;
+      + `<button class="gun" data-gun="${i},0" title="Guns off her left in slot ${i + 1}: click for one, right-click to take one off">${dots(gl)}</button>`
+      + `<button class="mv" data-mv="${i}" title="Her move in slot ${i + 1}: left click a left (again to go round), middle a forward, right a right">${m ? ARROW[m] : rest ? '<span class="rest">rest</span>' : ''}</button>`
+      + `<button class="gun" data-gun="${i},1" title="Guns off her right in slot ${i + 1}: click for one, right-click to take one off">${dots(gr)}</button>`;
   }).join('');
   $('toks').innerHTML = `<span>↰ <b>${left.L}</b></span><span>↑ <b>${left.F}</b></span><span>↱ <b>${left.R}</b></span><span title="Guns loaded">● <b>${left.guns}</b></span><span title="${k.moves} moves a turn, ${k.guns} gun${k.guns > 1 ? 's' : ''} a side a slot">${k.name}</span>`;
   $('sail').disabled = view.playing || table.cade.over;
@@ -139,13 +142,19 @@ function draw() {
   $('ships').innerHTML = table.cade.ships.map((s) => `<div class="ship${s.id === table.me ? ' me' : ''}"><span><b style="color:${SIDE_COL[s.side]}">${names.get(s.id)}</b> ${s.kind.name.toLowerCase()}</span><span class="meter" title="Damage"><i style="width:${Math.round(100 * s.damage / s.kind.sinks)}%"></i></span></div>`).join('');
   view.plan(view.playing ? null : table.preview());
 }
-$('pad').onclick = (e) => {
-  const mv = e.target.closest('[data-mv]'), gun = e.target.closest('[data-gun]');
-  if (view.playing) return;
-  if (mv) { lastSlot = Number(mv.dataset.mv); table.move(lastSlot); }
-  if (gun) { const [i, side] = gun.dataset.gun.split(',').map(Number); lastSlot = i; table.gun(i, side); }
+// (the mouse as the game's, the user, 17 Nov: "left mouse is left, and then it cycles through. Middle mouse is
+// forward, right mouse click is right"; on the guns, a click puts one on and a right click takes one off. A tap is a
+// left click.)
+$('pad').addEventListener('pointerdown', (e) => {
+  const mv = e.target.closest('[data-mv]'), gun = e.target.closest('[data-gun]'), b = e.button;
+  if ((!mv && !gun) || view.playing || b > 2) return;
+  e.preventDefault();   // (no scrolling off on a middle click)
+  if (mv) { lastSlot = Number(mv.dataset.mv); table.press(lastSlot, b); }
+  if (gun) { const [i, side] = gun.dataset.gun.split(',').map(Number); lastSlot = i; if (b === 2) table.ungun(i, side); else table.gun(i, side); }
   draw();
-};
+});
+$('pad').addEventListener('contextmenu', (e) => e.preventDefault());
+$('pad').addEventListener('auxclick', (e) => e.preventDefault());
 async function sail() {
   if (view.playing || table.cade.over) return;
   const log = table.sail();

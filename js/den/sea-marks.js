@@ -1,9 +1,9 @@
-// What's drawn on the water for a wind and a whirlpool, the den's one look for each, needing nothing of the den but
+// What's drawn on the water for a wind, a whirlpool and a blockade's buoy, the den's one look for each, needing nothing of the den but
 // what it's made of (materials.js), so any sea can lay them out at its own squares: the den's sea and race
-// (sea.js's windLane, whirlpools.js's pool), and the tabletop blockade (cade.js). Pulled out of sea.js and
+// (sea.js's windLane, whirlpools.js's pool), and both blockades (blockade.js's buoys, cade.js). Pulled out of sea.js and
 // whirlpools.js on 17 Nov so the tabletop blockade shares them rather than copying them.
 import * as THREE from 'three';
-import { mesh, canvasTex } from './materials.js';
+import { mat, mesh, canvasTex } from './materials.js';
 
 /** A lane of wind `n` squares of `cell` long, blowing toward -z as it lies (turn it by -d quarter turns for the way
  *  `d` it blows, clockwise from north): white streaks over a faint blue band, so it reads from afar. Move `tex.offset.y`
@@ -51,4 +51,27 @@ export function swirlMesh(cell) {
   o.renderOrder = 2;
   o.userData.speed = -1.6;   // (rotation.z up is anticlockwise seen from above: so, down)
   return o;
+}
+
+/** A blockade's buoy: a float with a white band, a pole, and its pennants (1, 2 or 3, its points), big enough to read
+ *  at a glance from above the whole board (the user, 17 Nov: "all the flags are a bit too subtle and hard to see ...
+ *  the flag parts are a bit too small"). `M` is the float's and pennants' material, to colour by whose it is; `s` its
+ *  size against a board of squares of 4 (the 3D blockade's; the tabletop blockade's squares of 10 pass 2.5). Both
+ *  blockades' buoys (blockade.js, cade.js). Returns { o, M }. */
+export function buoyLook(pennants, colour, s = 1) {
+  const o = new THREE.Group(), M = new THREE.MeshStandardMaterial({ color: colour, roughness: 0.5 });
+  o.add(mesh(new THREE.CylinderGeometry(0.8, 1.05, 1.6, 14), M), mesh(new THREE.CylinderGeometry(0.11, 0.11, 8, 6).translate(0, 4.3, 0), mat('#4a2f1a')));
+  o.add(mesh(new THREE.CylinderGeometry(0.9, 0.92, 0.32, 14).translate(0, 0.32, 0), mat('#f3ecdc')));
+  // (each pennant a flat wedge off the pole; the buoy's turned to show them full on: faceCamera)
+  for (let i = 0; i < pennants; i++) {
+    const p = mesh(new THREE.ConeGeometry(1.2, 3.6, 3).rotateZ(-Math.PI / 2), M);
+    p.scale.set(1, 1, 0.3); p.position.set(1.85, 7.6 - i * 2.15, 0); o.add(p);
+  }
+  o.scale.setScalar(s);
+  return { o, M };
+}
+
+/** A buoy (any group whose flags lie in its x-y plane) turned about its pole to show its flags full on to the camera. */
+export function faceCamera(o, camera) {
+  o.rotation.y = Math.atan2(camera.position.x - o.position.x, camera.position.z - o.position.z);
 }

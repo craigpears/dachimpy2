@@ -14,7 +14,7 @@
 import * as THREE from 'three';
 import { scene, mat, mesh, canvasTex, burst, makePirate } from './world.js';
 import { bake } from './bake.js';
-import { windMarks, swirlMesh } from './sea-marks.js';
+import { windMarks, swirlMesh, buoyLook, faceCamera } from './sea-marks.js';
 import { damageLook } from './ship-damage.js';
 import { sloopMesh, SLOOP_DECK } from './sloop.js';
 import { frigateMesh } from './frigate.js';
@@ -131,15 +131,14 @@ export function cadeView(table) {
     o.position.set(p.x, 0.06, p.z); g.add(o); swirls.push(o);
   }
 
-  // ----- the buoys: a float, a pole, its pennants; all coloured by whose it is -----
+  // ----- the buoys: a float, a pole, its pennants (both blockades' one look, sea-marks.js), coloured by whose it is,
+  // and a ring on the water in the same colour -----
   const buoys = influence(b, []).buoys.map((bu) => {
-    const o = new THREE.Group(), M = new THREE.MeshStandardMaterial({ color: NONE_COL, roughness: 0.5 }), white = mat('#f3ecdc');
-    o.add(mesh(new THREE.CylinderGeometry(0.9, 1.2, 1.8, 14), M), mesh(new THREE.CylinderGeometry(0.08, 0.08, 5.6, 6).translate(0, 3.3, 0), mat('#4a2f1a')));
-    o.add(mesh(new THREE.CylinderGeometry(1.0, 1.02, 0.36, 14).translate(0, 0.36, 0), white));
-    for (let i = 0; i < bu.points; i++) { const p = mesh(new THREE.ConeGeometry(0.55, 1.6, 3).rotateZ(-Math.PI / 2), M); p.scale.set(1, 1, 0.15); p.position.set(0.85, 5.7 - i * 1.1, 0); o.add(p); }
+    const { o, M } = buoyLook(bu.points, NONE_COL, CELL / 4 * 0.85);
     const ring = new THREE.Mesh(new THREE.RingGeometry(CELL * 0.34, CELL * 0.4, 36).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: NONE_COL, transparent: true, opacity: 0.6, depthWrite: false }));
-    ring.position.y = 0.08; ring.renderOrder = 2; o.add(ring);
-    o.position.copy(at(bu.x, bu.y)); g.add(o);
+    const p = at(bu.x, bu.y);
+    ring.position.set(p.x, 0.08, p.z); ring.renderOrder = 2; g.add(ring);
+    o.position.copy(p); g.add(o);
     return { ...bu, o, M, ring, ph: Math.random() * 6 };
   });
   const paintBuoys = (held) => {
@@ -260,9 +259,11 @@ export function cadeView(table) {
 
   function tick(dt, camera) {
     for (const tex of lanes) tex.offset.y -= dt * 2.2;
-    for (const o of swirls) o.rotation.z += dt * o.userData.speed;
+    // (the whirlpools turning slowly: the den's pace, a turn every four seconds, was "really far too fast" seen from
+    // above a whole board, the user, 17 Nov; a turn every twenty)
+    for (const o of swirls) o.rotation.z += dt * o.userData.speed * 0.2;
     const clock = performance.now() / 1000;
-    for (const bu of buoys) { bu.o.position.y = Math.sin(clock * 1.4 + bu.ph) * 0.12; bu.o.rotation.z = Math.sin(clock * 1.1 + bu.ph) * 0.04; }
+    for (const bu of buoys) { bu.o.position.y = Math.sin(clock * 1.4 + bu.ph) * 0.12; if (camera) faceCamera(bu.o, camera); bu.o.rotation.z = Math.sin(clock * 1.1 + bu.ph) * 0.04; }
     for (const V of ships.values()) {
       if (!V.holder.visible) continue;
       const near = !camera || camera.position.distanceTo(V.holder.position) < 110;

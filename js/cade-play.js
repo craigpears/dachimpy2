@@ -14,10 +14,10 @@ export function left(t, p) {
     return { F: t.F.length - used('F'), L: t.L.length - used('L'), R: t.R.length - used('R'),
         guns: t.guns - (p.guns ?? []).reduce((n, [a, b]) => n + a + b, 0) };
 }
-/** A slot's move clicked: on to the next she can play there (none, forward, left, right, round again), skipping
- *  what she's out of or a move a 3-move ship hasn't room for. */
+/** A slot's move left-clicked: on to the next she can play there (none, left, forward, right, round again: a left
+ *  first, as in the game; the user, 17 Nov), skipping what she's out of or a move a 3-move ship hasn't room for. */
 export function cycleMove(kind, t, p, slot) {
-    const order = [null, 'F', 'L', 'R'];
+    const order = [null, 'L', 'F', 'R'];
     const at = order.indexOf(p.moves[slot] ?? null);
     for (let i = 1; i <= 4; i++) {
         const q = copyPlan(p);
@@ -32,6 +32,21 @@ export function setMove(kind, t, p, slot, m) {
     const q = copyPlan(p);
     q.moves[slot] = m;
     return planProblem(kind, t, q) ? p : q;
+}
+/** A slot clicked with a mouse's button, as in the game (the user, 17 Nov: "left mouse is left, and then it cycles
+ *  through. Middle mouse is forward, right mouse click is right"): the left button cycles (`cycleMove`), the middle
+ *  puts a forward and the right a right, each taking it out again if it's already there. */
+export function pressMove(kind, t, p, slot, button) {
+    if (button === 0)
+        return cycleMove(kind, t, p, slot);
+    const m = button === 1 ? 'F' : 'R';
+    return setMove(kind, t, p, slot, p.moves[slot] === m ? null : m);
+}
+/** A slot's guns off one side, one fewer (a right click): none stays none. */
+export function dropGun(p, slot, side) {
+    const q = copyPlan(p);
+    q.guns[slot][side] = Math.max(0, q.guns[slot][side] - 1);
+    return q;
 }
 /** A slot's guns off one side clicked: one more, up to her guns a side (and what's loaded), then none again. */
 export function cycleGuns(kind, t, p, slot, side) {
@@ -151,6 +166,10 @@ export class Table {
     /** Your tokens left once the pad's are taken out. */
     get tokensLeft() { return left(this.you.tokens, this.pad); }
     move(slot) { this.pad = cycleMove(this.you.kind, this.you.tokens, this.pad, slot); }
+    /** A slot clicked with the mouse's left (0), middle (1) or right (2) button. */
+    press(slot, button) { this.pad = pressMove(this.you.kind, this.you.tokens, this.pad, slot, button); }
+    /** A gun off one side taken back out (a right click). */
+    ungun(slot, side) { this.pad = dropGun(this.pad, slot, side); }
     put(slot, m) { this.pad = setMove(this.you.kind, this.you.tokens, this.pad, slot, m); }
     gun(slot, side) { this.pad = cycleGuns(this.you.kind, this.you.tokens, this.pad, slot, side); }
     clear() { this.pad = emptyPlan(); }
