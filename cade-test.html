@@ -230,10 +230,11 @@ draw();
 say(`${names.get(table.me)}, a ${table.you.kind.name.toLowerCase()}: plan your four slots, then Sail`);
 let last = performance.now();
 function frame(now) {
-  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  // (the turn's playback keeps real time even when the frames come slowly; only the sparks take small steps)
+  const real = Math.min(0.25, (now - last) / 1000), dt = Math.min(0.05, real); last = now;
   const want = cam.follow ? view.shipNow() : new THREE.Vector3();
   cam.at.lerp(want, Math.min(1, dt * 3));
-  view.tick(dt, camera);
+  view.tick(real, camera);
   tickSparks(dt); blastTick(dt);
   camera.position.set(cam.at.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cam.at.y + Math.sin(cam.pitch) * cam.dist, cam.at.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist);
   camera.lookAt(cam.at);

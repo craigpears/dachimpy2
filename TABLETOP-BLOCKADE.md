@@ -306,3 +306,6 @@ Blockade nav challenges:
   but certainly is a learning tool. That looks fantastic." Not in the real game: it stays as a learning aid, the first
   piece of the training mode in §2 ("highlights a route"), and the place the teaching bots' hints can draw on (risks,
   hotspots) as they come; a switch to turn it off for playing it as the game does, later.
+- 17 Nov, how a turn plays back (the user): "a whirlpool animation to turn them should take the exact same amount of
+  time as turning left yourself". Every motion one beat: her move, then a wind's push or a whirlpool's carry, the same
+  length (and the wind: "the wind pushing you should be the same speed as the forward move yourself"), then the guns. (The whirlpools' own swirl turning slowly too: "far too fast" at the den's pace.)

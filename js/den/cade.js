@@ -210,7 +210,16 @@ export function cadeView(table) {
   };
 
   // ----- a turn played back -----
-  const SLOT = 1.3, MOVE = 0.42, WIND = [0.42, 0.66], GUNS = 0.68;
+  // (a slot's pace: her move, then the winds, then the guns. Every motion the same beat, a wind's push or a whirlpool's
+  // carry as long as a turn of her own, the user, 17 Nov: "a whirlpool animation to turn them should take the exact
+  // same amount of time as turning left yourself", and "the wind pushing you should be the same speed as the forward
+  // move yourself"; a slot with a wind or a whirlpool in it so one beat longer)
+  const BEAT = 0.85, SHOTS = 0.65;
+  const PACE = {
+    calm: { secs: BEAT + SHOTS, move: BEAT / (BEAT + SHOTS), wind: [BEAT / (BEAT + SHOTS), BEAT / (BEAT + SHOTS)], guns: BEAT / (BEAT + SHOTS) },
+    windy: { secs: 2 * BEAT + SHOTS, move: BEAT / (2 * BEAT + SHOTS), wind: [BEAT / (2 * BEAT + SHOTS), 2 * BEAT / (2 * BEAT + SHOTS)], guns: 2 * BEAT / (2 * BEAT + SHOTS) },
+  };
+  const paceOf = (sl) => ([...sl.tracks.values()].some((tr) => tr.wind) ? PACE.windy : PACE.calm);
   let playing = null;
   const balls = [];
   const ballGeo = new THREE.SphereGeometry(1, 10, 8), ballM = mat('#1b1a1c', { metalness: 0.5, roughness: 0.4 });
@@ -260,8 +269,8 @@ export function cadeView(table) {
   function tick(dt, camera) {
     for (const tex of lanes) tex.offset.y -= dt * 2.2;
     // (the whirlpools turning slowly: the den's pace, a turn every four seconds, was "really far too fast" seen from
-    // above a whole board, the user, 17 Nov; a turn every twenty)
-    for (const o of swirls) o.rotation.z += dt * o.userData.speed * 0.2;
+    // above a whole board, the user, 17 Nov; a turn every forty)
+    for (const o of swirls) o.rotation.z += dt * o.userData.speed * 0.1;
     const clock = performance.now() / 1000;
     for (const bu of buoys) { bu.o.position.y = Math.sin(clock * 1.4 + bu.ph) * 0.12; if (camera) faceCamera(bu.o, camera); bu.o.rotation.z = Math.sin(clock * 1.1 + bu.ph) * 0.04; }
     for (const V of ships.values()) {
@@ -286,7 +295,7 @@ export function cadeView(table) {
     for (let i = balls.length - 1; i >= 0; i--) if (balls[i].done) { g.remove(balls[i].m); balls.splice(i, 1); }
     if (!playing) return;
     const P = playing;
-    P.t += dt / SLOT;
+    P.t += dt / paceOf(P.log.slots[Math.min(3, Math.floor(P.t))]).secs;
     if (P.t >= 4) {
       // the turn's end: everyone where the rules have them, the sunk back on their edges, the buoys repainted
       playing = null;
@@ -295,7 +304,7 @@ export function cadeView(table) {
       P.done();
       return;
     }
-    const slot = Math.floor(P.t), f = P.t - slot, sl = P.log.slots[slot];
+    const slot = Math.floor(P.t), f = P.t - slot, sl = P.log.slots[slot], { move: MOVE, wind: WIND, guns: GUNS } = paceOf(sl);
     for (const [id, tr] of sl.tracks) {
       const V = ships.get(id);
       if (!V || V.sinking) continue;
