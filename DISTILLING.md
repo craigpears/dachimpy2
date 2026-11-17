@@ -2399,6 +2399,36 @@ white columns now, so we're switching from quick dragging to ... straightening u
   the bottom if you've got the spare energy"; then "that's a fair move in this context because there's likely going
   to be more blacks to appear. So those browns at the top are not trapped, but in a later game ... you would probably
   want to try and rescue them. But for now, it's fine." Left as it is; the rescue's for later in the game.
+- **Weighed, never ruled out** (17 Nov: "no move should ever be excluded. I guess you should treat it as being less
+  favorable, but not fully excluded"): the idle hoist's cut-offs (two browns pulled down, not the block phase) are
+  weights, `P.HOIST_PULLED` (none 0.02, one 0.15, two or more 1) and `P.HOIST_BLOCK` (0.5). 6 boards, CC^8: chain mean
+  4.0 (4.3 with the cut-offs; 3.8 with weights 0.05 and 0.3), within the noise of six.
+- **The bot's mode in view** (17 Nov: "more debugging on like what its evaluation is, like what mood it's in, what it's
+  trying to do"): distilling-test.html's bottom bar, while a bot plays, says its stage, how it reads the board and the
+  tactic in play, and the move it's making ("Stage I: banking whites · Healthy: Straighten up · The sweep").
+- **Next, the chain's end: when to give it up** (17 Nov, a CC^8 about to be a CC^9 with no room left): "this is when I
+  would start ... going back to quick move strategy ... there's no way we're sending the crystal clear past 9. Let's
+  start moving the junk into that column"; "the bot keeps trying to send ... whites into that column later. It's
+  obviously futile." The let go (`chainOver`, more junk than white in the next column) is too late: the chain's next
+  columns weighed against the whites there are to reach them.
+- **Next, the chain's own strategy: channels and paths** (17 Nov, watching seed 2's CC^8 in the chain; the pictures
+  weren't saved). "What I would be doing is creating a channel of browns ... pulling the browns into the bottom right to
+  create a nice channel to drag white pieces down through later, and doing a similar kind of channel of getting blacks
+  up to that top right ... it's not really getting a very even wall of [whites] because it's got no easy way of really
+  like making nice even line, nice complete white columns"; "from a pathfinding perspective ... there's far more paths
+  from any point where the white can appear on the left to getting it into the right column. Like just by moving these
+  blacks and browns around, is black, they can always get up, they can always get down." With it:
+  - it sorted junk column by column, "one column black, one column brown, one column black. It's supposed to be ...
+    brown to the bottom, black to the top, not column by column. And even then it was not really necessary effort at
+    this stage";
+  - two blacks trapped bottom left among the whites, "you could be dragging blacks down and then using some browns to
+    rescue them at this point, but it doesn't seem to be really going too aggressively for those black pieces": "it
+    gets them after the next burn ... but it certainly can't figure out how to get them without new black pieces
+    arriving on the board to pull in"; "I'd still be trying to fill those white columns at this point, but I'd
+    certainly be ... trying to at least get some of these trapped pieces out because they are a risk for crystal clear";
+  - "it's not very good at filling those white spots by the [spice], which I would prioritize because they're just
+    awkward to get to";
+  - "it just gets stuck a lot. Like here, it just seems to not be able to move."
 - **The user's pictures as boards** (tests/distill-straighten.test.ts): pictures 1, 3, 4 and 6 copied piece by piece.
   Picture 3's first move is the user's own sweep, the black down through the whites and up through the browns in one
   drag. Picture 4 (in the chain: browns to be carried right across clear columns, dropping into the blacks there and

@@ -178,6 +178,10 @@ export const P = {
   STRAIGHTEN: true,
   /** With nothing else worth doing in Stage I, a hoist rather than a wait (16 Nov). */
   HOIST_IDLE: true,
+  /** An idle hoist's worth by the browns it pulls down from high among the whites (none, one, two or more), and in the
+      block phase (17 Nov: weighed, never ruled out). */
+  HOIST_PULLED: [0.02, 0.15, 1] as readonly number[],
+  HOIST_BLOCK: 0.5,
   /** The whites banked, the chain started only once the finished junk columns waiting for the furnace are down to
       SWITCH_QUEUE (or the junk can't finish the next one): 16 Nov, `decisionTime`. */
   KEEP_FILLING: true,
@@ -1143,15 +1147,16 @@ export function choose(sit: Situation, ctx: Ctx, style: Style, focus: { x: numbe
   // Nothing else worth doing in Stage I: hoist, a black brought back to the trapped browns at the top to pull them down
   // (or a brown sunk through blacks, lifting them), rather than wait (the user, 16 Nov,
   // notes/distilling/52-a-black-back-along-the-top.webp: "going backwards across the screen ... is good if it pulls
-  // down trapped pieces like that"). Never a white further toward the fire for it.
-  // (Not in the block phase, junk moved in blocks with few small drags: 13 Nov, the twenty-third note.)
-  if (ctx.stage === 'junk' && P.HOIST_IDLE && P.READ && style.path && !blockPhase(cols)) {
+  // down trapped pieces like that"). Never a white further toward the fire for it. Weighed, never ruled out (the user,
+  // 17 Nov: "no move should ever be excluded ... treat it as being less favorable, but not fully excluded"): a drag
+  // pulling fewer browns down counts for less (P.HOIST_PULLED; any hoist at full worth in place of a wait cost the bots'
+  // chains, 16 Nov), and less again in the block phase, junk moved in blocks with few small drags (13 Nov).
+  if (ctx.stage === 'junk' && P.HOIST_IDLE && P.READ && style.path) {
     const safe = (_d: readonly Drag[], after: Board) => whitesFrom(after, ctx.burnFrom) <= whitesFrom(cols, ctx.burnFrom);
-    // (The drag pulling the most browns down from high among the whites first, then the hoist's own worth.)
-    // (Only a drag pulling two or more of them down: any hoist in place of a wait cost the bots' chains, 16 Nov.)
-    const h = hoists(sit, style, reading, safe).filter((m) => m.value > P.RATE_MIN && pulledDown(cols, m.move.drags) >= 2 && ok(m))
-      .sort((a, b) => pulledDown(cols, b.move.drags) - pulledDown(cols, a.move.drags) || b.value - a.value)[0];
-    if (h) return advice('move', HOIST_LABEL, h.move.reason, h);
+    const block = blockPhase(cols) ? P.HOIST_BLOCK : 1;
+    const worth = (m: Weighed) => m.value * P.HOIST_PULLED[Math.min(2, pulledDown(cols, m.move.drags))] * block;
+    const h = hoists(sit, style, reading, safe).filter((m) => worth(m) > P.RATE_MIN && ok(m)).sort((a, b) => worth(b) - worth(a))[0];
+    if (h) return advice('move', HOIST_LABEL, h.move.reason, { ...h, value: worth(h) });
   }
   return advice('wait', 'Wait', ready ? 'the column is ready: let the furnace take it' : 'nothing worth moving: wait for the next column');
 }

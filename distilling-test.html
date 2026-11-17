@@ -127,7 +127,7 @@ const log = (t) => { const li = document.createElement('li'); li.textContent = t
 const L = 'wbK*x';
 /** A bot playing the board (src/distill-bots.ts's BotPlayer, the one way bots play anywhere: the same seed and bot play the
     same game here as in the bots' runner and the tests): it ticks the game; the board only shows what it did. */
-let player = null;
+let player = null, mode = '';
 
 function deal() {
   board?.dispose();
@@ -144,6 +144,7 @@ function deal() {
     onFinish: (gm) => { if (gm.dismissed) log(`dismissed: ${gm.points} points in ${gm.columnsUp} columns, ${gm.score().toFixed(2)} a column`); },
   });
   scene.add(board.group);
+  mode = '';
   player = botName ? new BotPlayer(board.game, levelNamed(botName), {
     onEvents: (ev) => board.show(ev),
     onSwap: (x, y, to) => board.showSwap(x, y, to[0], to[1]),
@@ -168,8 +169,17 @@ $('bot').onchange = () => { botName = $('bot').value; deal(); $('bot').blur(); }
 $('speed').onchange = () => { setSpeed(Number($('speed').value)); $('speed').blur(); };
 deal();
 
+/** The bot's mode, in the bar along the bottom, always in view (the user, 17 Nov: "more debugging on like what its
+    evaluation is, like what mood it's in, what it's trying to do ... oh look, it thinks it's in quick move terms"): its
+    stage, how it reads the board and the tactic in play, and the move it's making. */
+function showMode(p) {
+  const stage = p.stage === 'chain' ? `The chain${p.column != null ? ` (building in column ${p.column + 1})` : ''}${p.letGo ? ', let go' : ''}` : 'Stage I: banking whites';
+  const read = p.state && p.tactic ? ` · ${STATES[p.state]?.label ?? p.state}: ${TACTICS[p.tactic]?.label ?? p.tactic}` : '';
+  mode = `${stage}${read} · ${p.kind === 'wait' ? `waiting: ${p.reason}` : p.label}`;
+}
 /** The routine the bot's playing, in small text under the stats, so its plan can be followed. */
 function showRoutine(p) {
+  showMode(p);
   $('routine').innerHTML = ''; const b = document.createElement('b'); b.textContent = p.label;
   // Its target, and the whites still needed for it (to bank, or to fill the columns going up).
   const need = p.whitesNeeded ? `${p.whitesNeeded} more white${p.whitesNeeded > 1 ? 's' : ''} ${p.stage === 'junk' ? 'to bank' : 'to fill it'}` : p.stage === 'junk' ? 'banked' : 'on its way';
@@ -245,7 +255,7 @@ function frame() {
     + `Points <b>${gm.points}</b> · score <b>${gm.score().toFixed(2)}</b> · chain <b>${gm.chain}</b> (best ${gm.longest})`
     // (a bot's moves and a person's effort for them: the user, 16 Nov, "how many moves a bot makes ... can be as important")
     + (player ? `<br>Moves <b>${player.bot.drags}</b> · swaps <b>${gm.swaps}</b> · effort <b>${player.effort.toFixed(0)}</b>` : '');
-  $('prompt').textContent = board.prompt();
+  $('prompt').textContent = player && mode ? mode : board.prompt();
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }

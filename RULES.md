@@ -1199,7 +1199,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   through each brown, pulls them down ("going backwards across the screen ... is good if it pulls down trapped pieces
   like that"). With nothing else worth doing in Stage I (not the block phase), the bot takes such a drag rather than
   waiting, when it pulls two or more browns down from high among the whites; any hoist in place of a wait cost the
-  bots' chains. Early on, browns at the top aren't trapped yet (17 Nov, seed 2 at 41 s, the bot waiting for the burn):
+  bots' chains; weighed, never ruled out (17 Nov: "no move should ever be excluded. I guess you should treat it as
+  being less favorable, but not fully excluded"): a drag pulling one brown down counts 0.15, none 0.02, half again in
+  the block phase. Early on, browns at the top aren't trapped yet (17 Nov, seed 2 at 41 s, the bot waiting for the burn):
   "there's likely going to be more blacks to appear. So those browns at the top are not trapped, but in a later game
   that you would probably want to try and rescue them. But for now, it's fine." 
 
