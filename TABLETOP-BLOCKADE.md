@@ -301,3 +301,8 @@ Blockade nav challenges:
   `src/cade-play.ts`: the best move sequence for the buoys with everyone else still, guns at any enemy in line), not
   the teaching bots. On a phone the pad sits at the bottom, the board above.
 - Next: the teaching bots by tier (the user's notes, §2: hotspots, risk, dancing), then the tabletop on an island.
+- 17 Nov, the user on the route drawn ahead as you plan (each slot's mark, the line between, red where you'd hit
+  something): "I really like how it shows you where you will end up with your moves ... obviously not a normal thing,
+  but certainly is a learning tool. That looks fantastic." Not in the real game: it stays as a learning aid, the first
+  piece of the training mode in §2 ("highlights a route"), and the place the teaching bots' hints can draw on (risks,
+  hotspots) as they come; a switch to turn it off for playing it as the game does, later.

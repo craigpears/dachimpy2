@@ -14,3 +14,4 @@ link: cade-test.html?as=dachimpy
 
 - 17 Nov: added.
 - 17 Nov: for you to playtest: Ready to play: a real board from your BlockadeSim from above in the den's and the 3D blockade's look, your war brig (?ship=sloop or warFrigate), four slots a turn with your guns, your route drawn as you plan, the turn played back slot by slot. The other ships are stand-ins, not the teaching bots yet. ?board= any of the 26 boards.
+- 17 Nov: 17 Nov, the user: the route drawn ahead as you plan "looks fantastic": not in the real game, kept as a learning aid, the training mode's start (TABLETOP-BLOCKADE.md §3).
