@@ -230,3 +230,29 @@ describe(`seed 5008 (18 Nov): "The straightening up thing is woeful right now"`,
     expect(junkDisorder(tops, 4)).toBeLessThan(junkDisorder(sides, 4));
   });
 });
+
+// (seed 5002, CC^8, 78 s in: the whites banked in columns 3 to 6 with fresh junk left of them, and whites in column 8,
+// gaps among the junk; the bot lifted a black already over, in column 7, up through the browns)
+const GAP = 'KwwbKbb* KbwbwKKwK wwwwwwwK wwwwwwwww wwwwwwww wbwwwwwww bbKKKbKK bbwwbbbwK bbbbKbbK KbbbbKKKb';
+describe(`"The preference should always be to take pieces from the left-hand side, i.e. the ones past the whites" (18 Nov)`, () => {
+  const lv = levelNamed('cc8');
+  const at = (cols: number[][], timeLeft: number) => choose({ cols, chain: 0, timeLeft }, contextFor(cols, 'junk', 0, lv.reach), lv);
+  it(`"If it's got a gap, sometimes it will drag things down that are already kind of far over past the whites": the gap filled from the left's junk`, () => {
+    const cols = B(GAP), end = bankOf(cols).at(-1)! + 1;
+    const a = at(cols, 13646), after = playDrags(cols, a.drags)!;
+    expect(a.kind).toBe('move');
+    expect(a.drags.some((d) => d.x < end), a.reason).toBe(true);
+    // (the gap filled: a white on the junk side further left)
+    const whiteX = (b: number[][]) => b.reduce((n, c, x) => n + (x >= end ? x * c.filter((p) => p === 0).length : 0), 0);
+    expect(whiteX(after), a.reason).toBeLessThan(whiteX(cols));
+    // (as it was: the junk already over reworked)
+    const was = P.LEFT_FIRST;
+    try { P.LEFT_FIRST = 0; expect(at(cols, 13646).drags.every((d) => d.x >= end)).toBe(true); } finally { P.LEFT_FIRST = was; }
+  });
+  it(`"Unless there's a clear need ... because of a risk of whites being burned": a white in the furnace's column is got out however it's quickest`, () => {
+    const cols = B(GAP);
+    cols[9][8] = 0;
+    const a = at(cols, 3000), after = playDrags(cols, a.drags)!;
+    expect(after[9].filter((p) => p === 0).length, a.reason).toBe(0);
+  });
+});

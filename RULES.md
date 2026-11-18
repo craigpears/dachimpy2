@@ -1275,6 +1275,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   burned before we really do anything useful with them. So why try doing anything to improve the quality? ... The
   reason for pulling rounds down doesn't exist yet." The tie-breaker that took a brown a flick lower (13 Nov) leaves
   the columns to burn out of it, so it no longer stretches a drag down into the furnace's column.
+- **Distilling: pieces from the left first, the junk already over left alone (18 Nov).** "If it's got a gap, sometimes
+  it will drag things down that are already kind of far over past the whites, unless there's a clear need to straighten
+  it up because of a risk of whites being burned or losing the ability to zigzag ... The preference should always be
+  to take pieces from the left-hand side, i.e. the ones past the whites. You get far more from dragging them over to
+  fix problems than you do messing around with what's already over there." In Stage I, with whites banked (three
+  columns) and junk still in them or left of them: a gap among the junk, a white's place, is filled by junk brought
+  over from the left rather than junk already over, and a move only reworking the junk already over is the last
+  choice. Not when it's needed: a white at risk of burning (a danger zone, the columns about to burn, flagged), a
+  trapped white or trapped junk freed, the right-hand pair sorted before the zigzag's ladder is lost, damage control.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one

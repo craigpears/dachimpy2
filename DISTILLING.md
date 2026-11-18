@@ -2472,6 +2472,27 @@ white columns now, so we're switching from quick dragging to ... straightening u
   minute 16.9 to 16.2; a column gone, moves 8.5 to 9.0. Seed 5008 better, longest 3 to 5 and no white burned (was 1);
   5003 (3 to 6), 5004 (3 to 6), 5005 (2 to 5) better; 5007 (9 to 6), 5009 (6 to 4, two whites burned) worse. P31 and
   P32 (tests/distill-positions.test.ts) no longer make their bad move.
+- **Pieces from the left first** (18 Nov, the user: "if it's got a gap, sometimes it will drag things down that are
+  already kind of far over past the whites ... The preference should always be to take pieces from the left-hand side";
+  RULES.md). `reworkOf` (src/distill-bots.ts, P.LEFT_FIRST, P.LEFT_BANK): in Stage I with three white columns banked or
+  more and junk in them or left of them, a move whose drags all start right of the bank is `rework` unless it moves a
+  white on the junk side left, frees a trapped white or trapped junk, or the reading's tactic is a need (fillGaps,
+  freeTrapped, sortLadder, fixCracks, damage control); and a gap filled (a white on the junk side moved left, `whiteX`)
+  is 'right' or 'left' by where its drags start, unless the white was at risk (a danger zone, the columns from
+  `burnFrom`, flagged). `choose` takes the best move from the left in place of rework, and a left gap fill in place of
+  a right one, so long as it's worth a move and puts no more junk into the bank (`keeps`); straightening up looks for
+  them under the plain reading (quick sorting) before sorting the junk columns, and the V's tail under straightening
+  up's own drags, then blocks, before sorting the tail. Found on the way: the tail's sort, a brown brought to the V's
+  tip, swapping the same pieces back and forth for 6 s on seed 5000 at 112 s with 15 junk left of the bank; and the
+  "nothing needed" test first counted only whites leaving the junk side, so a white nudged one column left was rework,
+  and the fallback then pushed a black from the left into the bank. Over seeds 5000 to 5004's first 150 s, the Stage I
+  moves starting right of the bank with junk left of it, not a white's rescue, about 40 to 15.
+- **Run, 20 boards each** (CC^8, the live ec9ab8e against this): chain mean 4.8 to 5.0, best 7 to 8, at target 0 to 2
+  of 20 (seeds 5004 and 5012, CC^8 each); no white burned 17 to 16 of 20, whites burned 0.3 to 0.4 a session (none in
+  the first 3 minutes); points a minute 16.2 to 17.2; a column gone, moves 9.0 to 8.9. Seed 5008 worse, longest 5 to 4
+  and three whites burned late (from 552 s); 5004 (6 to 8), 5012 (7 to 8), 5014 (2 to 4) better; 5011 (3 to 1) worse.
+  P37 (tests/distill-positions.test.ts) refreshed: the bot's move there is now a four-drag crawl filling the gap from
+  the left, and it still shuts the white in.
 - **Found on the way** (17 Nov): the chain's channel moves (`P.CHANNEL_SORT`) slow Helium's Crystal Clear 1, seed 269's
   first chain 56 moves to 81, past tests/helium-goal.test.ts's 80 (failing on main since the channels went up); gating
   them to targets of 3 or more fixes it but cost the CC^1 opening test (P.BUFFER on) two whites on seed 1. Settled the
