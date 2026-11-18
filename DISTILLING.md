@@ -2510,6 +2510,27 @@ white columns now, so we're switching from quick dragging to ... straightening u
   `tools/distill-compare.mjs [file] [target]` (the newest in Downloads by default) prints your game's figures beside
   the bot's on the same seed, then each of your moves where the bot, on that same board (`compare`, the bots'
   `advise`), would have moved another piece, with its reason (ALL=1 every move).
+- **The user's own game, seed 5011** (18 Nov, recorded: notes/distilling/recordings/seed5011-18nov.json; the bot's
+  weakest benchmark board, its longest chain 1). The user's CC^6 (unfinished, 3.5 minutes, 105 moves) beside the CC^8
+  bot's 1 on the same pieces (`tools/distill-compare.mjs`'s timeline). Their account as they played: "looking for the
+  longest moves ... I want to drag things as far as I can, as long as I've got my safe spot sorted"; "break up that
+  kind of block of browns in the middle, and then I'm just dragging stuff as far as I can"; "instead of trying to use
+  pieces on the right to fix it, I am just dragging new pieces in as much as I can"; then, near decision time, "I'm
+  not dragging any more blacks over because I don't know if I'm going to be able to. Maybe I'll try and get one more
+  column"; then straightening up, "these trapped browns along the top ... dragging browns down ... get those blacks up
+  and out ... dealing with this crap in the bottom left". What the record shows:
+  - Stage I, both burn 8 junk columns in 123 s. The user makes 8 to 9 moves a column, the bot 12 to 20 (in the first
+    column 12 against 20); the bot's extra moves are mostly junk moved on right of the white columns or sorted there
+    (about 4 a column), the user's about 1. The user's longest drags come last (92 to 108 s, 6.2 swaps a move), the
+    last junk carried over before the chain.
+  - Where the whites are when the chain starts, the big difference. At 121 s the user's whites are banked right
+    against the fire (columns 6 to 9 white, the furnace's column the last junk) with the fresh junk left of them
+    (columns 1 to 5): every column the fire takes next is white. The bot's, at 120 s, are in columns 1 to 7, three junk
+    columns between them and the fire, which it burns first (139 s, 154 s) while its chain waits.
+  - The chain: the user goes up six in a row (139 s to 211 s), 5 to 10 moves a column, junk taken left out of the
+    columns going up and whites moved right into their gaps. The bot makes 2 moves a column there and waits ("nothing
+    worth moving") with a brown at the top of the column going up, which goes up with it (169.8 s, `bwwwwwww`): the
+    chain broken before it starts (the bots' runner's "waits in the chain ... with junk in the column going up").
 - **Found on the way** (17 Nov): the chain's channel moves (`P.CHANNEL_SORT`) slow Helium's Crystal Clear 1, seed 269's
   first chain 56 moves to 81, past tests/helium-goal.test.ts's 80 (failing on main since the channels went up); gating
   them to targets of 3 or more fixes it but cost the CC^1 opening test (P.BUFFER on) two whites on seed 1. Settled the
