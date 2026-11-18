@@ -2493,6 +2493,14 @@ white columns now, so we're switching from quick dragging to ... straightening u
   and three whites burned late (from 552 s); 5004 (6 to 8), 5012 (7 to 8), 5014 (2 to 4) better; 5011 (3 to 1) worse.
   P37 (tests/distill-positions.test.ts) refreshed: the bot's move there is now a four-drag crawl filling the gap from
   the left, and it still shuts the white in.
+- **Your own game recorded** (18 Nov, the user: "record and log my moves while I'm playing it live, so you can compare
+  ... you can get more of an insight into what I'm doing differently"): playing distilling-test.html yourself, every
+  move is written down (src/distill-record.ts, `Recorder`: a held piece's swaps one move, each with the board before
+  it, the game time, the furnace's time left and the chain; the columns gone, the burns by hand, how it ended). Save
+  my moves downloads it as `distilling-seed<n>-<when>.json`; a finished game of ten moves or more saves itself.
+  `tools/distill-compare.mjs [file] [target]` (the newest in Downloads by default) prints your game's figures beside
+  the bot's on the same seed, then each of your moves where the bot, on that same board (`compare`, the bots'
+  `advise`), would have moved another piece, with its reason (ALL=1 every move).
 - **Found on the way** (17 Nov): the chain's channel moves (`P.CHANNEL_SORT`) slow Helium's Crystal Clear 1, seed 269's
   first chain 56 moves to 81, past tests/helium-goal.test.ts's 80 (failing on main since the channels went up); gating
   them to targets of 3 or more fixes it but cost the CC^1 opening test (P.BUFFER on) two whites on seed 1. Settled the

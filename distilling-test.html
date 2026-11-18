@@ -10,7 +10,9 @@
      and the bots of src/distill-bots.ts to watch at their own pace (?bot=cc3, each named by its target chain): each drag swept as a
      hand would, the piece held, and the routine it's playing (src/distill-routines.ts) in small text. A speed
      control (16 Nov: "can I at least have some sort of speed control?") runs the whole board slower or faster, the
-     hand, the furnace and the pieces alike, so the bot plays the same game: ?speed=0.5, [ and ] to step it. -->
+     hand, the furnace and the pieces alike, so the bot plays the same game: ?speed=0.5, [ and ] to step it. Playing it
+     yourself, your moves are recorded (src/distill-record.ts; the user, 18 Nov: "record and log my moves while I'm
+     playing it live, so you can compare"): Save my moves downloads them, for tools/distill-compare.mjs. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -65,6 +67,7 @@
     <button id="dismiss">Dismiss</button>
     <button id="pause">Pause</button>
     <button id="burn" title="Burn the furnace's column now, paused or not (X, right-click)">Burn</button>
+    <button id="save" title="Download your moves this game, each with the board before it, to compare with the bots">Save my moves</button>
   </div>
   <div class="row">
     <label for="bot">Watch a practice player:</label>
@@ -98,6 +101,7 @@ import { ROUTINES } from './js/distill-routines.js';
 import { STATES, TACTICS } from './js/distill-read.js';
 import { stepLines } from './js/distill-goals.js';
 import { distillBoard } from './js/den/distill-board.js';
+import { Recorder } from './js/distill-record.js';
 
 const $ = (id) => document.getElementById(id);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -143,6 +147,24 @@ const L = 'wbK*x';
 /** A bot playing the board (src/distill-bots.ts's BotPlayer, the one way bots play anywhere: the same seed and bot play the
     same game here as in the bots' runner and the tests): it ticks the game; the board only shows what it did. */
 let player = null, mode = '';
+/** Your own game recorded, move by move (src/distill-record.ts), when you're the one playing. */
+let recorder = null;
+/** A game of yours over: written down, and saved by itself once (a real game, ten moves or more), so it isn't lost
+    to a New board. */
+function ended() {
+  if (!recorder || recorder.rec.end) return;
+  recorder.finish();
+  if (recorder.rec.moves.length >= 10) saveMoves();
+}
+/** Your moves downloaded as JSON, named by the seed and when. */
+function saveMoves() {
+  if (!recorder) return;
+  const r = recorder.rec, stamp = r.started.replace(/[:.]/g, '-').slice(0, 19);
+  const url = URL.createObjectURL(new Blob([JSON.stringify(r)], { type: 'application/json' }));
+  const a = document.createElement('a'); a.href = url; a.download = `distilling-seed${r.seed}-${stamp}.json`;
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  log(`saved: ${r.moves.length} moves, ${a.download}`);
+}
 
 function deal() {
   board?.dispose();
@@ -152,11 +174,13 @@ function deal() {
     game: new Distilling(seeded(seed)), at: new THREE.Vector3(0, 0, 0), size: 3,
     onColumn: (c, finished) => {
       window.played.push({ t: board.game.time, up: c.up, pieces: c.pieces.map((p) => L[p]).join('') });   // (every column gone, for checking a run)
+      recorder?.column(c);
+      if (finished) ended();
       const what = c.message ? (c.message === 'clear' && c.chain > 1 ? `${MESSAGES.clear} x${c.chain}` : MESSAGES[c.message]) : c.up ? 'up' : 'burned';
       log(`${c.up ? 'up' : 'burned'}: ${c.pieces.map((p) => L[p]).join('')}, ${what}${c.spice ? `, ${MESSAGES[c.spice]}` : ''}, ${c.points + c.bonus} points`);
       if (finished) log(`finished: ${board.game.points} points in ${board.game.columnsUp} columns, ${board.game.score().toFixed(2)} a column`);
     },
-    onFinish: (gm) => { if (gm.dismissed) log(`dismissed: ${gm.points} points in ${gm.columnsUp} columns, ${gm.score().toFixed(2)} a column`); },
+    onFinish: (gm) => { ended(); if (gm.dismissed) log(`dismissed: ${gm.points} points in ${gm.columnsUp} columns, ${gm.score().toFixed(2)} a column`); },
   });
   scene.add(board.group);
   mode = '';
@@ -168,6 +192,9 @@ function deal() {
     onPlan: (p) => showRoutine(p),
   }) : null;
   board.external = !!player;
+  recorder = player ? null : new Recorder(board.game, seed, { speed });
+  window.recording = () => recorder?.rec;   // (for the console)
+  $('save').style.display = recorder ? '' : 'none';
   // (a burn by hand while a bot plays: the bot told of the column)
   if (player) board.burn = () => player.burn();
   showKnows();
@@ -179,6 +206,7 @@ $('restart').onclick = () => deal();
 $('next').onclick = () => { seed++; deal(); };
 $('dismiss').onclick = () => board.dismiss();
 $('burn').onclick = () => board.burn();
+$('save').onclick = () => { saveMoves(); $('save').blur(); };
 $('pause').onclick = () => { board.paused = !board.paused; $('pause').classList.toggle('on', board.paused); };
 $('bot').onchange = () => { botName = $('bot').value; deal(); $('bot').blur(); };
 $('speed').onchange = () => { setSpeed(Number($('speed').value)); $('speed').blur(); };
@@ -236,8 +264,8 @@ addEventListener('keydown', (e) => {
 const canvas = renderer.domElement;
 const ndc = (e) => [e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1];
 canvas.addEventListener('pointermove', (e) => board.pointer(...ndc(e), camera));
-canvas.addEventListener('pointerdown', (e) => { board.pointer(...ndc(e), camera); board.press(e.button); canvas.setPointerCapture(e.pointerId); });
-canvas.addEventListener('pointerup', (e) => board.release(e.button));
+canvas.addEventListener('pointerdown', (e) => { board.pointer(...ndc(e), camera); if (e.button === 0) recorder?.press(); board.press(e.button); canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointerup', (e) => { board.release(e.button); if (e.button === 0) recorder?.release(); });
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
 function fit() {
@@ -269,7 +297,8 @@ function frame() {
     + `Flask <b>${gm.flask}</b> / 100 · up <b>${gm.columnsUp}</b>, burned <b>${gm.columns.length - gm.columnsUp}</b><br>`
     + `Points <b>${gm.points}</b> · score <b>${gm.score().toFixed(2)}</b> · chain <b>${gm.chain}</b> (best ${gm.longest})`
     // (a bot's moves and a person's effort for them: the user, 16 Nov, "how many moves a bot makes ... can be as important")
-    + (player ? `<br>Moves <b>${player.bot.drags}</b> · swaps <b>${gm.swaps}</b> · effort <b>${player.effort.toFixed(0)}</b>` : '');
+    + (player ? `<br>Moves <b>${player.bot.drags}</b> · swaps <b>${gm.swaps}</b> · effort <b>${player.effort.toFixed(0)}</b>` : '')
+    + (recorder ? `<br>Your moves <b>${recorder.rec.moves.length}</b> recorded · swaps <b>${gm.swaps}</b>` : '');
   $('prompt').textContent = player && mode ? mode : board.prompt();
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
