@@ -215,6 +215,8 @@ export const P = {
   TIE_SCORE: 0.25,
   TIE_SWAPS: 2,
   TIE_COLS: 4,
+  /** The tie-breaker leaves the columns about to burn out of it (18 Nov, seed 5008; false: as before). */
+  TIE_SPARES_BURN: true,
   /** The block phase: what each drag costs a person on top (`judge`), so a small move earns its place. */
   BLOCK_DRAG_MS: 400,
   /** Stage I: whites in the column before the furnace's, hard to reach, saved first too (`dangerZones`; 0 off). */
@@ -464,11 +466,12 @@ export function edgeZone(cols: Board): number | null {
   return e.length ? Math.min(...e.map((w) => w.x)) : null;
 }
 /** The right-hand columns' order (the user, 13 Nov, the twenty-first note: "one of the heuristics is browns being
-    lower down the board"): every brown's depth in half pieces, less every black's, in the last TIE_COLS columns.
-    Higher is browns lower and blacks higher. */
-export function rightOrder(cols: Board): number {
+    lower down the board"): every brown's depth in half pieces, less every black's, in the last TIE_COLS columns,
+    short of `upTo` (the columns from it are to burn, so their order is no matter: the user, 18 Nov). Higher is
+    browns lower and blacks higher. */
+export function rightOrder(cols: Board, upTo = COLS): number {
   let v = 0;
-  for (let x = COLS - P.TIE_COLS; x < COLS; x++) cols[x].forEach((p, y) => {
+  for (let x = COLS - P.TIE_COLS; x < Math.min(upTo, COLS); x++) cols[x].forEach((p, y) => {
     const h = 2 * y + (cols[x].length === TALL ? 0 : 1);
     if (p === BROWN) v += h; else if (p === BLACK) v -= h;
   });
@@ -478,15 +481,21 @@ export function rightOrder(cols: Board): number {
     way, spending extra moves to sort them at this point. But it's still preferable if it costs you very little
     ... a little flick and a swish, and the brown can be one level lower"): among moves doing the best one's job
     (its board score gain, within TIE_SCORE) in as many drags and at most TIE_SWAPS more swaps, the one leaving
-    the right-hand side in the best order, browns lower and blacks higher; the best itself when none is better. */
-export function tieBreak(cols: Board, moves: readonly Weighed[], best: Weighed, block = false, accept: (m: Weighed) => boolean = () => true): Weighed {
-  if (!best.after) return best;
+    the right-hand side in the best order, browns lower and blacks higher; the best itself when none is better.
+    Never the columns about to burn (`upTo` on; the user, 18 Nov, seed 5008, a brown run five swaps into the
+    furnace's column for it: "we are expecting these columns to be burned before we really do anything useful with
+    them. So why try doing anything to improve the quality? ... The reason for pulling rounds down doesn't exist
+    yet"): while whites are banked their order is no matter, so with none of the right-hand columns left short of
+    them it never changes the choice. */
+export function tieBreak(cols: Board, moves: readonly Weighed[], best: Weighed, block = false, accept: (m: Weighed) => boolean = () => true, upTo = COLS): Weighed {
+  if (!best.after || (P.TIE_SPARES_BURN && upTo <= COLS - P.TIE_COLS)) return best;
+  if (!P.TIE_SPARES_BURN) upTo = COLS;
   const base = boardScore(cols, block), gain = boardScore(best.after, block) - base, swaps = swapsIn(best.move.drags);
-  let pick = best, order = rightOrder(best.after);
+  let pick = best, order = rightOrder(best.after, upTo);
   for (const m of moves) {
     if (m === best || !m.after || m.move.drags.length !== best.move.drags.length) continue;
     if (swapsIn(m.move.drags) > swaps + P.TIE_SWAPS || boardScore(m.after, block) - base < gain - P.TIE_SCORE) continue;
-    const o = rightOrder(m.after);
+    const o = rightOrder(m.after, upTo);
     if (o > order && accept(m)) { pick = m; order = o; }
   }
   return pick === best ? best : { ...pick, tie: true };
@@ -879,6 +888,11 @@ export function byTactic(sit: Situation, ctx: Ctx, style: Style, r: Reading, out
   else if (r.tactic === 'straighten' && style.path) for (const d of straightenDrags(cols, r)) {
     const after = playDrags(cols, d), p = cols[d[0].x][d[0].y] === BROWN ? 'brown' : 'black', from = `column ${d[0].x + 1}, row ${d[0].y + 1}`;
     const stray = r.targets.some((t) => t.x === d[0].x && t.y === d[0].y);
+    // (The ferry: a black let into the bank's top, a brown taken over through it.)
+    if (after && d.length === 2 && p === 'black' && !stray) {
+      cands.push({ move: { routine: 'turnOver', label: STRAIGHTEN_LABEL, drags: d, reason: `the ferry: the black at ${from} let down into the whites' top, then the brown at column ${d[1].x + 1}, row ${d[1].y + 1} up through the whites, down through it and over` }, after });
+      continue;
+    }
     // (A plain long drag is the sweep, swept blind: "you just go down, up, and kind of make that large sweeping motion".)
     if (after) cands.push({ move: { routine: 'turnOver', ...(plainDrag(d) ? {} : { label: STRAIGHTEN_LABEL }), drags: d, reason: stray ? `the ${p} at ${from} got out of the white columns, ${p === 'black' ? 'down through the whites and up through the browns' : 'over to the junk'}; sorted after` : `the ${p} at ${from} ${p === 'black' ? 'lifted up through the browns' : 'sunk down through the blacks'}, blacks to the top and browns to the bottom` }, after });
   }
@@ -1144,6 +1158,15 @@ export function choose(sit: Situation, ctx: Ctx, style: Style, focus: { x: numbe
   // (Only with the furnace's clock running: with the fire held, as in Helium's lessons, a wait is the burn that moves the
   // lesson on.)
   const idleOff = !P.NEVER_IDLE || !Number.isFinite(sit.timeLeft);
+  // Nothing to get over: the junk columns straightened up, blacks to the top and browns to the bottom across them (the
+  // user, 18 Nov, seed 5008, the bot waiting with the column ready: "you've got these browns that can be taken over and
+  // then straightened up ... The straightening up thing is woeful right now").
+  if (!idleOff && reading.tactic === 'straighten' && (!first || (!first.saves && first.value <= P.RATE_MIN))) {
+    const sorting: Reading = { ...reading, sortOnly: true }, was = { moves, stepsOf, first };
+    moves = weigh(sit, ctx, style, sorting); stepsOf = stepsWith(sorting); first = firstOk();
+    if (first && first.value > P.RATE_MIN && (!was.first || first.value > was.first.value)) read = sorting;
+    else ({ moves, stepsOf, first } = was);
+  }
   if (!idleOff && reading.tactic === 'straighten' && (!first || (!first.saves && first.value <= P.RATE_MIN))) {
     const plain = readBoard(cols, { stage: ctx.stage, timeLeft: sit.timeLeft, straighten: false }), was = { moves, stepsOf, first };
     moves = weigh(sit, ctx, style, plain); stepsOf = stepsWith(plain); first = firstOk();
@@ -1153,7 +1176,7 @@ export function choose(sit: Situation, ctx: Ctx, style: Style, focus: { x: numbe
   const ok = (m: Weighed) => !P.GOALS || purposeful(stepsOf(m));
   // A move saving a white from the furnace is played whatever it scores.
   const top = first && (first.saves || first.value > (ctx.stage === 'junk' ? P.RATE_MIN : P.MIN)) ? first : null;
-  const best = top && ctx.stage === 'junk' && !top.saves && !top.tactic ? tieBreak(cols, moves, top, blockPhase(cols), ok) : top;
+  const best = top && ctx.stage === 'junk' && !top.saves && !top.tactic ? tieBreak(cols, moves, top, blockPhase(cols), ok, ctx.burnFrom) : top;
   const advice = (kind: Advice['kind'], label: string, reason: string, m: Weighed | null = null): Advice => ({
     stage: ctx.stage, phase: phaseOf(cols, ctx.stage), kind, routine: !m ? null : m.move.routine === 'path' ? 'hook' : m.move.routine, technique: m?.move.routine ?? null,
     label, reason, drags: m ? joinPairs(cols, m.move.drags) : [], value: m?.value ?? 0, sweep: false, ...(m?.tie ? { tie: true } : {}),
@@ -1204,7 +1227,7 @@ export function choose(sit: Situation, ctx: Ctx, style: Style, focus: { x: numbe
   // by the fire: "What do you mean, nothing worth moving? There's no such thing as nothing worth moving ... browns can go
   // up, and then you can get the blacks ... you've got such a safe position here, you can just go for it"): in Stage I
   // with the column not ready, the best move with a goal, however little it gets, rather than a wait (P.NEVER_IDLE).
-  if (!idleOff && ctx.stage === 'junk' && !ready && first && first.value > 0 && ok(first)) {
+  if (!idleOff && ctx.stage === 'junk' && first && first.value > 0 && ok(first)) {
     const label = first.move.routine === 'path' ? ((first.move as PathMove).pair ? PAIR_LABEL : PATH_LABEL) : ((first.move as Move).label ?? ROUTINES[first.move.routine].label);
     return advice('move', label, `${first.tactic ? `${TACTICS[first.tactic].label.toLowerCase()}: ` : ''}${first.move.reason}`, first);
   }

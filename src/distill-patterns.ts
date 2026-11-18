@@ -49,6 +49,10 @@ export const PATTERN = {
   /** Getting it over (`junkOver`, src/distill-read.ts's `straightened`): each piece of junk left of the bank carried past
       it, worth a black out of the bank; 0 counts only the bank's own junk, as till 17 Nov. */
   OVER: 2,
+  /** The junk columns' order by height over the board, not column by column (`junkDisorder`; 18 Nov; 0: as before). */
+  BY_HEIGHT: 1,
+  /** ... over this many columns either side (`junkDisorder`). */
+  ORDER_ACROSS: 9,
 };
 
 /** A piece found by a pattern. */
@@ -243,12 +247,26 @@ export function bankStrays(cols: Board, xs: readonly number[]): At[] {
   for (const x of xs) cols[x].forEach((p, y) => { if (p === BLACK || p === BROWN) out.push({ x, y }); });
   return out;
 }
-/** The junk columns right of the bank, from `from` (half junk or more), their browns above blacks, counted in pairs:
-    the swaps still to sort them blacks over browns (the user, 16 Nov: "straightening up the board, getting black to the
-    top, brown to the bottom on the junk columns"). Not the furnace's: it burns as it is. */
+/** The junk columns right of the bank, from `from` (half junk or more), out of order: blacks at the top and browns at
+    the bottom across them, by height over the board (each brown's height and each black's depth in half rows, halved:
+    a swap of a brown down past a black is one), not column by column (the user, 18 Nov, seed 5008, a column of browns
+    beside columns of blacks: "it feels like it's got the board rotated the wrong way around, and it's putting them at
+    the side rather than at the top"; 16 Nov: "getting black to the top, brown to the bottom on the junk columns"): each
+    brown higher than a black, by half rows, in any of the junk columns (PATTERN.ORDER_ACROSS either side), a pair. Lower is better. Not the
+    furnace's: it burns as it is. PATTERN.BY_HEIGHT 0: the old count, each column's browns above its blacks. */
 export function junkDisorder(cols: Board, from: number): number {
   let n = 0;
-  for (let x = Math.max(0, from); x < COLS - 1; x++) if (cols[x].filter(isJunk).length * 2 >= cols[x].length) n += inversions(cols[x]);
+  const xs: number[] = [];
+  for (let x = Math.max(0, from); x < COLS - 1; x++) if (cols[x].filter(isJunk).length * 2 >= cols[x].length) xs.push(x);
+  if (!PATTERN.BY_HEIGHT) { for (const x of xs) n += inversions(cols[x]); return n; }
+  const pieces = (x: number, p: number) => cols[x].flatMap((q, y) => (q === p ? [halfOf(cols, x, y)] : []));
+  for (const x of xs) {
+    const browns = pieces(x, BROWN);
+    for (const bx of xs) {
+      if (Math.abs(bx - x) > PATTERN.ORDER_ACROSS) continue;
+      for (const k of pieces(bx, BLACK)) for (const b of browns) if (b < k) n++;
+    }
+  }
   return n;
 }
 

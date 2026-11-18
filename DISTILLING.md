@@ -2455,6 +2455,23 @@ white columns now, so we're switching from quick dragging to ... straightening u
   gone, moves 9.3 to 8.5 and effort down a tenth (Stage I's moves 3115 to 2496 in all). Seed 5008 itself worse: longest
   7 to 3. Seeds 5000 (3 to 6), 5009 (4 to 6, no white burned now), 5013 (2 to 5) better; 5003 (7 to 3), 5017 (6 to 3)
   worse.
+- **Seed 5008's straightening up, again** (18 Nov, the user watching seed 5008 live; RULES.md's four notes of the
+  day; notes/distilling/58-...): the tie-breaker (`tieBreak`, `rightOrder`) leaves the columns from `burnFrom` out
+  (P.TIE_SPARES_BURN): at 1.9 s it had stretched "finish the junk column" from two swaps to five, the brown into the
+  furnace's column. Never a wait for a ready column (P.NEVER_IDLE no longer stops at `ready`). The junk's order by
+  height across the junk columns (`junkDisorder`, PATTERN.BY_HEIGHT, ORDER_ACROSS): each brown higher than a black, in
+  half rows, a pair. A plain sum of heights was tried first and dropped: junk arriving anywhere raised it, so picture 3's
+  sweep counted as making things worse; neighbouring columns only (ORDER_ACROSS 1) left browns left and blacks right.
+  With nothing to get over, straightening up sorts (`Reading.sortOnly`, the bot's fallback before quick sorting); junk
+  got over keeps half its worth whatever sorting it costs, READ.SORT_FLOOR telling such moves apart below that. The
+  ferry (`ferryDrags`, READ.FERRY): on the board the bot waited on, no single drag got anything over (the browns top
+  out under whites, a junk column of browns beside them); a black let down from the top of the junk beside the bank,
+  then a brown up through the whites and down through it, two drags as one move: bank junk 10 to 5 in ten moves.
+- **Run, 20 boards each** (CC^8, the live 3d53f5f against this): chain mean 4.4 to 4.8, best 9 to 7, at target 2 to 0
+  of 20; no white burned 17 of 20 both, whites burned 0.1 to 0.3 a session (0.0 to 0.1 in the first 3 minutes); points a
+  minute 16.9 to 16.2; a column gone, moves 8.5 to 9.0. Seed 5008 better, longest 3 to 5 and no white burned (was 1);
+  5003 (3 to 6), 5004 (3 to 6), 5005 (2 to 5) better; 5007 (9 to 6), 5009 (6 to 4, two whites burned) worse. P31 and
+  P32 (tests/distill-positions.test.ts) no longer make their bad move.
 - **Found on the way** (17 Nov): the chain's channel moves (`P.CHANNEL_SORT`) slow Helium's Crystal Clear 1, seed 269's
   first chain 56 moves to 81, past tests/helium-goal.test.ts's 80 (failing on main since the channels went up); gating
   them to targets of 3 or more fixes it but cost the CC^1 opening test (P.BUFFER on) two whites on seed 1. Settled the

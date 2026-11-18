@@ -5,9 +5,9 @@ import { describe, expect, it } from 'vitest';
 import { P, advise, chainContext, choose, contextFor, decisionTime, levelNamed, pulledDown } from '../src/distill-bots';
 import { channelOrder } from '../src/distill-goals';
 import { playDrags } from '../src/distill-routines';
-import { readBoard, straightened as progressOf, strayDrags, trappedJunk } from '../src/distill-read';
+import { ferryDrags, junkOver, readBoard, straightened as progressOf, strayDrags, trappedJunk } from '../src/distill-read';
 import { S, trapped } from '../src/distill-score';
-import { bankJunk, bankOf, solidColumns } from '../src/distill-patterns';
+import { bankJunk, bankOf, junkDisorder, solidColumns } from '../src/distill-patterns';
 import { BROWN, Distilling } from '../src/distilling';
 
 const B = (s: string) => s.split(' ').map((c) => [...c].map((ch) => 'wbK*x'.indexOf(ch)));
@@ -87,8 +87,13 @@ describe('the user\'s pictures (16 Nov), copied exactly', () => {
     expect(bank).toEqual([0, 1, 2, 3]);
     expect(bankJunk(cols, bank)).toBe(4);
     const run = playOn(PIC3, 4);
-    // (its first move the sweep itself: the black at column 1, row 7 down through the whites and up through the browns)
-    expect(run[0].a.drags).toEqual([{ x: 0, y: 6, ways: [3, 3, 3, 0, 0, 0, 0, 0] }]);
+    // (its first move a sweep itself: one of the two blacks, column 1's or column 4's at row 7, down through the whites and
+    // up through the browns in one long drag; since 18 Nov, the junk's order counted across the junk columns, column 4's
+    // first, column 1's two moves on)
+    expect(run[0].a.drags).toHaveLength(1);
+    expect([0, 3]).toContain(run[0].a.drags[0].x);
+    expect(run[0].a.drags[0].y).toBe(6);
+    expect(run[0].a.drags[0].ways.length).toBeGreaterThanOrEqual(8);
     const last = run[run.length - 1].cols;
     expect(bank.some((x) => last[x].includes(2))).toBe(false);   // (no black left in the white columns)
     expect(bankJunk(last, bank)).toBeLessThanOrEqual(1);
@@ -196,5 +201,32 @@ describe('seed 5008 (17 Nov): "There\'s no such thing as nothing worth moving"',
     // (the two junk columns side by side sorted blacks over browns, nothing else changed: straightening up gets nothing)
     const sorted = B(PIC56); sorted[6] = [2, 2, 1, 1, 1, 1, 1, 1]; sorted[7] = [2, 2, 2, 1, 1, 1, 1, 1, 1];
     expect(progressOf(r, B(PIC56), sorted)).toBe(0);
+  });
+});
+
+// Seed 5008, 18 Nov: the bot waiting, "the column is ready", with browns stuck at the top of the bank behind a junk
+// column of browns, one black on its top.
+const READY = 'bbwwwbwww bbwwwwww wwwwwwwww wwwwbwww Kbbbbbbbw bw*KbKbw bbKKKK*bK *bKbKKKb KbbKKKbbK bbbKbKKb';
+describe(`seed 5008 (18 Nov): "The straightening up thing is woeful right now"`, () => {
+  it(`"It's still saying waiting, the column is ready ... I cannot fathom what that logic is": never a wait for a ready column while there's straightening up to do`, () => {
+    const run = playOn(READY, 8);
+    expect(run.length).toBe(8);
+  });
+  it(`"You've got these browns that can be taken over and then straightened up": the ferry, a black let into the whites' top and a brown taken over through it, gets the stuck browns out`, () => {
+    const cols = B(READY), xs = bankOf(cols);
+    expect(xs).toEqual([0, 1, 2, 3]);
+    // No single drag gets anything over: the browns top out under whites, with a wall of browns beside them.
+    for (const d of strayDrags(cols, readBoard(cols, { stage: 'junk', timeLeft: 40000 }).targets, 4)) expect(junkOver(xs, cols, playDrags(cols, d)!)).toBeLessThanOrEqual(0);
+    expect(ferryDrags(cols, xs).length).toBeGreaterThan(0);
+    const run = playOn(READY, 10);
+    expect(run[0].a.reason).toMatch(/the ferry/);
+    expect(bankJunk(run[run.length - 1].cols, xs)).toBeLessThanOrEqual(bankJunk(cols, xs) - 4);
+  });
+  it(`"It's got the board rotated the wrong way around, and it's putting them at the side rather than at the top": a column of browns beside a column of blacks is out of order, blacks along the top and browns below in order`, () => {
+    const base = B(READY);
+    const sides = base.map((c) => [...c]), tops = base.map((c) => [...c]);
+    sides[5] = [1, 1, 1, 1, 1, 1, 1, 1, 1]; sides[6] = [2, 2, 2, 2, 2, 2, 2, 2];
+    tops[5] = [2, 2, 2, 2, 1, 1, 1, 1, 1]; tops[6] = [2, 2, 2, 2, 1, 1, 1, 1];
+    expect(junkDisorder(tops, 4)).toBeLessThan(junkDisorder(sides, 4));
   });
 });

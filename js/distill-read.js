@@ -105,11 +105,18 @@ export const READ = {
         (down through the whites and up through the browns in one sweep). */
     STRAIGHTEN_SOLID: 3,
     STRAY_SWAPS: 12,
+    /** The ferry (`ferryDrags`, 18 Nov): on (1) or off (0); a black let down this many swaps at most into the bank's top;
+        this many ferries at most a board. */
+    FERRY: 1,
+    FERRY_SWAPS: 3,
+    FERRY_MOST: 24,
     /** Straightening up's credit for sorting the junk columns, blacks over browns in each (`junkDisorder`), a swap of
         sorting worth this much, only on a move that gets junk out or freed: till 17 Nov, a move of its own too (seed 5008:
         "a whole column of black, whole column of brown"; "it's just trying to sort blacks and browns ... those blacks up
         at the top were fine. Why did it have to drag them into a column? That's just wasting moves"). */
     SORT_CREDIT: 0.5,
+    /** ... and its share under the half kept by junk got over (18 Nov). */
+    SORT_FLOOR: 0.05,
     /** A trapped white's surroundings, for how freely they move (low): this many columns either side. */
     FLOW_NEAR: 2,
 };
@@ -325,7 +332,12 @@ export function straightened(r, cols, after) {
     // furnace's clock running: never a move of its own then, READ.SORT_CREDIT. With the fire held, as in Helium's lessons,
     // a move of its own still: the plain move they show.)
     const got = out + freed, sorting = READ.SORT_CREDIT * (junkDisorder(cols, bankEnd(xs)) - junkDisorder(after, bankEnd(xs)));
-    return got > 0 || r.held ? Math.max(0, got + sorting) : 0;
+    // (Junk got over, with the clock running, keeps half its worth whatever the sorting it costs: the junk columns by height, 18 Nov, count a black
+    // taken off a column's top heavily, and that's the ferry's way over.)
+    // (Below that floor the sorting still tells two such moves apart, a little: READ.SORT_FLOOR.)
+    if (got > 0 && !r.held)
+        return Math.max(got / 2 + READ.SORT_FLOOR * Math.tanh(sorting), got + sorting);
+    return r.held || r.sortOnly ? Math.max(0, got + sorting) : 0;
 }
 /** What a move gets over, straightening up ("step one, get it over"): the bank's junk out (`bankJunk`), and the junk
     from the bank or left of it carried past it, PATTERN.OVER a piece (17 Nov, seed 5008, the bank done and junk still in the columns
@@ -385,6 +397,9 @@ function trace(cols, x, y, most, ok, keep, cap = 400) {
     black lifted through browns, READ.SORT_SWAPS at most, never into the bank. */
 export function straightenDrags(cols, r) {
     const xs = r.bank ?? [], edge = bankEnd(xs), inBank = (x) => xs.includes(x), out = strayDrags(cols, r.targets, edge);
+    // Nothing gets over in one drag: a ferry, two (`ferryDrags`).
+    if (READ.FERRY && !out.some((ds) => { const a = playDrags(cols, ds); return !!a && junkOver(xs, cols, a) > 0; }))
+        out.push(...ferryDrags(cols, xs));
     // A brown from the junk beside the bank brought in under its stranded blacks, lifting each out as it passes (the
     // user's arrow along the bottom, 16 Nov: "pull those browns down, push the blacks up").
     if (r.targets.some((t) => cols[t.x][t.y] === BLACK))
@@ -415,6 +430,37 @@ export function straightenDrags(cols, r) {
             const ok = (to) => !inBank(to[0]) && isJunk(cols[to[0]][to[1]]);
             for (const d of trace(cols, x, y, READ.SORT_SWAPS, ok, () => true, 200))
                 out.push([d]);
+        });
+    return out;
+}
+/** The ferry (the user, 18 Nov, seed 5008, browns stuck at the top of the bank behind a junk column of browns, one black
+    on its top, the bot waiting: "you've got these browns that can be taken over and then straightened up"): a brown
+    climbs the whites but crosses into the junk only down through a black, so with no black where it tops out, a black
+    from the top of the junk beside the bank is first let down a swap or two into the bank's top, then a brown taken up
+    through the whites, down through it and over; the two drags as one move, kept when together they get junk over. */
+export function ferryDrags(cols, xs) {
+    const edge = bankEnd(xs), inBank = (x) => xs.includes(x), out = [];
+    for (let x = edge; x < Math.min(COLS - 1, edge + 2); x++)
+        cols[x].forEach((p, y) => {
+            if (p !== BLACK || y * 2 >= cols[x].length)
+                return;
+            for (const d of trace(cols, x, y, READ.FERRY_SWAPS, () => true, (_b, at) => inBank(at[0]), 100)) {
+                const b = playDrags(cols, [d]);
+                if (!b)
+                    continue;
+                for (const bx of xs)
+                    b[bx].forEach((q, by) => {
+                        if (q !== BROWN || out.length >= READ.FERRY_MOST)
+                            return;
+                        for (const f of trace(b, bx, by, READ.STRAY_SWAPS, () => true, (_c, at) => at[0] >= edge, 300)) {
+                            const a = playDrags(b, [f]);
+                            if (a && junkOver(xs, cols, a) > 0) {
+                                out.push([d, f]);
+                                break;
+                            }
+                        }
+                    });
+            }
         });
     return out;
 }

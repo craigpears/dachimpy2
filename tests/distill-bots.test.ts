@@ -351,6 +351,23 @@ describe('a brown a flick lower, for next to nothing (13 Nov, the twenty-first n
     const less = { ...hook, after: right('KbKKKbbbw') };
     expect(tieBreak(cols, [plain, less], plain).move).toBe(plain.move);
   });
+  it('never sorts the columns about to burn: no brown run five swaps into the furnace\'s column while whites are banked, 18 Nov ("we are expecting these columns to be burned before we really do anything useful with them")', () => {
+    // notes/distilling/58-*: seed 5008 at 1.9 s, finishing the junk column, the tie-breaker took the brown on past the
+    // job, down through the blacks into the furnace's column, three swaps more for its order.
+    const right = (c9: string) => board([...column(7, 'KKKKbbbb'), ...column(8, c9), ...column(9, 'KKKKbbbb')]);
+    const cols = right('KKKKKbbbb');
+    const plain = { move: { routine: 'diamond' as const, drags: [{ x: 0, y: 0, ways: [0, 0, 0] }], reason: '' }, value: 3, after: right('bKKKKbbbK') };
+    const hook = { move: { routine: 'diamond' as const, drags: [{ x: 0, y: 0, ways: [0, 0, 3, 0, 3] }], reason: '' }, value: 2.4, after: right('KbKKKbbbK') };
+    // Columns 7 to 10 to burn: their order is no matter.
+    expect(tieBreak(cols, [plain, hook], plain, false, () => true, 6).move).toBe(plain.move);
+    const moves: Advice[] = [], g = new Distilling(seeded(5008));
+    try {
+      playSession(g, levelNamed('cc8'), 1, undefined, (a) => { if (g.time > 4000) throw new Error('done'); if (a.kind === 'move') moves.push(a); });
+    } catch (e) { if ((e as Error).message !== 'done') throw e; }
+    expect(moves.length).toBeGreaterThan(3);
+    expect(moves.filter((a) => a.tie)).toEqual([]);
+    expect(moves.some((a) => a.drags.some((d) => d.x === 4 && d.y === 3 && d.ways.length === 5))).toBe(false);
+  });
 });
 
 describe('the block phase: the junk in blocks, the V, a brown kept bottom-left (13 Nov, the twenty-third to twenty-fifth notes)', () => {

@@ -1257,6 +1257,24 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   notes/distilling/57-...).** "Just drag those blacks up ... within a few moves ... I get to this quite quickly, and it's
   markedly better": a black lifted up through the browns into the place of a brown stuck at the top lets the brown down
   and can sink out itself; a brown at the top can't. The bank's junk counts a black in its top half half a brown there.
+- **Distilling: no waiting for a ready column either (18 Nov, seed 5008).** "It's still saying waiting, the column is
+  ready. Again, I cannot fathom what that logic is." The furnace takes the column in its own time, so a ready column is
+  no reason to wait: the bot straightens up meanwhile, the same as when it isn't ready.
+- **Distilling: straightened up means blacks along the top, browns along the bottom, across the junk columns (18 Nov,
+  seed 5008).** "It feels like it's got the board rotated the wrong way around, and it's putting them at the side rather
+  than at the top." A column of browns beside a column of blacks is out of order. The junk's order counts each brown
+  higher than a black anywhere in the junk columns, not each column on its own. With nothing to get over, sorting it is
+  the move ("you've got these browns that can be taken over and then straightened up"); otherwise it only decides
+  between moves that get junk over.
+- **Distilling: the ferry, browns stuck at the top of the white columns taken over (18 Nov, seed 5008).** A brown
+  climbs the whites but crosses into the junk only down through a black. With no black where it tops out (a junk
+  column of browns beside the bank), a black from the top of the junk beside it is let down a swap or two into the
+  whites' top first, then the brown taken up, down through it and over: two drags, one move.
+- **Distilling: no sorting of the columns about to burn while whites are banked (18 Nov, seed 5008,
+  notes/distilling/58-seed-5008-a-brown-run-into-the-furnace-column.webp).** "We are expecting these columns to be
+  burned before we really do anything useful with them. So why try doing anything to improve the quality? ... The
+  reason for pulling rounds down doesn't exist yet." The tie-breaker that took a brown a flick lower (13 Nov) leaves
+  the columns to burn out of it, so it no longer stretches a drag down into the furnace's column.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one
