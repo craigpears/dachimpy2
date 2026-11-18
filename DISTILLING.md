@@ -545,6 +545,15 @@ levels. **(to confirm with the user:** which of these you used, and how.)
 
 ## 4. Ratings and target numbers
 
+### The benchmark: CC^8 on seeds 5000 to 5019 (18 Nov)
+The user, 18 Nov: "are we using a consistent 20 seeds so that I can do the recording on one or two, and ... the goal
+is over those 20 boards to gradually get towards CC8 consistently." The same 20 boards every run,
+`SEED=5000 tools/distill-bots.mjs 20 cc8`, and the goal is the CC^8 bot reaching CC^8 on them consistently. On the
+18 Nov version (c2d0672), 2 of 20 (seeds 5004, 5012), mean longest chain 5.0. A seed's incoming pieces are the same
+whoever plays it, so the user's recorded games on these seeds (src/distill-record.ts, tools/distill-compare.mjs) set
+their play beside the bot's on the same board; worth recording first, the bot's weakest: 5011 (longest 1), 5017 (3),
+5006, 5008, 5009, 5013 (4).
+
 ### Worked scores (session score = points per column sent up)
 | Session | Points | Per column |
 |---|---|---|
