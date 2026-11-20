@@ -11,7 +11,8 @@
    "that menu at the bottom that pops up quickly would be brilliant"), and on T after. Pick a part, and she lays its
    board and plays its moves, saying what each does as it shows (her cues, src/den-wolfden.ts's stageCues; her words
    src/lines/multibella.ts's LESSON), the board waiting while she talks (Space moves her on), then hands it to you.
-   How it works is Umami's run from his replay (src/wolf-den-tutorial.ts's WALK), a beat at a time: each beat she
+   How it works is Umami's run from his replay, and speed nav the quick double (src/wolf-den-tutorial.ts's WALKS), each
+   walked a beat at a time: each beat she
    speaks holds the board till Space, or Next, the Drop button's place while she waits (15 Nov: "when it says next ...
    surely that should be a space"); in a lesson the bar's only Next, Lessons and Stop ("Multibella should be less
    controls"). The first time you come in, her opening (wolfden-opening.js): spinning the wheel frantically as the
@@ -21,7 +22,7 @@
 import * as THREE from 'three';
 import { PIRATES } from '../den-look.js';
 import { PLAN, WALLS, BACK, ARRIVE, TABLE, atTable, WINDOW, FURNISH, Moon, layBoard, PACE_LESSON, BOARDS, boardsOf, stageCues } from '../den-wolfden.js';
-import { WOLF_DEN_TUTORIAL, MECHANICS, WALK_BOARD, walkStepOf, endsStep, nextStep } from '../wolf-den-tutorial.js';
+import { WOLF_DEN_TUTORIAL, WALKS, walkOf, walkAt, walkStepOf, endsStep, nextStep } from '../wolf-den-tutorial.js';
 import { Navigation } from '../navigation.js';
 import { blocksOf } from '../den-houses.js';
 import { WOLF_DEN, TUTOR, LESSON, OPENING } from '../lines/multibella.js';
@@ -195,7 +196,7 @@ export const WOLFDEN_HOUSE = {
       bar.classList.toggle('on', G.playing && !G.choice);
       bar.classList.toggle('lesson', !!L);
       bar.classList.toggle('waiting', !!L?.wait);
-      const to = L?.wait && endsStep(L.wait) ? nextStep(walkStepOf(L.wait)) : null;
+      const to = L?.wait && L.walk && endsStep(L.wait, L.walk) ? nextStep(walkStepOf(L.wait, L.walk)) : null;
       dropBtn.textContent = !L?.wait ? 'Drop' : L.wait === 'end' ? 'My go \u25B8' : to ? `Next: ${to.title} \u25B8` : 'Next \u25B8';
       dropBtn.title = L?.wait ? 'Go on (Space)' : 'Drop the star (Space)';
     }
@@ -212,11 +213,12 @@ export const WOLFDEN_HOUSE = {
       showBar();
     }
     function startLesson(part) {
-      // (a step of how it works: Umami's run, walked from that step, the earlier ones' beats going by unsaid)
-      const walk = MECHANICS.includes(part.id);
-      const chain = boardsOf(walk ? WALK_BOARD : part.shows.ref);
+      // (a step of a walk, how it works or the quick double: walked from that step, the earlier ones' beats going by
+      // unsaid)
+      const w = walkOf(part.id);
+      const chain = boardsOf(w ? w.walk.board : part.shows.ref);
       if (!chain.length) return;
-      G.lesson = { part, chain, first: true, walk, from: walk ? MECHANICS.indexOf(part.id) : 0, wait: null };
+      G.lesson = { part, chain, first: true, walk: w?.id ?? null, from: w?.at ?? 0, wait: null };
       layNext();
       showBar();
     }
@@ -238,7 +240,7 @@ export const WOLFDEN_HOUSE = {
       for (const c of cues) {
         if (!words[c] || L.said.has(c)) continue;
         L.said.add(c);
-        if (L.walk && MECHANICS.indexOf(walkStepOf(c)) < L.from) continue;
+        if (L.walk && walkAt(c, L.walk) < L.from) continue;
         out.push(words[c]); last = c;
       }
       if (!out.length) return false;
@@ -274,7 +276,7 @@ export const WOLFDEN_HOUSE = {
       G.lesson = null;
       G.board.plan = null;
       showBar();
-      line(L.walk ? TUTOR.walked : TUTOR.after);
+      line(L.walk ? WALKS[L.walk].done : TUTOR.after);
     }
     /** Her opening, the first time in (wolfden-opening.js): then the moon's up again and the hut's yours. */
     function opening() {

@@ -10,7 +10,8 @@
    played it, the deeper mechanics on real boards: a cascade and the wild slots it makes, the outer ring where stars
    wait, a constellation charted by a cascade's last clear, and Umami's evil constellation (a fun one). Then, the same
    day, "How it works" as the user meant it: Umami's run from his replay (notes/wolf-den/), walked through a beat at a
-   time on one real board, Space for each (WALK, MECHANICS). Its words from the Wolf Dens Guide and Multibella's telling of the wilds (IDEAS.md); Multibella's
+   time on one real board, Space for each (WALK, MECHANICS). 20 Nov, speed nav: the quick double, the user's own
+   (WALKS.quick), walked the same way. Its words from the Wolf Dens Guide and Multibella's telling of the wilds (IDEAS.md); Multibella's
    lines are src/lines/multibella.ts's TUTOR and LESSON. */
 import { BOARDS, type Laid } from './den-wolfden.js';
 import { TUTOR } from './lines/multibella.js';
@@ -19,22 +20,54 @@ import { findPart, type Part, type Tutorial } from './tutorial.js';
 const board = (ref: string) => ({ kind: 'board' as const, ref });
 const moves = (ref: string) => ({ kind: 'moves' as const, ref });
 
-/* How it works: Umami's run, from his replay (the user, 15 Nov: "the tutorial thing I was intending"), on one board
-   (src/den-wolfden.ts's BOARDS.replay, one white dropped), a step of it a part, each its cues on the board in order
-   (src/den-wolfden.ts's CUES; her words src/lines/multibella.ts's LESSON.replay). The lesson walks it a beat at a time:
-   every beat she speaks holds the board till Space (or Next); picking a later step plays the earlier ones unsaid. */
-export const WALK_BOARD = 'replay';
-export const WALK: Readonly<Record<string, readonly string[]>> = {
-  single: ['set', 'step1'],
-  double: ['step2', 'wild'],
-  triple: ['step3', 'chart', 'deal', 'end'],
+/* A walk: one board walked through a beat at a time, a step of it a part, each its cues on the board in order
+   (src/den-wolfden.ts's CUES; her words src/lines/multibella.ts's LESSON, by the board). Every beat she speaks holds
+   the board till Space (or Next); picking a later step plays the earlier ones unsaid; `done`, her words handing you
+   the board after.
+   How it works: Umami's run, from his replay (the user, 15 Nov: "the tutorial thing I was intending"), BOARDS.replay,
+   one white dropped. Speed nav: the quick double (the user, 15 Nov: "it's speed nav and quick doubles is a good
+   strategy. So a layer of three so you can line up two pieces in the outer ring and it's nice and simple"; built 20
+   Nov), BOARDS.quick, the outer ring turned twice. */
+export interface Walk { board: string; steps: Readonly<Record<string, readonly string[]>>; done: string }
+export const WALKS: Readonly<Record<string, Walk>> = {
+  mechanics: {
+    board: 'replay',
+    steps: { single: ['set', 'step1'], double: ['step2', 'wild'], triple: ['step3', 'chart', 'deal', 'end'] },
+    done: TUTOR.walked,
+  },
+  quick: {
+    board: 'quick',
+    steps: { layer: ['set'], spin: ['move1', 'move2'], quickDouble: ['step1', 'step2', 'chart', 'deal', 'end'] },
+    done: TUTOR.quickWalked,
+  },
 };
+export const WALK_BOARD = WALKS.mechanics.board;
+export const WALK = WALKS.mechanics.steps;
 /** The steps of how it works, in order. */
 export const MECHANICS: readonly string[] = Object.keys(WALK);
-/** The step of how it works a cue's said in (null for none). */
-export const walkStepOf = (cue: string): string | null => MECHANICS.find((id) => WALK[id].includes(cue)) ?? null;
+/** The steps of speed nav's quick double, in order. */
+export const QUICK: readonly string[] = Object.keys(WALKS.quick.steps);
+/** The walk a part's a step of: the walk's name (its choice's id), and where in it the step is. Null for a part that
+    isn't a step of one. */
+export function walkOf(partId: string): { id: string; walk: Walk; at: number } | null {
+  for (const [id, walk] of Object.entries(WALKS)) {
+    const at = Object.keys(walk.steps).indexOf(partId);
+    if (at >= 0) return { id, walk, at };
+  }
+  return null;
+}
+/** The step of a walk (how it works, unless named) a cue's said in (null for none). */
+export const walkStepOf = (cue: string, walk = 'mechanics'): string | null => {
+  const steps = WALKS[walk]?.steps ?? {};
+  return Object.keys(steps).find((id) => steps[id].includes(cue)) ?? null;
+};
+/** Where in its walk the step a cue's said in is (-1 for none). */
+export const walkAt = (cue: string, walk = 'mechanics'): number => Object.keys(WALKS[walk]?.steps ?? {}).indexOf(walkStepOf(cue, walk) ?? '');
 /** Is this cue the last of its step's (the walk goes on to the next step after it)? */
-export const endsStep = (cue: string): boolean => { const id = walkStepOf(cue); return !!id && WALK[id][WALK[id].length - 1] === cue; };
+export const endsStep = (cue: string, walk = 'mechanics'): boolean => {
+  const id = walkStepOf(cue, walk), cues = id ? WALKS[walk].steps[id] : [];
+  return cues[cues.length - 1] === cue;
+};
 
 const BASICS: readonly Part[] = [
   { id: 'single', title: 'Single! +3', line: 'Umami\'s run, from his replay: three targets filled, a blue in the orange one. One white dropped makes three round the centre: a line, a point a star.', shows: moves(WALK_BOARD) },
@@ -54,6 +87,9 @@ const PHASES: readonly Part[] = [
 ];
 
 const TRICKS: readonly Part[] = [
+  { id: 'layer', title: 'Speed nav: a layer of three', line: 'The quick double, nice and simple, every time: two whites on the third ring with a gap beside them, the target under one; out on the outer ring, a white with the target\'s colour behind it.', shows: moves(WALKS.quick.board), phase: 'window' },
+  { id: 'spin', title: 'Spin the outer ring', line: 'Over full spokes they wait. Turned on, the white comes over the gap.', shows: moves(WALKS.quick.board), phase: 'window' },
+  { id: 'quickDouble', title: 'Single, then Double! Constellation!', line: 'The white drops: three whites, a Single. The star behind it falls into the target they left: charted on the second step, 71 times two, in two turns.', shows: moves(WALKS.quick.board), phase: 'window', tag: 'x2' },
   { id: 'trapdoor', title: 'The Trapdoor', line: 'Clear, then chart: a line goes, and the star parked above it falls into the slot. The chart\'s points doubled.', shows: moves('trapdoor'), phase: 'window', tag: 'x2' },
   { id: 'echo', title: 'The Echo', line: 'Chart, then clear: the stars falling into the slots it leaves make a line. The next constellation\'s centre goes wild.', shows: moves('echo'), phase: 'window' },
   { id: 'beside', title: 'A combo beside the wrong star', line: 'A combo\'s clear beside a slot holding the wrong colour turns it wild, and the star already in it counts.', shows: moves(WALK_BOARD), phase: 'window' },
@@ -70,17 +106,18 @@ export const WOLF_DEN_TUTORIAL: Tutorial = {
   hello: TUTOR.hello,
   choices: [
     { id: 'mechanics', label: 'How it works: Umami\'s run', asks: TUTOR.mechanics.asks, then: TUTOR.mechanics.then, covers: MECHANICS },
+    { id: 'quick', label: 'Speed nav: the quick double', asks: TUTOR.quick.asks, then: TUTOR.quick.then, covers: QUICK },
     { id: 'basics', label: 'What\'s different', asks: TUTOR.basics.asks, then: TUTOR.basics.then, covers: BASICS.map((p) => p.id).filter((id) => !MECHANICS.includes(id)) },
-    { id: 'tricks', label: 'The chains', asks: TUTOR.tricks.asks, then: TUTOR.tricks.then, covers: ['tricks'] },
+    { id: 'tricks', label: 'The chains', asks: TUTOR.tricks.asks, then: TUTOR.tricks.then, covers: TRICKS.map((p) => p.id).filter((id) => !QUICK.includes(id)) },
     { id: 'fun', label: 'A fun one', asks: TUTOR.fun.asks, then: TUTOR.fun.then, covers: ['scenarios'] },
   ],
 };
 
 /** The lesson's board a part's `shows.ref` names (its kind, a board to look at or moves to watch, is the part's). */
 export const wolfShows = (ref: string): Laid | null => BOARDS[ref] ?? null;
-/** After a step of how it works, the next step's part (null after the last, or for a part that isn't a step): what
-    Next says it's going on to. */
+/** After a step of a walk, the next step's part (null after the last, or for a part that isn't a step): what Next
+    says it's going on to. */
 export function nextStep(id: string): Part | null {
-  const i = MECHANICS.indexOf(id);
-  return i >= 0 && i + 1 < MECHANICS.length ? findPart(WOLF_DEN_TUTORIAL, MECHANICS[i + 1])?.part ?? null : null;
+  const w = walkOf(id), steps = w ? Object.keys(w.walk.steps) : [];
+  return w && w.at + 1 < steps.length ? findPart(WOLF_DEN_TUTORIAL, steps[w.at + 1])?.part ?? null : null;
 }

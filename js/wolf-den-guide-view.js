@@ -3,13 +3,13 @@
 // an article with data-board="name" gets that board as laid, one with data-moves="name" each of the lesson's boards in
 // turn (the one named, then any it says to lay next) before its moves, her plan ringed, and after them, and under them
 // what Multibella says as she plays them (src/lines/multibella.ts's LESSON), so the read version says what the lesson
-// does. One with data-beat="step" too is a beat of How it works, Umami's run (src/wolf-den-tutorial.ts's WALK): the
-// board as each of its cues shows, and her words for them. The sticky nav comes from the tutorial's description (src/wolf-den-tutorial.ts), by js/tutorial-nav.js.
+// does. One with data-beat="step" too is a beat of a walk, How it works (Umami's run) or speed nav (the quick double)
+// (src/wolf-den-tutorial.ts's WALKS): the board as each of its cues shows, and her words for them. The sticky nav comes from the tutorial's description (src/wolf-den-tutorial.ts), by js/tutorial-nav.js.
 // Hand-written, not compiled.
 import { BOARDS, boardsOf, layBoard, playStep, stageCues } from './den-wolfden.js';
 import { Navigation } from './navigation.js';
 import { seeded } from './mirror-row.js';
-import { WOLF_DEN_TUTORIAL, WALK } from './wolf-den-tutorial.js';
+import { WOLF_DEN_TUTORIAL, WALKS } from './wolf-den-tutorial.js';
 import { LESSON } from './lines/multibella.js';
 import { tutorialNav } from './tutorial-nav.js';
 
@@ -17,6 +17,7 @@ const failed = document.querySelector('[data-failed]');
 tutorialNav(WOLF_DEN_TUTORIAL, { mount: document.querySelector('#basics'), links: [{ title: 'Learn it from Multibella', href: 'den.html?at=wolfden', target: '_blank' }] });
 
 const STEP_NAMES = ['Single', 'Double', 'Triple'];
+const RING_NAMES = ['The centre', 'The middle', 'The third', 'The outer'];
 /** A board's picture: the den's board drawn once, as its game stands (a plan ringed, if given), copied onto a canvas
     of its own. */
 async function picture(game, plan = null) {
@@ -60,10 +61,12 @@ function boardAt(grid, marks) {
   g.constellation = marks ? { id: 1, marks } : null;
   return g;
 }
-/** A beat of Umami's run: the board as each of its cues shows (the plan ringed before the move, a line as it goes, every
-    target filled as it's charted, the next one up), captioned as the board names it, and her words for them. */
+/** A beat of a walk: the board as each of its cues shows (the plan ringed before the moves, a ring just turned, a line
+    as it goes, every target filled as it's charted, the next one up), captioned as the board names it, and her words
+    for them. */
 async function drawBeat(art, name, beat) {
-  const laid = layBoard(name, seeded(7)), cues = WALK[beat] ?? [];
+  const walk = Object.values(WALKS).find((w) => w.board === name && w.steps[beat]);
+  const laid = layBoard(name, seeded(7)), cues = walk?.steps[beat] ?? [];
   const row = document.createElement('div');
   row.className = 'boards';
   art.append(row);
@@ -71,9 +74,11 @@ async function drawBeat(art, name, beat) {
   const marksOf = (c) => c && c.marks.map((m) => ({ ...m, wild: c === laid.game.constellation ? wild.has(`${m.ring},${m.spoke}`) : m.wild }));
   const shots = [];
   if (cues.includes('set')) shots.push([await picture(laid.game, BOARDS[name].plan ?? null), 'Before: the plan ringed']);
-  const first = laid.game.constellation, stages = playStep(laid.game, laid.moves[0]).stages;
+  const first = laid.game.constellation;
   let n = 0, prev = null;
-  for (const st of stages) {
+  for (const [i, move] of laid.moves.entries()) for (const st of playStep(laid.game, move).stages) {
+    if (st.kind === 'turn' || st.kind === 'drop') n = 0;
+    if (st.kind === 'turn' && cues.includes(`move${i + 1}`)) shots.push([await picture(boardAt(st.grid, marksOf(first))), `${RING_NAMES[move.turn] ?? 'A'} ring turned${i ? ' again' : ''}`]);
     const step = st.kind === 'line' || st.kind === 'constellation' ? ++n : 0;
     for (const w of st.wilded ?? []) wild.add(`${w.ring},${w.spoke}`);
     const said = stageCues(st, step).filter((c) => cues.includes(c));

@@ -18,7 +18,7 @@
    it, and when she says what as they play (her cues, `stageCues`; the words are src/lines/multibella.ts's LESSON).
    The deeper mechanics (15 Nov, after the user played the basics): a cascade making wild targets, the outer ring where
    stars wait, a constellation charted by a cascade's last clear, and Umami's evil constellation (a fun one, not the
-   lesson); and Umami's run from his replay, the lesson's "How it works" (`replay`). Her opening, the first time you
+   lesson); and Umami's run from his replay, the lesson's "How it works" (`replay`); and the quick double, speed nav (`quick`). Her opening, the first time you
    come in: spinning the wheel frantically as the werewolves come, the moon waning (`OPENING`). Not yet (to come,
    with the user): the rumbles, the den's Foraging. */
 import { Navigation, bottomRow, type Mark, type NextStar, type Place, type Stage } from './navigation.js';
@@ -130,6 +130,26 @@ export const BOARDS: Readonly<Record<string, Laid>> = {
     next: { c: W, spoke: 5 },
     moves: [{ drop: true }],
     plan: [{ ring: 0, spoke: 0 }, { ring: 0, spoke: 3 }, { ring: 0, spoke: 4 }, { ring: 0, spoke: 5 }, { ring: 1, spoke: 3 }, { ring: 0, spoke: 1 }, { ring: 0, spoke: 2 }],
+  },
+  /* The quick double, speed nav (the user, 15 Nov: "it's speed nav and quick doubles is a good strategy. So a layer of
+     three so you can line up two pieces in the outer ring and it's nice and simple"; their board, notes/wolf-den/
+     quick-double.png, laid as it is there): on the third ring whites at the top and up-right, the gap up-left, the
+     yellow target under the top white, the constellation's other three targets filled; out on the outer ring a white
+     up-right and a yellow behind it on the right. The outer ring turned twice anticlockwise: the white waits over the
+     full top spoke, then drops into the gap, three whites, "Single! +3"; the yellow, come round over the emptied top,
+     falls into its target: charted on the second step, "Double! Constellation!", 71 times two. Her lesson's "Speed nav"
+     walks it a beat at a time (src/wolf-den-tutorial.ts's WALKS.quick). */
+  quick: {
+    rings: [
+      [O, Y, R, R, B, B, Y, B],
+      [B, R, R, Y, O, Y, B, W],
+      [W, W, O, B, Y, R, R, _],
+      [_, W, Y],
+    ],
+    marks: [{ ring: 0, spoke: 3, colour: R }, { ring: 1, spoke: 4, colour: O }, { ring: 1, spoke: 6, colour: B }, { ring: 2, spoke: 0, colour: Y }],
+    next: { c: R, spoke: 4 },
+    moves: [{ turn: 3, dir: -1 }, { turn: 3, dir: -1 }],
+    plan: [{ ring: 2, spoke: 7 }, { ring: 2, spoke: 0 }, { ring: 2, spoke: 1 }, { ring: 3, spoke: 1 }, { ring: 3, spoke: 2 }],
   },
   /* A Trapdoor: the third ring turned a place puts a red over two reds down spoke 0; they go, and the yellow parked
      above them in the fourth ring falls into the place. */

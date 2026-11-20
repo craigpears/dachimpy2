@@ -2728,7 +2728,14 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     moon rising again for the next pack. About 13 seconds; Space or Esc skips it (`OPENING`).
   - **Umami's evil constellation is a fun one (15 Nov):** "They did keep the umami thing just as like a fun one ... I'd
     love for him to go after try and figure out how to solve that. But ... that's not the tutorial thing I was
-    intending." Out of How it works; her menu's fourth choice, "A fun one".
+    intending." Out of How it works; her menu's last choice, "A fun one".
+  - **Speed nav: the quick double (the user, 15 Nov; built 20 Nov):** "it's speed nav and quick doubles is a good
+    strategy. So a layer of three so you can line up two pieces in the outer ring and it's nice and simple." Her
+    menu's second choice, walked a beat at a time like Umami's run, on the user's own board (notes/wolf-den/
+    quick-double.png, `BOARDS.quick`): two whites on the third ring with a gap beside them and the yellow target under
+    one; a white and a yellow behind it on the outer ring; the outer ring turned twice, the white drops into the gap
+    (Single), the yellow falls into the emptied target (Double! Constellation!, 71 times two). Fast, good doubles over
+    triples (Pandayay: "u dont need to do triples to get fren").
   - **"Wild target"** in her words, the guide's and the code's: YPPedia's word (the user, 15 Nov: "Go with yppedia and
     wild targets"), over "wild slot", the Wolf Dens Guide's and the players'.
   - **Umami's evil constellation at the wolf den (15 Nov):** the user's combo-only constellation (11 Nov, "The

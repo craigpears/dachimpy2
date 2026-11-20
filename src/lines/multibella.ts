@@ -32,6 +32,7 @@ export const TUTOR = {
   hello: 'A wolf den\'s Navigation isn\'t the one you know. Let me show you.',
   basics: { asks: 'Or what\'s different here?', then: 'What\'s different, then. Which bit?' },
   mechanics: { asks: 'Want to see how it works? Umami\'s run, from his replay, a step at a time.', then: 'Umami\'s run, then. Space for each step.' },
+  quick: { asks: 'Or speed nav? The quick double. Nice and simple, and you can do it every time.', then: 'The quick double, then. Space for each step.' },
   tricks: { asks: 'Or the chains that pay?', then: 'Chains! Pick one.' },
   fun: { asks: 'Or a fun one? Umami\'s evil constellation.', then: 'Evil, this one. Watch.' },
   show: 'This one\'s {title}. I\'ll set it up, you watch the board.',
@@ -39,6 +40,7 @@ export const TUTOR = {
   afterNote: 'Chart what you can: each constellation turns werewolves back. T for her lessons again.',
   walked: 'Your board now, those four wild targets and all. Any star fills them. Cookie while you think?',
   walkedNote: 'Space drops, arrows turn. T for her lessons again.',
+  quickWalked: 'Your board now. Build a layer of three, line two up outside, spin. Quick as you like. Cookie?',
 } as const;
 
 /** What she says as she plays a lesson's board, by the board (src/den-wolfden.ts's BOARDS) and her cue on it (its
@@ -55,6 +57,15 @@ export const LESSON = {
     chart: 'Constellation! 71, times three: 213. For one white.',
     deal: 'And the next one comes up with four wild targets in the centre. Two clears before the chart did that.',
     end: 'Single, Double, Triple Constellation. That\'s the trick: end a cascade on the constellation.',
+  },
+  quick: {
+    set: 'Speed nav. A layer of three: two whites on the third ring, the gap beside them, and the yellow target under the top one. Out on the outer ring, two lined up: a white, then a yellow behind it.',
+    move1: 'Spin the outer ring. Over full spokes, they just wait.',
+    move2: 'Once more, and the white\'s over the gap...',
+    step1: 'Single! Three whites, gone. And the yellow\'s right over the target they left...',
+    chart: '...Double! Constellation! 71, times two: 142. Two turns.',
+    deal: 'And the next one\'s up, its centre wild from the chain.',
+    end: 'That\'s the quick double. You don\'t need triples, just be quick: build the layer, line two up outside, spin.',
   },
   cascade: {
     set: 'Cascades first. See the two reds round the third ring, and the stars waiting up top? One red dropped, and watch what it sets off.',
@@ -138,13 +149,14 @@ export const CHARACTER: Character = {
     },
     {
       when: 'Her lesson\'s opening choice, at the star table (it pops up as you sit; T)', says: TUTOR,
-      each: { hello: 'Her opening line', mechanics: 'Her first question, and once it\'s picked', basics: 'Her second, and once it\'s picked', tricks: 'Her third, and once it\'s picked', fun: 'Her fourth, and once it\'s picked', show: 'As a lesson\'s board is laid, when it has no words of its own ({title} its name)', after: 'Handing you the board', afterNote: 'Under it, in the bar', walked: 'Handing you the board after Umami\'s run, its four wild targets up', walkedNote: 'Under it, in the bar' },
+      each: { hello: 'Her opening line', mechanics: 'Her first question, and once it\'s picked', basics: 'Her second, and once it\'s picked', tricks: 'Her third, and once it\'s picked', quick: 'Her speed nav question, after how it works, and once it\'s picked', fun: 'Her last, and once it\'s picked', show: 'As a lesson\'s board is laid, when it has no words of its own ({title} its name)', after: 'Handing you the board', afterNote: 'Under it, in the bar', walked: 'Handing you the board after Umami\'s run, its four wild targets up', walkedNote: 'Under it, in the bar', quickWalked: 'Handing you the board after the quick double' },
     },
     {
       when: 'Her lesson, as she plays each board at the star table: as it\'s laid, before a move, as each clear or chart of a cascade shows, as slots go wild, as the next constellation goes up, and at the end',
       says: LESSON,
       each: {
         replay: 'How it works: Umami\'s run, from his replay, a beat at a time (Space for each)',
+        quick: 'Speed nav: the quick double, a layer of three and two lined up on the outer ring, a beat at a time (Space for each)',
         cascade: 'A cascade, lines only, making wild targets',
         outer: 'The fourth ring: a star waiting up there, carried round, dropped in by a clear under it',
         lastClear: 'A constellation charted by a cascade\'s last clear',

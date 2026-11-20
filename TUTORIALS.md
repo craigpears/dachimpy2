@@ -186,6 +186,11 @@ ones unsaid. The choice comes first in her menu, which pops up as you sit the fi
 brilliant"). Umami's evil constellation is a scenario, "A fun one". The read guide shows each step's boards as its
 beats show (`data-beat`).
 
+Speed nav, the quick double (20 Nov; the user, 15 Nov: "a layer of three so you can line up two pieces in the outer
+ring and it's nice and simple"), is a second walk the same way, her menu's second choice: `WALKS` holds each walk (its
+board, its steps' cues, her words handing you the board after), `walkOf` the walk a part's a step of. Its three steps
+(a layer of three, spin the outer ring, Single then Double! Constellation!) are tricks, kept out of the chains' choice.
+
 - **She talks you through it:** a board's `plan` ringed in gold while she says her first line (the plan before the
   build, RULES.md); her cues (`stageCues`: `set`, `move<n>`, `step<n>`, `wild`, `chart`, `deal`, `end`), her words
   for each in src/lines/multibella.ts's `LESSON`, the board holding still while she talks (nav-board.js's `onStage`,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BOARDS, MOON, Moon, layBoard, playStep, atTable, TABLE, ARRIVE, boardsOf, cuesOn, isCue, stageCues, OPENING, openingAt } from '../src/den-wolfden';
 import { linesOf, denPoints, needsCombo, DEN } from '../src/navigation';
-import { WOLF_DEN_TUTORIAL, wolfShows, MECHANICS, nextStep, WALK, WALK_BOARD, walkStepOf, endsStep } from '../src/wolf-den-tutorial';
+import { WOLF_DEN_TUTORIAL, wolfShows, MECHANICS, QUICK, WALKS, walkOf, walkAt, nextStep, WALK, WALK_BOARD, walkStepOf, endsStep } from '../src/wolf-den-tutorial';
 import { LESSON, OPENING as OPENING_LINES, TUTOR } from '../src/lines/multibella';
 import { SECTIONS, findPart } from '../src/tutorial';
 import { HOUSES, houseById, houseList } from '../src/den-houses';
@@ -180,6 +180,57 @@ describe("15 Nov: How it works walks through Umami's replay, not the evil conste
     expect(findPart(WOLF_DEN_TUTORIAL, 'evil')?.part.tag).toBe('for fun');
     expect(BOARDS.evil).toBeDefined();
     expect(TUTOR.walked).toBeTruthy();
+  });
+});
+
+// The user, 15 Nov: "notes for wolf den are it's speed nav and quick doubles is a good strategy. So a layer of three so
+// you can line up two pieces in the outer ring and it's nice and simple"; their board, notes/wolf-den/quick-double.png.
+// Built 20 Nov ("Yes, build it").
+describe('20 Nov: speed nav, the quick double on a layer of three, two lined up on the outer ring', () => {
+  it('two turns of the outer ring: the first leaves them waiting over full spokes, the second makes a Single, then charts it Double: 3 + 71 x 2', () => {
+    const { game, moves } = layBoard('quick', seeded(4))!;
+    expect(moves).toEqual([{ turn: 3, dir: -1 }, { turn: 3, dir: -1 }]);
+    expect(denPoints(game.constellation!.marks)).toBe(71);
+    expect(game.grid[2][7]).toBeNull();
+    const first = playStep(game, moves[0]);
+    expect(first.points).toBe(0);
+    expect(game.grid[3][0]?.c).toBe(3);   // the white waiting over the full top spoke
+    const m = playStep(game, moves[1]);
+    const kinds = m.stages.map((s) => s.kind).filter((k) => k === 'line' || k === 'constellation');
+    expect(kinds).toEqual(['line', 'constellation']);
+    expect(m.done!.step).toBe(2);
+    expect(m.done!.points).toBe(142);
+    expect(m.points).toBe(3 + 142);
+    expect(game.constellation!.marks.filter((k) => k.ring === 0 && k.wild).length).toBe(3);
+  });
+  it('walked a beat at a time like Umami\'s run: its steps\' beats on the board in order, every beat she has words for', () => {
+    const b = layBoard('quick', seeded(4))!, order = ['set'];
+    b.moves.forEach((step, i) => {
+      order.push(`move${i + 1}`);
+      let n = 0;
+      for (const st of playStep(b.game, step).stages) order.push(...stageCues(st, st.kind === 'line' || st.kind === 'constellation' ? ++n : 0));
+    });
+    order.push('end');
+    const beats = QUICK.flatMap((id) => WALKS.quick.steps[id]);
+    expect(beats).toEqual(order.filter((c) => beats.includes(c)));
+    for (const c of Object.keys(LESSON.quick)) expect(beats, c).toContain(c);
+    expect(walkOf('spin')).toMatchObject({ id: 'quick', at: 1 });
+    expect(walkOf('single')).toMatchObject({ id: 'mechanics', at: 0 });
+    expect(walkOf('trapdoor')).toBeNull();
+    expect(walkAt('move2', 'quick')).toBe(1);
+    expect(endsStep('move2', 'quick')).toBe(true);
+    expect(endsStep('move1', 'quick')).toBe(false);
+    expect(nextStep('layer')?.id).toBe('spin');
+    expect(nextStep('quickDouble')).toBeNull();
+    expect(WALKS.quick.done).toBe(TUTOR.quickWalked);
+  });
+  it('its own choice in her menu, second, after how it works; the chains\' choice keeps the other tricks', () => {
+    expect(WOLF_DEN_TUTORIAL.choices.map((c) => c.id)).toEqual(['mechanics', 'quick', 'basics', 'tricks', 'fun']);
+    expect(WOLF_DEN_TUTORIAL.choices[1].covers).toEqual(QUICK);
+    const tricks = WOLF_DEN_TUTORIAL.choices.find((c) => c.id === 'tricks')!.covers;
+    for (const id of QUICK) expect(tricks).not.toContain(id);
+    expect(tricks).toContain('trapdoor');
+    for (const id of QUICK) expect(findPart(WOLF_DEN_TUTORIAL, id)?.part.shows).toEqual({ kind: 'moves', ref: 'quick' });
   });
 });
 

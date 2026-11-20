@@ -1,6 +1,6 @@
 ---
 title: To refine: the wolf den lesson as speed nav, quick doubles on a layer of three
-status: doing
+status: playtest
 asked: 15 Nov
 updated: 20 Nov
 shot: notes/wolf-den/quick-double.png
@@ -17,3 +17,5 @@ shot: notes/wolf-den/quick-double.png
 - 15 Nov: the move, as the user put it (15 Nov): a red target on the third ring, two yellows in a line beside it; on the outer ring a yellow with a red behind it; spin the outer ring and the yellow drops for the single, then the red drops into the target: 'a really quick formulaic double that you can do really easily every time'. Stars in bags of ten (two of each colour) makes three of a colour slower to come: bags-of-ten card
 - 15 Nov: the user's screenshot of it on a real board: notes/wolf-den/quick-double.png (README says what's where). The target is under one of the line's own stars: the line clears it, and the star behind falls into it
 - 20 Nov: being done
+- 20 Nov: 20 Nov, built: 'Speed nav: the quick double', her menu's second choice, walked a beat at a time on Space like Umami's run, on your board from quick-double.png (BOARDS.quick): two turns of the outer ring, Single +3, then Double! Constellation! +142. In the read guide at the top of the tricks; tested.
+- 20 Nov: for you to playtest
