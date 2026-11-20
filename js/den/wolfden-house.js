@@ -294,6 +294,9 @@ export const WOLFDEN_HOUSE = {
     const inst = {
       blocks: G.blocks,
       frozen: () => G.playing,
+      // (you, out of the way while you chart: Umami's head was right over the board, the user, 20 Nov: "my capybara
+      // character, is like literally sticking his head right over the board. I can't see the stars coming down")
+      hidesYou: () => G.playing,
       enter() {
         const again = G.visited;
         G.visited = true;

@@ -148,11 +148,14 @@ function panelCanvas() {
 /** Olive-gold, the wheel's: dark edge, body, shade and shine. */
 const GOLD = { edge: '#2e2808', body: '#857526', shade: '#62561a', shine: '#ddd290', tick: '#f0ecd0' };
 /** The wheel: spokes out to their handles, the hub's filigree, the thin inner ring and the two broad
-    rims the other places sit on (one lit over it each frame). */
-let WHEEL_CV = null;
-function wheelCanvas() {
-  if (WHEEL_CV) return WHEEL_CV;
-  WHEEL_CV = canvas(S, S, (g) => {
+    rims the other places sit on (one lit over it each frame). A wolf den's (`four`) has a third broad rim
+    out over the handles, its fourth ring's places: it was there, but only as stars sitting on the handles,
+    no ring to be seen (the user, 20 Nov: "I only see 3 ... rings. The whole point ... of Wolf Den Navving
+    is there are 4 of them"; "there is a fourth ring there, but I certainly can't see it"). */
+const WHEEL_CV = {};
+function wheelCanvas(four = false) {
+  if (WHEEL_CV[four]) return WHEEL_CV[four];
+  return (WHEEL_CV[four] = canvas(S, S, (g) => {
     g.lineCap = 'round'; g.lineJoin = 'round';
     // Gold work: a dark edge, then the gold, along the same path.
     const gold = (path, w) => { path(); g.lineWidth = w + 6; g.strokeStyle = GOLD.edge; g.stroke(); g.lineWidth = w; g.strokeStyle = GOLD.body; g.stroke(); };
@@ -199,23 +202,22 @@ function wheelCanvas() {
     gold(() => { g.beginPath(); g.arc(C, C, RING_R[0], 0, Math.PI * 2); }, 9);
     g.lineWidth = 2; g.strokeStyle = GOLD.shine; g.beginPath(); g.arc(C, C, RING_R[0] - 2, 0, Math.PI * 2); g.stroke();
     // The two broad rims, the middle and the outer: shaded on the inside, a shine toward the outside,
-    // tick marks round the outer like a dial's.
-    for (const r of [RING_R[1], RING_R[2]]) {
+    // tick marks round the outer like a dial's (a wolf den's fourth, out over the handles, the same).
+    for (const r of four ? [RING_R[1], RING_R[2], OUT] : [RING_R[1], RING_R[2]]) {
       const w = 46;
       g.lineWidth = w + 7; g.strokeStyle = GOLD.edge; g.beginPath(); g.arc(C, C, r, 0, Math.PI * 2); g.stroke();
       g.lineWidth = w; g.strokeStyle = GOLD.body; g.stroke();
       g.lineWidth = w * 0.34; g.strokeStyle = GOLD.shade; g.beginPath(); g.arc(C, C, r - w * 0.3, 0, Math.PI * 2); g.stroke();
       g.lineWidth = 4; g.strokeStyle = GOLD.shine; g.beginPath(); g.arc(C, C, r + w * 0.16, 0, Math.PI * 2); g.stroke();
       g.lineWidth = 2; g.strokeStyle = 'rgba(221,210,144,0.6)'; g.beginPath(); g.arc(C, C, r - w * 0.12, 0, Math.PI * 2); g.stroke();
-      const n = r === RING_R[2] ? 72 : 48;
+      const dial = r !== RING_R[1], n = dial ? 72 : 48;
       for (let i = 0; i < n; i++) {
         const a = i * 2 * Math.PI / n, long = i % 3 === 0;
-        g.lineWidth = 2.5; g.strokeStyle = r === RING_R[2] ? GOLD.tick : 'rgba(46,40,8,0.7)';
+        g.lineWidth = 2.5; g.strokeStyle = dial ? GOLD.tick : 'rgba(46,40,8,0.7)';
         g.beginPath(); g.moveTo(...at(r + w * 0.05, a)); g.lineTo(...at(r + w * (long ? 0.36 : 0.26), a)); g.stroke();
       }
     }
-  });
-  return WHEEL_CV;
+  }));
 }
 
 /** A constellation's place: holding its colour, a coin of it with its star on; else a thick ring of
@@ -304,8 +306,8 @@ const DROP_PER_RING = 0.32, RING_W = RING_R[1] - RING_R[0];
    (while a teacher talks over it), in place of `tick`. */
 export function navBoard(o = {}) {
   const game = o.game ?? new Navigation(o.random ?? Math.random, o.options ?? {});
-  /* A wolf den's board, four rings ("four-tier", 14 Nov): the wheel drawn a little smaller, its handles' rings the
-     fourth ring's places, and the next star waiting further out. Its cascades named over the stars as they go. */
+  /* A wolf den's board, four rings ("four-tier", 14 Nov): the wheel drawn a little smaller, a fourth broad rim over
+     its handles the fourth ring's places (20 Nov: drawn, not only the handles), and the next star waiting further out. Its cascades named over the stars as they go. */
   const K = game.rings > RINGS ? 0.84 : 1, RR = K < 1 ? [...RING_R.map((r) => r * K), OUT * K] : RING_R;
   const OUT_B = K < 1 ? 468 : OUT, SR = STAR_R * K, named = o.named ?? game.rings > RINGS;
   const radius = (ring) => (ring < game.rings ? RR[ring] : OUT_B);
@@ -502,7 +504,7 @@ export function navBoard(o = {}) {
     // The wheel and all on it, its middle the canvas's.
     g.save();
     g.translate(0, OFF);
-    if (K < 1) { g.save(); g.translate(C, C); g.scale(K, K); g.translate(-C, -C); g.drawImage(wheelCanvas(), 0, 0); g.restore(); }
+    if (K < 1) { g.save(); g.translate(C, C); g.scale(K, K); g.translate(-C, -C); g.drawImage(wheelCanvas(true), 0, 0); g.restore(); }
     else g.drawImage(wheelCanvas(), 0, 0);
     // The ring selected, plainly: its band lit and a bright gold edge either side of it (one just turned,
     // brighter still for a moment). It was only a little brighter, hard to tell (the user, 13 Nov: "the
