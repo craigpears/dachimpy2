@@ -21,12 +21,12 @@ const moves = (ref) => ({ kind: 'moves', ref });
 export const WALKS = {
     mechanics: {
         board: 'replay',
-        steps: { single: ['set', 'step1'], double: ['step2', 'wild'], triple: ['step3', 'chart', 'deal', 'end'] },
+        steps: { umamiRun: ['set', 'step1', 'step2', 'wild', 'step3', 'chart', 'deal', 'end'] },
         done: TUTOR.walked,
     },
     quick: {
         board: 'quick',
-        steps: { quickDouble: ['set', 'move1', 'move2', 'move3', 'move4', 'move5', 'step1', 'step2', 'chart', 'end'] },
+        steps: { quickDouble: ['set', 'move3', 'move4', 'move5', 'move6', 'move7', 'move8', 'step1', 'step2', 'chart', 'end'] },
         done: TUTOR.quickWalked,
     },
 };
@@ -59,9 +59,7 @@ export const endsStep = (cue, walk = 'mechanics') => {
     return cues[cues.length - 1] === cue;
 };
 const BASICS = [
-    { id: 'single', title: 'Single! +3', line: 'Umami\'s run, from his replay: three targets filled, a blue in the orange one. One white dropped makes three round the centre: a line, a point a star.', shows: moves(WALK_BOARD) },
-    { id: 'double', title: 'Double! +6: a wild target', line: 'The red above falls in beside two reds: a line in a combo. Its clear turns the target beside it every colour, wild, and the blue in it counts.', shows: moves(WALK_BOARD) },
-    { id: 'triple', title: 'Triple! Constellation! +213', line: 'Every target filled on the third step: 71 times three. And the next one comes up with four wild targets in the centre.', shows: moves(WALK_BOARD), tag: 'x3' },
+    { id: 'umamiRun', title: 'How it works: Umami\'s run', line: 'From his replay, one white dropped: Single! +3; Double! +6, the target beside it gone wild; Triple! Constellation! +213, and four wild targets up next.', shows: moves(WALK_BOARD), tag: 'x3' },
     { id: 'cascade', title: 'Cascades', line: 'A clear whose falling stars make another clear, and another, in the one move: Single, Double, Triple. And each clear in a combo turns the slots beside it wild.', shows: moves('cascade') },
     { id: 'rings', title: 'Four rings', line: 'Four-tier: a fourth, outer ring with no slots of its own, where stars wait over a full spoke, turning with their ring, to drop in when a clear opens under them.', shows: moves('outer') },
     { id: 'constellations', title: 'The den\'s constellations', line: 'Three slots in the centre ring, two in the middle, one in the third; a fresh board\'s first only three and one.', shows: board('rings') },
@@ -74,7 +72,7 @@ const PHASES = [
     { id: 'rumble', title: 'The rumbles', line: 'Each round a Rumble against the pack first, then the stations.', shows: board('rings'), todo: 'the rumbles themselves, not in the den yet' },
 ];
 const TRICKS = [
-    { id: 'quickDouble', title: 'Speed nav: the quick double', line: 'A shape you can build every time, quick: a pair on the third ring, the gap beside it over the target; the two you need parked on the outer ring, in order; one spin, and it\'s a Single, then a Double.', shows: moves(WALKS.quick.board), phase: 'window', tag: 'x2' },
+    { id: 'quickDouble', title: 'Speed nav: the quick double', line: 'Methodical, and easy to do again and again: fill the bottom two rings; on the third, find a pair beside the target; wait for its colour and the target\'s, park them side by side on the outer ring, in order; spin: a Single, then a Double.', shows: moves(WALKS.quick.board), phase: 'window', tag: 'x2' },
     { id: 'trapdoor', title: 'The Trapdoor', line: 'Clear, then chart: a line goes, and the star parked above it falls into the slot. The chart\'s points doubled.', shows: moves('trapdoor'), phase: 'window', tag: 'x2' },
     { id: 'echo', title: 'The Echo', line: 'Chart, then clear: the stars falling into the slots it leaves make a line. The next constellation\'s centre goes wild.', shows: moves('echo'), phase: 'window' },
     { id: 'beside', title: 'A combo beside the wrong star', line: 'A combo\'s clear beside a slot holding the wrong colour turns it wild, and the star already in it counts.', shows: moves(WALK_BOARD), phase: 'window' },

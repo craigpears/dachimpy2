@@ -698,7 +698,7 @@ export function navBoard(o = {}) {
   function markTag(x, y, text, col, a) {
     g.save();
     g.globalAlpha = a;
-    g.font = `800 ${Math.round(30 * K)}px 'Alegreya Sans', sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = `800 ${Math.round(38 * K)}px 'Alegreya Sans', sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
     const w = g.measureText(text).width + 18 * K, h = 36 * K;
     g.fillStyle = 'rgba(14,9,4,0.9)'; g.strokeStyle = col; g.lineWidth = 3;
     g.beginPath(); g.roundRect(x - w / 2, y - h / 2, w, h, 10 * K); g.fill(); g.stroke();
@@ -712,9 +712,11 @@ export function navBoard(o = {}) {
     if (!ms?.length) return;
     const pulse = 0.75 + 0.25 * Math.sin(b.time * 4), order = { arrow: 0, star: 1, gap: 2, badge: 3 };
     for (const m of [...ms].sort((p, q) => order[p.kind] - order[q.kind])) {
-      const a = m.faint ? 0.42 : pulse;
+      // (still to come, plainly there but dashed, never so faint you can't tell what it's about: the user, 20 Nov,
+      // "faintly ringed is an understatement. I can't tell ... what it's trying to refer to")
+      const a = m.faint ? 0.8 : pulse;
       g.save();
-      g.setLineDash(m.faint ? [10, 9] : []);
+      g.setLineDash(m.faint ? [16 * K, 10 * K] : []);
       if (m.kind === 'star' || m.kind === 'gap') {
         const [x, y] = xy(radius(m.at.ring), ang(m.at.spoke)), col = m.kind === 'gap' ? '#ffffff' : COL[m.colour].ring;
         if (m.kind === 'gap') {
@@ -722,10 +724,12 @@ export function navBoard(o = {}) {
           gg.addColorStop(0, `rgba(255,255,255,${0.3 * a})`); gg.addColorStop(1, 'rgba(255,255,255,0)');
           g.fillStyle = gg; g.beginPath(); g.arc(x, y, SR * 1.5, 0, Math.PI * 2); g.fill();
         }
-        g.globalAlpha = a; g.lineWidth = 6 * K; g.strokeStyle = col; g.shadowColor = col; g.shadowBlur = m.faint ? 0 : 14;
+        g.globalAlpha = a; g.lineWidth = (m.faint ? 7 : 9) * K; g.strokeStyle = col; g.shadowColor = col; g.shadowBlur = m.faint ? 6 : 18;
+        g.beginPath(); g.arc(x, y, SR * 1.4, 0, Math.PI * 2); g.lineWidth += 6 * K; g.strokeStyle = 'rgba(8,10,30,0.55)'; g.shadowBlur = 0; g.stroke();
+        g.lineWidth -= 6 * K; g.strokeStyle = col; g.shadowBlur = m.faint ? 6 : 18;
         g.beginPath(); g.arc(x, y, SR * 1.4, 0, Math.PI * 2); g.stroke();
         g.restore();
-        if (m.label) { const [tx, ty] = beside(m.at, true); markTag(tx, ty, m.label, col, m.faint ? 0.5 : 1); }
+        if (m.label) { const [tx, ty] = beside(m.at, true); markTag(tx, ty, m.label, col, m.faint ? 0.85 : 1); }
         continue;
       }
       if (m.kind === 'arrow') {
@@ -750,13 +754,13 @@ export function navBoard(o = {}) {
       }
       if (m.kind === 'badge') {
         const [x, y] = beside(m.at, false), R = 20 * K;
-        g.globalAlpha = m.faint ? 0.5 : 1;
+        g.globalAlpha = m.faint ? 0.85 : 1;
         g.fillStyle = '#f2c84a'; g.strokeStyle = '#3a2408'; g.lineWidth = 3;
         g.beginPath(); g.arc(x, y, R, 0, Math.PI * 2); g.fill(); g.stroke();
         g.fillStyle = '#2a1804'; g.font = `900 ${Math.round(26 * K)}px 'Alegreya Sans', sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
         g.fillText(String(m.n), x, y + 1);
         g.restore();
-        if (m.label) markTag(x, y + R + 20 * K, m.label, '#f2c84a', m.faint ? 0.5 : 1);
+        if (m.label) markTag(x, y + R + 20 * K, m.label, '#f2c84a', m.faint ? 0.85 : 1);
       }
     }
   }

@@ -121,29 +121,36 @@ export const BOARDS = {
     },
     /* The quick double, speed nav (the user, 15 Nov: "it's speed nav and quick doubles is a good strategy. So a layer of
        three so you can line up two pieces in the outer ring and it's nice and simple"; their board, notes/wolf-den/
-       quick-double.png), built up from the start (20 Nov: "first of all, set up two next to each other, but then you can
-       kind of wait and build up those two pieces in the right spots on the outer ring"): the constellation's other three
-       targets filled, the yellow target on the third ring at the top, the third ring empty there, up-right and up-left.
-       A white dropped onto the yellow target, another up-right beside it: the pair, the gap up-left. Then the two she
-       needs parked on the outer ring, over full spokes: a white up-right, then a yellow behind it on the right. The outer
-       ring turned twice anticlockwise: the white waits over the full top spoke, then drops into the gap, three whites,
-       "Single! +3"; the yellow, come round over the emptied top, falls into its target: charted on the second step,
+       quick-double.png), as you'd really play it (20 Nov, after playing the first goes: "the first step is ... we're
+       building the bottom two rings basically like normal, we're just filling them in. And then by the time we get to the
+       third ring, we're saying, right, we want to wait for an opportunity ... I've already got a red ... That's the ...
+       basis for the first part of the double ... this is so methodical and easy to recreate. So now all I need is to get
+       a red and a yellow piece next to each other in the outer ring"; and "you can['t] magically predict that the white is
+       coming next"). The constellation's yellow target on the third ring at the top, a red already beside it, up-right.
+       Stars come as they come (each step's `next`, shown before she says what she'll do with it): a blue and an orange
+       fill the bottom two rings in, like normal; a blue that's no use goes on the third ring out of the way; a red, onto
+       the target beside the red: the pair, its gap up-left. A red: parked on the outer ring, right, over a full spoke. A
+       yellow, two spokes on: the outer ring turned on one to bring the red right up beside where it'll land, and the
+       yellow dropped in behind it. The outer ring turned back round toward the gap, four places: the red drops into the
+       gap, three reds, "Single! +3"; the yellow, right behind, falls into the emptied target: charted on the second step,
        "Double! Constellation!", 71 times two. Her lesson's "Speed nav" walks it a beat at a time (src/wolf-den-
-       tutorial.ts's WALKS.quick), its plan marked on the board throughout (`planMarks`). */
+       tutorial.ts's WALKS.quick), its plan marked on the board from when she spots the red (`planMarks`, `markFrom`). */
     quick: {
         rings: [
-            [O, Y, R, R, B, B, Y, B],
-            [B, R, R, Y, O, Y, B, W],
-            [_, _, O, B, Y, R, R, _],
+            [O, Y, R, R, B, W, Y, B],
+            [_, O, Y, W, _, Y, B, W],
+            [_, R, O, W, _, B, Y, _],
         ],
         marks: [{ ring: 0, spoke: 3, colour: R }, { ring: 1, spoke: 4, colour: O }, { ring: 1, spoke: 6, colour: B }, { ring: 2, spoke: 0, colour: Y }],
-        next: { c: W, spoke: 0 },
+        next: { c: B, spoke: 0 },
         moves: [
-            { drop: true, next: { c: W, spoke: 0 } }, { drop: true, next: { c: W, spoke: 1 } },
-            { drop: true, next: { c: W, spoke: 1 } }, { drop: true, next: { c: Y, spoke: 2 } },
-            { turn: 3, dir: -1 }, { turn: 3, dir: -1 },
+            { drop: true, next: { c: B, spoke: 0 } }, { drop: true, next: { c: O, spoke: 4 } },
+            { drop: true, next: { c: B, spoke: 4 } }, { drop: true, next: { c: R, spoke: 0 } },
+            { drop: true, next: { c: R, spoke: 2 } }, { turn: 3, dir: 1, next: { c: Y, spoke: 4 } }, { drop: true },
+            { turn: 3, dir: -1 }, { turn: 3, dir: -1 }, { turn: 3, dir: -1 }, { turn: 3, dir: -1 },
         ],
         marked: true,
+        markFrom: 3,
     },
     /* A Trapdoor: the third ring turned a place puts a red over two reds down spoke 0; they go, and the yellow parked
        above them in the fourth ring falls into the place. */
@@ -301,13 +308,11 @@ export function layBoard(name, random = Math.random) {
         game.next = { id: 9000, ...L.next };
     return { game, moves: [...L.moves] };
 }
-/** Play one of a lesson's moves on its game. */
+/** Play one of a lesson's moves on its game (the star that comes before it first, if it says). */
 export function playStep(game, step) {
-    if (!('drop' in step))
-        return game.turn(step.dir, step.turn);
-    if (step.next)
+    if (step.next && (game.next.c !== step.next.c || game.next.spoke !== step.next.spoke))
         game.place(step.next);
-    return game.drop();
+    return 'drop' in step ? game.drop() : game.turn(step.dir, step.turn);
 }
 const placeOf = (grid, id) => {
     for (let r = 0; r < grid.length; r++)
@@ -323,7 +328,8 @@ export function planMarks(name, n) {
     if (!L?.marked)
         return [];
     const steady = () => 0.5, lastDrop = L.moves.map((m) => 'drop' in m).lastIndexOf(true);
-    if (n >= L.moves.length)
+    // (from where she spots it, `markFrom`, till it's set off)
+    if (n >= L.moves.length || n < (L.markFrom ?? 0))
         return [];
     // (the board built, then set off, every stage seen)
     const g = layBoard(name, steady).game, outer = g.rings - 1;
@@ -348,10 +354,11 @@ export function planMarks(name, n) {
     const has = (p, c) => now.grid[p.ring][p.spoke]?.c === c;
     const out = [];
     const mark = (m, there) => { out.push(there ? m : { ...m, faint: true }); };
-    const pair = lineAt.filter((p) => built[p.ring][p.spoke]);
+    // (the pair: a star already there first, the one she spots, tagged)
+    const laid = layBoard(name, steady).game.grid;
+    const pair = lineAt.filter((p) => built[p.ring][p.spoke]).sort((p, q) => Number(!!laid[q.ring][q.spoke]) - Number(!!laid[p.ring][p.spoke]));
     const gap = lineAt.find((p) => !pair.includes(p));
-    for (const p of pair)
-        mark({ kind: 'star', at: p, colour: built[p.ring][p.spoke].c, label: '' }, has(p, built[p.ring][p.spoke].c));
+    pair.forEach((p, k) => mark({ kind: 'star', at: p, colour: built[p.ring][p.spoke].c, label: k === 0 ? 'pair' : '' }, has(p, built[p.ring][p.spoke].c)));
     if (gap)
         mark({ kind: 'gap', at: gap, label: 'gap' }, pair.every((p) => has(p, built[p.ring][p.spoke].c)));
     const ready = n > lastDrop;

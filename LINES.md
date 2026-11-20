@@ -1458,7 +1458,7 @@ Kind and practical, and encouraging ("You got this!"): the one who explained the
   - *asks:* "Or what's different here?"
   - *then:* "What's different, then. Which bit?"
 - *Her first question, and once it's picked:*
-  - *asks:* "Want to see how it works? Umami's run, from his replay, a step at a time."
+  - *asks:* "Want to see how it works? Umami's run, from his replay."
   - *then:* "Umami's run, then. Space for each step."
 - *Her speed nav question, after how it works, and once it's picked:*
   - *asks:* "Or speed nav? The quick double. Nice and simple, and you can do it every time."
@@ -1474,7 +1474,7 @@ Kind and practical, and encouraging ("You got this!"): the one who explained the
 - *Under it, in the bar:* "Chart what you can: each constellation turns werewolves back. T for her lessons again."
 - *Handing you the board after Umami's run, its four wild targets up:* "Your board now, those four wild targets and all. Any star fills them. Cookie while you think?"
 - *Under it, in the bar:* "Space drops, arrows turn. T for her lessons again."
-- *Handing you the board after the quick double:* "Your board now. A pair, two parked outside in order, spin. Quick as you like. Cookie?"
+- *Handing you the board after the quick double:* "Your board now. Find a pair, park two outside in order, spin. Quick as you like. Cookie?"
 
 ### Her lesson, as she plays each board at the star table: as it's laid, before a move, as each clear or chart of a cascade shows, as slots go wild, as the next constellation goes up, and at the end
 
@@ -1487,16 +1487,17 @@ Kind and practical, and encouraging ("You got this!"): the one who explained the
   - *chart:* "Constellation! 71, times three: 213. For one white."
   - *deal:* "And the next one comes up with four wild targets in the centre. Two clears before the chart did that."
   - *end:* "Single, Double, Triple Constellation. That's the trick: end a cascade on the constellation."
-- *Speed nav: the quick double, built up from the start, its plan marked on the board, a beat at a time (Space for each):*
-  - *set:* "Speed nav: the quick double. No clever triples, just a shape you can build every time, quick. That's it ringed, faint till it's built: a pair of whites on the third ring, the gap beside them, the yellow target under one. And the two we need, parked outside. Then one spin."
-  - *move1:* "First, the pair. A white, onto the yellow target. Wrong colour, I know: it's the one that clears out of the way."
-  - *move2:* "And a white beside it. Two side by side, and the gap up-left of them: three in a row, waiting for its third."
-  - *move3:* "Now we wait for the two we need, and park them on the outer ring: over a full spoke, a star just sits up there. Anything else that comes, put it where it won't get in the way. The white first..."
-  - *move4:* "...then the yellow, behind it. Order matters: the white has to reach the gap first, so the yellow drops into the hole it leaves."
-  - *move5:* "Built. Now spin the outer ring. Over full spokes, they ride round, waiting..."
-  - *step1:* "Single! The white dropped into the gap: three whites, gone. And the yellow's right over the empty target..."
-  - *chart:* "Double! Constellation! 71, times two. Two turns, and you can set it up every time."
-  - *end:* "A pair on the third ring, the gap beside it. Park the two you need outside, in order. Spin. Your go: try building one."
+- *Speed nav: the quick double, as you'd really play it, stars coming as they come, its plan marked on the board, a beat at a time (Space for each):*
+  - *set:* "Speed nav: the quick double. Same every time, so it's easy to do again and again. Stars come as they come: you can't pick them. So first, the bottom two rings: fill them in, like normal."
+  - *move3:* "Now the third ring. Here we wait for an opportunity. A blue: no use to me, so it goes where it won't get in the way."
+  - *move4:* "See it? A red, already up here, right beside the yellow target. That's half a pair. And here's a red: onto the target, beside it."
+  - *move5:* "That's my pair, and the gap on its other side. Now all I need is a red and a yellow, side by side on the outer ring, the red in front. A red: over a full spoke, it just waits up there."
+  - *move6:* "Then whatever comes. A yellow, but two spokes on. So I turn the outer ring, to bring the red right up beside where it'll land..."
+  - *move7:* "...and drop the yellow in behind it. Red in front, yellow behind."
+  - *move8:* "Set. Now spin the outer ring round toward the gap. Over full spokes, they ride round, waiting..."
+  - *step1:* "Single! The red dropped into the gap: three reds, gone. And the yellow's right over the empty target..."
+  - *chart:* "Double! Constellation! 71, times two."
+  - *end:* "Fill the bottom two. On the third ring, find a pair beside the target. Then wait for its colour and the target's, park them side by side outside, in order, and spin. Same every time."
 - *A cascade, lines only, making wild targets:*
   - *set:* "Cascades first. See the two reds round the third ring, and the stars waiting up top? One red dropped, and watch what it sets off."
   - *step1:* "Single! Three reds. And the blue that was waiting over them falls in..."

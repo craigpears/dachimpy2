@@ -2807,6 +2807,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     the outer ring in order, the rest put out of the way; then the spin), its plan marked on the board throughout,
     Sailing's way (`planMarks`): faint till built, then solid, "gap", "1st" and "2nd" tagged, dotted arrows to where
     each lands, "1 Single" and "2 Double".
+    Then, the same day, as you'd really play it: "the first step is ... building the bottom two rings basically like
+    normal ... by the time we get to the third ring ... we want to wait for an opportunity ... I've already got a red.
+    Why would I be building a white piece there? ... this is so methodical and easy to recreate. So now all I need is
+    to get a red and a yellow piece next to each other in the outer ring"; and "you can['t] magically predict that the
+    white is coming next". So: the bottom two rings filled in first; on the third ring, a red already beside the target
+    spotted (the plan marked from there, `markFrom`), what's no use put out of the way, a red onto the target; a red
+    parked outside, then a yellow that comes two spokes on, the outer ring turned to bring the red up beside where it
+    lands; spun round toward the gap. Each star shows before she says what she'll do with it (a step's `next`). The
+    plan's marks plain to see while still to come: dashed, never faint ("I can't tell ... what it's trying to refer to").
+  - **Her menu opens at the top, its choices, as you sit (20 Nov):** "I should be at that top menu first", and How it
+    works (Umami's run) one lesson, not three steps ("still broken down").
   - **A choice of one part is that lesson (20 Nov):** in any tutorial's menu, picking a choice that covers a single
     part plays it straight away, no list of one to pick from.
   - **"Wild target"** in her words, the guide's and the code's: YPPedia's word (the user, 15 Nov: "Go with yppedia and

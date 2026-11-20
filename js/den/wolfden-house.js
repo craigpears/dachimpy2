@@ -249,6 +249,11 @@ export const WOLFDEN_HOUSE = {
       else line(...out);
       return true;
     }
+    /** A lesson's next star, the one its step says comes (none said: whatever the board dealt). */
+    function comes(step) {
+      const n = step?.next, g = G.board.game;
+      if (n && (g.next.c !== n.c || g.next.spoke !== n.spoke)) g.place(n);
+    }
     /** Space, or Next: on from a beat she's waiting on. False if she isn't. */
     function goOn() {
       const L = G.lesson;
@@ -265,13 +270,16 @@ export const WOLFDEN_HOUSE = {
       if (L.wait || H.talking() || G.board.busy()) return;
       if ((L.t -= dt) > 0) return;
       if (L.n < L.moves.length) {
+        // (the star that comes, shown before she says what she'll do with it: her lesson's stars come as they come)
+        comes(L.moves[L.n]);
         if (say([`move${L.n + 1}`])) return;
         const step = L.moves[L.n++];
         G.board.plan = null;
         // (the move that sets it off: the plan's done its job, the board plays it out unmarked)
         if (L.n >= L.moves.length) { G.board.marks = null; L.marked = L.n; }
-        if ('drop' in step) { if (step.next) G.board.game.place(step.next); G.board.drop(); }
+        if ('drop' in step) G.board.drop();
         else { G.board.game.ring = step.turn; G.board.turn(step.dir); }
+        comes(L.moves[L.n]);
         L.t = PACE_LESSON.MOVE;
         return;
       }
@@ -359,7 +367,9 @@ export const WOLFDEN_HOUSE = {
         if (G.playing) return true;
         // (charting counts as having come up to the table: its line never cuts into a lesson)
         // (her menu up along the bottom on How it works the first time: the quick way in)
-        if (atTable(H.you)) { H.hush(); G.tabled = true; play(true); if (!G.offered) { G.offered = true; lessons('mechanics'); } return true; }
+        // (her menu up along the bottom the first time, at the top, her choices: the quick way in; the user, 20 Nov: "I
+        // should be at that top menu first")
+        if (atTable(H.you)) { H.hush(); G.tabled = true; play(true); if (!G.offered) { G.offered = true; lessons(); } return true; }
         return false;
       },
       // (the bar's buttons are the keys)

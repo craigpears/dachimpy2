@@ -178,8 +178,8 @@ After the user played the basics, the deeper mechanics went in on real boards of
 Cascades, Four rings, Why chains pay; tests/den-wolfden.test.ts). Then How it works as the user meant it: Umami's run
 from his replay (notes/wolf-den/), one real board (`BOARDS.replay`) whose one white dropped gives "Single! +3",
 "Double! +6" turning the orange target beside it wild, and "Triple! Constellation! +213", the next up with four wild
-targets. Its steps are `WALK` (single, double, triple), each its cues on the board in order (tested); the lesson walks
-them a beat at a time, every beat she speaks holding the board till Space or Next (the Drop button's place while she
+targets. One lesson since 20 Nov ("still broken down"), `umamiRun`, its cues on the board in order (tested); the
+lesson walks it a beat at a time, every beat she speaks holding the board till Space or Next (the Drop button's place while she
 waits, naming the step it goes on to: `endsStep`, `nextStep`); a later step picked from the menu plays the earlier
 ones unsaid. The choice comes first in her menu, which pops up as you sit the first time, on its list: the model for
 "the lesson is the quick way in" with a menu (the user: "that menu at the bottom that pops up quickly would be

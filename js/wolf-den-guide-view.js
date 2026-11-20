@@ -74,9 +74,10 @@ async function drawBeat(art, name, beat) {
   const wild = new Set(laid.game.constellation.marks.filter((m) => m.wild).map((m) => `${m.ring},${m.spoke}`));
   const marksOf = (c) => c && c.marks.map((m) => ({ ...m, wild: c === laid.game.constellation ? wild.has(`${m.ring},${m.spoke}`) : m.wild }));
   const shots = [];
-  // (a board built then set off has its whole plan marked, faint till it's built: src/den-wolfden.ts's planMarks)
+  // (a board built then set off has its plan marked, dashed till it's built: src/den-wolfden.ts's planMarks)
   const marked = !!BOARDS[name].marked;
-  if (cues.includes('set')) shots.push([await picture(laid.game, BOARDS[name].plan ?? null, planMarks(name, 0)), marked ? 'The plan, faint till it\'s built' : 'Before: the plan ringed']);
+  const m0 = planMarks(name, 0);
+  if (cues.includes('set')) shots.push([await picture(laid.game, BOARDS[name].plan ?? null, m0), m0.length ? 'The plan, dashed till it's built' : marked || !BOARDS[name].plan ? 'Before' : 'Before: the plan ringed']);
   const first = laid.game.constellation;
   let n = 0, prev = null;
   for (const [i, move] of laid.moves.entries()) {
@@ -96,7 +97,7 @@ async function drawBeat(art, name, beat) {
     prev = st;
     }
     // (a star she drops, as it comes to rest, the plan as it stands)
-    if (colour && cues.includes(`move${i + 1}`)) shots.push([await picture(boardAt(laid.game.grid, marksOf(first)), null, planMarks(name, i + 1)), `A ${colour.toLowerCase()} dropped`]);
+    if (colour && cues.includes(`move${i + 1}`)) shots.push([await picture(boardAt(laid.game.grid, marksOf(first)), null, planMarks(name, i + 1)), `A ${colour.toLowerCase()} comes: dropped${planMarks(name, i + 1).length && !planMarks(name, i).length ? ', and the plan marked' : ''}`]);
   }
   for (const [cv, caption] of shots) row.append(figure(cv, caption));
   const words = cues.map((c) => LESSON[name]?.[c]).filter(Boolean);
