@@ -2855,6 +2855,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     "pieces come in, they say come in bags of 10 for this puzzle. So instead of it being random, it's like you get a
     bag mixed up with two of each colour ... you don't get a third of anything until you get two of each in that
     cycle." Shuffled within the bag, it seems. It makes combos needing three of a colour slower to set up.
+  - **The next star creeps in on its own: the timer (the user, 20 Nov).** "It's supposed to slowly move down, like,
+    before you've done anything ... that's the timer to give you only a set amount of time to do something, so you
+    can't just sit there forever. Like, really slowly. But eventually it will touch the bottom and then you're stuck
+    with that move." Waiting on its spoke's handle, it creeps in toward the wheel, an arc round it draining and going
+    red near the end, and touching (CREEP.SECS, 20 seconds, made up) it drops where it is, a booch if its spoke's full.
+    Turning doesn't stop the clock; dropping starts the next one's. Only while you're at the board: not in a teacher's
+    demonstration or under her menu. And once Space is pressed it goes in really quick ("once you hit space, it should
+    go really quick. The slow drop is ... for before you've hit the space bar"): 13 Nov's "the pieces are supposed to
+    slowly drop" meant this creep, and was misread then as a slow fall.
+  - **A wild target holding a star is filled, lit and locked (the user, 20 Nov):** "the same kind of visible indicator
+    as if ... you've got a white in a white ring": a coin of the star's colour with its star on it, inside the ring of
+    every colour, glowing.
   - A first go is the first three, one, two and three stars (FIRST_GO): the greedy bot takes about 66
     moves over them (15, 21 and 30), a minute or two at the keys, and booches about once in thirteen
     goes.

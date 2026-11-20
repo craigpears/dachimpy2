@@ -1,7 +1,7 @@
 /* Duty Navigation's rules, as YPPedia gives them ("Navigation", read 11 Nov 2026), and what was made
    up where it doesn't say (src/navigation.ts). */
 import { describe, expect, it } from 'vitest';
-import { BOOCH_PENALTY, COLOURS, COLOUR_NAMES, FIRST_GO, Navigation, PAR, RINGS, SCORE, SIZES, SPOKES, bottomRow, linesOf, needsCombo, parFor, pointsFor, ratingFor } from '../src/navigation';
+import { BOOCH_PENALTY, COLOURS, CREEP, COLOUR_NAMES, FIRST_GO, Navigation, PAR, RINGS, SCORE, SIZES, SPOKES, bottomRow, linesOf, needsCombo, parFor, pointsFor, ratingFor } from '../src/navigation';
 import type { Done, Mark } from '../src/navigation';
 import { seeded } from '../src/mirror-row';
 
@@ -297,5 +297,41 @@ describe('a combo constellation: the evil one, built for the starlit door, saved
     expect(done.map((d) => d.stars)).toEqual([2, 3, 6]);
     expect(needsCombo(done[2].marks)).toBe(true);
     expect(g.totalMoves).toBe(76);
+  });
+});
+
+// The user, 20 Nov: "It's supposed to slowly move down, like, before you've done anything ... that's the timer to give
+// you only a set amount of time to do something, so you can't just sit there forever. Like, really slowly. But
+// eventually it will touch the bottom and then you're stuck with that move."
+describe('20 Nov: the next star creeps in on its own, the timer, and drops where it is when it touches', () => {
+  it('creeps in really slowly, touching after CREEP.SECS, never before', () => {
+    const g = new Navigation(seeded(3));
+    expect(CREEP.SECS).toBeGreaterThanOrEqual(10);
+    expect(g.creepShare()).toBe(0);
+    let t = 0;
+    while (!g.creep(0.5)) { t += 0.5; expect(t).toBeLessThan(CREEP.SECS); }
+    expect(t + 0.5).toBeCloseTo(CREEP.SECS, 6);
+    expect(g.creepShare()).toBe(1);
+  });
+  it("dropped (by Space or by touching), the next one starts again from the top; turning doesn't stop the clock", () => {
+    const g = new Navigation(seeded(3));
+    g.creep(CREEP.SECS / 2);
+    g.turn(1);
+    expect(g.creepShare()).toBeCloseTo(0.5, 6);
+    const was = g.next.id;
+    g.drop();
+    expect(g.next.id).not.toBe(was);
+    expect(g.creepShare()).toBe(0);
+  });
+  it("can be turned off (creep: 0), and set to its own pace; a bot's imagined copy keeps the clock", () => {
+    const off = new Navigation(seeded(3), { creep: 0 });
+    expect(off.creep(1000)).toBe(false);
+    expect(off.creepShare()).toBe(0);
+    const quick = new Navigation(seeded(3), { creep: 4 });
+    expect(quick.creep(3)).toBe(false);
+    expect(quick.creep(1)).toBe(true);
+    const half = new Navigation(seeded(3));
+    half.creep(CREEP.SECS / 4);
+    expect(half.copy(seeded(9)).creepShare()).toBeCloseTo(0.25, 6);
   });
 });

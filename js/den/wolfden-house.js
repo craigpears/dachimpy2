@@ -311,6 +311,8 @@ export const WOLFDEN_HOUSE = {
       },
       tick(dt) {
         // (in a lesson the board waits while she talks, or for you to go on)
+        // (the next star creeps in only on your own board: not in her lessons, her opening, or under her menu)
+        G.board.timer = G.playing && !G.lesson && !G.choice && !G.opening;
         if (G.lesson && (H.talking() || G.lesson.wait)) G.board.hold(dt);
         else G.board.tick(dt);
         G.digP.tick?.(dt);
