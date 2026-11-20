@@ -21,7 +21,7 @@
    turns back to a wolf-kin's, and when it's gone the next pack comes. Esc, or Stop, to step back from the table. */
 import * as THREE from 'three';
 import { PIRATES } from '../den-look.js';
-import { PLAN, WALLS, BACK, ARRIVE, TABLE, atTable, WINDOW, FURNISH, Moon, layBoard, PACE_LESSON, BOARDS, boardsOf, stageCues } from '../den-wolfden.js';
+import { PLAN, WALLS, BACK, ARRIVE, TABLE, atTable, WINDOW, FURNISH, Moon, layBoard, PACE_LESSON, BOARDS, boardsOf, stageCues, planMarks } from '../den-wolfden.js';
 import { WOLF_DEN_TUTORIAL, WALKS, walkOf, walkAt, walkStepOf, endsStep, nextStep } from '../wolf-den-tutorial.js';
 import { Navigation } from '../navigation.js';
 import { blocksOf } from '../den-houses.js';
@@ -185,7 +185,7 @@ export const WOLFDEN_HOUSE = {
     function play(on) {
       G.playing = on;
       G.board.idle = !on;
-      if (!on) { G.choice?.close(); G.choice = null; if (G.lesson) { G.lesson = null; G.board.plan = null; H.say(G.dig, null); } }
+      if (!on) { G.choice?.close(); G.choice = null; if (G.lesson) { G.lesson = null; G.board.plan = null; G.board.marks = null; H.say(G.dig, null); } }
       showBar();
       showScore();
     }
@@ -228,7 +228,8 @@ export const WOLFDEN_HOUSE = {
       setBoard(b.game);
       G.board.idle = false;
       G.board.plan = BOARDS[name].plan ?? null;
-      Object.assign(L, { name, moves: b.moves, n: 0, t: PACE_LESSON.FIRST, said: new Set(), ended: false });
+      G.board.marks = null;
+      Object.assign(L, { name, moves: b.moves, n: 0, marked: -1, t: PACE_LESSON.FIRST, said: new Set(), ended: false });
       if (!say(['set']) && L.first) line(TUTOR.show.replace('{title}', L.part.title));
       L.first = false;
     }
@@ -259,13 +260,17 @@ export const WOLFDEN_HOUSE = {
     }
     function lessonTick(dt) {
       const L = G.lesson;
+      // (her plan marked on the board as it stands, Sailing's way: src/den-wolfden.ts's planMarks)
+      if (!G.board.busy() && L.marked !== L.n) { L.marked = L.n; G.board.marks = planMarks(L.name, L.n); }
       if (L.wait || H.talking() || G.board.busy()) return;
       if ((L.t -= dt) > 0) return;
       if (L.n < L.moves.length) {
         if (say([`move${L.n + 1}`])) return;
         const step = L.moves[L.n++];
         G.board.plan = null;
-        if ('drop' in step) G.board.drop();
+        // (the move that sets it off: the plan's done its job, the board plays it out unmarked)
+        if (L.n >= L.moves.length) { G.board.marks = null; L.marked = L.n; }
+        if ('drop' in step) { if (step.next) G.board.game.place(step.next); G.board.drop(); }
         else { G.board.game.ring = step.turn; G.board.turn(step.dir); }
         L.t = PACE_LESSON.MOVE;
         return;
@@ -275,6 +280,7 @@ export const WOLFDEN_HOUSE = {
       if (L.chain.length) { layNext(); return; }
       G.lesson = null;
       G.board.plan = null;
+      G.board.marks = null;
       showBar();
       line(L.walk ? WALKS[L.walk].done : TUTOR.after);
     }

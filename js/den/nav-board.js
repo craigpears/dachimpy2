@@ -594,6 +594,7 @@ export function navBoard(o = {}) {
       for (const p of b.plan) { const [x, y] = xy(radius(p.ring), ang(p.spoke)); g.beginPath(); g.arc(x, y, SR * 1.45, 0, Math.PI * 2); g.stroke(); }
       g.restore();
     }
+    drawMarks();
     // The next star, out on its spoke's handle, a pale halo round it (not while one's still dropping in), creeping
     // in toward the wheel as it waits, its time left an arc round it, draining, going red near the end, the halo
     // pulsing faster: the timer (the rules' `creep`; the user, 20 Nov: "that's the timer to give you only a set amount
@@ -687,6 +688,78 @@ export function navBoard(o = {}) {
   // the board's back).
   // Still where it is, drawn (only the time goes on, for what pulses): while a teacher talks over it.
   b.hold = (dt) => { b.time += dt; draw(); tex.needsUpdate = true; };
+
+  /* A teacher's plan marked on the board, Sailing's way (`b.marks`, set it: src/den-wolfden.ts's PlanMark, from
+     planMarks; js/den/sail-board.js's drawMarks the model; the user, 20 Nov: "it's not really showing the plan in the
+     way that sailing is"): a star still to put in place ringed in its colour, the gap glowing, each star parked
+     outside tagged ("1st", "2nd") with a dotted arrow round its ring and in to where it lands, and what happens in
+     order, gold badges (1 Single, 2 Double). Still to come, faint and dashed; built, solid, pulsing gently. */
+  b.marks = null;
+  function markTag(x, y, text, col, a) {
+    g.save();
+    g.globalAlpha = a;
+    g.font = `800 ${Math.round(30 * K)}px 'Alegreya Sans', sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    const w = g.measureText(text).width + 18 * K, h = 36 * K;
+    g.fillStyle = 'rgba(14,9,4,0.9)'; g.strokeStyle = col; g.lineWidth = 3;
+    g.beginPath(); g.roundRect(x - w / 2, y - h / 2, w, h, 10 * K); g.fill(); g.stroke();
+    g.fillStyle = col; g.fillText(text, x, y + 1);
+    g.restore();
+  }
+  // (a tag's place: out from the board's middle past the mark, or in toward it)
+  const beside = (p, out) => xy(radius(p.ring) + (out ? 1 : -1) * SR * 1.95, ang(p.spoke));
+  function drawMarks() {
+    const ms = b.marks;
+    if (!ms?.length) return;
+    const pulse = 0.75 + 0.25 * Math.sin(b.time * 4), order = { arrow: 0, star: 1, gap: 2, badge: 3 };
+    for (const m of [...ms].sort((p, q) => order[p.kind] - order[q.kind])) {
+      const a = m.faint ? 0.42 : pulse;
+      g.save();
+      g.setLineDash(m.faint ? [10, 9] : []);
+      if (m.kind === 'star' || m.kind === 'gap') {
+        const [x, y] = xy(radius(m.at.ring), ang(m.at.spoke)), col = m.kind === 'gap' ? '#ffffff' : COL[m.colour].ring;
+        if (m.kind === 'gap') {
+          const gg = g.createRadialGradient(x, y, SR * 0.2, x, y, SR * 1.5);
+          gg.addColorStop(0, `rgba(255,255,255,${0.3 * a})`); gg.addColorStop(1, 'rgba(255,255,255,0)');
+          g.fillStyle = gg; g.beginPath(); g.arc(x, y, SR * 1.5, 0, Math.PI * 2); g.fill();
+        }
+        g.globalAlpha = a; g.lineWidth = 6 * K; g.strokeStyle = col; g.shadowColor = col; g.shadowBlur = m.faint ? 0 : 14;
+        g.beginPath(); g.arc(x, y, SR * 1.4, 0, Math.PI * 2); g.stroke();
+        g.restore();
+        if (m.label) { const [tx, ty] = beside(m.at, true); markTag(tx, ty, m.label, col, m.faint ? 0.5 : 1); }
+        continue;
+      }
+      if (m.kind === 'arrow') {
+        // (round its ring the way it's turned, then in to where it lands)
+        const col = COL[m.colour].ring, r0 = radius(m.from.ring), a0 = ang(m.from.spoke);
+        let a1 = ang(m.to.spoke), d = a1 - a0;
+        if (m.dir < 0) { while (d > 0) d -= Math.PI * 2; } else { while (d < 0) d += Math.PI * 2; }
+        a1 = a0 + d;
+        const [ex, ey] = xy(radius(m.to.ring) + SR * 0.9, a1);
+        g.globalAlpha = a; g.lineWidth = 9 * K; g.strokeStyle = col; g.setLineDash([1, 16 * K]); g.lineCap = 'round'; g.shadowColor = 'rgba(0,0,0,0.8)'; g.shadowBlur = 6;
+        g.beginPath();
+        if (Math.abs(d) > 0.01) g.arc(C, C, r0, a0, a1, m.dir < 0); else g.moveTo(...xy(r0, a0));
+        g.lineTo(ex, ey); g.stroke();
+        // (its head, pointing in)
+        g.setLineDash([]); g.fillStyle = col;
+        const ux = Math.cos(a1), uy = Math.sin(a1), vx = -uy, vy = ux, hl = 22 * K, hw = 13 * K;
+        g.beginPath(); g.moveTo(ex - ux * 2, ey - uy * 2);
+        g.lineTo(ex + ux * hl + vx * hw, ey + uy * hl + vy * hw); g.lineTo(ex + ux * hl - vx * hw, ey + uy * hl - vy * hw);
+        g.closePath(); g.fill();
+        g.restore();
+        continue;
+      }
+      if (m.kind === 'badge') {
+        const [x, y] = beside(m.at, false), R = 20 * K;
+        g.globalAlpha = m.faint ? 0.5 : 1;
+        g.fillStyle = '#f2c84a'; g.strokeStyle = '#3a2408'; g.lineWidth = 3;
+        g.beginPath(); g.arc(x, y, R, 0, Math.PI * 2); g.fill(); g.stroke();
+        g.fillStyle = '#2a1804'; g.font = `900 ${Math.round(26 * K)}px 'Alegreya Sans', sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(String(m.n), x, y + 1);
+        g.restore();
+        if (m.label) markTag(x, y + R + 20 * K, m.label, '#f2c84a', m.faint ? 0.5 : 1);
+      }
+    }
+  }
   b.refresh = () => { b.queue = []; b.stage = null; b.dropFrom = []; b.lit = null; b.wildLater.clear(); layNow(game.grid); b.shownCon = game.constellation; b.conFade = 1; };
   b.dispose = () => {
     group.removeFromParent();

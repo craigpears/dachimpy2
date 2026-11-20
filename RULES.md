@@ -2798,6 +2798,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     one; a white and a yellow behind it on the outer ring; the outer ring turned twice, the white drops into the gap
     (Single), the yellow falls into the emptied target (Double! Constellation!, 71 times two). Fast, good doubles over
     triples (Pandayay: "u dont need to do triples to get fren").
+    Reworked the same day after the user played it ("Surely when I pick the quick double, that should be it, and the
+    rest are just little steps within that selected lesson ... it's not really explaining the idea of why this is
+    easy ... not really showing the build-up ... there's a journey, there's a thinking process that's all quite
+    missing ... it's not really showing the plan in the way that sailing is"): one lesson, played as soon as it's
+    picked; the aim first and why it's easy (a shape you can build every time, no clever triples), then built up from
+    the start (a white onto the target, a white beside it: the pair and its gap; then wait, parking the two you need on
+    the outer ring in order, the rest put out of the way; then the spin), its plan marked on the board throughout,
+    Sailing's way (`planMarks`): faint till built, then solid, "gap", "1st" and "2nd" tagged, dotted arrows to where
+    each lands, "1 Single" and "2 Double".
+  - **A choice of one part is that lesson (20 Nov):** in any tutorial's menu, picking a choice that covers a single
+    part plays it straight away, no list of one to pick from.
   - **"Wild target"** in her words, the guide's and the code's: YPPedia's word (the user, 15 Nov: "Go with yppedia and
     wild targets"), over "wild slot", the Wolf Dens Guide's and the players'.
   - **Umami's evil constellation at the wolf den (15 Nov):** the user's combo-only constellation (11 Nov, "The

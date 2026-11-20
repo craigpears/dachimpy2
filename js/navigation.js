@@ -323,6 +323,12 @@ export class Navigation {
         this.settle(res);
         return res;
     }
+    /** A host's own next star (a teacher's, dealt where her lesson needs it): its colour and spoke, the creep from the
+        top. */
+    place(next) {
+        this.next = { id: this.nextId++, c: next.c, spoke: next.spoke };
+        this.waited = 0;
+    }
     /** How far the next star's crept in: 0 just dealt, 1 touching the wheel. */
     creepShare() { return this.creepSecs > 0 ? Math.min(1, this.waited / this.creepSecs) : 0; }
     /** Time passing for the next star (the clock handed in: `dt` seconds): it creeps in, and true once it's touched

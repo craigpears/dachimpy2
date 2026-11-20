@@ -27,7 +27,9 @@ const moves = (ref: string) => ({ kind: 'moves' as const, ref });
    How it works: Umami's run, from his replay (the user, 15 Nov: "the tutorial thing I was intending"), BOARDS.replay,
    one white dropped. Speed nav: the quick double (the user, 15 Nov: "it's speed nav and quick doubles is a good
    strategy. So a layer of three so you can line up two pieces in the outer ring and it's nice and simple"; built 20
-   Nov), BOARDS.quick, the outer ring turned twice. */
+   Nov), BOARDS.quick, one lesson, not steps to pick from (20 Nov: "Surely when I pick the quick double, that should be
+   it, and the rest are just little steps within that selected lesson"): the aim first, then built up from the start
+   (the pair, the two parked outside in order), then set off, her plan marked on the board throughout. */
 export interface Walk { board: string; steps: Readonly<Record<string, readonly string[]>>; done: string }
 export const WALKS: Readonly<Record<string, Walk>> = {
   mechanics: {
@@ -37,7 +39,7 @@ export const WALKS: Readonly<Record<string, Walk>> = {
   },
   quick: {
     board: 'quick',
-    steps: { layer: ['set'], spin: ['move1', 'move2'], quickDouble: ['step1', 'step2', 'chart', 'deal', 'end'] },
+    steps: { quickDouble: ['set', 'move1', 'move2', 'move3', 'move4', 'move5', 'step1', 'step2', 'chart', 'end'] },
     done: TUTOR.quickWalked,
   },
 };
@@ -87,9 +89,7 @@ const PHASES: readonly Part[] = [
 ];
 
 const TRICKS: readonly Part[] = [
-  { id: 'layer', title: 'Speed nav: a layer of three', line: 'The quick double, nice and simple, every time: two whites on the third ring with a gap beside them, the target under one; out on the outer ring, a white with the target\'s colour behind it.', shows: moves(WALKS.quick.board), phase: 'window' },
-  { id: 'spin', title: 'Spin the outer ring', line: 'Over full spokes they wait. Turned on, the white comes over the gap.', shows: moves(WALKS.quick.board), phase: 'window' },
-  { id: 'quickDouble', title: 'Single, then Double! Constellation!', line: 'The white drops: three whites, a Single. The star behind it falls into the target they left: charted on the second step, 71 times two, in two turns.', shows: moves(WALKS.quick.board), phase: 'window', tag: 'x2' },
+  { id: 'quickDouble', title: 'Speed nav: the quick double', line: 'A shape you can build every time, quick: a pair on the third ring, the gap beside it over the target; the two you need parked on the outer ring, in order; one spin, and it\'s a Single, then a Double.', shows: moves(WALKS.quick.board), phase: 'window', tag: 'x2' },
   { id: 'trapdoor', title: 'The Trapdoor', line: 'Clear, then chart: a line goes, and the star parked above it falls into the slot. The chart\'s points doubled.', shows: moves('trapdoor'), phase: 'window', tag: 'x2' },
   { id: 'echo', title: 'The Echo', line: 'Chart, then clear: the stars falling into the slots it leaves make a line. The next constellation\'s centre goes wild.', shows: moves('echo'), phase: 'window' },
   { id: 'beside', title: 'A combo beside the wrong star', line: 'A combo\'s clear beside a slot holding the wrong colour turns it wild, and the star already in it counts.', shows: moves(WALK_BOARD), phase: 'window' },

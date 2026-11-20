@@ -26,7 +26,7 @@ export const WALKS = {
     },
     quick: {
         board: 'quick',
-        steps: { layer: ['set'], spin: ['move1', 'move2'], quickDouble: ['step1', 'step2', 'chart', 'deal', 'end'] },
+        steps: { quickDouble: ['set', 'move1', 'move2', 'move3', 'move4', 'move5', 'step1', 'step2', 'chart', 'end'] },
         done: TUTOR.quickWalked,
     },
 };
@@ -74,9 +74,7 @@ const PHASES = [
     { id: 'rumble', title: 'The rumbles', line: 'Each round a Rumble against the pack first, then the stations.', shows: board('rings'), todo: 'the rumbles themselves, not in the den yet' },
 ];
 const TRICKS = [
-    { id: 'layer', title: 'Speed nav: a layer of three', line: 'The quick double, nice and simple, every time: two whites on the third ring with a gap beside them, the target under one; out on the outer ring, a white with the target\'s colour behind it.', shows: moves(WALKS.quick.board), phase: 'window' },
-    { id: 'spin', title: 'Spin the outer ring', line: 'Over full spokes they wait. Turned on, the white comes over the gap.', shows: moves(WALKS.quick.board), phase: 'window' },
-    { id: 'quickDouble', title: 'Single, then Double! Constellation!', line: 'The white drops: three whites, a Single. The star behind it falls into the target they left: charted on the second step, 71 times two, in two turns.', shows: moves(WALKS.quick.board), phase: 'window', tag: 'x2' },
+    { id: 'quickDouble', title: 'Speed nav: the quick double', line: 'A shape you can build every time, quick: a pair on the third ring, the gap beside it over the target; the two you need parked on the outer ring, in order; one spin, and it\'s a Single, then a Double.', shows: moves(WALKS.quick.board), phase: 'window', tag: 'x2' },
     { id: 'trapdoor', title: 'The Trapdoor', line: 'Clear, then chart: a line goes, and the star parked above it falls into the slot. The chart\'s points doubled.', shows: moves('trapdoor'), phase: 'window', tag: 'x2' },
     { id: 'echo', title: 'The Echo', line: 'Chart, then clear: the stars falling into the slots it leaves make a line. The next constellation\'s centre goes wild.', shows: moves('echo'), phase: 'window' },
     { id: 'beside', title: 'A combo beside the wrong star', line: 'A combo\'s clear beside a slot holding the wrong colour turns it wild, and the star already in it counts.', shows: moves(WALK_BOARD), phase: 'window' },

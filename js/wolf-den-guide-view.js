@@ -6,8 +6,8 @@
 // does. One with data-beat="step" too is a beat of a walk, How it works (Umami's run) or speed nav (the quick double)
 // (src/wolf-den-tutorial.ts's WALKS): the board as each of its cues shows, and her words for them. The sticky nav comes from the tutorial's description (src/wolf-den-tutorial.ts), by js/tutorial-nav.js.
 // Hand-written, not compiled.
-import { BOARDS, boardsOf, layBoard, playStep, stageCues } from './den-wolfden.js';
-import { Navigation } from './navigation.js';
+import { BOARDS, boardsOf, layBoard, playStep, stageCues, planMarks } from './den-wolfden.js';
+import { Navigation, COLOUR_NAMES } from './navigation.js';
 import { seeded } from './mirror-row.js';
 import { WOLF_DEN_TUTORIAL, WALKS } from './wolf-den-tutorial.js';
 import { LESSON } from './lines/multibella.js';
@@ -20,11 +20,12 @@ const STEP_NAMES = ['Single', 'Double', 'Triple'];
 const RING_NAMES = ['The centre', 'The middle', 'The third', 'The outer'];
 /** A board's picture: the den's board drawn once, as its game stands (a plan ringed, if given), copied onto a canvas
     of its own. */
-async function picture(game, plan = null) {
+async function picture(game, plan = null, marks = null) {
   const { navBoard } = await import('./den/nav-board.js');
   const b = navBoard({ game, sky: false });
   b.idle = true;
   b.plan = plan;
+  b.marks = marks;
   b.tick(0.001);
   const cv = document.createElement('canvas');
   cv.width = 512; cv.height = 512;
@@ -73,12 +74,16 @@ async function drawBeat(art, name, beat) {
   const wild = new Set(laid.game.constellation.marks.filter((m) => m.wild).map((m) => `${m.ring},${m.spoke}`));
   const marksOf = (c) => c && c.marks.map((m) => ({ ...m, wild: c === laid.game.constellation ? wild.has(`${m.ring},${m.spoke}`) : m.wild }));
   const shots = [];
-  if (cues.includes('set')) shots.push([await picture(laid.game, BOARDS[name].plan ?? null), 'Before: the plan ringed']);
+  // (a board built then set off has its whole plan marked, faint till it's built: src/den-wolfden.ts's planMarks)
+  const marked = !!BOARDS[name].marked;
+  if (cues.includes('set')) shots.push([await picture(laid.game, BOARDS[name].plan ?? null, planMarks(name, 0)), marked ? 'The plan, faint till it\'s built' : 'Before: the plan ringed']);
   const first = laid.game.constellation;
   let n = 0, prev = null;
-  for (const [i, move] of laid.moves.entries()) for (const st of playStep(laid.game, move).stages) {
+  for (const [i, move] of laid.moves.entries()) {
+    const colour = 'drop' in move ? COLOUR_NAMES[move.next?.c ?? laid.game.next.c] : null;
+    for (const st of playStep(laid.game, move).stages) {
     if (st.kind === 'turn' || st.kind === 'drop') n = 0;
-    if (st.kind === 'turn' && cues.includes(`move${i + 1}`)) shots.push([await picture(boardAt(st.grid, marksOf(first))), `${RING_NAMES[move.turn] ?? 'A'} ring turned${i ? ' again' : ''}`]);
+    if (st.kind === 'turn' && cues.includes(`move${i + 1}`)) shots.push([await picture(boardAt(st.grid, marksOf(first)), null, planMarks(name, i + 1)), `${RING_NAMES[move.turn] ?? 'A'} ring turned${laid.moves[i - 1] && 'turn' in laid.moves[i - 1] ? ' again' : ''}`]);
     const step = st.kind === 'line' || st.kind === 'constellation' ? ++n : 0;
     for (const w of st.wilded ?? []) wild.add(`${w.ring},${w.spoke}`);
     const said = stageCues(st, step).filter((c) => cues.includes(c));
@@ -89,6 +94,9 @@ async function drawBeat(art, name, beat) {
       if (st.kind === 'deal') shots.push([await picture(boardAt(st.grid, marksOf(st.constellation))), `The next one up: ${st.constellation.marks.filter((m) => m.wild).length} wild targets`]);
     }
     prev = st;
+    }
+    // (a star she drops, as it comes to rest, the plan as it stands)
+    if (colour && cues.includes(`move${i + 1}`)) shots.push([await picture(boardAt(laid.game.grid, marksOf(first)), null, planMarks(name, i + 1)), `A ${colour.toLowerCase()} dropped`]);
   }
   for (const [cv, caption] of shots) row.append(figure(cv, caption));
   const words = cues.map((c) => LESSON[name]?.[c]).filter(Boolean);

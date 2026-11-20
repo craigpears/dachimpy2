@@ -33,7 +33,7 @@ export const TUTOR = {
     afterNote: 'Chart what you can: each constellation turns werewolves back. T for her lessons again.',
     walked: 'Your board now, those four wild targets and all. Any star fills them. Cookie while you think?',
     walkedNote: 'Space drops, arrows turn. T for her lessons again.',
-    quickWalked: 'Your board now. Build a layer of three, line two up outside, spin. Quick as you like. Cookie?',
+    quickWalked: 'Your board now. A pair, two parked outside in order, spin. Quick as you like. Cookie?',
 };
 /** What she says as she plays a lesson's board, by the board (src/den-wolfden.ts's BOARDS) and her cue on it (its
     CUES: 'set' as it's laid, `move<n>` before its nth move, `step<n>` as the cascade's nth clear or chart shows, 'wild'
@@ -51,13 +51,15 @@ export const LESSON = {
         end: 'Single, Double, Triple Constellation. That\'s the trick: end a cascade on the constellation.',
     },
     quick: {
-        set: 'Speed nav. A layer of three: two whites on the third ring, the gap beside them, and the yellow target under the top one. Out on the outer ring, two lined up: a white, then a yellow behind it.',
-        move1: 'Spin the outer ring. Over full spokes, they just wait.',
-        move2: 'Once more, and the white\'s over the gap...',
-        step1: 'Single! Three whites, gone. And the yellow\'s right over the target they left...',
-        chart: '...Double! Constellation! 71, times two: 142. Two turns.',
-        deal: 'And the next one\'s up, its centre wild from the chain.',
-        end: 'That\'s the quick double. You don\'t need triples, just be quick: build the layer, line two up outside, spin.',
+        set: 'Speed nav: the quick double. No clever triples, just a shape you can build every time, quick. That\'s it ringed, faint till it\'s built: a pair of whites on the third ring, the gap beside them, the yellow target under one. And the two we need, parked outside. Then one spin.',
+        move1: 'First, the pair. A white, onto the yellow target. Wrong colour, I know: it\'s the one that clears out of the way.',
+        move2: 'And a white beside it. Two side by side, and the gap up-left of them: three in a row, waiting for its third.',
+        move3: 'Now we wait for the two we need, and park them on the outer ring: over a full spoke, a star just sits up there. Anything else that comes, put it where it won\'t get in the way. The white first...',
+        move4: '...then the yellow, behind it. Order matters: the white has to reach the gap first, so the yellow drops into the hole it leaves.',
+        move5: 'Built. Now spin the outer ring. Over full spokes, they ride round, waiting...',
+        step1: 'Single! The white dropped into the gap: three whites, gone. And the yellow\'s right over the empty target...',
+        chart: 'Double! Constellation! 71, times two. Two turns, and you can set it up every time.',
+        end: 'A pair on the third ring, the gap beside it. Park the two you need outside, in order. Spin. Your go: try building one.',
     },
     cascade: {
         set: 'Cascades first. See the two reds round the third ring, and the stars waiting up top? One red dropped, and watch what it sets off.',
@@ -147,7 +149,7 @@ export const CHARACTER = {
             says: LESSON,
             each: {
                 replay: 'How it works: Umami\'s run, from his replay, a beat at a time (Space for each)',
-                quick: 'Speed nav: the quick double, a layer of three and two lined up on the outer ring, a beat at a time (Space for each)',
+                quick: 'Speed nav: the quick double, built up from the start, its plan marked on the board, a beat at a time (Space for each)',
                 cascade: 'A cascade, lines only, making wild targets',
                 outer: 'The fourth ring: a star waiting up there, carried round, dropped in by a clear under it',
                 lastClear: 'A constellation charted by a cascade\'s last clear',

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { BOARDS, MOON, Moon, layBoard, playStep, atTable, TABLE, ARRIVE, boardsOf, cuesOn, isCue, stageCues, OPENING, openingAt } from '../src/den-wolfden';
+import { BOARDS, MOON, Moon, layBoard, playStep, planMarks, atTable, TABLE, ARRIVE, boardsOf, cuesOn, isCue, stageCues, OPENING, openingAt } from '../src/den-wolfden';
 import { linesOf, denPoints, needsCombo, DEN } from '../src/navigation';
 import { WOLF_DEN_TUTORIAL, wolfShows, MECHANICS, QUICK, WALKS, walkOf, walkAt, nextStep, WALK, WALK_BOARD, walkStepOf, endsStep } from '../src/wolf-den-tutorial';
 import { LESSON, OPENING as OPENING_LINES, TUTOR } from '../src/lines/multibella';
-import { SECTIONS, findPart } from '../src/tutorial';
+import { SECTIONS, TutorialMenu, findPart } from '../src/tutorial';
 import { HOUSES, houseById, houseList } from '../src/den-houses';
 import { seeded } from '../src/mirror-row';
 import { LAY, Sea } from '../src/den-sail';
@@ -185,25 +185,44 @@ describe("15 Nov: How it works walks through Umami's replay, not the evil conste
 
 // The user, 15 Nov: "notes for wolf den are it's speed nav and quick doubles is a good strategy. So a layer of three so
 // you can line up two pieces in the outer ring and it's nice and simple"; their board, notes/wolf-den/quick-double.png.
-// Built 20 Nov ("Yes, build it").
-describe('20 Nov: speed nav, the quick double on a layer of three, two lined up on the outer ring', () => {
-  it('two turns of the outer ring: the first leaves them waiting over full spokes, the second makes a Single, then charts it Double: 3 + 71 x 2', () => {
+// Built 20 Nov ("Yes, build it"); reworked the same day after playing it: "Surely when I pick the quick double, that
+// should be it ... it's not really explaining the idea of why this is easy ... not really showing the build-up ...
+// it's not really showing the plan in the way that sailing is."
+describe('20 Nov: speed nav, the quick double, built up from the start, its plan marked', () => {
+  it('built up: a white onto the target, a white beside it, a white then a yellow parked outside; two turns: Single, then Double, 3 + 71 x 2', () => {
     const { game, moves } = layBoard('quick', seeded(4))!;
-    expect(moves).toEqual([{ turn: 3, dir: -1 }, { turn: 3, dir: -1 }]);
     expect(denPoints(game.constellation!.marks)).toBe(71);
-    expect(game.grid[2][7]).toBeNull();
-    const first = playStep(game, moves[0]);
-    expect(first.points).toBe(0);
-    expect(game.grid[3][0]?.c).toBe(3);   // the white waiting over the full top spoke
-    const m = playStep(game, moves[1]);
-    const kinds = m.stages.map((s) => s.kind).filter((k) => k === 'line' || k === 'constellation');
-    expect(kinds).toEqual(['line', 'constellation']);
-    expect(m.done!.step).toBe(2);
-    expect(m.done!.points).toBe(142);
-    expect(m.points).toBe(3 + 142);
-    expect(game.constellation!.marks.filter((k) => k.ring === 0 && k.wild).length).toBe(3);
+    const res = moves.map((s) => playStep(game, s));
+    expect(game.score).toBe(3 + 142);
+    // (the pair on the third ring after two drops, the gap beside it; the two parked outside after two more)
+    const b = layBoard('quick', seeded(4))!;
+    b.moves.slice(0, 2).forEach((s) => playStep(b.game, s));
+    expect([b.game.grid[2][0]?.c, b.game.grid[2][1]?.c, b.game.grid[2][7]]).toEqual([3, 3, null]);
+    b.moves.slice(2, 4).forEach((s) => playStep(b.game, s));
+    expect([b.game.grid[3][1]?.c, b.game.grid[3][2]?.c]).toEqual([3, 0]);
+    expect(res.slice(0, 5).every((m) => m.points === 0 && !m.booched)).toBe(true);
+    const last = res[res.length - 1];
+    expect(last.stages.filter((s) => s.kind === 'line' || s.kind === 'constellation').map((s) => s.kind)).toEqual(['line', 'constellation']);
+    expect(last.done!.step).toBe(2);
+    expect(last.done!.points).toBe(142);
   });
-  it('walked a beat at a time like Umami\'s run: its steps\' beats on the board in order, every beat she has words for', () => {
+  it('its plan marked from the start, read off the rules: the pair, the gap, the two parked, where each lands, Single then Double', () => {
+    const m0 = planMarks('quick', 0), at = (p: { ring: number; spoke: number }) => `${p.ring},${p.spoke}`;
+    expect(m0.filter((m) => m.kind === 'star' && !m.label).map((m) => at((m as { at: { ring: number; spoke: number } }).at)).sort()).toEqual(['2,0', '2,1']);
+    expect(m0.filter((m) => m.kind === 'gap').map((m) => at((m as { at: { ring: number; spoke: number } }).at))).toEqual(['2,7']);
+    const parked = m0.filter((m) => m.kind === 'star' && m.label) as { at: { ring: number; spoke: number }; label: string; colour: number }[];
+    expect(parked.map((m) => [m.label, at(m.at), m.colour])).toEqual([['1st', '3,1', 3], ['2nd', '3,2', 0]]);
+    const arrows = m0.filter((m) => m.kind === 'arrow') as { to: { ring: number; spoke: number } }[];
+    expect(arrows.map((a) => at(a.to))).toEqual(['2,7', '2,0']);
+    expect(m0.filter((m) => m.kind === 'badge').map((m) => (m as { label: string }).label)).toEqual(['Single', 'Double']);
+    // (all faint before it's built; the pair solid once both whites are in; all solid once both are parked; none once set off)
+    expect(m0.every((m) => m.faint)).toBe(true);
+    expect(planMarks('quick', 2).filter((m) => !m.faint).map((m) => m.kind).sort()).toEqual(['gap', 'star', 'star']);
+    expect(planMarks('quick', 4).every((m) => !m.faint)).toBe(true);
+    expect(planMarks('quick', BOARDS.quick.moves.length)).toEqual([]);
+    expect(planMarks('replay', 0)).toEqual([]);
+  });
+  it('one lesson, walked a beat at a time: its beats in order, every one she has words for; picking it plays it, no steps to pick', () => {
     const b = layBoard('quick', seeded(4))!, order = ['set'];
     b.moves.forEach((step, i) => {
       order.push(`move${i + 1}`);
@@ -211,26 +230,27 @@ describe('20 Nov: speed nav, the quick double on a layer of three, two lined up 
       for (const st of playStep(b.game, step).stages) order.push(...stageCues(st, st.kind === 'line' || st.kind === 'constellation' ? ++n : 0));
     });
     order.push('end');
-    const beats = QUICK.flatMap((id) => WALKS.quick.steps[id]);
+    expect(QUICK).toEqual(['quickDouble']);
+    const beats = WALKS.quick.steps.quickDouble;
     expect(beats).toEqual(order.filter((c) => beats.includes(c)));
     for (const c of Object.keys(LESSON.quick)) expect(beats, c).toContain(c);
-    expect(walkOf('spin')).toMatchObject({ id: 'quick', at: 1 });
+    expect(walkOf('quickDouble')).toMatchObject({ id: 'quick', at: 0 });
     expect(walkOf('single')).toMatchObject({ id: 'mechanics', at: 0 });
     expect(walkOf('trapdoor')).toBeNull();
-    expect(walkAt('move2', 'quick')).toBe(1);
-    expect(endsStep('move2', 'quick')).toBe(true);
-    expect(endsStep('move1', 'quick')).toBe(false);
-    expect(nextStep('layer')?.id).toBe('spin');
+    expect(walkAt('move3', 'quick')).toBe(0);
     expect(nextStep('quickDouble')).toBeNull();
     expect(WALKS.quick.done).toBe(TUTOR.quickWalked);
+    const menu = new TutorialMenu(WOLF_DEN_TUTORIAL);
+    const ev = menu.tap(WOLF_DEN_TUTORIAL.choices.findIndex((c) => c.id === 'quick'));
+    expect(ev).toMatchObject({ kind: 'play', part: { id: 'quickDouble' }, choice: 'quick' });
   });
   it('its own choice in her menu, second, after how it works; the chains\' choice keeps the other tricks', () => {
     expect(WOLF_DEN_TUTORIAL.choices.map((c) => c.id)).toEqual(['mechanics', 'quick', 'basics', 'tricks', 'fun']);
     expect(WOLF_DEN_TUTORIAL.choices[1].covers).toEqual(QUICK);
     const tricks = WOLF_DEN_TUTORIAL.choices.find((c) => c.id === 'tricks')!.covers;
-    for (const id of QUICK) expect(tricks).not.toContain(id);
+    expect(tricks).not.toContain('quickDouble');
     expect(tricks).toContain('trapdoor');
-    for (const id of QUICK) expect(findPart(WOLF_DEN_TUTORIAL, id)?.part.shows).toEqual({ kind: 'moves', ref: 'quick' });
+    expect(findPart(WOLF_DEN_TUTORIAL, 'quickDouble')?.part.shows).toEqual({ kind: 'moves', ref: 'quick' });
   });
 });
 

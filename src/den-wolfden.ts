@@ -86,13 +86,14 @@ export class Moon {
 
 // ---------------------------------------------------------------- the lesson's boards
 
-/** A move Multibella plays: a ring turned (+1 clockwise, -1 anticlockwise), or the next star dropped. */
-export type Step = { turn: number; dir: 1 | -1 } | { drop: true };
+/** A move Multibella plays: a ring turned (+1 clockwise, -1 anticlockwise), or the next star dropped (`next`: the
+    star she's dealt for it, its colour and spoke, where her lesson needs it). */
+export type Step = { turn: number; dir: 1 | -1 } | { drop: true; next?: { c: number; spoke: number } };
 /** A board laid for the lesson: its stars ring by ring (0 the innermost, colours as COLOUR_NAMES: 0 yellow, 1 red,
     2 orange, 3 white, 4 blue), the constellation's places, the next star waiting, and the moves she plays on it.
     `plan`: the places her plan's about, ringed on the board while she says it, before she plays (RULES.md, "A
     demonstration shows its plan before it builds"); `then`: the board she lays next, once this one's played. */
-export interface Laid { rings: (number | null)[][]; marks: Mark[]; next?: Omit<NextStar, 'id'>; moves: Step[]; plan?: Place[]; then?: string }
+export interface Laid { rings: (number | null)[][]; marks: Mark[]; next?: Omit<NextStar, 'id'>; moves: Step[]; plan?: Place[]; then?: string; marked?: true }
 const [Y, R, O, W, B] = [0, 1, 2, 3, 4];
 const _ = null;
 /** The lesson's boards, by name (a tutorial part's `shows.ref`, after its kind). Each is tested to do what its part
@@ -133,23 +134,29 @@ export const BOARDS: Readonly<Record<string, Laid>> = {
   },
   /* The quick double, speed nav (the user, 15 Nov: "it's speed nav and quick doubles is a good strategy. So a layer of
      three so you can line up two pieces in the outer ring and it's nice and simple"; their board, notes/wolf-den/
-     quick-double.png, laid as it is there): on the third ring whites at the top and up-right, the gap up-left, the
-     yellow target under the top white, the constellation's other three targets filled; out on the outer ring a white
-     up-right and a yellow behind it on the right. The outer ring turned twice anticlockwise: the white waits over the
-     full top spoke, then drops into the gap, three whites, "Single! +3"; the yellow, come round over the emptied top,
-     falls into its target: charted on the second step, "Double! Constellation!", 71 times two. Her lesson's "Speed nav"
-     walks it a beat at a time (src/wolf-den-tutorial.ts's WALKS.quick). */
+     quick-double.png), built up from the start (20 Nov: "first of all, set up two next to each other, but then you can
+     kind of wait and build up those two pieces in the right spots on the outer ring"): the constellation's other three
+     targets filled, the yellow target on the third ring at the top, the third ring empty there, up-right and up-left.
+     A white dropped onto the yellow target, another up-right beside it: the pair, the gap up-left. Then the two she
+     needs parked on the outer ring, over full spokes: a white up-right, then a yellow behind it on the right. The outer
+     ring turned twice anticlockwise: the white waits over the full top spoke, then drops into the gap, three whites,
+     "Single! +3"; the yellow, come round over the emptied top, falls into its target: charted on the second step,
+     "Double! Constellation!", 71 times two. Her lesson's "Speed nav" walks it a beat at a time (src/wolf-den-
+     tutorial.ts's WALKS.quick), its plan marked on the board throughout (`planMarks`). */
   quick: {
     rings: [
       [O, Y, R, R, B, B, Y, B],
       [B, R, R, Y, O, Y, B, W],
-      [W, W, O, B, Y, R, R, _],
-      [_, W, Y],
+      [_, _, O, B, Y, R, R, _],
     ],
     marks: [{ ring: 0, spoke: 3, colour: R }, { ring: 1, spoke: 4, colour: O }, { ring: 1, spoke: 6, colour: B }, { ring: 2, spoke: 0, colour: Y }],
-    next: { c: R, spoke: 4 },
-    moves: [{ turn: 3, dir: -1 }, { turn: 3, dir: -1 }],
-    plan: [{ ring: 2, spoke: 7 }, { ring: 2, spoke: 0 }, { ring: 2, spoke: 1 }, { ring: 3, spoke: 1 }, { ring: 3, spoke: 2 }],
+    next: { c: W, spoke: 0 },
+    moves: [
+      { drop: true, next: { c: W, spoke: 0 } }, { drop: true, next: { c: W, spoke: 1 } },
+      { drop: true, next: { c: W, spoke: 1 } }, { drop: true, next: { c: Y, spoke: 2 } },
+      { turn: 3, dir: -1 }, { turn: 3, dir: -1 },
+    ],
+    marked: true,
   },
   /* A Trapdoor: the third ring turned a place puts a red over two reds down spoke 0; they go, and the yellow parked
      above them in the fourth ring falls into the place. */
@@ -300,7 +307,71 @@ export function layBoard(name: string, random: () => number = Math.random): { ga
 }
 /** Play one of a lesson's moves on its game. */
 export function playStep(game: Navigation, step: Step) {
-  return 'drop' in step ? game.drop() : game.turn(step.dir, step.turn);
+  if (!('drop' in step)) return game.turn(step.dir, step.turn);
+  if (step.next) game.place(step.next);
+  return game.drop();
+}
+
+/* The plan marked on a lesson's board, Sailing's way (src/balloons.ts's marks; RULES.md, "A demonstration shows its
+   plan before it builds"; the user, 20 Nov, of the quick double: "it's not really showing the plan in the way that
+   sailing is"): the whole of what she's building on the board from the start, each part faint till it's built, then
+   solid, read off the board as the rules play it, so it can't point at the wrong place. For a board built then set
+   off (`marked`): its drops build it, the turns after the last drop set it off. Marked: the stars of the line that
+   goes first already in place (`star`), the gap they leave (`gap`), each star parked on the outer ring by the order it
+   lands ("1st", "2nd"; riding round with its ring), an arrow from each to where it lands, and what happens in order
+   (`badge`: 1, the Single, at the gap; 2, the Double, where the second lands). */
+export type PlanMark = (
+  | { kind: 'star'; at: Place; colour: number; label: string }
+  | { kind: 'gap'; at: Place; label: string }
+  | { kind: 'arrow'; from: Place; to: Place; colour: number; dir: 1 | -1 }
+  | { kind: 'badge'; at: Place; n: number; label: string }
+) & { faint?: true };
+const placeOf = (grid: Navigation['grid'], id: number): Place | null => {
+  for (let r = 0; r < grid.length; r++) for (let s = 0; s < grid[r].length; s++) if (grid[r][s]?.id === id) return { ring: r, spoke: s };
+  return null;
+};
+/** What's marked on a lesson's board once `n` of its moves are played (see PlanMark); none for a board that isn't
+    `marked`, or once it's been set off. */
+export function planMarks(name: string, n: number): PlanMark[] {
+  const L = BOARDS[name];
+  if (!L?.marked) return [];
+  const steady = () => 0.5, lastDrop = L.moves.map((m) => 'drop' in m).lastIndexOf(true);
+  if (n >= L.moves.length) return [];
+  // (the board built, then set off, every stage seen)
+  const g = layBoard(name, steady)!.game, outer = g.rings - 1;
+  L.moves.slice(0, lastDrop + 1).forEach((s) => playStep(g, s));
+  const built = g.grid.map((ring) => ring.slice());
+  const parked = built[outer].flatMap((x, spoke) => (x ? [{ id: x.id, c: x.c, at: { ring: outer, spoke } }] : []));
+  const spin = L.moves.slice(lastDrop + 1);
+  const dir = spin.find((m): m is { turn: number; dir: 1 | -1 } => 'turn' in m)?.dir ?? -1;
+  const stages = spin.flatMap((s) => playStep(g, s).stages);
+  // (the line that goes first: where its stars were as it went, on the board the stage before it left)
+  const li = stages.findIndex((st) => st.kind === 'line');
+  if (li < 1) return [];
+  const lineAt = stages[li].cleared.map((id) => placeOf(stages[li - 1].grid, id)).filter((p): p is Place => !!p);
+  const lands = parked.map((p) => {
+    const i = stages.findIndex((st) => { const at = placeOf(st.grid, p.id); return !!at && at.ring < outer; });
+    return i < 0 ? null : { ...p, to: placeOf(stages[i].grid, p.id)!, i };
+  }).filter((p): p is NonNullable<typeof p> => !!p).sort((a, b) => a.i - b.i);
+  // (where things stand after n moves)
+  const now = layBoard(name, steady)!.game;
+  L.moves.slice(0, n).forEach((s) => playStep(now, s));
+  const has = (p: Place, c: number) => now.grid[p.ring][p.spoke]?.c === c;
+  const out: PlanMark[] = [];
+  const mark = (m: PlanMark, there: boolean) => { out.push(there ? m : { ...m, faint: true }); };
+  const pair = lineAt.filter((p) => built[p.ring][p.spoke]);
+  const gap = lineAt.find((p) => !pair.includes(p));
+  for (const p of pair) mark({ kind: 'star', at: p, colour: built[p.ring][p.spoke]!.c, label: '' }, has(p, built[p.ring][p.spoke]!.c));
+  if (gap) mark({ kind: 'gap', at: gap, label: 'gap' }, pair.every((p) => has(p, built[p.ring][p.spoke]!.c)));
+  const ready = n > lastDrop;
+  lands.forEach((l, k) => {
+    const at = placeOf(now.grid, l.id) ?? l.at;
+    mark({ kind: 'star', at, colour: l.c, label: k === 0 ? '1st' : k === 1 ? '2nd' : `${k + 1}th` }, !!placeOf(now.grid, l.id));
+    mark({ kind: 'arrow', from: at, to: l.to, colour: l.c, dir }, ready);
+  });
+  if (gap) mark({ kind: 'badge', at: gap, n: 1, label: 'Single' }, ready);
+  if (lands[1]) mark({ kind: 'badge', at: lands[1].to, n: 2, label: 'Double' }, ready);
+  return out;
 }
 /** Seconds between Multibella's moves on a lesson's board, and how long she waits before the first. */
 export const PACE_LESSON = { MOVE: 1.1, FIRST: 1.6 } as const;

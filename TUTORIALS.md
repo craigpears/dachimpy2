@@ -190,6 +190,10 @@ Speed nav, the quick double (20 Nov; the user, 15 Nov: "a layer of three so you 
 ring and it's nice and simple"), is a second walk the same way, her menu's second choice: `WALKS` holds each walk (its
 board, its steps' cues, her words handing you the board after), `walkOf` the walk a part's a step of. Its three steps
 (a layer of three, spin the outer ring, Single then Double! Constellation!) are tricks, kept out of the chains' choice.
+Reworked the same day after the user played it: one part, `quickDouble`, played as soon as it's picked (a choice of
+one part is that lesson, in any tutorial's menu: src/tutorial.ts), built up from the start on `BOARDS.quick` (her
+drops dealt the star she needs, `Step.next`), its plan marked on the board throughout, Sailing's way:
+src/den-wolfden.ts's `planMarks`, read off the rules, drawn by js/den/nav-board.js's `marks`.
 
 - **She talks you through it:** a board's `plan` ringed in gold while she says her first line (the plan before the
   build, RULES.md); her cues (`stageCues`: `set`, `move<n>`, `step<n>`, `wild`, `chart`, `deal`, `end`), her words
