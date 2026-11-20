@@ -1212,6 +1212,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   to, like, even just say 1 or 2 junk columns, even if you're being incredibly anxious." Whites banked for the target,
   the chain starts only when the finished junk columns waiting for the furnace are down to two, or the junk can't
   finish the next one.
+- **Distilling: channels to the column going up (17 Nov, watching CC^8 in the chain).** "Creating a channel of browns
+  ... pulling the browns into the bottom right to create a nice channel to drag white pieces down through later, and
+  doing a similar kind of channel of getting blacks up to that top right"; "from a pathfinding perspective ... there's
+  far more paths from any point where the white can appear on the left to getting it into the right column." In the
+  three columns left of the column being filled, browns low and blacks high count in the chain's measure, over the
+  board, not column by column ("one column black, one column brown ... not column by column"); a brown sunk through
+  blacks or a black lifted through browns there is "build a channel".
+- **Distilling: a chain that can't go on is let go (17 Nov, a CC^8 about to be a CC^9).** "There's no way we're sending
+  the crystal clear past 9. Let's start moving the junk into that column"; "the bot keeps trying to send ... whites into
+  that column later. It's obviously futile." Its next column more junk than white, the chain's let go even with
+  nowhere fit to start the next one: that starts a few columns left (three for CC^8), from the whites to come.
 - **Distilling: going backwards to pull trapped browns down (16 Nov, notes/distilling/52-a-black-back-along-the-top.webp).**
   Browns stuck at the top of the white columns sink only through a black: a black taken back left along the top, up
   through each brown, pulls them down ("going backwards across the screen ... is good if it pulls down trapped pieces
@@ -1222,6 +1233,57 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   the block phase. Early on, browns at the top aren't trapped yet (17 Nov, seed 2 at 41 s, the bot waiting for the burn):
   "there's likely going to be more blacks to appear. So those browns at the top are not trapped, but in a later game
   that you would probably want to try and rescue them. But for now, it's fine." 
+- **Distilling: trapped pieces that touch are trapped together (17 Nov, notes/distilling/55-two-blacks-move-as-one.webp).**
+  "If I move number one up without number two, that's going to leave number two stranded ... they move as one continuous
+  unit." A black (or brown) with only another of its colour on its right, itself trapped, is trapped too, not joined to
+  the colour through it. Straightening up counts trapped junk freed as getting it done, and trapped as undoing it, so it
+  frees the pair together (a brown brought back beside them, their way out), never one by leaving the other.
+- **Distilling: there's no such thing as nothing worth moving (17 Nov, seed 5008, CC^8 waiting three junk columns deep
+  by the fire).** "What do you mean, nothing worth moving? There's no such thing as nothing worth moving. Like, browns can
+  go up, and then you can get the blacks ... you've got such a safe position here, you can just go for it." In Stage I
+  with the furnace's clock running and the column not ready, the bot always makes its best move with a goal, however
+  little it gets; with nothing to straighten up, it quick sorts. (With the fire held, as in Helium's lessons, a wait is
+  the burn that moves the lesson on.)
+- **Distilling: getting it over means the junk left of the white columns too (17 Nov, seed 5008).** "There's all this
+  stuff on the left-hand side. Get it over. It's not moving anything." Straightening up counts junk carried from the
+  white columns, or from left of them, past them; dropped into them it counts nothing ("never more put in").
+- **Distilling: sorting the junk columns is no goal of its own (17 Nov, seed 5008, notes/distilling/56-...).** "Why is
+  it doing things like these weird whole column of black, whole column of brown"; "it's just trying to sort blacks and
+  browns ... those blacks up at the top were fine. Why did it have to drag them into a column? That's just wasting
+  moves." Against the clock, a move that only sorts junk (blacks over browns in a column) gets nothing done; the sorting
+  only decides between moves that get junk out. Junk left at the top and bottom of the junk is fine while it isn't stuck
+  ("it's not stuck junk ... you've got plenty of pieces to do the straightening up").
+- **Distilling: a black at the top of the white columns is cleaner than a brown there (17 Nov, seed 5008,
+  notes/distilling/57-...).** "Just drag those blacks up ... within a few moves ... I get to this quite quickly, and it's
+  markedly better": a black lifted up through the browns into the place of a brown stuck at the top lets the brown down
+  and can sink out itself; a brown at the top can't. The bank's junk counts a black in its top half half a brown there.
+- **Distilling: no waiting for a ready column either (18 Nov, seed 5008).** "It's still saying waiting, the column is
+  ready. Again, I cannot fathom what that logic is." The furnace takes the column in its own time, so a ready column is
+  no reason to wait: the bot straightens up meanwhile, the same as when it isn't ready.
+- **Distilling: straightened up means blacks along the top, browns along the bottom, across the junk columns (18 Nov,
+  seed 5008).** "It feels like it's got the board rotated the wrong way around, and it's putting them at the side rather
+  than at the top." A column of browns beside a column of blacks is out of order. The junk's order counts each brown
+  higher than a black anywhere in the junk columns, not each column on its own. With nothing to get over, sorting it is
+  the move ("you've got these browns that can be taken over and then straightened up"); otherwise it only decides
+  between moves that get junk over.
+- **Distilling: the ferry, browns stuck at the top of the white columns taken over (18 Nov, seed 5008).** A brown
+  climbs the whites but crosses into the junk only down through a black. With no black where it tops out (a junk
+  column of browns beside the bank), a black from the top of the junk beside it is let down a swap or two into the
+  whites' top first, then the brown taken up, down through it and over: two drags, one move.
+- **Distilling: no sorting of the columns about to burn while whites are banked (18 Nov, seed 5008,
+  notes/distilling/58-seed-5008-a-brown-run-into-the-furnace-column.webp).** "We are expecting these columns to be
+  burned before we really do anything useful with them. So why try doing anything to improve the quality? ... The
+  reason for pulling rounds down doesn't exist yet." The tie-breaker that took a brown a flick lower (13 Nov) leaves
+  the columns to burn out of it, so it no longer stretches a drag down into the furnace's column.
+- **Distilling: pieces from the left first, the junk already over left alone (18 Nov).** "If it's got a gap, sometimes
+  it will drag things down that are already kind of far over past the whites, unless there's a clear need to straighten
+  it up because of a risk of whites being burned or losing the ability to zigzag ... The preference should always be
+  to take pieces from the left-hand side, i.e. the ones past the whites. You get far more from dragging them over to
+  fix problems than you do messing around with what's already over there." In Stage I, with whites banked (three
+  columns) and junk still in them or left of them: a gap among the junk, a white's place, is filled by junk brought
+  over from the left rather than junk already over, and a move only reworking the junk already over is the last
+  choice. Not when it's needed: a white at risk of burning (a danger zone, the columns about to burn, flagged), a
+  trapped white or trapped junk freed, the right-hand pair sorted before the zigzag's ladder is lost, damage control.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one

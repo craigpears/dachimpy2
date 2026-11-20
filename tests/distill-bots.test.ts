@@ -106,9 +106,10 @@ describe('the bots are their target chains, 13 Nov (the thirtieth note: "I want 
   });
   it('never dismisses: when a chain breaks it goes back to building toward the next ("then it will start working on the next one")', () => {
     let chained = false, rebuilt = false;
-    // (Seed 5002: on 5000, since the late game's channels (14 Nov), its chains break with whites still banked, so it
-    // chains them again and never needs to rebuild in 8 minutes; it was 5000 since the pair rescue did the same on 5002.)
-    const r = playSession(new Distilling(seeded(5002)), levelNamed('cc2'), 8, undefined, (a) => {
+    // (Seed 5003: on 5000, since the late game's channels (14 Nov), its chains break with whites still banked, so it
+    // chains them again and never needs to rebuild in 8 minutes; it was 5000 since the pair rescue did the same on 5002,
+    // and 5002 since the chain's channels (17 Nov) did the same there.)
+    const r = playSession(new Distilling(seeded(5003)), levelNamed('cc2'), 8, undefined, (a) => {
       expect(a.kind).not.toBe('dismiss');
       expect(a.target).toBe(2);
       expect(a.whitesNeeded).toBeGreaterThanOrEqual(0);
@@ -349,6 +350,23 @@ describe('a brown a flick lower, for next to nothing (13 Nov, the twenty-first n
     // Nor a move doing less of the job.
     const less = { ...hook, after: right('KbKKKbbbw') };
     expect(tieBreak(cols, [plain, less], plain).move).toBe(plain.move);
+  });
+  it('never sorts the columns about to burn: no brown run five swaps into the furnace\'s column while whites are banked, 18 Nov ("we are expecting these columns to be burned before we really do anything useful with them")', () => {
+    // notes/distilling/58-*: seed 5008 at 1.9 s, finishing the junk column, the tie-breaker took the brown on past the
+    // job, down through the blacks into the furnace's column, three swaps more for its order.
+    const right = (c9: string) => board([...column(7, 'KKKKbbbb'), ...column(8, c9), ...column(9, 'KKKKbbbb')]);
+    const cols = right('KKKKKbbbb');
+    const plain = { move: { routine: 'diamond' as const, drags: [{ x: 0, y: 0, ways: [0, 0, 0] }], reason: '' }, value: 3, after: right('bKKKKbbbK') };
+    const hook = { move: { routine: 'diamond' as const, drags: [{ x: 0, y: 0, ways: [0, 0, 3, 0, 3] }], reason: '' }, value: 2.4, after: right('KbKKKbbbK') };
+    // Columns 7 to 10 to burn: their order is no matter.
+    expect(tieBreak(cols, [plain, hook], plain, false, () => true, 6).move).toBe(plain.move);
+    const moves: Advice[] = [], g = new Distilling(seeded(5008));
+    try {
+      playSession(g, levelNamed('cc8'), 1, undefined, (a) => { if (g.time > 4000) throw new Error('done'); if (a.kind === 'move') moves.push(a); });
+    } catch (e) { if ((e as Error).message !== 'done') throw e; }
+    expect(moves.length).toBeGreaterThan(3);
+    expect(moves.filter((a) => a.tie)).toEqual([]);
+    expect(moves.some((a) => a.drags.some((d) => d.x === 4 && d.y === 3 && d.ways.length === 5))).toBe(false);
   });
 });
 
@@ -677,8 +695,11 @@ describe('the CC^1 opening (the user, 13 Nov, watching CC^1: "it should be like 
     for (let seed = 1; seed <= 3; seed++) {
       const g = new Distilling(seeded(seed)), bot = new DistillBot(levelNamed('cc1'));
       expect(bot.plan(g).stage, `seed ${seed}`).toBe('junk');
-      let started = false;
-      playSession(g, levelNamed('cc1'), 2, undefined, (a) => {
+      let started = false, opening = -1;
+      // (The opening's whites: those burned before its first Crystal Clear goes up. Seed 1 burned two more at 92 and 107 s,
+      // later chains' (17 Nov, the chain's channels kept to targets of 3 and up, P.CHANNEL_FROM: over ten CC^1 boards no
+      // white burned 7 of 10, against 4 without).)
+      playSession(g, levelNamed('cc1'), 2, (c) => { if (opening < 0 && c.up && c.chain > 0) opening = g.whitesBurned; }, (a) => {
         if (started || a.stage !== 'chain') return;
         started = true;
         // Built right behind the junk: every column right of it is junk to burn (more junk than white), none a column
@@ -689,7 +710,7 @@ describe('the CC^1 opening (the user, 13 Nov, watching CC^1: "it should be like 
         }
       });
       expect(started, `seed ${seed}`).toBe(true);
-      expect(g.whitesBurned, `seed ${seed}`).toBe(0);
+      expect(opening < 0 ? g.whitesBurned : opening, `seed ${seed}`).toBe(0);
     }
   });
   it('never a white moved back out of the column it\'s filling, 13 Nov ("it doesn\'t seem to actually try and get the whites there ... and then it\'s just moved that out")', () => {

@@ -170,13 +170,20 @@ describe('the lead-up: the move that puts a white in trouble, from before the da
     expect(LEAD.filter((p) => p.ms <= 180000).length * 2).toBeGreaterThanOrEqual(LEAD.length);
     expect(new Set(LEAD.map((p) => p.seed)).size).toBeGreaterThanOrEqual(5);
   });
+  // Lead-ups the bot no longer gets wrong: its move there now leaves the white out of trouble. (P42, 17 Nov: with trapped
+  // junk seen as a group, src/distill-score.ts's S.TRAP_GROUP, it frees the trapped black at column 4, row 8 instead of
+  // the brown's sweep that shut the white in.)
+  // (P31 and P32, 18 Nov: about 10 s in, Stage I, with the day's straightening up and tie-breaker changes,
+  // the bot's move there no longer shuts the white in.)
+  const FIXED = new Set(['P42', 'P31', 'P32']);
   for (const p of LEAD) {
-    it(`${p.id} (${p.level}, seed ${p.seed}, ${(p.ms / 1000).toFixed(1)} s in): the ringed white is out of trouble before the bot's move and in it after, the move as the bot makes it now`, () => {
+    it(`${p.id} (${p.level}, seed ${p.seed}, ${(p.ms / 1000).toFixed(1)} s in): the ringed white is out of trouble before the bot's move and in it after${FIXED.has(p.id) ? ' (fixed: no longer)' : ''}, the move as the bot makes it now`, () => {
       const cols = boardOf(p), after = playDrags(cols, p.bot.drags)!;
       expect(p.shut?.length, p.id).toBeGreaterThan(0);
       expect(moveOf(botAt(p)).drags, `${p.id}: run tools/distill-positions.mjs`).toEqual(p.bot.drags);
       const trouble = (b: typeof cols) => { let n = 0; for (let x = 4; x < COLS; x++) b[x].forEach((_, y) => { if (inTrouble(b, x, y, p.timeLeft)) n++; }); return n; };
-      expect(trouble(after), p.id).toBeGreaterThan(trouble(cols));
+      if (FIXED.has(p.id)) expect(trouble(after), p.id).toBeLessThanOrEqual(trouble(cols));
+      else expect(trouble(after), p.id).toBeGreaterThan(trouble(cols));
     });
   }
 });

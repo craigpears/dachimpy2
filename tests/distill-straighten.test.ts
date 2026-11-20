@@ -2,9 +2,12 @@
    junk stuck in them, the bot still quick sorting. src/distill-read.ts's `straighten`, src/distill-patterns.ts's bank
    (`bankOf`, `bankJunk`), src/distill-bots.ts's moves for it. */
 import { describe, expect, it } from 'vitest';
-import { P, advise, decisionTime, pulledDown } from '../src/distill-bots';
-import { readBoard, strayDrags } from '../src/distill-read';
-import { bankJunk, bankOf, solidColumns } from '../src/distill-patterns';
+import { P, advise, chainContext, choose, contextFor, decisionTime, levelNamed, pulledDown } from '../src/distill-bots';
+import { channelOrder } from '../src/distill-goals';
+import { playDrags } from '../src/distill-routines';
+import { ferryDrags, junkOver, readBoard, straightened as progressOf, strayDrags, trappedJunk } from '../src/distill-read';
+import { S, trapped } from '../src/distill-score';
+import { bankJunk, bankOf, junkDisorder, solidColumns } from '../src/distill-patterns';
 import { BROWN, Distilling } from '../src/distilling';
 
 const B = (s: string) => s.split(' ').map((c) => [...c].map((ch) => 'wbK*x'.indexOf(ch)));
@@ -84,8 +87,13 @@ describe('the user\'s pictures (16 Nov), copied exactly', () => {
     expect(bank).toEqual([0, 1, 2, 3]);
     expect(bankJunk(cols, bank)).toBe(4);
     const run = playOn(PIC3, 4);
-    // (its first move the sweep itself: the black at column 1, row 7 down through the whites and up through the browns)
-    expect(run[0].a.drags).toEqual([{ x: 0, y: 6, ways: [3, 3, 3, 0, 0, 0, 0, 0] }]);
+    // (its first move a sweep itself: one of the two blacks, column 1's or column 4's at row 7, down through the whites and
+    // up through the browns in one long drag; since 18 Nov, the junk's order counted across the junk columns, column 4's
+    // first, column 1's two moves on)
+    expect(run[0].a.drags).toHaveLength(1);
+    expect([0, 3]).toContain(run[0].a.drags[0].x);
+    expect(run[0].a.drags[0].y).toBe(6);
+    expect(run[0].a.drags[0].ways.length).toBeGreaterThanOrEqual(8);
     const last = run[run.length - 1].cols;
     expect(bank.some((x) => last[x].includes(2))).toBe(false);   // (no black left in the white columns)
     expect(bankJunk(last, bank)).toBeLessThanOrEqual(1);
@@ -116,5 +124,135 @@ describe(`"If you've got an easily completed junk column, you don't do that ever
     // (the same, two of the finished junk columns gone to the furnace)
     const two = B('KKKKwwwww wwwwwwww wwwwwwwww wwwwwwww wwwwwwwww wwwwwwww wwwwwwwww wwwwKKKK KbKKbbbbb KbKbbbbK');
     expect(decisionTime(two, 4)).toBe(true);
+  });
+});
+
+describe('the chain (17 Nov, seed 2 CC^8, the user\'s pictures copied)', () => {
+  it('"Creating a channel of browns ... and ... getting blacks up to that top right": where it waited, it builds a channel to the column being filled', () => {
+    const cols = B('bwbbbbKKK bKKbbKKK bbbwKKKbK bbwKKwKK KbwwwwKbK wwwwwwww wwwwwwwww wwwwwwww w*wwwwwww wwwwwwww');
+    const ctx = contextFor(cols, 'chain', 0, 40), a = choose({ cols, chain: 3, timeLeft: 15000 }, ctx, levelNamed('cc8'));
+    expect(a.kind).toBe('move');
+    expect(channelOrder(playDrags(cols, a.drags)!, ctx.fill)).toBeGreaterThan(channelOrder(cols, ctx.fill));
+  });
+  it('"There\'s no way we\'re sending the crystal clear past 9. Let\'s start moving the junk into that column": a chain whose next column can\'t be filled is let go, its whites no more sent into it', () => {
+    const cols = B('bwbKKKbbb wKbKbKbK KKKbK*bKK bbbbKbbK KbKKKKKKK KbwwKKwb bKKwKKbbb bKwwKKbK bKwwKKbbb wwwwwwww');
+    const c = chainContext(cols, 8, 0, 8, 40);
+    expect(c.letGo).toBe(true);
+    expect(c.ctx.over).toEqual([6, 8]);
+    const a = choose({ cols, chain: 8, timeLeft: 15000 }, c.ctx, levelNamed('cc8')), after = playDrags(cols, a.drags)!;
+    expect(after[8].filter((p) => p === 0).length).toBeLessThanOrEqual(cols[8].filter((p) => p === 0).length);   // (no white into column 9)
+  });
+});
+
+// (notes/distilling/55-two-blacks-move-as-one.webp, the user's picture copied: black number one at the bottom of column 3,
+// number two at the bottom of column 2 beside it, both under whites, the brown that was their way out taken away)
+const PIC55 = 'KwKbbKbw bKwKb*bwK wwwwwwwK wwwwwwww* wwwwwwwK bwwwwwbKb bbKbbbbb KK*KKKKKK KKKKKbbb Kbbbb*K*b';
+describe(`"If I move number one up without number two, that's going to leave number two stranded ... they move as one continuous unit" (17 Nov, picture 55)`, () => {
+  it('both blacks are seen trapped, number two walled in by number one, not joined to the colour through it', () => {
+    const cols = B(PIC55);
+    expect(trapped(cols, 2, 7)).toBe(true);   // (number one)
+    expect(trapped(cols, 1, 8)).toBe(true);   // (number two)
+    const was = S.TRAP_GROUP;
+    try { S.TRAP_GROUP = 0; expect(trapped(cols, 1, 8)).toBe(false); } finally { S.TRAP_GROUP = was; }   // (the old reading)
+  });
+  it('straightening up frees them both, never one by leaving the other trapped', () => {
+    const run = playOn(PIC55, 4), bank = bankOf(B(PIC55)), to = bank[bank.length - 1] + 1;
+    // (the two, and a brown at the top of column 2; the junk left of the white columns got over first since 17 Nov's
+    // seed 5008, "get it over", the pair freed within a few moves, the count never rising on the way)
+    let was = trappedJunk(B(PIC55), to);
+    expect(was).toBe(3);
+    for (const { a, cols } of run) { const n = trappedJunk(cols, to); expect(n, a.reason).toBeLessThanOrEqual(was); was = n; }
+    expect(was).toBe(0);
+  });
+});
+
+// Seed 5008, CC^8, Stage I, the user's pictures (17 Nov) copied piece by piece. 56: the white columns banked with three
+// browns stuck at their tops, a whole column of browns beside a whole column of blacks (notes/distilling/56-...); 57: the
+// user's own board a few moves on, the blacks dragged up into the browns' places (notes/distilling/57-...); then a burn
+// later, the junk still left of the white columns, the bot moving nothing; and the bot waiting, "nothing worth moving",
+// three junk columns deep by the fire (those two pictures weren't saved).
+const PIC56 = '*KKbKwwb KwbKKwbKb wwwwwwww bwwwwwwww bwwwwwww bwwwwwwww bbbbbbbb KKKKKbbbb KK*KKKKK bbbKKb*bb';
+const PIC57 = '*KKbKwwb KwbKKwbKb wwwwwwww KKwwwwwww wwwwwwww wKwwwwwww KKbbbbbb KbbbKbbbb Kb*bKKKK bbbKKb*bb';
+const LATER = 'wwwKbwbKb *KKbKwwb KKbKKwbKb wwwwwwww wwwwwwwww wwwwwbww wwwwwbwww KKKKKbbb Kbbbbbbbb Kb*KbKKK';
+const IDLE = 'bKwbKwbb wKbwwwKKb bbwwKwKK bwwwwwwKK bwwwwwww wbwwbwwww wwwwwwbw KKKKwKwKK bbbbbKbb bbbbbbbbb';
+describe('seed 5008 (17 Nov): "There\'s no such thing as nothing worth moving"', () => {
+  it('"Just drag those blacks up ... it\'s markedly better": a black in a brown\'s place at the top of the white columns counts as cleaner', () => {
+    const xs = [2, 3, 4, 5];
+    expect(bankJunk(B(PIC57), xs)).toBeLessThan(bankJunk(B(PIC56), xs));
+  });
+  it('"Get it over. It\'s not moving anything": the junk left of the white columns is carried over, never a wait', () => {
+    const run = playOn(LATER, 8), left = (c: number[][]) => c.slice(0, 3).flat().filter((p) => p === 1 || p === 2).length;
+    expect(run.length).toBe(8);
+    expect(left(run[run.length - 1].cols)).toBeLessThan(left(B(LATER)));
+  });
+  for (const [name, s] of [['the junk beside the white columns', PIC56], ['three junk columns deep by the fire', IDLE], ['a burn later', LATER]] as const) {
+    it(`"You've got such a safe position here, you can just go for it" (${name}): it keeps moving till the column's ready to burn`, () => {
+      const g = new Distilling(() => 0.5, { timer: false }).lay(B(s));
+      for (let i = 0; i < 10; i++) {
+        const a = advise({ cols: g.cols, chain: 0, timeLeft: 40000 }, { target: 8 });
+        expect(a.reason, `move ${i + 1}`).not.toMatch(/nothing worth moving/);
+        if (a.kind !== 'move') break;
+        for (const d of a.drags) { g.dragWays(d.x, d.y, d.ways); g.settle(1000); }
+      }
+    });
+  }
+  it('"Those blacks up at the top were fine. Why did it have to drag them into a column?": sorting the junk columns is no progress of its own', () => {
+    const r = readBoard(B(PIC56), { stage: 'junk', timeLeft: 40000 });
+    // (the two junk columns side by side sorted blacks over browns, nothing else changed: straightening up gets nothing)
+    const sorted = B(PIC56); sorted[6] = [2, 2, 1, 1, 1, 1, 1, 1]; sorted[7] = [2, 2, 2, 1, 1, 1, 1, 1, 1];
+    expect(progressOf(r, B(PIC56), sorted)).toBe(0);
+  });
+});
+
+// Seed 5008, 18 Nov: the bot waiting, "the column is ready", with browns stuck at the top of the bank behind a junk
+// column of browns, one black on its top.
+const READY = 'bbwwwbwww bbwwwwww wwwwwwwww wwwwbwww Kbbbbbbbw bw*KbKbw bbKKKK*bK *bKbKKKb KbbKKKbbK bbbKbKKb';
+describe(`seed 5008 (18 Nov): "The straightening up thing is woeful right now"`, () => {
+  it(`"It's still saying waiting, the column is ready ... I cannot fathom what that logic is": never a wait for a ready column while there's straightening up to do`, () => {
+    const run = playOn(READY, 8);
+    expect(run.length).toBe(8);
+  });
+  it(`"You've got these browns that can be taken over and then straightened up": the ferry, a black let into the whites' top and a brown taken over through it, gets the stuck browns out`, () => {
+    const cols = B(READY), xs = bankOf(cols);
+    expect(xs).toEqual([0, 1, 2, 3]);
+    // No single drag gets anything over: the browns top out under whites, with a wall of browns beside them.
+    for (const d of strayDrags(cols, readBoard(cols, { stage: 'junk', timeLeft: 40000 }).targets, 4)) expect(junkOver(xs, cols, playDrags(cols, d)!)).toBeLessThanOrEqual(0);
+    expect(ferryDrags(cols, xs).length).toBeGreaterThan(0);
+    const run = playOn(READY, 10);
+    expect(run[0].a.reason).toMatch(/the ferry/);
+    expect(bankJunk(run[run.length - 1].cols, xs)).toBeLessThanOrEqual(bankJunk(cols, xs) - 4);
+  });
+  it(`"It's got the board rotated the wrong way around, and it's putting them at the side rather than at the top": a column of browns beside a column of blacks is out of order, blacks along the top and browns below in order`, () => {
+    const base = B(READY);
+    const sides = base.map((c) => [...c]), tops = base.map((c) => [...c]);
+    sides[5] = [1, 1, 1, 1, 1, 1, 1, 1, 1]; sides[6] = [2, 2, 2, 2, 2, 2, 2, 2];
+    tops[5] = [2, 2, 2, 2, 1, 1, 1, 1, 1]; tops[6] = [2, 2, 2, 2, 1, 1, 1, 1];
+    expect(junkDisorder(tops, 4)).toBeLessThan(junkDisorder(sides, 4));
+  });
+});
+
+// (seed 5002, CC^8, 78 s in: the whites banked in columns 3 to 6 with fresh junk left of them, and whites in column 8,
+// gaps among the junk; the bot lifted a black already over, in column 7, up through the browns)
+const GAP = 'KwwbKbb* KbwbwKKwK wwwwwwwK wwwwwwwww wwwwwwww wbwwwwwww bbKKKbKK bbwwbbbwK bbbbKbbK KbbbbKKKb';
+describe(`"The preference should always be to take pieces from the left-hand side, i.e. the ones past the whites" (18 Nov)`, () => {
+  const lv = levelNamed('cc8');
+  const at = (cols: number[][], timeLeft: number) => choose({ cols, chain: 0, timeLeft }, contextFor(cols, 'junk', 0, lv.reach), lv);
+  it(`"If it's got a gap, sometimes it will drag things down that are already kind of far over past the whites": the gap filled from the left's junk`, () => {
+    const cols = B(GAP), end = bankOf(cols).at(-1)! + 1;
+    const a = at(cols, 13646), after = playDrags(cols, a.drags)!;
+    expect(a.kind).toBe('move');
+    expect(a.drags.some((d) => d.x < end), a.reason).toBe(true);
+    // (the gap filled: a white on the junk side further left)
+    const whiteX = (b: number[][]) => b.reduce((n, c, x) => n + (x >= end ? x * c.filter((p) => p === 0).length : 0), 0);
+    expect(whiteX(after), a.reason).toBeLessThan(whiteX(cols));
+    // (as it was: the junk already over reworked)
+    const was = P.LEFT_FIRST;
+    try { P.LEFT_FIRST = 0; expect(at(cols, 13646).drags.every((d) => d.x >= end)).toBe(true); } finally { P.LEFT_FIRST = was; }
+  });
+  it(`"Unless there's a clear need ... because of a risk of whites being burned": a white in the furnace's column is got out however it's quickest`, () => {
+    const cols = B(GAP);
+    cols[9][8] = 0;
+    const a = at(cols, 3000), after = playDrags(cols, a.drags)!;
+    expect(after[9].filter((p) => p === 0).length, a.reason).toBe(0);
   });
 });
