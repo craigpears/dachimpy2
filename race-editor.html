@@ -25,6 +25,7 @@
   .views span { background: var(--accent); color: var(--on-accent); }
   .views a { color: var(--accent-text); }
   .views a:hover { background: rgba(224, 169, 42, 0.18); }
+  @media (pointer: coarse) { .views a, .views span { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; } }
   .views a.off { opacity: 0.4; pointer-events: none; }
   main { display: grid; grid-template-columns: minmax(0, 680px) minmax(300px, 440px); justify-content: center; gap: 16px; align-items: start; }
   #chart { background: var(--well); border: 2px solid var(--frame); border-radius: 10px; padding: 6px; line-height: 0; }

@@ -150,6 +150,8 @@ export const DISTILL_TUTORIAL: Tutorial = {
   puzzle: 'Distilling', teacher: 'Helium',
   basics: pointed([...THUMB_PARTS, ...DRAG_PARTS, ...BASIC_PARTS]), phases: pointed(PHASE_PARTS), tricks: pointed(TRICK_PARTS), scenarios: pointed(SCENARIO_PARTS), choices: CHOICES,
   hello: L.opening,
+  // (a single level, as the wolf den's: the user, 15 Nov, "click, click, and in. It felt a lot smoother")
+  flat: true,
   anchors: { basics: 'thumb', phases: 'phases', tricks: 'phases', scenarios: 'reading' },
 };
 

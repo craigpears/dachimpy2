@@ -13,7 +13,7 @@ import { countingDown } from './den-raids.js';
 import { BILGE } from './den-bilge.js';
 import { beachStep } from './den-beach.js';
 import { cleanLook, cleanDen } from './den-look.js';
-import { C, S, SPEED, HP, BUILD_SECS, tune, k, $, myLook, denLook, renderer, scene, camera, skyDome, PILE_SC, rotCW, rotCCW, flip, animateWalk, faceTo, V3, pirate, HOP, STEP, view, carry, bounds, obstacles, G, keys, tweens, sparks, raiders, ghostKey, ghost, target, shake, mouseMode, mouse, topView, keyAt, wm, wmBlock, wmLinger, wallView, ray, wallPlane, toast, v3, L0, L1, L2, worldLets, roomGlow, hazeAt } from './den/world.js';
+import { C, S, SPEED, HP, BUILD_SECS, tune, k, $, myLook, denLook, renderer, scene, camera, skyDome, PILE_SC, rotCW, rotCCW, flip, animateWalk, faceTo, V3, pirate, HOP, STEP, view, carry, bounds, obstacles, G, keys, tweens, sparks, tickSparks, raiders, ghostKey, ghost, target, shake, mouseMode, mouse, topView, keyAt, wm, wmBlock, wmLinger, wallView, ray, wallPlane, toast, v3, L0, L1, L2, worldLets, roomGlow, hazeAt } from './den/world.js';
 import { ramp, frames, frameAt, openJob, frameState, frameFits, putFramePiece, finishFrame, heightAt, onRampart, startHouse, houseState, plotLabel, atPlot, biomeTick, waveFlags, outside, throughGate, gateTick, towerLegs, selfSeen } from './den/land.js';
 import { wall, X, Y, newWall, doorOf, fits, layerOpen, curLayer, patchFits, nextMat, nextLayer, barFrac, labelFor, frameLabel, updateStats, breakHole, dropPiece, dropBoard, holeX } from './den/wall.js';
 import { GD, gd, gdCell, atGunDeck, gunOn, onGunDeck, gunSq, deckBlocks, loopsOf, gunTick, addStore, updateGunDeck, gunLabels, chalk, chalkAhead, turnArrowAhead, chalkRelease, wheelDeck, pointChalk, gundeckLets } from './den/gundeck.js';
@@ -360,6 +360,18 @@ export function setPaused(on) {
 }
 $('pause-btn').onclick = (e) => { e.currentTarget.blur(); setPaused(!paused); };
 $('resume').onclick = () => setPaused(false);
+// On a phone the den's menu is folded behind one Menu button (den.html; RULES.md, "On a phone").
+$('hud-more').onclick = (e) => {
+  const open = document.querySelector('.hud').classList.toggle('open');
+  e.currentTarget.textContent = open ? 'Close' : 'Menu';
+  e.currentTarget.setAttribute('aria-expanded', open);
+  e.currentTarget.blur();
+};
+// On a touch screen the prompt with something to do is its button: tapped, it's Space (den.html).
+$('prompt').addEventListener('click', (e) => {
+  if (!e.currentTarget.classList.contains('act') || !matchMedia('(pointer: coarse)').matches) return;
+  for (const type of ['keydown', 'keyup']) dispatchEvent(new KeyboardEvent(type, { key: ' ', code: 'Space', bubbles: true }));
+});
 document.addEventListener('visibilitychange', () => { if (document.hidden && !online() && !G.over) setPaused(true); });
 function tick() {
   const now = performance.now();
@@ -533,15 +545,7 @@ function update(dt) {
     t.step(s);
     if (s >= 1) { tweens.splice(i, 1); t.done?.(); }
   }
-  for (let i = sparks.length - 1; i >= 0; i--) {
-    const s = sparks[i];
-    s.userData.v.y -= 7 * dt;
-    s.position.addScaledVector(s.userData.v, dt);
-    s.rotation.x += dt * 6; s.rotation.y += dt * 4;
-    s.userData.life -= dt;
-    s.scale.setScalar(Math.max(0, s.userData.life));
-    if (s.userData.life <= 0) { scene.remove(s); sparks.splice(i, 1); }
-  }
+  tickSparks(dt);
 
   mapTick(dt);
   cineTick(dt);   // (a cutscene playing: js/den/cine.js)
@@ -627,9 +631,10 @@ function update(dt) {
   // At sea: following her from behind and above, out over the water (turn and zoom as ever).
   sailView += ((sail.on ? 1 : 0) - sailView) * Math.min(1, dt * 2);
   if (sailView > 0.001 && sail.g) {
-    L2.set(sail.g.position.x, Math.max(0.6, sail.g.position.y - 1), sail.g.position.z - 2);   // (up in the clifftop lagoon, looking at her there)
+    const fg = sail.follow ?? sail.g;   // (or Primates Rule, out on her test run: js/den/frigate-run.js)
+    L2.set(fg.position.x, Math.max(0.6, fg.position.y - 1), fg.position.z - 2);   // (up in the clifftop lagoon, looking at her there)
     look.lerp(L2, sailView);
-    dist += (26 * view.zoom - dist) * sailView;
+    dist += ((sail.follow ? 40 : 26) * view.zoom - dist) * sailView;   // (further back for a ship her size)
     tilt += (Math.max(0.3, Math.min(1.45, 0.78 + view.pitch)) - tilt) * sailView;
   }
   // The Sailing board open: her slid into the part of the screen it leaves (js/den/sail-station.js).
@@ -840,13 +845,15 @@ function update(dt) {
     const g = wall.gateCols, hk = wm && !wm.f ? holeKey([h.b.r0 + h.b.h / 2, h.b.c0 + h.b.w / 2], [wall.H / 2, (g.c0 + g.c1 + 1) / 2]) : '';
     const html = hk ? `<kbd class="hk">${hk}</kbd>${body}` : body;
     nextLayer(h);
-    if (h.sig !== cls + html) { h.sig = cls + html; h.label.className = cls; h.label.innerHTML = html; }
+    if (h.sig !== cls + html) { h.sig = cls + html; h.label.className = cls; h.label.innerHTML = html; h.labelW = 0; }
     const bar = h.label.querySelector('.bar:not(.lay) b');
     if (bar) bar.style.width = `${Math.max(0, barFrac(h)) * 100}%`;
     h.label.querySelectorAll('.bar.lay b').forEach((b, j) => { const L = h.lay[j]; b.style.width = `${L ? Math.max(0, L.hp / L.maxHp) * 100 : 0}%`; });
     // From up on the wall, labels sit on the den side so they don't hide the raiders.
     if (topView) v3.set(holeX(h), 0, 2.2).project(camera); else v3.set(holeX(h), Y(h.b.r0) + 0.15, 0.1).project(camera);
-    h.label.style.left = `${(v3.x + 1) / 2 * innerWidth}px`;
+    // (a hole on the screen keeps its label on it too, not cut off at the edge: a phone, 16 Nov)
+    const hx = (v3.x + 1) / 2 * innerWidth, half = (h.labelW ||= h.label.offsetWidth) / 2 + 4;
+    h.label.style.left = `${hx < 0 || hx > innerWidth || half * 2 > innerWidth ? hx : Math.min(innerWidth - half, Math.max(half, hx))}px`;
     h.label.style.top = `${(1 - v3.y) / 2 * innerHeight}px`;
     h.label.style.display = deckView > 0.5 || swordView > 0.5 ? 'none' : '';   // out of the way while you're gunning or swordfighting
     // A patch under attack shudders.

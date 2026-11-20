@@ -3,8 +3,9 @@
 // start getting out to sea, you just kind of see that out there and put [a mark] on it. [To] make it
 // clear, it's kind of a to-do item." Her look is js/den/frigate.js's own, her sails furled, her anchor
 // cable down off her bow, riding gently where she lies; a sign over her, "Primates Rule · coming
-// soon", that faces you wherever you are; and sailing up near her, you say she's not ready yet. No
-// boarding her: nothing to do there yet. sailing.js keeps her going: primatesTick, primatesReset.
+// soon" (since 15 Nov "ready for a test run"), that faces you wherever you are; and sailing up near her, you
+// say so. Space by her takes her out on her test run (frigate-run.js), and she's put away here while she's out.
+// sailing.js keeps her going: primatesTick, primatesReset.
 import * as THREE from 'three';
 import { PRIMATES_RULE } from '../den-frigate.js';
 import { MOORED, MOORED_MID, MooredHail, nearMoored } from '../den-moored.js';
@@ -49,7 +50,7 @@ function build() {
 }
 
 /** Each tick, at sea or seen from the beach (sailing.js): built the first time, riding at anchor;
-    sailing up near her, you say she's not ready yet, once a voyage. */
+    sailing up near her, you say she's ready for a test run, once a voyage. */
 export function primatesTick(dt) {
   const W = (moored.W ||= build()), t = performance.now() / 1000;
   W.her.g.position.y = Math.sin(t * 0.7) * 0.04;

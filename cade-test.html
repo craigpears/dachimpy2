@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabletop blockade test</title>
+<!-- The tabletop blockade, faithful to Puzzle Pirates' (TABLETOP-BLOCKADE.md), unlinked like distilling-test.html: a real
+     board from the user's own BlockadeSim, three ships a side, yours the one you plan for, the rest stand-ins until the
+     teaching bots come. Each turn: put a move and your guns in each of its four slots, then Sail; it plays out slot by
+     slot, everyone at once. Rules src/cade.ts, the table src/cade-play.ts, its 3D js/den/cade.js (the den's look and the
+     3D blockade's, sharing none of its rules). ?board= a board's id (Gallows16_3, Lilac1_1, Iocane22_2...), ?ship= yours
+     (sloop, warBrig, warFrigate), ?seed= the dice, ?turns= the round's length. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #f6ead2; --dim: #cbb894; --gold: #e0a92a; --crimson: #e2564a; --panel: rgba(28, 19, 12, 0.86); --edge: #5a412a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0e1a24; font: 500 16px/1.4 'Alegreya Sans', system-ui, sans-serif; color: var(--ink); }
+  canvas { display: block; touch-action: none; }
+  .ui { position: fixed; left: 12px; top: 12px; width: min(300px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 10px 12px; }
+  h1 { font: 700 22px 'Alegreya', serif; color: var(--gold); margin: 0 0 4px; }
+  p { margin: 0 0 8px; color: var(--dim); font-size: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; align-items: center; }
+  button, select { font: 700 14px 'Alegreya Sans', sans-serif; color: var(--ink); background: #3b2a1b; border: 1px solid #c9a35c; border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+  button.on { background: #6a4a1a; }
+  button:disabled { opacity: .45; cursor: default; }
+  .score { display: flex; justify-content: space-between; align-items: baseline; font: 700 18px 'Alegreya', serif; margin-bottom: 6px; }
+  .gold { color: var(--gold); } .crimson { color: var(--crimson); }
+  .score small { font: 500 13px 'Alegreya Sans', sans-serif; color: var(--dim); }
+  /* the planning pad: a row a slot, the guns off her left, her move, the guns off her right */
+  .pad { display: grid; grid-template-columns: 22px 1fr 54px 1fr; gap: 4px 6px; align-items: center; margin-bottom: 6px; }
+  .pad .n { color: var(--dim); font-size: 13px; text-align: center; }
+  .pad button { height: 34px; padding: 0; font-size: 20px; }
+  .pad .mv { font-size: 24px; }
+  .pad .rest { font-size: 12px; color: var(--dim); }
+  .pad .gun { display: flex; justify-content: center; align-items: center; gap: 7px; }
+  .pad .dot { display: block; width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--dim); }
+  .pad .dot.on { background: var(--gold); border-color: var(--gold); }
+  .toks { display: flex; gap: 6px; margin-bottom: 8px; font-size: 14px; }
+  .toks span { border: 1px solid var(--edge); border-radius: 6px; padding: 1px 7px; background: #241810; }
+  .toks b { color: var(--gold); }
+  .sail { width: 100%; font-size: 18px; padding: 6px; margin-bottom: 8px; background: #6a4a1a; }
+  .ships { font-size: 13px; color: var(--dim); }
+  .ship { display: grid; grid-template-columns: 1fr 80px; gap: 0 8px; padding: 3px 0; border-top: 1px solid rgba(201, 163, 92, 0.18); }
+  .ship b { color: var(--ink); } .ship.me b { text-decoration: underline; }
+  .meter { position: relative; height: 7px; background: #241810; border-radius: 3px; overflow: hidden; align-self: center; }
+  .meter i { position: absolute; left: 0; top: 0; bottom: 0; background: #c8572a; }
+  .buoys { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; font-size: 12px; }
+  .buoys span { border: 1px solid var(--edge); border-radius: 5px; padding: 0 5px; color: var(--dim); }
+  .buoys span.gold { border-color: var(--gold); color: var(--gold); } .buoys span.crimson { border-color: var(--crimson); color: var(--crimson); } .buoys span.contested { color: var(--ink); border-color: var(--ink); }
+  #say { position: fixed; left: 50%; top: 14px; transform: translateX(-50%); width: max-content; max-width: min(560px, calc(100vw - 32px)); background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; padding: 6px 12px; font-size: 15px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  #say.on { opacity: 1; } #say.bad { border-color: #c8572a; }
+  #over { display: none; position: fixed; left: 50%; top: 38%; transform: translate(-50%, -50%); background: var(--panel); border: 2px solid var(--gold); border-radius: 14px; padding: 16px 26px; text-align: center; z-index: 5; }
+  body.over #over { display: block; }
+  #over b { display: block; font-size: 26px; color: var(--gold); margin-bottom: 4px; }
+  #over span { display: block; font-size: 15px; margin-bottom: 10px; }
+  details summary { cursor: pointer; color: var(--dim); font-size: 13px; margin-bottom: 4px; }
+  [hidden] { display: none !important; }
+  /* (on a phone the board fills the screen; the pad sits at the bottom, the rest folded away: tasks, "the blockade on a phone") */
+  @media (max-width: 700px) {
+    .ui { top: auto; bottom: 8px; left: 8px; width: calc(100vw - 16px); max-height: 52vh; padding: 8px 10px; }
+    p.about, h1 { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="ui">
+  <h1>Tabletop blockade</h1>
+  <p class="about">Puzzle Pirates' blockade, as it plays. Each turn, put a move in each of its four slots (a 3-move ship rests one) and the guns you'll fire off each side, then Sail: everyone moves at once, slot by slot; winds push you a square, whirlpools carry you round; then the guns. A buoy only your side's ships reach scores its pennants every turn; a sloop has to sit on it, a frigate holds the most. A slot: left click a left (again to go round), middle click a forward, right click a right; a gun's circle: click it on, right-click it off. Keys: A W D a move in the next slot, Q E a gun off the left or right in the last slot you set, X clears, Space sails.</p>
+  <div class="score"><span class="gold" id="s0">0</span><small id="turn">Turn 1 of 60</small><span class="crimson" id="s1">0</span></div>
+  <div class="buoys" id="buoys"></div>
+  <div class="pad" id="pad"></div>
+  <div class="toks" id="toks"></div>
+  <button class="sail" id="sail" title="Play the turn (Space)">Sail</button>
+  <div class="row"><button id="clear" title="Clear your plan (X)">Clear</button><button id="mine" class="on" title="The camera on your ship">Your ship</button><button id="whole" title="The whole board">Whole board</button></div>
+  <details id="more"><summary>Ships, board</summary>
+    <div class="ships" id="ships"></div>
+    <div class="row" style="margin-top:8px"><select id="board" title="The board"></select><select id="ship" title="Your ship"><option value="sloop">Sloop</option><option value="warBrig">War brig</option><option value="warFrigate">War frigate</option></select><button id="again">New round</button></div>
+  </details>
+</div>
+<div id="say"></div>
+<div id="over"><b id="overTitle"></b><span id="overScore"></span><button id="overAgain">New round</button></div>
+<script src="js/engine.js"></script>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { renderer, scene, camera, paintSky, pirate, tickSparks, sunOver, skyDome } from './js/den/world.js';
+import { blastTick } from './js/den/blast.js';
+import { cadeView, SIDE_COL } from './js/den/cade.js';
+import { Table, DEFAULT_FLEET } from './js/cade-play.js';
+import { CADE_BOARDS } from './js/cade-boards.js';
+
+const $ = (id) => document.getElementById(id), params = new URLSearchParams(location.search);
+const seeded = (seed) => () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+const seed = Number(params.get('seed')) || Math.floor(Math.random() * 1e6) + 1;
+const mineKind = ['sloop', 'warBrig', 'warFrigate'].includes(params.get('ship')) ? params.get('ship') : 'warBrig';
+const fleet = DEFAULT_FLEET.map((f) => (f.you ? { ...f, kind: mineKind } : f));
+const table = new Table({ board: params.get('board') ?? 'Gallows16_3', fleet, turns: Number(params.get('turns')) || 60, random: seeded(seed) });
+
+paintSky('#4f8fd0', '#cfe2ee');
+camera.far = 1200; camera.updateProjectionMatrix();
+pirate.g.visible = false;
+sunOver(0, 0, 0);
+const sea = new THREE.Mesh(new THREE.CircleGeometry(520, 64).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#2f78a8', roughness: 0.35, metalness: 0.1 }));
+sea.receiveShadow = true;
+scene.add(sea);
+const view = cadeView(table);
+const names = view.names();
+
+let sayT = 0;
+const say = (text, bad = false) => { const el = $('say'); el.textContent = text; el.classList.add('on'); el.classList.toggle('bad', bad); sayT = 3 + text.length / 30; };
+
+// ----- the panel -----
+for (const [id, b] of Object.entries(CADE_BOARDS)) $('board').add(new Option(b.name, id, false, id === table.boardId));
+$('ship').value = mineKind;
+const ARROW = { F: '↑', L: '↰', R: '↱' };
+let lastSlot = 0;
+function draw() {
+  const me = table.you, pad = table.pad, left = table.tokensLeft, k = me.kind, moves = pad.moves.filter(Boolean).length;
+  $('s0').textContent = table.cade.score[0]; $('s1').textContent = table.cade.score[1];
+  $('turn').textContent = table.cade.over ? 'The round is over' : `Turn ${table.cade.turn + 1} of ${table.cade.turns}`;
+  $('pad').innerHTML = [0, 1, 2, 3].map((i) => {
+    const m = pad.moves[i], [gl, gr] = pad.guns[i], rest = !m && k.moves === 3 && moves >= 3;
+    // (her guns a side, a circle each, filled as they're picked: the user, 17 Nov, "just two empty circles and then fill
+    // them as they get selected")
+    const dots = (n) => Array.from({ length: k.guns }, (_, j) => `<i class="dot${j < n ? ' on' : ''}"></i>`).join('');
+    return `<span class="n">${i + 1}</span>`
+      + `<button class="gun" data-gun="${i},0" title="Guns off her left in slot ${i + 1}: click for one, right-click to take one off">${dots(gl)}</button>`
+      + `<button class="mv" data-mv="${i}" title="Her move in slot ${i + 1}: left click a left (again to go round), middle a forward, right a right">${m ? ARROW[m] : rest ? '<span class="rest">rest</span>' : ''}</button>`
+      + `<button class="gun" data-gun="${i},1" title="Guns off her right in slot ${i + 1}: click for one, right-click to take one off">${dots(gr)}</button>`;
+  }).join('');
+  $('toks').innerHTML = `<span>↰ <b>${left.L}</b></span><span>↑ <b>${left.F}</b></span><span>↱ <b>${left.R}</b></span><span title="Guns loaded">● <b>${left.guns}</b></span><span title="${k.moves} moves a turn, ${k.guns} gun${k.guns > 1 ? 's' : ''} a side a slot">${k.name}</span>`;
+  $('sail').disabled = view.playing || table.cade.over;
+  const { buoys } = table.last ?? { buoys: [] };
+  $('buoys').innerHTML = (buoys.length ? buoys : []).map((bu) => `<span class="${bu.holder === 0 ? 'gold' : bu.holder === 1 ? 'crimson' : bu.holder === 'contested' ? 'contested' : ''}">${'⚑'.repeat(bu.points)}</span>`).join('');
+  $('ships').innerHTML = table.cade.ships.map((s) => `<div class="ship${s.id === table.me ? ' me' : ''}"><span><b style="color:${SIDE_COL[s.side]}">${names.get(s.id)}</b> ${s.kind.name.toLowerCase()}</span><span class="meter" title="Damage"><i style="width:${Math.round(100 * s.damage / s.kind.sinks)}%"></i></span></div>`).join('');
+  view.plan(view.playing ? null : table.preview());
+}
+// (the mouse as the game's, the user, 17 Nov: "left mouse is left, and then it cycles through. Middle mouse is
+// forward, right mouse click is right"; on the guns, a click puts one on and a right click takes one off. A tap is a
+// left click.)
+$('pad').addEventListener('pointerdown', (e) => {
+  const mv = e.target.closest('[data-mv]'), gun = e.target.closest('[data-gun]'), b = e.button;
+  if ((!mv && !gun) || view.playing || b > 2) return;
+  e.preventDefault();   // (no scrolling off on a middle click)
+  if (mv) { lastSlot = Number(mv.dataset.mv); table.press(lastSlot, b); }
+  if (gun) { const [i, side] = gun.dataset.gun.split(',').map(Number); lastSlot = i; if (b === 2) table.ungun(i, side); else table.gun(i, side); }
+  draw();
+});
+$('pad').addEventListener('contextmenu', (e) => e.preventDefault());
+$('pad').addEventListener('auxclick', (e) => e.preventDefault());
+async function sail() {
+  if (view.playing || table.cade.over) return;
+  const log = table.sail();
+  lastSlot = 0;
+  draw();
+  const sunk = log.slots.flatMap((sl) => sl.sunk);
+  await view.play(log);
+  if (sunk.includes(table.me)) say(`${names.get(table.me)} has gone down! She's back on your edge, fresh`, true);
+  else if (sunk.length) say(`${sunk.map((id) => names.get(id)).join(' and ')} went down`);
+  else if (log.points[0] || log.points[1]) say(`The buoys this turn: ${log.points[0]} to ${log.points[1]}`);
+  draw();
+  if (table.cade.over) {
+    const [a, z] = table.cade.score, lead = table.cade.leader;
+    $('overTitle').textContent = lead === 0 ? 'Your side wins the round' : lead === 1 ? 'The crimson side wins the round' : 'A draw';
+    $('overScore').textContent = `${a} to ${z}`;
+    document.body.classList.add('over');
+  }
+}
+$('sail').onclick = sail;
+$('clear').onclick = () => { table.clear(); draw(); };
+const restart = () => {
+  params.set('board', $('board').value); params.set('ship', $('ship').value); params.delete('seed');
+  location.search = params.toString();
+};
+$('again').onclick = restart; $('overAgain').onclick = restart;
+$('board').onchange = restart; $('ship').onchange = restart;
+addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey || e.target.tagName === 'SELECT') return;
+  const k = e.key.toLowerCase(), m = { a: 'L', w: 'F', d: 'R' }[k];
+  if (view.playing) return;
+  if (m) {
+    const i = table.pad.moves.findIndex((x) => !x);
+    if (i >= 0) { const before = table.pad; table.put(i, m); if (table.pad === before) say(`No ${m === 'F' ? 'forwards' : m === 'L' ? 'lefts' : 'rights'} left, or no room for another move`, true); else lastSlot = i; }
+  } else if (k === 'q' || k === 'e') table.gun(lastSlot, k === 'q' ? 0 : 1);
+  else if (k === 'x' || k === 'backspace') table.clear();
+  else if (k === ' ' || k === 'enter') { e.preventDefault(); sail(); return; }
+  else return;
+  e.preventDefault();
+  draw();
+});
+
+// ----- the camera: on your ship, or the whole board; drag to turn, wheel or pinch to zoom -----
+const MINE = { yaw: 0, pitch: 0.85, dist: 62 }, WHOLE = { yaw: 0, pitch: 1.25, dist: 470 };
+const cam = { ...MINE, at: new THREE.Vector3(), follow: true };
+cam.at.copy(view.focus());
+const pick = (follow) => {
+  cam.follow = follow; Object.assign(cam, follow ? MINE : WHOLE);
+  $('mine').classList.toggle('on', follow); $('whole').classList.toggle('on', !follow);
+};
+$('mine').onclick = () => pick(true); $('whole').onclick = () => pick(false);
+if (innerWidth < 700) MINE.dist = 80;
+const canvas = renderer.domElement, pts = new Map();
+let pinch = 0;
+canvas.addEventListener('pointerdown', (e) => { pts.set(e.pointerId, [e.clientX, e.clientY]); canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointerup', (e) => { pts.delete(e.pointerId); pinch = 0; });
+canvas.addEventListener('pointercancel', (e) => { pts.delete(e.pointerId); pinch = 0; });
+canvas.addEventListener('pointermove', (e) => {
+  const p = pts.get(e.pointerId);
+  if (!p) return;
+  if (pts.size === 2) {
+    const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+    if (pinch) cam.dist = Math.min(700, Math.max(30, cam.dist * pinch / Math.max(1, d)));
+    pinch = d;
+  } else {
+    cam.yaw -= (e.clientX - p[0]) * 0.005;
+    cam.pitch = Math.min(1.45, Math.max(0.35, cam.pitch + (e.clientY - p[1]) * 0.004));
+  }
+  pts.set(e.pointerId, [e.clientX, e.clientY]);
+});
+canvas.addEventListener('wheel', (e) => { e.preventDefault(); cam.dist = Math.min(700, Math.max(30, cam.dist * Math.exp(e.deltaY * 0.001))); }, { passive: false });
+
+draw();
+say(`${names.get(table.me)}, a ${table.you.kind.name.toLowerCase()}: plan your four slots, then Sail`);
+let last = performance.now();
+function frame(now) {
+  // (the turn's playback keeps real time even when the frames come slowly; only the sparks take small steps)
+  const real = Math.min(0.25, (now - last) / 1000), dt = Math.min(0.05, real); last = now;
+  const want = cam.follow ? view.shipNow() : new THREE.Vector3();
+  cam.at.lerp(want, Math.min(1, dt * 3));
+  view.tick(real, camera);
+  tickSparks(dt); blastTick(dt);
+  camera.position.set(cam.at.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cam.at.y + Math.sin(cam.pitch) * cam.dist, cam.at.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist);
+  camera.lookAt(cam.at);
+  // (the sky round the camera, as the den keeps it; the haze by how far off the board is, clear up close, the whole
+  // board still clear from above)
+  skyDome.position.copy(camera.position);
+  scene.fog.near = cam.dist * 1.1; scene.fog.far = cam.dist * 2.6 + 200;
+  if (sayT > 0 && (sayT -= dt) <= 0) $('say').classList.remove('on');
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.cade = { table, view };
+</script>
+</body>
+</html>

@@ -22,6 +22,11 @@
   article code { font-size: 13px; color: #7a6048; }
   button.ask { font: 700 16px 'Alegreya Sans'; color: #2a1d13; background: #e0a92a; border: 0; border-radius: 8px; padding: 9px 16px; cursor: pointer; }
   #picked { color: #cbb894; }
+  /* On a phone (RULES.md, "On a phone", 16 Nov): everything to tap a thumb's size. */
+  @media (pointer: coarse) {
+    button, select { min-height: 44px; }
+    input[type=checkbox], input[type=radio] { width: 22px; height: 22px; }
+  }
 </style>
 </head>
 <body>

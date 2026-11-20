@@ -31,6 +31,11 @@
   #say.on { opacity: 1; transition: none; }
   /* Narrow, the panel goes under the board (the board's own title and moon are at its top), its blurb hidden. */
   @media (max-width: 900px) { .ui { top: auto; bottom: 48px; } .ui p { display: none; } }
+  /* On a phone (RULES.md, "On a phone", 16 Nov): everything to tap a thumb's size. */
+  @media (pointer: coarse) {
+    button, select { min-height: 44px; }
+    input[type=checkbox], input[type=radio] { width: 22px; height: 22px; }
+  }
 </style>
 </head>
 <body>

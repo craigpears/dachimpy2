@@ -29,6 +29,13 @@
   #say { position: fixed; left: 0; right: 0; top: 18px; text-align: center; font: 700 30px 'Alegreya', serif; color: #ffd23a; text-shadow: 0 2px 0 #3a2210, 0 0 14px rgba(0,0,0,.6); pointer-events: none; opacity: 0; transition: opacity .5s; }
   #say.on { opacity: 1; transition: none; }
   @media (max-width: 700px) { .ui { top: auto; bottom: 48px; } }
+  /* On a phone (RULES.md, "On a phone", 16 Nov): everything to tap a thumb's size. */
+  @media (pointer: coarse) {
+    button, select { min-height: 44px; }
+    input[type=checkbox], input[type=radio] { width: 22px; height: 22px; }
+    .ui p, #prompt { display: none; }   /* (its keys and clicks: nothing a phone has) */
+  }
+  @media (max-width: 620px) { .ui { left: 6px; bottom: 8px; width: calc(100vw - 12px); padding: 6px 10px; } .ui h1 { font-size: 18px; } #log { display: none; } }
 </style>
 </head>
 <body>

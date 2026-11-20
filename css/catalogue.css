@@ -10,3 +10,11 @@
 .tabs a.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .tabs span { color: var(--faint); border: 1px dashed var(--edge); font-weight: 500; }
 .tabs span small { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+/* On a phone (RULES.md, "On a phone"): the band slimmer, the brand and tabs a thumb's size. */
+@media (max-width: 640px) {
+  .catnav { padding: 6px 12px; gap: 4px 12px; }
+  .catnav .brand { font-size: 20px; display: inline-flex; align-items: center; min-height: 44px; }
+  .tabs { gap: 6px; }
+  .tabs a, .tabs span { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; padding: 0 14px; font-size: 16px; }
+  .tabs span { display: none; }   /* (the ones to come: not on a phone) */
+}

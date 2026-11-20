@@ -10,6 +10,7 @@ import { scene, mat, mesh, canvasTex, woodTex, V3, flagMat, flagpole, burst } fr
 import { rock } from './land.js';
 import { reef } from './reef.js';
 import { SLOOP_DECK } from './sloop.js';
+import { windMarks } from './sea-marks.js';
 export { SLOOP_DECK, SLOOP_BEAM, sloopMesh, sloopSails } from './sloop.js';
 
 // ---------- sailing: the old sloop in the cove ----------
@@ -35,8 +36,9 @@ export const seaX = (c) => SEA_X0 + (c + 0.5) * SAIL.CELL, seaZ = (r) => SAIL.Z0
 export const voices = new Voices();
 /* sail.bumps and sail.pins: hooks for a place that takes a bump or a pin itself (the starlit door: door.js).
    A bump hook, given the move's event, returns true if the bump was its (no "Bump! Rocks"); a pin hook,
-   given the pointer and the square under it, true if it dropped the pin itself. */
-export const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0, guns: new Broadside(), rockAt: new Map(), world: null, riding: false, said: {}, bumps: [], pins: [] };
+   given the pointer and the square under it, true if it dropped the pin itself. sail.follow: what the camera
+   follows at sea instead of her, if anything (Primates Rule on her test run: frigate-run.js). */
+export const sail = { on: false, sea: new Sea(9), helm: null, g: null, rocks: null, pin: null, hover: null, dots: [], sig: '', hudSig: '', seen: false, heel: 0, bumpT: 0, guns: new Broadside(), rockAt: new Map(), world: null, riding: false, said: {}, bumps: [], pins: [], follow: null };
 /** Her mast, sails and guns struck out of the way (true) or up again (false), and anyone standing on
     her deck with them (`sail.struck`: your spouse steps out of view, 12 Nov: "the bride gets in the way
     of the puzzles on deck"). The one implementation: a puzzle on her deck, the oars, the crane. */
@@ -132,31 +134,13 @@ export function seaWorld() {
 /** A lane of wind, `n` squares from (c, r) the way `d` blows: white streaks racing along it over a
     faint blue band, so it reads from afar. The trade winds' lanes, and any other wind on the sea
     (Kikkit's whirlpools': whirlpools.js), are drawn by this. Move `tex.offset.y` by -2.2 a second to
-    race it along (sailing.js). */
+    race it along (sailing.js). Its look is sea-marks.js's, the tabletop blockade's winds too. */
 export function windLane(c, r, d, n) {
-  const G = new THREE.Group();
-  {   // (indented as it was in seaWorld's loop)
-    const tex = canvasTex(64, 128, (g, w, h) => {
-      g.clearRect(0, 0, w, h);
-      g.strokeStyle = 'rgba(240,250,252,0.95)'; g.lineCap = 'round';
-      for (let i = 0; i < 9; i++) { const x = 6 + Math.random() * 52, y = Math.random() * h, l = 18 + Math.random() * 30; g.lineWidth = 2 + Math.random() * 3; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + l); g.stroke(); }
-    });
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(1, n * 1.5);
-    const L = n * SAIL.CELL, m = mesh(new THREE.PlaneGeometry(SAIL.CELL * 0.85, L).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.6, depthWrite: false, fog: false }), false);
-    const DCx = [0, 1, 0, -1][d], DRx = [1, 0, -1, 0][d], mid = (n - 1) / 2;
-    m.position.set(seaX(c + DCx * mid), 0.07, seaZ(r + DRx * mid));
-    m.rotation.y = -d * Math.PI / 2;
-    m.renderOrder = 2;
-    G.add(m);
-    // A faint blue band under the streaks, so the lane reads from afar.
-    const band = mesh(new THREE.PlaneGeometry(SAIL.CELL * 0.95, L).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#7fd0ea', transparent: true, opacity: 0.18, depthWrite: false, fog: false }), false);
-    band.position.copy(m.position).setY(0.065);
-    band.rotation.y = m.rotation.y;
-    band.renderOrder = 2;
-    G.add(band);
-    return { g: G, tex };
-  }
+  const lane = windMarks(SAIL.CELL, n);
+  const DCx = [0, 1, 0, -1][d], DRx = [1, 0, -1, 0][d], mid = (n - 1) / 2;
+  lane.g.position.set(seaX(c + DCx * mid), 0, seaZ(r + DRx * mid));
+  lane.g.rotation.y = -d * Math.PI / 2;
+  return lane;
 }
 function seaWorldRest(W) {
   // The junction's buoy, yellow, at the corner of the square.

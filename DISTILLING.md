@@ -942,6 +942,23 @@ PHASE). A burned column brings a new one onto the fire's side, so Stage I goes f
 The tiers are gone (the thirtieth note: "I don't want to say able blah blah blah"). Each bot is its target chain,
 `LEVELS` in `src/distill-bots.ts`: **CC^1, CC^2, CC^3, CC^5, CC^8** (`?bot=cc2` on distilling-test.html; the old
 names still open the nearest, learner CC^1, master CC^3, grandmaster CC^5, ultimate CC^8).
+- **Watched at a speed you pick** (16 Nov: "I never remember asking for this to be a super speed thing, but can I at
+  least have some sort of speed control?"): the bots still play at the one human pace (`PACE`), and the test page's
+  Speed (quarter, half, normal, double, 4x, 8x; `[` and `]`; `?speed=0.5`) runs the whole board at it, hand, furnace
+  and pieces alike, so a bot slowed down plays the same game.
+- **One simulation for a bot's play** (16 Nov: "the bot does the set X things for ticks ... burning and things like
+  that should not be dependent on an animation or real time element at all"; "if there's a bit of lag, the front end
+  will then catch up with the simulation, not the other way around"): src/distill-bots.ts's `BotPlayer` plans a move,
+  spots each drag, swaps at its hand's rate, waits out a column's slide, and ticks the game in `STEP_MS` (10 ms) slices
+  of game time however its time is handed in. The bots' runner (`playSession`), the tests and the test page all play
+  through it, so seed 2 with CC^8 is the same game in each, column for column (tests/distill-player.test.ts). On the
+  page the 3D board doesn't tick the game while a bot plays (`external`): it shows the player's swaps and columns,
+  its animations jumping ahead after a slow frame. `window.played` lists every column gone, with its game time.
+- **A person's effort, beside the results** (16 Nov: "how many moves a bot makes ... can be as important to how well
+  it's doing as the actual result ... one repeated technique, like the swaps should count less than like the little
+  fiddly ones"): `EFFORT` in src/distill-bots.ts, a drag 1, each swap along it 0.1, each turn in it 0.5, counted by the
+  player as moves are made (`Played.effort`, `effortOf`). The runner's SUMMARY ends with moves, swaps and effort a
+  column gone; the test page shows the moves, swaps and effort so far.
 - **The target sets the bank:** the whites banked before the chain, `bankFor`: 4 columns for CC^1, 4.5, 5, then 6
   for CC^5 and CC^8 (7 was tried for CC^8 and kept it in Stage I nearly all session, below).
 - **The target sets the techniques:** CC^1 the four simple ones (save the whites, finish the junk column, the
@@ -2334,6 +2351,101 @@ more, or in the furnace's column past saving in time) counted before and after i
 the moment, its board the last where that white was free enough, the move drawn, the white ringed (`shut`). 175 found;
 12 kept, the earliest first, one a deal, all in the first 100 s (most in the first 40). Each asks "What should the bot
 have done here instead?" Tested: each still shows its move, the ringed white out of trouble before it and in after.
+
+### Straightening up (16 Nov, eighteenth run)
+The user, watching CC^8 on seed 2 (distilling-test.html at fixed ticks, a seed and bot replaying the same game): the
+whites banked on the left with blacks stuck at their bottoms and browns at their tops, and the bot still quick sorting,
+"pull those browns down, push the blacks up ... I would be prioritizing that to create nice clear white columns"; a
+black it had pulled down left there, "you have to pull it up through the brown pieces and get the black to the top";
+"step one, get it over. Step two, kind of resort and straighten the line"; and the mode switch, "we've got a lot of
+white columns now, so we're switching from quick dragging to ... straightening up the board". RULES.md, "straighten up".
+
+- **The bank** (src/distill-patterns.ts): the longest run of columns side by side each almost white, two thirds or
+  more (`bankOf`; a fresh junk column may have come in left of it), settled when nothing left of it is half white
+  (`bankSettled`: not the two halves of colour close together, where plain sweeps across do, 12 Nov), and the junk
+  spoiling them (`bankJunk`: a black 2, a brown in the top half 2, in the bottom half 1). The junk columns'
+  disorder right of it, browns above blacks in pairs, not the furnace's (`junkDisorder`).
+- **The tactic** (src/distill-read.ts, `straighten`): in place of quick sorting, outside the block phase, with the
+  bank settled, READ.STRAIGHTEN_SOLID (3) columns or more, and junk in it (every reading before quick sorting comes
+  first: the whites by the fire, the ladder, trapped whites, the tail, the blocks; the user's judged boards keep their
+  readings, and the 12 Nov note "I'm not going to waste my time organizing stuff that's going to get burned" holds:
+  the junk columns are sorted only while there's junk in the bank to get out). Its progress (`straightened`): the junk got out of the bank, worth twice the junk
+  columns' sorting; nothing if it puts junk in or takes a white out.
+- **Its moves** (`straightenDrags`): each stray's drag out of the bank, READ.STRAY_SWAPS (12) at most (`strayDrags`);
+  a brown from the two columns beside the bank brought in under its stuck blacks, lifting them out; the junk columns'
+  browns sunk and blacks lifted. The junk-out moves first, the sorting only once none can be (src/distill-bots.ts);
+  with nothing worth doing, no move that puts junk into the bank. A plain long drag among them is the sweep. Each
+  drag's goal `straighten` (src/distill-goals.ts).
+- **In the chain**: the junk in the column going up and the two after it taken right in one drag, let go among the
+  columns to burn (`P.STRAY`), for targets of CC^3 and up (CC^1 and CC^2 keep plain moves).
+- **Run** (6 boards, CC^8, `PLAN='{"STRAIGHTEN":0,"STRAY":0}'` the old): as built, chain mean 4.3 both, best 5 both,
+  no white burned 4 to 5 of 6, points a minute 15.1 to 13.2. A looser first version (the bank any half-white run, read
+  before the trapped whites, the tail and the blocks, the junk columns sorted with nothing in the bank) reached chain
+  mean 5.3, best 8, one CC^8, 16.5 points a minute, but overrode boards the user judged on 12 and 13 Nov (P17's blocks,
+  P30's tail, "four columns of junk waiting get no sorting drag"), so it was narrowed. Six boards is small; a bigger
+  run, and when the mode switches (the user: "how many columns have burned ... could likely affect the stage of the
+  game"), are next.
+- **Hoisting rather than waiting** (16 Nov, notes/distilling/52-a-black-back-along-the-top.webp: "going backwards across
+  the screen ... is good if it pulls down trapped pieces like that"): with nothing else worth doing in Stage I, the
+  bot hoists (src/distill-bots.ts, `choose`, `P.HOIST_IDLE`), the drag pulling the most browns down from high among
+  the whites first (`pulledDown`), two of them at the least, never a white toward the fire for it; not in the block
+  phase (few small drags there, 13 Nov). Any hoist in place of a wait cost the bots: 6 boards of CC^8, chain mean 3.7
+  against 4.3 without it; narrowed to two browns pulled down, it never came up in those 6 and costs nothing. On the user's board it plays their drag, the black at column 5, row 2 up-left, down-left, up-left,
+  up-left.
+- **Early, a top brown isn't trapped** (17 Nov, notes/distilling/53-seed-2-waits-at-41-s.webp, seed 2's CC^8 at 41 s,
+  `bwwwKwbK* bwwwbwwK wwwwwwwKb bwwbwwwK wK*bbKbKK wwKKbbbK bbKKK*b*K bK*Kbbbb b*bbKbKKK bKbKbKbK`, the bot waiting
+  the last 5 s for the burn): at first "why doesn't it do a very simple ... rescue of the browns along the top", or
+  "moving that brown and black into place" (54-a-brown-and-black-into-place.webp), "and then tidy up ... the blacks at
+  the bottom if you've got the spare energy"; then "that's a fair move in this context because there's likely going
+  to be more blacks to appear. So those browns at the top are not trapped, but in a later game ... you would probably
+  want to try and rescue them. But for now, it's fine." Left as it is; the rescue's for later in the game.
+- **Weighed, never ruled out** (17 Nov: "no move should ever be excluded. I guess you should treat it as being less
+  favorable, but not fully excluded"): the idle hoist's cut-offs (two browns pulled down, not the block phase) are
+  weights, `P.HOIST_PULLED` (none 0.02, one 0.15, two or more 1) and `P.HOIST_BLOCK` (0.5). 6 boards, CC^8: chain mean
+  4.0 (4.3 with the cut-offs; 3.8 with weights 0.05 and 0.3), within the noise of six.
+- **The bot's mode in view** (17 Nov: "more debugging on like what its evaluation is, like what mood it's in, what it's
+  trying to do"): distilling-test.html's bottom bar, while a bot plays, says its stage, how it reads the board and the
+  tactic in play, and the move it's making ("Stage I: banking whites · Healthy: Straighten up · The sweep").
+- **Next, the chain's end: when to give it up** (17 Nov, a CC^8 about to be a CC^9 with no room left): "this is when I
+  would start ... going back to quick move strategy ... there's no way we're sending the crystal clear past 9. Let's
+  start moving the junk into that column"; "the bot keeps trying to send ... whites into that column later. It's
+  obviously futile." The let go (`chainOver`, more junk than white in the next column) is too late: the chain's next
+  columns weighed against the whites there are to reach them.
+- **Next, the chain's own strategy: channels and paths** (17 Nov, watching seed 2's CC^8 in the chain; the pictures
+  weren't saved). "What I would be doing is creating a channel of browns ... pulling the browns into the bottom right to
+  create a nice channel to drag white pieces down through later, and doing a similar kind of channel of getting blacks
+  up to that top right ... it's not really getting a very even wall of [whites] because it's got no easy way of really
+  like making nice even line, nice complete white columns"; "from a pathfinding perspective ... there's far more paths
+  from any point where the white can appear on the left to getting it into the right column. Like just by moving these
+  blacks and browns around, is black, they can always get up, they can always get down." With it:
+  - it sorted junk column by column, "one column black, one column brown, one column black. It's supposed to be ...
+    brown to the bottom, black to the top, not column by column. And even then it was not really necessary effort at
+    this stage";
+  - two blacks trapped bottom left among the whites, "you could be dragging blacks down and then using some browns to
+    rescue them at this point, but it doesn't seem to be really going too aggressively for those black pieces": "it
+    gets them after the next burn ... but it certainly can't figure out how to get them without new black pieces
+    arriving on the board to pull in"; "I'd still be trying to fill those white columns at this point, but I'd
+    certainly be ... trying to at least get some of these trapped pieces out because they are a risk for crystal clear";
+  - "it's not very good at filling those white spots by the [spice], which I would prioritize because they're just
+    awkward to get to";
+  - "it just gets stuck a lot. Like here, it just seems to not be able to move."
+- **The user's pictures as boards** (tests/distill-straighten.test.ts): pictures 1, 3, 4 and 6 copied piece by piece.
+  Picture 3's first move is the user's own sweep, the black down through the whites and up through the browns in one
+  drag. Picture 4 (in the chain: browns to be carried right across clear columns, dropping into the blacks there and
+  leaving one to sort) is a to-do: the chain's planner looks a move ahead and won't spoil a clear column for it.
+- **Run on the one simulation** (16 Nov, after `BotPlayer`; 6 boards, CC^8): everything new off
+  (`PLAN='{"STRAIGHTEN":0,"STRAY":0,"HOIST_IDLE":0}'`), chain mean 4.8, best 8, no white burned 4 of 6, 14.6 points a
+  minute, effort 16.1 a column gone; as built, chain mean 4.3, best 6, no white burned 6 of 6, 15.6 points a minute,
+  effort 17.3. Fewer whites burned and more points, chains a little shorter: too few boards to tell; a 20-board run
+  each way (about 25 minutes) is the user's call.
+- **When the chain starts** (16 Nov, picture 5: a chain started with a fifth junk column half built, pulled apart
+  back to white; "you keep going until you are at risk of burning a column ... down to, like, even just say 1 or 2
+  junk columns"): `decisionTime` (src/distill-bots.ts), with the whites banked, waits till the finished junk columns
+  waiting for the furnace are down to `P.SWITCH_QUEUE` (2), or the junk can't finish the next one (`P.KEEP_FILLING`;
+  its columns-burned measure, the user's other idea, not needed for it). 6 boards: CC^3 chain mean 3.3 to 4.0, best 5
+  to 6, 11.6 to 12.7 points a minute, effort 12.0 to 12.5 a column; CC^8 unchanged (it never came up in those six).
+- **Left**: two blacks boxed in by a spice at the bank's bottom stay (no single drag reaches them); picture 4's brown
+  carried right across clear columns in the chain wants the chain's planner two moves ahead.
 
 ## 5. Questions only the user can answer
 1. Your figure of eight: the crawl as drawn above, or something else ("butterfly")?

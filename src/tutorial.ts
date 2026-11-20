@@ -98,6 +98,10 @@ export interface Tutorial {
   anchors?: Partial<Record<Section, string>>;
   /** The page's own words, where they differ (WORDS). */
   words?: Partial<Omit<Words, 'titles'>> & { titles?: Partial<Record<Section, string>> };
+  /** A single level (the user, 15 Nov, of the wolf den's lessons: "I like that it's a single level ... click, click,
+      and in"): a choice's list is one run in a game's order (`lessonOrder`), no tabs; and after a part, Next plays
+      the one after it there (`nextPart`). */
+  flat?: boolean;
 }
 
 /** A tutorial's words: its own, else WORDS. */
@@ -142,6 +146,31 @@ export function covered(t: Tutorial, c: Choice): List[] {
   const titles = wordsOf(t).titles;
   return LIST_ORDER.map((section) => ({ section, title: titles[section], parts: partsOf(t, section).filter((p) => ids.has(p.id)) })).filter((l) => l.parts.length > 0);
 }
+/** A choice's parts as one run, in a game's order, ready ones only: its basics; those met any time; then each phase it
+    covers, in the phases' order, with the scenarios and tricks met in it after it (scenarios first). What a single
+    level's list shows, and what Next walks through. */
+export function lessonOrder(t: Tutorial, c: Choice): Part[] {
+  const ids = new Set(covered(t, c).flatMap((l) => l.parts.map((p) => p.id)));
+  const has = (p: Part) => ids.has(p.id);
+  const phases = partsOf(t, 'phases'), others = [...partsOf(t, 'scenarios'), ...partsOf(t, 'tricks')];
+  const inPhase = (p: Part) => p.phase !== undefined && phases.some((q) => q.id === p.phase);
+  const out: Part[] = [...partsOf(t, 'basics').filter(has), ...others.filter((p) => has(p) && !inPhase(p))];
+  for (const ph of phases) {
+    if (has(ph)) out.push(ph);
+    out.push(...others.filter((p) => has(p) && p.phase === ph.id));
+  }
+  return out;
+}
+/** The part after `id` in a lesson's order: in choice `choiceId`'s, else the first choice's that has it; null at the
+    end, or if it's in none. */
+export function nextPart(t: Tutorial, id: string, choiceId: string | null = null): Part | null {
+  const order = (c: Choice) => lessonOrder(t, c);
+  const c = choicesOf(t).find((x) => x.id === choiceId && order(x).some((p) => p.id === id)) ?? choicesOf(t).find((x) => order(x).some((p) => p.id === id));
+  if (!c) return null;
+  const run = order(c), i = run.findIndex((p) => p.id === id);
+  return run[i + 1] ?? null;
+}
+
 /** The choices with something ready to show. */
 export const choicesOf = (t: Tutorial): Choice[] => t.choices.filter((c) => covered(t, c).length > 0);
 /** The teacher's opening line: theirs, or their hello and their questions (the ones with something to show). */
@@ -262,7 +291,13 @@ export class TutorialMenu {
   private focus = 0;
   constructor(t: Tutorial) { this.t = t; }
 
-  private lists(): List[] { return this.choice ? covered(this.t, this.choice) : []; }
+  private lists(): List[] {
+    if (!this.choice) return [];
+    if (!this.t.flat) return covered(this.t, this.choice);
+    // (a single level: one run, its section the first part's; each part's own section found as it's played)
+    const parts = lessonOrder(this.t, this.choice);
+    return parts.length ? [{ section: findPart(this.t, parts[0].id)!.section, title: this.choice.label, parts }] : [];
+  }
   private items(): MenuItem[] {
     if (this.level === 'choose') return choicesOf(this.t).map((c) => ({ id: c.id, label: c.label }));
     const l = this.lists()[this.tab];
@@ -301,7 +336,7 @@ export class TutorialMenu {
     this.focus = i;
     if (this.level === 'choose') { this.open(items[i].id); return null; }
     const l = this.lists()[this.tab], part = l.parts[i];
-    return { kind: 'play', part, section: l.section, choice: this.choice!.id };
+    return { kind: 'play', part, section: findPart(this.t, part.id)?.section ?? l.section, choice: this.choice!.id };
   }
   /** A tab tapped. */
   tapTab(section: Section): void {

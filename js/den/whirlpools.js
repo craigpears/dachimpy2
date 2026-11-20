@@ -20,6 +20,7 @@ import { OF_HIM } from '../lines/penguin.js';
 import { PIRATES } from '../den-look.js';
 import { scene, mat, mesh, canvasTex, G, keys, toast, burst, V3, pirate } from './world.js';
 import { sail, seaX, seaZ, windLane, voices } from './sea.js';
+import { swirlMesh } from './sea-marks.js';
 import { outline, slab } from './isle.js';
 import { palm } from './wedding-scene.js';
 import { cp } from './checkpoint.js';
@@ -41,31 +42,12 @@ const GROUNDS = { sand: GROUND, floe: FLOE };
 export const kik = { W: null, pool: new Whirlpools(), on: false, held: null, moment: null };
 
 // ---------- the look of it ----------
-/* A whirlpool's swirl: spiral arms of foam on a darker eye, turned as it turns. */
-const swirlTex = (dark) => canvasTex(128, 128, (g, w) => {
-  const c = w / 2, grad = g.createRadialGradient(c, c, 2, c, c, c);
-  grad.addColorStop(0, dark ? 'rgba(8,30,40,.95)' : 'rgba(20,60,70,.8)');
-  grad.addColorStop(0.55, 'rgba(40,110,120,.45)');
-  grad.addColorStop(1, 'rgba(60,140,150,0)');
-  g.fillStyle = grad; g.fillRect(0, 0, w, w);
-  g.strokeStyle = 'rgba(235,250,250,.85)'; g.lineCap = 'round';
-  for (let arm = 0; arm < 4; arm++) {
-    g.lineWidth = 3.5 - arm * 0.4;
-    g.beginPath();
-    for (let t = 0; t <= 40; t++) { const a = arm * Math.PI / 2 + t * 0.12, r = 6 + t * 1.35; g.lineTo(c + Math.cos(a) * r, c + Math.sin(a) * r); }
-    g.stroke();
-  }
-});
 /* A whirlpool (src/den-whirl.ts): one swirl over all four of its squares, turning clockwise seen from
-   above, as every whirlpool does (YPPedia). Any whirlpool's look (the race's: race.js). Spin it by
-   `userData.speed` a second. */
+   above, as every whirlpool does (YPPedia). Any whirlpool's look (the race's: race.js; the swirl itself
+   sea-marks.js's, the tabletop blockade's too). Spin it by `userData.speed` a second. */
 export function pool(w) {
-  const m = new THREE.MeshBasicMaterial({ map: swirlTex(true), transparent: true, depthWrite: false });
-  const o = mesh(new THREE.CircleGeometry(CELL * 1.02, 48), m, false);
-  o.rotation.x = -Math.PI / 2;
+  const o = swirlMesh(CELL);
   o.position.set(seaX(w.mid[0]), 0.06, seaZ(w.mid[1]));
-  o.renderOrder = 2;
-  o.userData.speed = -1.6;   // (rotation.z up is anticlockwise seen from above: so, down)
   return o;
 }
 /* Her winds, drawn as the trade winds' lanes are (sea.js, windLane: the same wind, the same look; the

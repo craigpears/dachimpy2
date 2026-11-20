@@ -99,6 +99,7 @@ button { font: inherit; color: inherit; }
   .shell { grid-template-columns: minmax(0, 1fr); }
   .nav { position: sticky; z-index: 5; height: auto; flex-direction: row; overflow-x: auto; padding: 8px 12px; border-right: 0; border-bottom: 1px solid var(--line); gap: 4px; scrollbar-width: none; }
   .nav a { white-space: nowrap; padding: 6px 10px; font-size: 15px; }
+  .nav { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); padding-right: 32px; }   /* (more off to the right: faded, so it's plain)
   .nav .brand { font-size: 17px; padding: 6px 10px; white-space: nowrap; }
   .nav .brand br, .brand-mark, .nav-group { display: none; }
   #main { padding-top: 24px; }

@@ -11,7 +11,7 @@
 import { COLS, WHITE, BURNT, goesUp } from './distilling.js';
 import { afterOpening, follow, lessonPlan } from './den-helium.js';
 import { DISTILL_TUTORIAL, distillShows } from './distill-tutorial.js';
-import { findPart, ready } from './tutorial.js';
+import { findPart, nextPart, ready } from './tutorial.js';
 import { TUTOR } from './lines/helium.js';
 export { DISTILL_TUTORIAL };
 const copy = (b) => b.map((c) => [...c]);
@@ -23,12 +23,13 @@ export const noteFor = (part) => `${part.title}: ${part.line}`;
     (its point's `before`), the pieces it's about ringed (the picture's rings, else the pieces about to be dragged);
     the move, its drags played at PACE_LESSON, or its column burned (a white in it, and the still goes bang); then
     what it did (`after`), the same pieces ringed again where the move left them (and the dragged ones where they
-    went). Then their line handing you the still. Step one is their lesson's own (lessonPlan), its point theirs.
-    Empty if the part isn't there or isn't ready, or nothing shows it. */
-export function tutorBeats(part) {
+    went). Then their line handing you the still (`next`: there's a next one in its list, N for it). Step one is
+    their lesson's own (lessonPlan), its point theirs. Empty if the part isn't there or isn't ready, or nothing shows
+    it. */
+export function tutorBeats(part, { next = false } = {}) {
     if (!ready(part))
         return [];
-    const handOver = { name: 'after', says: TUTOR.after, note: TUTOR.afterNote, act: { kind: 'none' } };
+    const handOver = { name: 'after', says: next ? TUTOR.afterNext : TUTOR.after, note: TUTOR.afterNote, act: { kind: 'none' } };
     if (part.id === 'stepOne') {
         const g = afterOpening();
         return [{ name: 'lay', says: '', note: part.line, act: { kind: 'lay', cols: copy(g.cols) } }, ...lessonPlan(g)];
@@ -64,5 +65,8 @@ export function ringedAfter(cols, drags, at) {
 /** A part by its id (a "show me this" link's `learn=`), as beats; empty if there's no such part ready. */
 export function learnBeats(id) {
     const f = findPart(DISTILL_TUTORIAL, id);
-    return f ? tutorBeats(f.part) : [];
+    return f ? tutorBeats(f.part, { next: !!nextOf(id) }) : [];
 }
+/** The lesson after part `id` in its list (choice `choice`'s, else the first that has it), Next's; null at the end.
+    After their own lesson, step one, it's the next on the fire's side. */
+export const nextOf = (id, choice = null) => nextPart(DISTILL_TUTORIAL, id, choice);

@@ -18,6 +18,12 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
 
 ## Design rules from playtests
 
+- **The simulation underneath, the drawing on top (16 Nov).** The user, starting the tabletop blockade: "all the
+  simulation should happen underneath, and any 3D-ish stuff or rendering stuff happens on top ... the core
+  simulation should be very logic based, very testable." Every game, puzzle and place: its rules a pure TypeScript
+  module in `src/` with tests, knowing nothing of how it's drawn; the 3D, the flat pages, the bots and the lessons
+  all on top of it, through what it returns, never reaching into it. Distilling (`src/distilling.ts` under its board,
+  its bots and Helium's lesson) and the tabletop blockade (`src/cade.ts`) are the pattern.
 - **It's a game, not a tutorial.** Short, quick-fire, with a journey and a daily puzzle.
 - **Words over percentages.** Don't fill the screen with numbers. Grades, meters and rarity
   words are fine. When rarity is shown, also say how often a piece turns up as "about 1 in X"
@@ -125,6 +131,24 @@ so it isn't lost. Two kinds of entry: facts about the real puzzle, and design ru
   sea and the puzzle getting the screen, not the menus (a bar along the top kept slim; buttons that do nothing in
   that moment hidden; the camera movable by touch).
 
+- **On a phone (16 Nov):** "menus or like control things, just taking a disproportionate amount of the space ...
+  can I actually see the action? Is the menu following good UX principles?" (the blockade's buttons and its list of
+  ships, the wolf den's panels before it). What every page and place is held to on a phone, checked by `npm run
+  mobile` (tools/mobile.mjs, its numbers) and judged by its reviewer (tools/mobile-review.md, the screenshots):
+  1. **The action is the screen.** The sea, the board, the room: most of the screen, its middle clear. Panels,
+     buttons and words over it are the exception, short and to the side (the check flags a quarter covered, or a
+     sixth of its middle).
+  2. **Controls at the thumb, along the bottom.** What you press while playing sits along the bottom edge (or
+     the sides, turned sideways), at least 44px to tap, spaced so a thumb hits one; not up in the corners.
+  3. **Lists and menus behind one button.** A list of ships, a menu of the den, a page of controls: folded behind
+     one button (a ☰, "Ships", "Help"), closed when you arrive, closing again when you go back to playing.
+  4. **Nothing covering what you're playing.** No panel, line or prompt over the board or the ship you're
+     steering; a line said beside or below it, a toast short and out of the middle.
+  5. **Only what this moment needs.** Buttons that do nothing now are hidden; key hints ("Space to...") aren't
+     shown on a touch screen, a button is.
+  6. **Readable, and on the screen.** Words 12px or more; nothing cut off at an edge or the foot; no sideways
+     scroll; both ways round.
+
 ## Pirate Den (3D prototype, `den.html`)
 
 Unlisted for now: reachable only by its URL until the user says to put it in the nav.
@@ -178,6 +202,15 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   just kind of jumped into it without any context of what it was doing, what it was achieving, what the point
   was"): first what's wrong or wanted on this board, then the move, then what it achieved, the pieces it's about
   ringed. Its words come from the read guide's own text for that trick, so the two say the same.
+- **A lesson's other parts: one button among the puzzle's own, a single level, then Next (15 Nov).** The middle
+  ground between a menu in your way and none at all, after a button floating beside Helium's cutscene ("I'm not
+  liking this button at all ... We've gone from this was too much because there were too many menus to back to
+  where we started"): the wolf den's way ("it's got like lessons at the bottom ... I like that it's a single level.
+  You can click how it works ... It was like click, click, and in. It felt a lot smoother"). So nothing's over the
+  lesson or its cutscene; "Lessons" sits in the row of the puzzle's own buttons once it's yours; a choice opens one
+  plain list in a game's order, no tabs, and a part picked plays; then Next plays the one after it in that list.
+  The structure, tabs and links are the read guide's. Step one still plays straight after the opening, so something
+  happens without a click.
 
 - **Every adventure ends with something to keep (14 Nov).** "If you ... complete [any little adventure], there should
   be some meaningful reward, even if it's a small token thing like a visible persistent change to the map, a creature
@@ -1162,6 +1195,33 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   browns). Never a white taken from a column that's mostly white. And the first chain's column started further left than
   "two or three in from the fire" ("a person would not be wanting to put themselves under so much pressure"): built
   (`P.FIRST_AT`), off till the user decides, since it burned more whites in the bots' run.
+- **Distilling: straighten up once white columns are banked (16 Nov, watching CC^8 on seed 2).** Quick sorting (blacks
+  down, browns up) is right early on, "but at a certain point it needs to switch modes ... we've got a lot of white
+  columns now, so we're switching from quick dragging to ... straightening up the board, getting black to the top,
+  brown to the bottom on the junk columns". In place of quick sorting, once three columns side by side are six whites
+  in eight or nine or more, with only fresh junk left of them: the junk got out of the white columns first, in one long drag if it takes one (a black down through the whites
+  and up through the browns; a brown up through the whites and down through the blacks at the top: "that's why the
+  blacks are there at the top. They are there to essentially rescue the brown pieces"; a brown along the bottom lifting
+  the stuck blacks out), never more junk put in ("this is going to lead to the board quality degrading over time");
+  then the junk columns sorted, blacks over browns; then wait for the burn. "Step one, get it over. Step two, kind of
+  resort and straighten the line." In the chain, the junk in the column going up and the two after it is taken right
+  the same way.
+- **Distilling: keep building junk columns till they run short (16 Nov, after a chain started with a fifth junk column
+  half built and pulled apart).** "If you've got an easily completed junk column, you don't do that ever. You keep
+  going until you are at risk of burning a column ... There is no reason to switch until, you know, really you're down
+  to, like, even just say 1 or 2 junk columns, even if you're being incredibly anxious." Whites banked for the target,
+  the chain starts only when the finished junk columns waiting for the furnace are down to two, or the junk can't
+  finish the next one.
+- **Distilling: going backwards to pull trapped browns down (16 Nov, notes/distilling/52-a-black-back-along-the-top.webp).**
+  Browns stuck at the top of the white columns sink only through a black: a black taken back left along the top, up
+  through each brown, pulls them down ("going backwards across the screen ... is good if it pulls down trapped pieces
+  like that"). With nothing else worth doing in Stage I (not the block phase), the bot takes such a drag rather than
+  waiting, when it pulls two or more browns down from high among the whites; any hoist in place of a wait cost the
+  bots' chains; weighed, never ruled out (17 Nov: "no move should ever be excluded. I guess you should treat it as
+  being less favorable, but not fully excluded"): a drag pulling one brown down counts 0.15, none 0.02, half again in
+  the block phase. Early on, browns at the top aren't trapped yet (17 Nov, seed 2 at 41 s, the bot waiting for the burn):
+  "there's likely going to be more blacks to appear. So those browns at the top are not trapped, but in a later game
+  that you would probably want to try and rescue them. But for now, it's fine." 
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one
@@ -2722,6 +2782,10 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     moves counted (choosing a ring isn't); constellations' places weighted toward the middle (filled
     from the centre out, its strategy) and never a line of three of a colour among themselves; sizes
     one star, then two, three... a constellation (SIZES, a host can give its own, and fewer colours).
+  - **Stars come in bags of ten, not plain random (the user, 15 Nov, from what players said; not built yet).**
+    "pieces come in, they say come in bags of 10 for this puzzle. So instead of it being random, it's like you get a
+    bag mixed up with two of each colour ... you don't get a third of anything until you get two of each in that
+    cycle." Shuffled within the bag, it seems. It makes combos needing three of a colour slower to set up.
   - A first go is the first three, one, two and three stars (FIRST_GO): the greedy bot takes about 66
     moves over them (15, 21 and 30), a minute or two at the keys, and booches about once in thirteen
     goes.
@@ -4023,3 +4087,80 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   original tune if it ever gets music, no lyrics.
 - Still to come (the task board, tasks/carpet-ride/): the second leg to the blockade; Gravee painting her portrait ("Naturally [Gravee] taking
   a portrait").
+
+### A blockade's about the points (15 Nov)
+
+- **You hang on the points, and die on them if you must.** The user: "this is a game about the points. You will hang to
+  the points. You die practically on the points. As long as doing so would not mean the other person gets more points
+  indirectly than it's worth ... sinking's not the end of the world. Being dead in the water, away from flags, not
+  covering anything. Oof." So no ship ever hides ("you never hide. There's just no tactical reason or benefit to. You
+  lose coverage of points"): a hurt one is patched where she is. What damage changes is her nerve: "being more or less
+  aggressive depending on your damage level ... if you know the person next to you is more damaged than you are, you get
+  more aggressive. If you're damaged, you might kind of take fewer risks". Nobody wanders off to a corner of the sea.
+- **Sinking costs travel, not just time.** Open sea round the board (six squares a side), the big ships coming back in
+  by an edge and sailing in ("there needs to be a bit of a buffer travel zone"), the sloops quick on the edge winds;
+  every ship can come in by either end (frigates by either gate's side, sloops and brigs by either side's edge: "island
+  and oceanside spawns").
+- **Full damage sinks her, and the edge is safe.** No lying dead in the water: "we were supposed to be sinking ships, not
+  having them just float around there". A ship at full damage spins down and comes back in at an edge, in a safe zone
+  four squares deep where nobody can fire or be shot, waiting a moment before she can move ("the safe zone around the
+  edge ... you can't shoot each other ... one turn before they can move again").
+- **The gate guns have a side.** Each gate's guns are the side's whose frigates come in at that end, and fire on the
+  other side only ("it's for everybody's gain to destroy them, so the opponent benefits from their destruction as much
+  as you do. Hence the dilemma. The turrets need to have a side"), so wrecking the enemy's is worth the detour. One
+  frigate a side comes in at each end ("frigs need to be able to come in on each side ... one frig from each team
+  should come in on each side"), so one runs the enemy's guns till they're wrecked; not the guns defending whoever
+  comes in ("then it just makes the whole game too lopsided ... you'd never take the two-point cluster on the other
+  side").
+- **A brig's craft clear the enemy's guns.** A turtle rams a gate gun of the other side's as she would a ship, a hit
+  to its wrecking that doesn't quieten it, so it fires on her as she rams; a phantom's broadside wrecks them too. Her
+  brig launches at them in reach as at a frigate ("they're the standoff hunters").
+- **A turtle rams where the broadsides don't bear**: off a ship's nearer end, bow or stern, her side only if there's
+  nothing else ("let's stay at the front of the war frig and start ramming it from the front").
+- **Never half in a gateway.** A frigate holding a buoy from a gateway goes on in; caught there, she moves straight on
+  when she can; an enemy frigate stuck there is raked from astern by a frigate and sniped at by a sloop ("that ship is a
+  sitting duck for somebody else to just swing around behind it").
+- **Manoeuvre on the points.** A frigate on the points with an enemy in reach and no broadside bearing turns to bring hers
+  round, by a move that keeps the buoy in her reach ("you can still maneuver within the middle, fight things, but just
+  ... while you've got the points within your influence").
+- **A fair board.** The board and both fleets, every entry, are each other's turned round its middle: neither side's
+  frigate has a rock to turn for that the other's hasn't ("the map looks very unfair that one ends up having to turn for
+  a rock while the other doesn't").
+- **A ship can always turn where she fits.** A big ship's turn is her wide quarter circle when there's room for it;
+  blocked by rocks or ships, she bumps and turns on the spot about her middle, so long as her hull fits there facing the
+  new way ("they don't need open water to turn. You can at least bounce off rocks or each other's ships"). Two frigates
+  bow to bow between the gates swing round and trade broadsides ("surely frigs should be able to bounce off each other
+  and then start exchanging a broadside in the middle, not camping").
+- **Low rocks keep a frigate in the middle of the heart.** A line of low rocks down each side of the heart's middle, six
+  squares across: too shallow for a frigate, the brigs and sloops slipping over them, every shot flying over them ("you
+  can shoot over them but you can't get past them, just to kind of control where a war frigate can get to in the middle
+  so it stays in that center square area"). No frigate gets into a corner she can't turn in.
+- **A gate gun shows every hit**: from the first, half its battlements gone, its stone blackened, its gun knocked askew,
+  smoking ("I didn't see any visible damage after the first shot from the sloop on one of the cannons").
+- **Guard the brig.** A sloop drives off an enemy sloop at her side's brig lying at anchor, one sloop to each ("I would
+  expect them to be protecting the war brig and getting behind [her]").
+- **No fights off the points.** A frigate fires on whoever comes into her broadside, but never picks a fight with an
+  enemy who isn't on or contesting a buoy ("You don't hang around off points getting into fights").
+- **A sheltered spot has a way in from outside.** The heart's corners are out of any frigate's reach inside the fort,
+  a brig's launching spot; each has a gap through the wall from the open sea, a postern or a way out, so a sloop can
+  slip in at her ("balance that with another kind of gap coming from the outside").
+
+### The blockade's balance: emergent, never a rule (15 Nov)
+
+- **Rock, paper, scissors comes from how the ships handle, never from a rule about what a ship may attack.** The user,
+  of turtles told to leave sloops alone: "it feels a bit artificial ... rather than it being a mechanical advantage".
+  So every craft and ship goes for whatever her bot thinks best, and the triangle emerges: a frigate's slow, long turns
+  give a turtle the moment it needs to ram her (a ram only lands on a ship lying still a second), while a sloop that
+  keeps moving slips her, and one that sits still foolishly is rammed just the same ("that makes it ... emergent
+  rather than some magical rule"); a brig anchored to launch is a sitting duck for a sloop quick into position; a
+  sloop that duels a frigate is sunk by her weight of shot.
+- **The gate guns paint a target and are slow to fire,** so moving is plainly the answer: the nearest ship's square
+  marked, the shot down 2.4 s later. A sloop on the move dodges it; a frigate's move is too long ("paint a target on a
+  square and then just take quite a while to fire ... for a [war frig] ... that's basically an entire turn, so they
+  can't dodge it"). No camping count: what's punished is what doesn't move.
+- **Head-on, a brig should beat sloops** ("brigs should just be able to shoot ... sloops"); the triangle's third side
+  comes out of tactics in a full blockade, when frigates force the brigs out of the centre.
+- **Balance is proved fleet against fleet, terrain included** (tests/blockade-balance.test.ts, BLOCKADE.md §3): equal
+  points, both ways round, on open sea and on the blockade's own board, guns and all ("brigs being able to use the
+  terrain to launch from a protected position is very key to the balance test"). When a side of the triangle doesn't
+  hold, the fix is in handling, terrain or price, and the test says so.

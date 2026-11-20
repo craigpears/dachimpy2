@@ -37,6 +37,7 @@
     background: linear-gradient(135deg, var(--a) 0 50%, var(--b) 50% 100%); }
   .themes button[aria-pressed="true"] { border-color: var(--text); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
   .themes button:hover { border-color: var(--dim); }
+  @media (pointer: coarse) { .themes button { width: 44px; height: 44px; } }   /* (a thumb's size: RULES.md, "On a phone") */
   img { display: block; max-width: 100%; }
   .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
   /* The bar, stuck to the top as you scroll (the user, 14 Nov: "I definitely need a sticky navigation menu"; then
@@ -108,8 +109,9 @@
   .choice-head b { font: 700 26px/1.15 'Alegreya', serif; color: var(--title); }
   .choice-head .see { flex: none; font-weight: 700; font-size: 15px; color: var(--dim); }
   .choice-head:hover b, .choice-head:hover .see, .choice-head:focus-visible .see { color: var(--accent-text); }
-  /* Three pictures side by side, all the same size (14 Nov: a big one beside two small ones "is very jarring"); two
-     for the new concepts, the race and rowing (14 Nov). */
+  /* Three pictures side by side, all the same size (14 Nov: a big one beside two small ones "is very jarring"); for the
+     new concepts, the race, the blockade (15 Nov: "worthy enough of going under ... the interesting concepts at the
+     top") and rowing. */
   .pics { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .pics.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pics a { display: block; text-decoration: none; border-radius: 8px; }
@@ -135,6 +137,7 @@
 
   /* A grid of cards: a picture, a title, a line and its link. */
   .cards { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+  .cards.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .cards article { margin: 0; display: flex; flex-direction: column; }
   .cards h3 { font-size: 21px; margin-top: 10px; }
   .cards p { font-size: 16px; }
@@ -189,7 +192,7 @@
   @media (max-width: 640px) {
     .about { grid-column: 1 / -1; margin-top: 10px; }
     article.side { grid-template-columns: 1fr; }
-    .cards { grid-template-columns: 1fr; }
+    .cards, .cards.three { grid-template-columns: 1fr; }
     .shots.two { grid-template-columns: 1fr; }
     h3 { font-size: 22px; }
     article { padding: 10px; }
@@ -237,19 +240,25 @@
     </details>
 
   <nav class="choices" id="choose" aria-label="What are you here for?">
-    <div class="choice"><a class="choice-head" href="#concepts"><b>Try some interesting new concepts</b><span class="see">See more ↓</span></a><div class="pics two"><a href="den.html?at=race"><figure><img src="changelog/race-field.jpg" width="1280" height="720" alt=""><figcaption>The sloop race</figcaption></figure></a><a href="den.html?at=rowing"><figure><img src="changelog/rowing.jpg" width="1280" height="720" alt=""><figcaption>Rowing</figcaption></figure></a></div></div>
+    <div class="choice"><a class="choice-head" href="#concepts"><b>Try some interesting new concepts</b><span class="see">See more ↓</span></a><div class="pics"><a href="den.html?at=race"><figure><img src="changelog/race-field.jpg" width="1280" height="720" alt=""><figcaption>The sloop race</figcaption></figure></a><a href="blockade-test.html"><figure><img src="changelog/blockade-brawl.jpg" width="800" height="505" alt=""><figcaption>A blockade</figcaption></figure></a><a href="den.html?at=rowing"><figure><img src="changelog/rowing.jpg" width="1280" height="720" alt=""><figcaption>Rowing</figcaption></figure></a></div></div>
     <div class="choice"><a class="choice-head" href="#tutorials"><b>Try out some new tutorials</b><span class="see">See more ↓</span></a><div class="pics"><a href="den.html?at=helium"><figure><img src="changelog/helium-lesson.jpg" width="1280" height="720" alt=""><figcaption>Distilling, with Helium</figcaption></figure></a><a href="den.html?at=tzz"><figure><img src="changelog/tzz-lesson.jpg" width="1280" height="720" alt=""><figcaption>Sailing, with Tzz</figcaption></figure></a><a href="distilling-guide.html"><figure><img src="changelog/distilling-guide.jpg" width="1280" height="720" alt=""><figcaption>Distilling, to read</figcaption></figure></a></div></div>
     <div class="choice"><a class="choice-head" href="#fun"><b>A bit of fun and a look around</b><span class="see">See more ↓</span></a><div class="pics"><a href="den.html?at=kikkit"><figure><img src="changelog/kikkit-approach.jpg" width="960" height="540" alt=""><figcaption>Kikkit's island</figcaption></figure></a><a href="den.html?at=gravee"><figure><img src="changelog/gravee.jpg" width="1280" height="720" alt=""><figcaption>Gravee's gallery</figcaption></figure></a><a href="den.html?at=umami"><figure><img src="changelog/umami-rescue.jpg" width="1280" height="720" alt=""><figcaption>Rescuing Umami the capybara</figcaption></figure></a></div></div>
   </nav>
 
   <h2 id="concepts">Try some interesting new concepts</h2>
 
-  <div class="cards">
+  <div class="cards three">
     <article>
       <a class="pic" href="den.html?at=race"><img src="changelog/race-field.jpg" width="1280" height="720" loading="lazy" alt="Three sloops racing down through the start's whirlpools toward the first buoy and the gun gap"></a>
       <h3>The sloop race</h3>
       <p>A race made of puzzles: every shortcut a different one, every way round able to win.</p>
       <p class="try"><a class="go" href="den.html?at=race">Race it</a> <a href="den.html?at=race-watch">Watch a race</a> <a href="race-editor.html">Make a course</a></p>
+    </article>
+    <article>
+      <a class="pic" href="blockade-test.html"><img src="changelog/blockade-board.jpg" width="800" height="643" loading="lazy" alt="A blockade board from above: the walled fort in the middle, winds blowing out of it to four reef lagoons, both fleets round them"></a>
+      <h3>A blockade</h3>
+      <p>Two fleets fight for the buoys: sloops, brigs and war frigates, each with a job. Watch the bots, or watch two frigates brawl.</p>
+      <p class="try"><a class="go" href="blockade-test.html">Watch a blockade</a> <a href="blockade-test.html?watch=brawl">A brawl</a></p>
     </article>
     <article>
       <a class="pic" href="den.html?at=rowing"><img src="changelog/rowing.jpg" width="1280" height="720" loading="lazy" alt="Rowing the sloop: two boards of mirror strokes, one for each side's oars, her bows swinging toward the side that pulls harder"></a>
@@ -391,6 +400,9 @@
       <a class="place" href="den.html?at=rowing"><img src="changelog/rowing.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Rowing her</b><i>Her oars out, a board each side</i></span></a>
       <a class="place" href="den.html?at=dignity"><img src="changelog/dignity.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Dignity's checkpoint</b><i>Her cutscene at the gate</i></span></a>
       <a class="place" href="den.html?at=umami"><img src="changelog/capybara-crane.jpg" width="1280" height="720" loading="lazy" alt=""><span><b>Umami's rescue</b><i>The lagoon, the crane, Foraging</i></span></a>
+      <a class="place" href="den.html?at=primates"><img src="changelog/primates-rule-reef.jpg" width="800" height="450" loading="lazy" alt=""><span><b>Primates Rule</b><i>Take the war frigate out</i></span></a>
+      <a class="place" href="blockade-test.html?watch=brawl"><img src="changelog/blockade-brawl.jpg" width="800" height="505" loading="lazy" alt=""><span><b>A brawl</b><i>Two war frigates fight it out, holes and all</i></span></a>
+      <a class="place" href="blockade-test.html"><img src="changelog/blockade-board.jpg" width="800" height="643" loading="lazy" alt=""><span><b>A blockade</b><i>Watch both fleets fight for the buoys</i></span></a>
     </section>
     <section>
       <h3>The islands</h3>
@@ -458,6 +470,7 @@
       <li><a href="foraging-test.html">Foraging, on its own</a>, the board the race's driftwood and Umami's rescue use.</li>
       <li><a href="oars-test.html">Oars against the water</a>, an idea for a rowing puzzle of its own.</li>
       <li><a href="frigate-test.html">Primates Rule</a>, Dachimpy's war frigate, and a test sea to sail her or the sloop.</li>
+      <li><a href="blockade-test.html">A blockade</a>: war frigates, war brigs and sloops fighting for the buoys, the frigates shooting an imperial gate down, the sloops riding the winds in and out to the reef lagoons, the brigs' turtles and ghost sloops.</li>
       <li><a href="catalogue-colours.html">The catalogue</a>: every colour the wardrobe has, named and tried on, and every piece of furniture.</li>
     </ul>
   </section>
