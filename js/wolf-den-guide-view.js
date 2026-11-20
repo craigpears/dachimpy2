@@ -77,7 +77,7 @@ async function drawBeat(art, name, beat) {
   // (a board built then set off has its plan marked, dashed till it's built: src/den-wolfden.ts's planMarks)
   const marked = !!BOARDS[name].marked;
   const m0 = planMarks(name, 0);
-  if (cues.includes('set')) shots.push([await picture(laid.game, BOARDS[name].plan ?? null, m0), m0.length ? 'The plan, dashed till it's built' : marked || !BOARDS[name].plan ? 'Before' : 'Before: the plan ringed']);
+  if (cues.includes('set')) shots.push([await picture(laid.game, BOARDS[name].plan ?? null, m0), m0.length ? "The plan, dashed till it's built" : marked || !BOARDS[name].plan ? 'Before' : 'Before: the plan ringed']);
   const first = laid.game.constellation;
   let n = 0, prev = null;
   for (const [i, move] of laid.moves.entries()) {
