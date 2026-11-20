@@ -1,8 +1,8 @@
 ---
 title: To refine: the wolf den lesson as speed nav, quick doubles on a layer of three
-status: asked
+status: doing
 asked: 15 Nov
-updated: 15 Nov
+updated: 20 Nov
 shot: notes/wolf-den/quick-double.png
 ---
 
@@ -16,3 +16,4 @@ shot: notes/wolf-den/quick-double.png
 - 15 Nov: the note is also logged on mechanics-lesson (d35e920, on the wolf den lesson's branch); this card is the refining, for later
 - 15 Nov: the move, as the user put it (15 Nov): a red target on the third ring, two yellows in a line beside it; on the outer ring a yellow with a red behind it; spin the outer ring and the yellow drops for the single, then the red drops into the target: 'a really quick formulaic double that you can do really easily every time'. Stars in bags of ten (two of each colour) makes three of a colour slower to come: bags-of-ten card
 - 15 Nov: the user's screenshot of it on a real board: notes/wolf-den/quick-double.png (README says what's where). The target is under one of the line's own stars: the line clears it, and the star behind falls into it
+- 20 Nov: being done
