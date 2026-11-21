@@ -107,6 +107,11 @@ choice by `js/tutorial-choice.js`; both on their own in the unlinked `tutorial-t
 
 Read [STORY.md](STORY.md) for the den's story, its progression and the principles behind them, and keep it
 up to date as the story grows. Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
+Swordfight duels (21 Nov) have [SWORDFIGHT.md](SWORDFIGHT.md): Puzzle Pirates' real duel rules (where a
+sword or sprinkle lands, its colours by the attacker's drop pattern, the insta); built in `src/swordfight.ts`
+(`Duel`, `Board.take`, `SWORDS`), its bots `src/sword-bots.ts` (a `SwordBot` a strategy, `BOTS`, played at a
+person's pace by `Hand`), on the unlinked `swordfight-duel-test.html` (`js/sword-duel-view.js`; `?watch`, `?seed=`,
+`?bot=`, `?swords=`). Read it before working on Swordfight.
 Distilling, the puzzle Helium teaches, has one too, [DISTILLING.md](DISTILLING.md) (its real rules, look, techniques
 and targets, researched 12 Nov): read it before working on Distilling, and keep it current.
 The tabletop blockade (16 Nov), a faithful Puzzle Pirates blockade kept wholly apart from the den's 3D one, has
@@ -119,6 +124,10 @@ and `tests/cade-boards.test.ts`; the table `src/cade-play.ts` (a round set out, 
 stand-ins sailing the other ships until the teaching bots come, `Table`), drawn on the unlinked `cade-test.html` by
 `js/den/cade.js` in the den's and the 3D blockade's look (the den's ships, `ship-damage.js`'s holes and crew, the
 den's wind lanes and whirlpools from `js/den/sea-marks.js`, their one look, shared with sea.js and whirlpools.js).
+Rumble (21 Nov), the brawling puzzle, as a duel: [RUMBLE.md](RUMBLE.md) its real rules (YPPedia's tables, where they
+disagree, the strategies by name); `src/rumble.ts` the rules on two boards (what a clear sends, how it lands),
+`src/rumble-bots.ts` its bots (a `Style` each, only the greedy one built; the strategy bots an idea card), played on
+the unlinked `rumble-test.html` (`?watch` two bots) drawn by the hand-written `js/rumble-view.js`. No den 3D yet.
 The sloop race has a design document of its own, [RACE.md](RACE.md) (the user, 11 Nov: "all these kind of
 thoughts, design and balance decisions should all be in some kind of game design document specific to these
 races"): read it before working on the race, and keep it up to date with every design or balance decision and

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rumble test</title>
+<!-- A test page for Puzzle Pirates' Rumble, unlinked like den.html (21 Nov, the user: "especially like dueling is in
+     sword fighting ... you can fight a bot or see two bots fighting, where you can see both of the boards").
+     The rules are src/rumble.ts (compiled to js/rumble.js), its bots src/rumble-bots.ts; RUMBLE.md the research.
+     This page is drawn by the hand-written js/rumble-view.js: both boards side by side, yours on the left, so what
+     your clears send can be watched landing on the other board. The seed, the bots and the mode are in the address:
+     ?seed=7&bot=greedy to brawl a bot, ?watch&seed=7&left=greedy&right=greedy to watch two. Normal speed only. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/site.css">
+<style>
+  .arena { max-width: 980px; margin: 0 auto; padding: 10px 16px 12px; }
+  .top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 8px; }
+  h1 { margin: 0; font: 700 26px/1.1 'Alegreya', serif; color: var(--title); }
+  .modes { display: flex; gap: 6px; flex-wrap: wrap; }
+  .modes a, .top button { font: 700 15px 'Alegreya Sans', sans-serif; color: var(--text); background: var(--tile); border: 1px solid var(--edge);
+    border-radius: 8px; padding: 6px 12px; text-decoration: none; cursor: pointer; min-height: 36px; display: inline-flex; align-items: center; }
+  .modes a[aria-current] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .modes a:hover, .top button:hover { background: var(--tile-hi); }
+  .modes a[aria-current]:hover { background: var(--accent-hi); }
+  .seed { color: var(--faint); font-size: 14px; }
+  .help { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid var(--paper-edge); border-radius: 10px;
+    padding: 8px 14px; margin: 0 0 10px; font-size: 15px; }
+  .help p { margin: 4px 0; max-width: 75ch; }
+  .help b { color: var(--ink-head); }
+  .boards { display: flex; justify-content: center; gap: 14px; }
+  .side { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+  .who { font: 700 16px 'Alegreya', serif; color: var(--dim); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .who.you { color: var(--accent-text); }
+  canvas { display: block; border-radius: 10px; box-shadow: 0 4px 14px var(--shadow); touch-action: none; }
+  .stat { font-size: 14px; color: var(--dim); margin-top: 4px; text-align: center; line-height: 1.3; }
+  .stat b { color: var(--text); }
+  .said { min-height: 2.8em; margin: 8px auto 0; max-width: 760px; text-align: center; color: var(--text); font-size: 15px; line-height: 1.4; }
+  .said span { display: block; color: var(--dim); font-size: 14px; }
+  .said span:first-child { color: var(--text); font-size: 15px; }
+  .fists { display: none; justify-content: center; gap: 16px; margin-top: 8px; }
+  .fists button { flex: 1 1 0; max-width: 220px; min-height: 56px; font: 700 17px 'Alegreya Sans', sans-serif; color: var(--on-accent);
+    background: var(--accent); border: none; border-radius: 12px; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .fists button.held { background: var(--accent-hi); box-shadow: 0 0 0 3px var(--accent-text) inset; }
+  .keys { color: var(--faint); font-size: 14px; text-align: center; margin-top: 6px; }
+  @media (pointer: coarse) {
+    .fists { display: flex; }
+    .keys { display: none; }
+    .modes a, .top button { min-height: 44px; }
+  }
+  @media (max-width: 620px) {
+    .arena { padding: 6px 8px 8px; }
+    h1 { font-size: 21px; }
+    .top { gap: 6px; margin-bottom: 4px; }
+    .seed { display: none; }
+    .boards { gap: 8px; }
+    .who { font-size: 14px; }
+    .stat { font-size: 12px; }
+    .said { font-size: 14px; min-height: 2.6em; margin-top: 4px; }
+    .said span:not(:first-child) { display: none; }
+    .fists { margin-top: 4px; }
+  }
+</style>
+</head>
+<body>
+<script src="js/site-bar.js" data-static></script>
+<main class="arena">
+  <div class="top">
+    <h1>Rumble</h1>
+    <nav class="modes" aria-label="Mode">
+      <a id="mode-play" href="?">Brawl a bot</a>
+      <a id="mode-watch" href="?watch">Watch two bots</a>
+    </nav>
+    <button id="again" type="button">New rumble</button>
+    <button id="how" type="button" aria-expanded="false" aria-controls="help">How to play</button>
+    <span class="seed" id="seed"></span>
+  </div>
+  <div class="help" id="help" hidden>
+    <p><b>Aim</b> with the mouse over your board (or drag on it, on a phone; or the arrow keys). Both fists aim
+      together. <b>Fire</b> the left fist with Z or the left button, the right with X or the right button (on a phone,
+      the two buttons below). Balls bounce off the sides.</p>
+    <p><b>Three of a colour</b> clear, and anything left hanging falls. That sends <b>sprinkles</b>: a row of 9 comes up
+      from the foot of their board once you've made enough.</p>
+    <p><b>Hold</b> a fire button about a second to <b>charge</b> the ball: a group it makes stays, charged, numbered in
+      order. Hit the first one with an ordinary ball and every group charged after it goes too: a <b>combo</b>. Two
+      groups or more is a <b>strike</b>, pushed in at the top corner of their board (your left fist hits their right).
+      Loose balls in a combo turn some of the strike into <b>bruises</b>, dark balls that join no group until two clears
+      beside them.</p>
+    <p>An attack lands after their next shot. Every eighth shot a new row comes in at the top. Balls below the line,
+      and you're out.</p>
+  </div>
+  <div class="boards">
+    <section class="side"><div class="who" id="who0"></div><canvas id="board0"></canvas><div class="stat" id="stat0"></div></section>
+    <section class="side"><div class="who" id="who1"></div><canvas id="board1"></canvas><div class="stat" id="stat1"></div></section>
+  </div>
+  <div class="fists" id="fists">
+    <button id="fist0" type="button">Left fist</button>
+    <button id="fist1" type="button">Right fist</button>
+  </div>
+  <p class="said" id="said" aria-live="polite"></p>
+  <p class="keys" id="keys">Aim with the mouse or the arrow keys · Z and X (or the mouse buttons) fire each fist · hold to charge</p>
+</main>
+<script type="module" src="js/rumble-view.js"></script>
+</body>
+</html>

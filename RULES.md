@@ -3425,6 +3425,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   **Except a boss fight.** A Swordfight against a golem is a big standoff in the open, "almost
   heroic", not "any old one-on-one", so there it makes sense for the rest of the raid to pause.
   The golem's size also makes big Swordfight boards look in proportion.
+- **Swordfight duels, on a test page only (21 Nov).** The user asked for competitive Swordfight "where you can see
+  both of the boards to get a feel ... seeing what happens to the opponent's board when you do something": fight a
+  bot, or watch two. It's `swordfight-duel-test.html`, off the den (duels at the wall stay turned down, above). The
+  same Swordfight module as the armoury hoist, with Puzzle Pirates' real duel rules (SWORDFIGHT.md): both sides
+  dealt the same pairs, an attack waiting over your board till your pair lands, swords and sprinkles placed and
+  coloured as the real ones are by the attacker's drop pattern, the insta. "Start out the basics for now": one
+  greedy bot; bots with strategies of their own (one building an insta) are an idea card.
 - **Crewmates help each other's puzzle, visibly.** Even when one pirate plays a puzzle (one
   swordfighter against the golem), the rest of the crew should be able to help from their own
   jobs: a cannon shot that hits the golem drops black blocks onto its board. The help has to be
