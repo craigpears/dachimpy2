@@ -10,3 +10,4 @@ updated: 21 Nov
 ## Log
 
 - 21 Nov: added.
+- 21 Nov: 21 Nov, from the Rumble basics: a strategy bot plugs in as a Style in src/rumble-bots.ts (id, name, says, think = its pace, score(option, {me, them})) added to STYLES; options() already lists every shot (both fists, each reachable cell, charged or not) with its Outcome (groups, popped, dropoff, extra) and the board after, and strikeSize() gives what a combo would send. rumble-test.html picks it by ?bot=<id>, or ?watch&left=<id>&right=<id>. RUMBLE.md §6 names the styles.
