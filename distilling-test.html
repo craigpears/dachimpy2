@@ -339,7 +339,8 @@ fit();
 const clock = new THREE.Clock();
 function frame() {
   // (a second at most caught up a frame: a tab back from the background carries on, not races)
-  const dt = Math.min(1, clock.getDelta()) * speed;
+  // (nothing moves while the guide's open: the user, 21 Nov, "the puzzle should not be playing while you're reading it")
+  const dt = Math.min(1, clock.getDelta()) * speed * (guide.shown ? 0 : 1);
   if (player && !board.paused) player.advance(dt * 1000);
   board.tick(dt);
   // Straight on to the board, a little left of the middle so the panel doesn't cover it.
