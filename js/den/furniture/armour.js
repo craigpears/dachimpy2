@@ -1,10 +1,10 @@
 /* A suit of armour stood on a stone plinth, a plume on its helm. */
-import { THREE, mat, box, cyl, rod, ball, steel, socket } from './parts.js';
+import { THREE, mat, box, cyl, rod, ball, steel as STEEL, gilt, socket } from './parts.js';
 
 const plinthM = mat('#dcd6cb', { roughness: 0.9 });
-/** A suit of armour stood on a stone plinth, a plume on its helm. */
-export function armour({ plinth = true, plume = '#2f5fb8' } = {}) {
-  const g = new THREE.Group(), y0 = plinth ? 0.34 : 0;
+/** A suit of armour stood on a stone plinth, a plume on its helm. `gold`: gilded all over (Jezerbell's). */
+export function armour({ plinth = true, plume = '#2f5fb8', gold = false } = {}) {
+  const g = new THREE.Group(), y0 = plinth ? 0.34 : 0, steel = gold ? gilt : STEEL;
   if (plinth) g.add(box(0.56, 0.3, 0.5, plinthM, 0, 0.15, 0), box(0.62, 0.04, 0.56, plinthM, 0, 0.32, 0));
   for (const sx of [-1, 1]) {
     g.add(cyl(0.07, 0.06, 0.82, steel, 0.1 * sx, y0 + 0.43, 0, 8), ball(0.075, steel, 0.1 * sx, y0 + 0.45, 0.02), box(0.11, 0.06, 0.2, steel, 0.1 * sx, y0 + 0.03, 0.04));
@@ -18,6 +18,6 @@ export function armour({ plinth = true, plume = '#2f5fb8' } = {}) {
 
 export const PIECES = [
   { id: 'armour', name: 'Suit of armour', group: 'skeleton', make: armour,
-    about: 'A suit of armour stood on a stone plinth, a plume on its helm. Options: plinth, plume (its colour).',
-    where: 'Primates Rule\'s deck.' },
+    about: 'A suit of armour stood on a stone plinth, a plume on its helm. Options: plinth, plume (its colour), gold (gilded all over).',
+    where: 'Primates Rule\'s deck; Jezerbell\'s house, gilded.' },
 ];

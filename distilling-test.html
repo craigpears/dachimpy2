@@ -17,8 +17,9 @@
      Variations to feel (21 Nov, a harder Distilling that changes the thinking; DISTILLING.md §8), each off unless in
      the address: ?furnaces=2 a furnace each side, ?furnaces=4 every edge, the sides' and the rows' in turn (no bots
      for either yet), &darkrum a pure-brown column holding a chain,
-     &richspice a spice in a Crystal Clear making the next columns richer, &moveheat (or &moveheat=2) every drag
-     bringing the burn a tick (0.3 s) nearer. ?hard all of it at once, four furnaces (the user, 21 Nov: "I kind of wanted them all in
+     &richspice a spice in a Crystal Clear making the next columns richer, &moveheat every move bringing the burn 0.1 s
+     nearer (&moveheat=200, ms, any other; the page's setting), &doubles both of a pair Crystal Clears at once paying more and bringing
+     spice in. ?hard all of it at once, four furnaces (the user, 21 Nov: "I kind of wanted them all in
      one because they kind of work with each other"), and the Harder button. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,6 +45,7 @@
   #log li:first-child { color: var(--ink); font-weight: 700; }
   #prompt { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; padding: 4px 12px; font-size: 15px; color: var(--dim); white-space: nowrap; max-width: calc(100vw - 24px); overflow: hidden; text-overflow: ellipsis; }
   @media (max-width: 900px) { .ui { top: auto; bottom: 48px; } .ui p { display: none; } }
+  .embed .ui > p { display: none; }   /* (in distilling-harder.html's frame: its What it is says it) */
   /* On a phone (RULES.md, "On a phone", 16 Nov): everything to tap a thumb's size. */
   @media (pointer: coarse) {
     button, select { min-height: 44px; }
@@ -81,8 +83,11 @@
     <select id="furnaces"><option value="1">one, the real puzzle</option><option value="2">two, one each side</option><option value="4">four, every edge</option></select>
     <label title="A pure-brown column sent up between two Crystal Clears holds the chain, and pays 2 on the next"><input type="checkbox" id="darkrum"> dark rum</label>
     <label title="A spice sent up in a Crystal Clear makes the next two columns richer in whites and spice"><input type="checkbox" id="richspice"> rich spice</label>
-    <label title="Every drag brings the burn a tick (0.3 s) nearer: fewer moves, more time"><input type="checkbox" id="moveheat"> moves heat the furnace</label>
+    <label title="Both of a pair Crystal Clears at once: 4 more points, and a spice comes in with each new column or row"><input type="checkbox" id="doubles"> doubles</label>
+    <label title="Every move (a drag, or a click's swap) brings the burn this much nearer: fewer moves, more time">moves heat the furnace:
+      <select id="moveheat"><option value="0">no</option><option value="50">0.05 s a move</option><option value="100">0.1 s a move</option><option value="150">0.15 s a move</option><option value="200">0.2 s a move</option><option value="300">0.3 s a move</option></select></label>
     <button id="hard" title="All of them at once: a furnace on every edge, dark rum, rich spice, moves heating the furnace">Harder: all of it</button>
+    <button id="how" title="What this harder Distilling is, with pictures">How it plays</button>
   </div>
   <div class="row" id="botrow">
     <label for="bot">Watch a practice player:</label>
@@ -110,12 +115,13 @@
 <script type="module">
 import * as THREE from 'three';
 import { seeded } from './js/mirror-row.js';
-import { Distilling, MESSAGES } from './js/distilling.js';
+import { Distilling, MESSAGES, MOVE_HEAT_MS, TICK_MS } from './js/distilling.js';
 import { LEVELS, levelNamed, bankFor, PER_COLUMN, BotPlayer } from './js/distill-bots.js';
 import { ROUTINES } from './js/distill-routines.js';
 import { STATES, TACTICS } from './js/distill-read.js';
 import { stepLines } from './js/distill-goals.js';
 import { distillBoard } from './js/den/distill-board.js';
+import { harderGuide } from './js/den/distill-harder-guide.js';
 import { Recorder } from './js/distill-record.js';
 
 const $ = (id) => document.getElementById(id);
@@ -140,11 +146,23 @@ let seed = Number(params.get('seed')) || 1, board = null, botName = params.get('
 // (?hard: all four at once)
 const hard = params.has('hard');
 let furnaces = hard ? 4 : [2, 4].includes(Number(params.get('furnaces'))) ? Number(params.get('furnaces')) : 1, darkRum = hard || params.has('darkrum'), richSpice = hard || params.has('richspice');
-// (moves heating the furnace: ?moveheat a tick a drag, ?moveheat=2 two)
-let moveHeat = params.has('moveheat') ? Math.max(1, Math.round(Number(params.get('moveheat')) || 1)) : hard ? 1 : 0;
-$('furnaces').value = String(furnaces); $('darkrum').checked = darkRum; $('richspice').checked = richSpice; $('moveheat').checked = moveHeat > 0;
+let doubles = hard || params.has('doubles');
+// (moves heating the furnace, ms a move: ?moveheat MOVE_HEAT_MS, ?moveheat=200; an old link's ?moveheat=2, in ticks)
+const heatOf = (v) => { const n = Number(v); return !n ? MOVE_HEAT_MS : n <= 5 ? n * TICK_MS : Math.round(n); };
+let moveHeat = params.has('moveheat') ? heatOf(params.get('moveheat')) : hard ? MOVE_HEAT_MS : 0;
+// (the setting's nearest, so the select shows it)
+const HEATS = [...$('moveheat').options].map((o) => Number(o.value));
+if (moveHeat) moveHeat = HEATS.reduce((a, b) => (Math.abs(b - moveHeat) < Math.abs(a - moveHeat) ? b : a));
+$('furnaces').value = String(furnaces); $('darkrum').checked = darkRum; $('richspice').checked = richSpice; $('moveheat').value = String(moveHeat); $('doubles').checked = doubles;
 const showBotRow = () => { $('botrow').style.display = furnaces > 1 ? 'none' : ''; };
 showBotRow();
+// What the harder version is, with pictures (js/den/distill-harder-guide.js; the user, 21 Nov: "not in a text dump,
+// but in an actual decent thing"): How it plays, and open by itself the first time a harder board's loaded here.
+const guide = harderGuide();
+$('how').onclick = () => guide.open();
+const harder = () => furnaces > 1 || darkRum || richSpice || doubles || moveHeat > 0;
+const seenGuide = () => { try { return localStorage.getItem('distill-harder-guide') === 'seen'; } catch { return true; } };
+const sawGuide = () => { try { localStorage.setItem('distill-harder-guide', 'seen'); } catch { /* (private window) */ } };
 // ?shot: the board alone in the middle, no panel (for a picture of it).
 const shot = params.has('shot');
 // The speed it's all run at (the user, 16 Nov: "I never remember asking for this to be a super speed thing, but can
@@ -196,13 +214,13 @@ function deal() {
   $('log').innerHTML = '';
   window.played = [];
   board = distillBoard({
-    game: new Distilling(seeded(seed), { furnaces, darkRum, richSpice, moveHeat }), at: new THREE.Vector3(0, 0, 0), size: 3,
+    game: new Distilling(seeded(seed), { furnaces, darkRum, richSpice, moveHeat, doubles }), at: new THREE.Vector3(0, 0, 0), size: 3,
     onColumn: (c, finished) => {
       window.played.push({ t: board.game.time, up: c.up, pieces: c.pieces.map((p) => L[p]).join('') });   // (every column gone, for checking a run)
       recorder?.column(c);
       if (finished) ended();
       const what = c.message ? (c.message === 'clear' && c.chain > 1 ? `${MESSAGES.clear} x${c.chain}` : MESSAGES[c.message]) : c.darkRum ? `${MESSAGES.darkRum}, the chain held` : c.up ? 'up' : 'burned';
-      const extra = `${c.rumBonus ? `, dark rum +${c.rumBonus}` : ''}${c.rich ? `, ${MESSAGES.rich}` : ''}`;
+      const extra = `${c.rumBonus ? `, dark rum +${c.rumBonus}` : ''}${c.rich ? `, ${MESSAGES.rich}` : ''}${c.double ? `, ${MESSAGES.double}` : ''}`;
       log(`${c.side ? `${c.side}: ` : ''}${c.up ? 'up' : 'burned'}: ${c.pieces.map((p) => L[p]).join('')}, ${what}${c.spice ? `, ${MESSAGES[c.spice]}` : ''}${extra}, ${c.points + c.bonus} points`);
       if (finished) log(`finished: ${board.game.points} points in ${board.game.columnsUp} columns, ${board.game.score().toFixed(2)} a column`);
     },
@@ -219,7 +237,7 @@ function deal() {
   }) : null;
   board.external = !!player;
   // (the real puzzle only: a variation's game can't be replayed by the compare tool)
-  recorder = player || furnaces > 1 || darkRum || richSpice || moveHeat ? null : new Recorder(board.game, seed, { speed });
+  recorder = player || furnaces > 1 || darkRum || richSpice || doubles || moveHeat ? null : new Recorder(board.game, seed, { speed });
   window.recording = () => recorder?.rec;   // (for the console)
   $('save').style.display = recorder ? '' : 'none';
   // (a burn by hand while a bot plays: the bot told of the column)
@@ -229,8 +247,9 @@ function deal() {
   address();
 }
 function address() {
-  const all = furnaces === 4 && darkRum && richSpice && moveHeat === 1;
-  const v = all ? '&hard' : `${furnaces > 1 ? `&furnaces=${furnaces}` : ''}${darkRum ? '&darkrum' : ''}${richSpice ? '&richspice' : ''}${moveHeat ? `&moveheat${moveHeat > 1 ? `=${moveHeat}` : ''}` : ''}`;
+  if (params.has('embed')) return;   // (in a frame: its own page's address is the one that matters)
+  const all = furnaces === 4 && darkRum && richSpice && doubles && moveHeat === MOVE_HEAT_MS;
+  const v = all ? '&hard' : `${furnaces > 1 ? `&furnaces=${furnaces}` : ''}${darkRum ? '&darkrum' : ''}${richSpice ? '&richspice' : ''}${doubles ? '&doubles' : ''}${moveHeat ? `&moveheat${moveHeat !== MOVE_HEAT_MS ? `=${moveHeat}` : ''}` : ''}`;
   history.replaceState(null, '', `?seed=${seed}${v}${botName && furnaces === 1 ? `&bot=${botName}` : ''}${speed !== 1 ? `&speed=${speed}` : ''}${shot ? '&shot' : ''}`);
 }
 $('restart').onclick = () => deal();
@@ -244,13 +263,21 @@ $('speed').onchange = () => { setSpeed(Number($('speed').value)); $('speed').blu
 $('furnaces').onchange = () => { furnaces = Number($('furnaces').value); showBotRow(); deal(); $('furnaces').blur(); };
 $('darkrum').onchange = () => { darkRum = $('darkrum').checked; deal(); $('darkrum').blur(); };
 $('richspice').onchange = () => { richSpice = $('richspice').checked; deal(); $('richspice').blur(); };
-$('moveheat').onchange = () => { moveHeat = $('moveheat').checked ? 1 : 0; deal(); $('moveheat').blur(); };
+$('doubles').onchange = () => { doubles = $('doubles').checked; deal(); $('doubles').blur(); };
+$('moveheat').onchange = () => { moveHeat = Number($('moveheat').value); deal(); $('moveheat').blur(); };
 $('hard').onclick = () => {
-  furnaces = 4; darkRum = richSpice = true; moveHeat = 1;
-  $('furnaces').value = '4'; $('darkrum').checked = $('richspice').checked = $('moveheat').checked = true;
+  furnaces = 4; darkRum = richSpice = doubles = true; moveHeat = MOVE_HEAT_MS; $('doubles').checked = true;
+  $('furnaces').value = '4'; $('darkrum').checked = $('richspice').checked = true; $('moveheat').value = String(MOVE_HEAT_MS);
   showBotRow(); deal();
 };
 deal();
+// (in distilling-harder.html's frame, &embed: the guide's its own tab there, so it never opens by itself, and the
+// page holds the board still while another tab's open, `hold`)
+const embed = params.has('embed');
+if (embed) document.body.classList.add('embed');
+let held = false;
+window.hold = (on) => { held = !!on; };
+if (harder() && !shot && !embed && !seenGuide()) { guide.open(); sawGuide(); }
 
 /** The bot's mode, in the bar along the bottom, always in view (the user, 17 Nov: "more debugging on like what its
     evaluation is, like what mood it's in, what it's trying to do ... oh look, it thinks it's in quick move terms"): its
@@ -292,7 +319,7 @@ function showRoutine(p) {
   }
 }
 addEventListener('keydown', (e) => {
-  if (e.target.tagName === 'SELECT') return;
+  if (e.target.tagName === 'SELECT' || guide.shown) return;
   if (e.target.tagName === 'BUTTON') e.target.blur();
   if (e.key === '[' || e.key === ']') {
     const i = SPEEDS.indexOf(speed) + (e.key === ']' ? 1 : -1);
@@ -325,7 +352,8 @@ fit();
 const clock = new THREE.Clock();
 function frame() {
   // (a second at most caught up a frame: a tab back from the background carries on, not races)
-  const dt = Math.min(1, clock.getDelta()) * speed;
+  // (nothing moves while the guide's open: the user, 21 Nov, "the puzzle should not be playing while you're reading it")
+  const dt = Math.min(1, clock.getDelta()) * speed * (guide.shown || held ? 0 : 1);
   if (player && !board.paused) player.advance(dt * 1000);
   board.tick(dt);
   // Straight on to the board, a little left of the middle so the panel doesn't cover it.
@@ -336,7 +364,7 @@ function frame() {
   $('stats').innerHTML = `Seed <b>${seed}</b>${speed !== 1 ? ` · speed <b>${speed}x</b>` : ''} · <b>${(gm.time / 1000).toFixed(0)}</b> s · burn in <b>${Number.isFinite(left) ? (left / 1000).toFixed(1) : '-'}</b> s<br>`
     + (gm.furnaces === 2 ? 'Two furnaces: both edge columns go together<br>' : '')
     + (gm.furnaces === 4 ? `Four furnaces: next to go, <b>${gm.next === 'sides' ? 'the sides' : 'the top and bottom rows'}</b><br>` : '')
-    + (gm.moveHeat ? `Moves <b>${gm.moves}</b>, the burn <b>${(gm.heatedBy * 0.306).toFixed(1)}</b> s sooner in all<br>` : '')
+    + (gm.moveHeat ? `Moves <b>${gm.moves}</b>, the burn <b>${(gm.heatedBy / 1000).toFixed(1)}</b> s sooner in all (${(gm.moveHeat / 1000).toFixed(2)} s a move)<br>` : '')
     + `Flask <b>${gm.flask}</b> / 100 · up <b>${gm.columnsUp}</b>, burned <b>${gm.columns.length - gm.columnsUp}</b><br>`
     + `Points <b>${gm.points}</b> · score <b>${gm.score().toFixed(2)}</b> · chain <b>${gm.chain}</b> (best ${gm.longest})`
     + (gm.rumHeld ? ' · <b>dark rum</b> holding it' : '') + (gm.rich ? ` · <b>${gm.rich}</b> rich column${gm.rich > 1 ? 's' : ''} to come` : '')

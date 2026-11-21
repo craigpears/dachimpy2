@@ -456,6 +456,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   the point. You should see, go visit those different pirates." A real pirate in the den gets a house of
   her own on the housing district's list, sized to suit her, not a room in someone else's (Roobear's,
   IDEAS.md, was nearly a room at Gravee's manor). Who lodges where can still be a line between them.
+- **A house as big as what happens in it, and nothing on its walls without its point (21 Nov).** Of
+  Jezerbell's first version: "the house is a bit small for how big of a concept there is in it", so a house
+  with a hunt and a fray in it gets a hall to match. And the route labels copied from her screenshot ("one
+  island to another island") were labels on presents in her real house: "Without the presents ... it's just a
+  bit weird." A thing from a screenshot comes in with what gives it its point, or not at all.
 - **The housing district, and Gravee's house (11 Nov).** "you have like the areas of houses and
   you have the enter a house stuff and you can choose whose house to go into. And maybe she's just
   one of them ... she can show you ... around her house. And the vampires and do the portrait
@@ -3425,6 +3430,13 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   **Except a boss fight.** A Swordfight against a golem is a big standoff in the open, "almost
   heroic", not "any old one-on-one", so there it makes sense for the rest of the raid to pause.
   The golem's size also makes big Swordfight boards look in proportion.
+- **Swordfight duels, on a test page only (21 Nov).** The user asked for competitive Swordfight "where you can see
+  both of the boards to get a feel ... seeing what happens to the opponent's board when you do something": fight a
+  bot, or watch two. It's `swordfight-duel-test.html`, off the den (duels at the wall stay turned down, above). The
+  same Swordfight module as the armoury hoist, with Puzzle Pirates' real duel rules (SWORDFIGHT.md): both sides
+  dealt the same pairs, an attack waiting over your board till your pair lands, swords and sprinkles placed and
+  coloured as the real ones are by the attacker's drop pattern, the insta. "Start out the basics for now": one
+  greedy bot; bots with strategies of their own (one building an insta) are an idea card.
 - **Crewmates help each other's puzzle, visibly.** Even when one pirate plays a puzzle (one
   swordfighter against the golem), the rest of the crew should be able to help from their own
   jobs: a cannon shot that hits the golem drops black blocks onto its board. The help has to be
