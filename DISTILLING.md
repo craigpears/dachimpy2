@@ -2648,6 +2648,19 @@ nice and illustrative". In order:
 
 ## 8. Harder variations to feel (21 Nov)
 
+**The design intent** (the user, 21 Nov, giving it a page of its own, `distilling-harder.html`: Play, What it is, and
+The thinking behind it): "for high-level distillers, hitting crystal clear 12 is relatively easy. There's nothing that
+differentiates you. So this, the idea here is to bring in more tactics." Its aims, in order:
+- **Many ways to play, real choices.** "Do you go fast or do you go slow to be efficient ... There's just so many more
+  options how to play." Moves heating the furnace make speed against efficiency a choice; "Do I go and burn lots of
+  junk at the start? Do I do one crystal clear at a time, double together to get more spice?"
+- **Perfect runs impossible, by design.** "It's actually impossible to just get perfect runs of crystal clears is the
+  intent. Subject to balancing, so you actually have to make more tactical decisions." The furnaces' pace, a move's
+  cost and each bonus are tuned toward that, not toward an easy CC^12.
+- **Pressure to act, not wait.** "Negative points on spice burn just create more pressure to act instead of just
+  waiting around and building up a long crystal clear chain in a similar mechanical way each game." Doubles bring
+  spice in, a reward that is also a burden.
+
 The user (21 Nov) finds the real puzzle near solved for a good player: CC^12 comes routinely and the rest is spawn
 luck. They want a variation that changes the thinking, not the pace (no faster fires, more rows or exploding pieces).
 The ideas are on the card `idea-distilling-with-a-higher-skill-cap-fun-variation`; a first feel-test is on

@@ -3,7 +3,8 @@
 // in an actual decent thing"). Hand-written, like the read guides' views; the pictures are drawn from the rules
 // themselves (src/distilling.ts's variations, DISTILLING.md §8): a seeded game laid out and burned, so what they show
 // is what the board does. The pieces are the board's own (js/den/distill-board.js's pieceCanvas). Shown over the
-// unlinked distilling-test.html, `harderGuide()` an overlay to open and close.
+// unlinked distilling-test.html, `harderGuide()` an overlay to open and close; inline on distilling-harder.html's "What
+// it is", `harderGuideInline(into)`.
 import {
   Distilling, COLS, TALL, WHITE, BROWN, SPICE, SLIDE_MS, CHAIN_BONUS, DOUBLE_BONUS, DARK_RUM_BONUS, TICK_MS, MOVE_HEAT_MS,
   BURN_TICKS, rowSplit, parseBoard,
@@ -176,25 +177,48 @@ const CSS = `
 .hg-card h3 { font: 700 19px 'Alegreya', Georgia, serif; color: #ffd27a; margin: 0 0 6px; }
 .hg-card p { margin: 0 0 6px; color: #f6ead2; font-size: 15px; line-height: 1.4; }
 .hg-pics { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-top: 8px; }
-.hg figure { margin: 0; max-width: 100%; }
-.hg figcaption { font-size: 13px; color: #cbb894; margin-top: 3px; max-width: 220px; }
-.hg .cols { display: flex; gap: 10px; align-items: flex-end; }
-.hg .cols figcaption { text-align: center; max-width: 80px; }
-.hg .turns { display: flex; flex-wrap: wrap; gap: 6px; }
-.hg .turns span { display: flex; flex-direction: column; padding: 5px 10px; border-radius: 6px; font-size: 14px; color: #f6ead2; border: 1px solid; }
-.hg .turns .sides { border-color: #ff8a2a; background: rgba(255, 138, 42, 0.14); }
-.hg .turns .rows { border-color: #ffd23a; background: rgba(255, 210, 58, 0.12); }
-.hg .turns b { color: #ffd27a; }
+.hg-grid figure { margin: 0; max-width: 100%; }
+.hg-grid figcaption { font-size: 13px; color: #cbb894; margin-top: 3px; max-width: 220px; }
+.hg-grid .cols { display: flex; gap: 10px; align-items: flex-end; }
+.hg-grid .cols figcaption { text-align: center; max-width: 80px; }
+.hg-grid .turns { display: flex; flex-wrap: wrap; gap: 6px; }
+.hg-grid .turns span { display: flex; flex-direction: column; padding: 5px 10px; border-radius: 6px; font-size: 14px; color: #f6ead2; border: 1px solid; }
+.hg-grid .turns .sides { border-color: #ff8a2a; background: rgba(255, 138, 42, 0.14); }
+.hg-grid .turns .rows { border-color: #ffd23a; background: rgba(255, 210, 58, 0.12); }
+.hg-grid .turns b { color: #ffd27a; }
+/* On a page of the site (css/site.css): its parchment and ink, in the theme you picked. */
+.hg-site .hg-grid { margin-top: 0; }
+.hg-site .hg-card { background: linear-gradient(170deg, var(--paper), var(--paper2)); border-color: var(--paper-edge); box-shadow: 0 6px 18px var(--shadow); }
+.hg-site .hg-card h3 { font-size: 22px; color: var(--ink-head); }
+.hg-site .hg-card p { color: var(--ink2); font-size: 16px; }
+.hg-site figcaption, .hg-site .turns span { color: var(--ink2); }
+.hg-site .turns b { color: var(--ink-head); }
+.hg-site canvas { border-radius: 8px; }
 @media (max-width: 620px) { .hg { padding: 8px; } .hg-panel { padding: 12px; } .hg-head h2 { font-size: 23px; } }
 `;
 
+let styled = false;
+const addStyle = () => { if (styled) return; styled = true; const style = el('style'); style.textContent = CSS; document.head.append(style); };
+/** The cards, each rule with its picture. */
+function cards() {
+  const pic = pictures();
+  return el('div', { class: 'hg-grid' }, ...SECTIONS(pic).map((s, i) => el('section', { class: `hg-card${i === 2 || i === 8 ? ' wide' : ''}` },
+    el('h3', {}, s.title), ...s.text.map((t) => el('p', {}, t)), s.pics.length ? el('div', { class: 'hg-pics' }, ...s.pics) : '')));
+}
+
+/** The guide in a page of the site (distilling-harder.html's "What it is"): its cards put into `into`, in the site's
+    colours. */
+export function harderGuideInline(into) {
+  addStyle();
+  into.classList.add('hg-site');
+  into.append(cards());
+}
+
 /** The guide, an overlay over the page: `open()` and `close()` it; it closes on Escape or a click outside it. */
 export function harderGuide() {
-  const style = el('style'); style.textContent = CSS; document.head.append(style);
+  addStyle();
   const close = el('button', { class: 'hg-close', type: 'button' }, 'Play');
-  const pic = pictures();
-  const grid = el('div', { class: 'hg-grid' }, ...SECTIONS(pic).map((s, i) => el('section', { class: `hg-card${i === 2 || i === 8 ? ' wide' : ''}` },
-    el('h3', {}, s.title), ...s.text.map((t) => el('p', {}, t)), s.pics.length ? el('div', { class: 'hg-pics' }, ...s.pics) : '')));
+  const grid = cards();
   const panel = el('div', { class: 'hg-panel', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Distilling on four sides' },
     el('div', { class: 'hg-head' }, el('div', {}, el('h2', {}, 'Distilling on four sides'),
       el('p', {}, 'A harder Distilling to try: the same puzzle, with the fire all round it, and a few new ways to score.')), close),

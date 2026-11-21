@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Distilling, harder</title>
+<!-- The harder Distilling's own page (the user, 21 Nov: "which I actually do think deserves its own page, it should also
+     have a what it is tab and also the thinking behind it"), in the site's look, three tabs as design.html's: Play (the
+     test board, distilling-test.html?hard, in a frame, held still while another tab's open), What it is (the four-sides
+     guide, js/den/distill-harder-guide.js, the same one the test page opens over the board) and The thinking behind it
+     (the user's reasons, in plain words; DISTILLING.md §8 holds them as the design intent). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,700;1,500&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/site.css">
+<style>
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { margin: 0; font: 700 clamp(30px, 6vw, 44px)/1.05 'Alegreya', serif; color: var(--title); }
+  .lede { margin: 6px 0 0; color: var(--dim); max-width: 680px; }
+  nav.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 16px; border-bottom: 1px solid var(--edge); }
+  nav.tabs a { font: 700 18px 'Alegreya', serif; color: var(--dim); text-decoration: none; padding: 8px 16px; min-height: 44px; display: inline-flex; align-items: center;
+    border: 1px solid transparent; border-bottom: none; border-radius: 9px 9px 0 0; margin-bottom: -1px; }
+  nav.tabs a:hover { color: var(--title); }
+  nav.tabs a.on { color: var(--title); background: var(--bg, transparent); border-color: var(--edge); }
+  .tabbed section.tab { display: none; }
+  .tabbed section.tab.on { display: block; }
+  /* Play: the board in a frame, as tall as the screen allows. */
+  .board { width: 100%; height: min(78vh, 760px); min-height: 520px; border: 2px solid var(--frame); border-radius: 10px; background: var(--well); display: block; }
+  .under { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 10px 2px 0; color: var(--dim); font-size: 15px; }
+  .under a { color: var(--link); font-weight: 700; }
+  .go { display: inline-flex; align-items: center; min-height: 44px; font: 700 16px 'Alegreya Sans'; color: var(--on-accent) !important; background: var(--accent); border-radius: 8px; padding: 0 16px; text-decoration: none; }
+  .go:hover { background: var(--accent-hi); }
+  /* The thinking: articles on parchment, as design.html's. */
+  article { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid var(--paper-edge); border-radius: 12px;
+    box-shadow: 0 8px 24px var(--shadow), inset 0 0 40px var(--paper-glow); padding: 14px 16px; margin: 0 0 18px; }
+  article h3 { margin: 4px 2px 6px; font: 700 25px/1.15 'Alegreya', serif; color: var(--ink-head); }
+  article p, article li { color: var(--ink2); max-width: 72ch; }
+  article p { margin: 0 2px 8px; }
+  article ul { margin: 2px 0 8px; padding-left: 22px; }
+  article li { margin: 0 0 6px; }
+  article b { color: var(--ink); }
+  .ask { font: italic 700 19px/1.35 'Alegreya', serif; color: var(--link); margin: 4px 2px 10px; max-width: 72ch; }
+  article.pic { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 6px 20px; align-items: start; }
+  article.pic img { width: 100%; height: auto; border-radius: 8px; border: 2px solid var(--frame); background: var(--well); display: block; }
+  footer { margin-top: 36px; color: var(--faint); font-size: 13px; text-align: center; }
+  @media (max-width: 700px) {
+    article.pic { grid-template-columns: 1fr; }
+    .board { height: 82vh; min-height: 0; }
+    article h3 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<script src="js/site-bar.js"></script>
+<div class="wrap">
+  <h1>Distilling, harder</h1>
+  <p class="lede">The same puzzle, with a furnace on every edge and a few new ways to score: a Distilling where there's no
+    one right way to play, only choices.</p>
+  <nav class="tabs"><a href="#play">Play</a><a href="#what">What it is</a><a href="#thinking">The thinking behind it</a></nav>
+
+  <section class="tab" id="play">
+    <iframe class="board" id="board" title="Distilling on four sides, the board to play" data-src="distilling-test.html?seed=1&amp;hard&amp;embed"></iframe>
+    <div class="under">
+      <a class="go" href="distilling-test.html?seed=1&amp;hard">Play it full screen</a>
+      <span>New here? <a href="#what">What it is</a> shows every rule with a picture. Each idea can be switched off in the board's panel, to feel what it does.</span>
+    </div>
+  </section>
+
+  <section class="tab" id="what">
+    <div id="guide"></div>
+  </section>
+
+  <section class="tab" id="thinking">
+    <article class="pic">
+      <img src="changelog/distilling-four-sides-card.jpg" width="900" height="560" loading="lazy" alt="Distilling on four sides: a board with a furnace bar along every edge, the furnaces taking turns">
+      <div>
+        <h3>Why a harder Distilling</h3>
+        <p>For a good distiller, Crystal Clear 12 comes round again and again. There's one way to play it: bank your whites,
+          store the junk in the corners away from the fire, then build a long chain, the same steps every board. Once you
+          know them, nothing sets one good distiller apart from another, and what's left is the luck of what spawns.</p>
+        <p>This version is there to bring in more tactics: the same pieces and the same swap rule, but a board where you have
+          to think about what you're doing, every burn.</p>
+      </div>
+    </article>
+    <article>
+      <h3>Real choices, many ways to play</h3>
+      <p>With the fire all round the board, there's no safe corner left to park junk in, so the questions come thick and fast:</p>
+      <ul>
+        <li><b>Fast or slow?</b> Every move brings the next burn a little nearer. Do you make lots of quick moves, or fewer,
+          better ones and keep your time?</li>
+        <li><b>Clear the junk first?</b> Do you burn lots of junk at the start, giving up whites with it, to make room?</li>
+        <li><b>One at a time, or a double?</b> Build one Crystal Clear at a time, or line up both columns of a pair, or the
+          top and bottom rows, for a double: more points, and more spice coming in.</li>
+        <li><b>Which side to give up?</b> The sides burn, then the rows, then the sides again. You can't save every white on
+          every edge, so you choose which to rescue and which to let go.</li>
+      </ul>
+    </article>
+    <article class="pic">
+      <img src="changelog/distilling-four-sides.jpg" width="900" height="930" loading="lazy" alt="The rows going: the top and bottom rows ringed as they leave, new pieces coming in through the middle">
+      <div>
+        <h3>Perfect runs aren't meant to be possible</h3>
+        <p>The aim is that you can't just string together perfect runs of Crystal Clears. Something always has to give,
+          and how you decide what gives is where the skill is now, rather than in doing the same steps faster.</p>
+        <p>That's a target to tune towards: how fast the furnaces go, how much a move costs, and what each bonus pays are
+          all still to be balanced as it's played.</p>
+      </div>
+    </article>
+    <article>
+      <h3>Pressure to act</h3>
+      <p>In the real game the safe play is to wait: keep the board tidy and build up a long chain the same way each time.
+        Here, waiting costs you.</p>
+      <ul>
+        <li><b>Spice burned loses points.</b> A spice is 3 points sent up, but 3 off if it burns, and with fire on every edge
+          it's never far from a furnace.</li>
+        <li><b>Doubles bring spice in.</b> Two Crystal Clears at once pay well, but each brings a spice that never moves, in
+          the middle of your board. A reward that makes the next burns harder.</li>
+        <li><b>Every move heats the fire.</b> It isn't scored, but dawdling with lots of small moves brings the burn on.</li>
+        <li><b>Dark rum keeps a chain alive.</b> A column of browns sent up mid-chain holds it once, so a chain can survive a
+          board that turns against you, if you see it coming.</li>
+      </ul>
+    </article>
+  </section>
+
+  <footer>Puzzle Pirates™ © 2001–2026 Grey Havens, LLC, created by Three Rings Design.<br>An unofficial fan project, not affiliated with or endorsed by them.</footer>
+</div>
+<script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
+<script type="module">
+import { harderGuideInline } from './js/den/distill-harder-guide.js';
+// The tabs: the one the address names (#play by default). The board's frame is loaded the first time Play shows, and
+// held still while another tab's open (the user, 21 Nov, of the guide over the board: "the puzzle should not be playing
+// while you're reading it").
+const tabs = [...document.querySelectorAll('section.tab')], links = [...document.querySelectorAll('nav.tabs a')];
+const frame = document.getElementById('board');
+let guided = false;
+document.body.classList.add('tabbed');
+function show() {
+  const id = location.hash.slice(1), at = id && document.getElementById(id);
+  const tab = (at && at.closest('section.tab')) || tabs[0];
+  for (const t of tabs) t.classList.toggle('on', t === tab);
+  for (const a of links) a.classList.toggle('on', a.getAttribute('href') === '#' + tab.id);
+  const playing = tab.id === 'play';
+  if (playing && !frame.src) frame.src = frame.dataset.src;
+  try { frame.contentWindow?.hold?.(!playing); } catch { /* (not loaded yet) */ }
+  if (tab.id === 'what' && !guided) { guided = true; harderGuideInline(document.getElementById('guide')); }
+}
+frame.addEventListener('load', () => { try { frame.contentWindow.hold?.(!document.getElementById('play').classList.contains('on')); } catch { /* */ } });
+addEventListener('hashchange', show);
+show();
+</script>
+</body>
+</html>
