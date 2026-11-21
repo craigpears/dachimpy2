@@ -31,6 +31,9 @@ import { person } from './props-people.js';
 import { cine, cinePlay, cineEnd } from './cine.js';
 import { V3 } from './world.js';
 
+/** Seconds a beaten wolf's board stays up, the wolf going down, before the next wolf's deal (it went straight on,
+    "going away too quickly", the user, 21 Nov). */
+const NEXT_WOLF = 2.2;
 /** Your fists on the keys (Z and X, as the Rumble test page; Space the left too), and aiming (the arrows, A and D). */
 const FISTS = { z: 0, ' ': 0, x: 1 }, AIMS = { arrowleft: -1, a: -1, arrowright: 1, d: 1 };
 
@@ -319,7 +322,7 @@ export const JEZERBELL_HOUSE = {
           g.tick(t);
           boards.take(g.drain());
           for (const e of F.rules.tick(dt)) frayEvent(e);
-        } else if ((F.ending += dt) >= 1.2) {
+        } else if ((F.ending += dt) >= NEXT_WOLF) {
           const won = g.winner === 0;
           for (const e of F.rules.duelOver(won)) frayEvent(e);
         }
