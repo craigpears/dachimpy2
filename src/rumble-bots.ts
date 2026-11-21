@@ -79,7 +79,7 @@ export const GREEDY: Style = {
   id: 'greedy',
   name: 'Greedy brawler',
   says: 'Clears what it can; charges three groups in the middle, then sets them off.',
-  think: 1.1,
+  think: 1.9,          // 1.1 at first, too quick to follow (21 Nov)
   score(o, { me }) {
     const { outcome: out, after } = o, charges = me.board.charges.length;
     const low = fullness(after), danger = low > 0.7;
