@@ -48,6 +48,8 @@ import * as coralFile from './coral.js'; export * from './coral.js';
 import * as tridentFile from './trident.js'; export * from './trident.js';
 import * as bronzeCannonFile from './bronze-cannon.js'; export * from './bronze-cannon.js';
 import * as ghostFile from './ghost.js'; export * from './ghost.js';
+import * as summoningFile from './summoning.js'; export * from './summoning.js';
+import * as hallPiecesFile from './hall-pieces.js'; export * from './hall-pieces.js';
 export { place } from './parts.js';
 
 const FILES = [
@@ -58,6 +60,7 @@ const FILES = [
   crateFile, barrelFile, tarpPileFile, rowboatFile, stillFile,
   cookiePlateFile, shelfFile, simModelFile,
   clamFile, coralFile, tridentFile, bronzeCannonFile, ghostFile,
+  summoningFile, hallPiecesFile,
 ];
 
 /** The catalogue's sections, in order. */
@@ -69,6 +72,7 @@ export const GROUPS = [
   { id: 'cargo', name: 'Cargo, and outdoors', blurb: 'Crates, barrels and a rowboat for a beach, and a copper still.' },
   { id: 'museum', name: 'A museum\'s things', blurb: 'Dachimpy\'s: their trinkets, the old sim\'s board in miniature, and cookies.' },
   { id: 'styles', name: 'Ships\' styles', blurb: 'What decks a war frigate of a style of her own: an Atlantean\'s clams, coral, trident and green guns; a Phantom\'s ghost.' },
+  { id: 'hall', name: 'A summoner\'s hall', blurb: 'Jezerbell\'s: a werewolf summoning stump and a vampire altar, a throne with bat wings, gargoyles, a doubloon exchange, a vase, a palm and statues.' },
 ];
 
 /** Every piece, in order: { id, name, group, about, where, make, sample?, onWall?, small? }. `sample`: the

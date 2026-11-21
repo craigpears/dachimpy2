@@ -456,6 +456,11 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   the point. You should see, go visit those different pirates." A real pirate in the den gets a house of
   her own on the housing district's list, sized to suit her, not a room in someone else's (Roobear's,
   IDEAS.md, was nearly a room at Gravee's manor). Who lodges where can still be a line between them.
+- **A house as big as what happens in it, and nothing on its walls without its point (21 Nov).** Of
+  Jezerbell's first version: "the house is a bit small for how big of a concept there is in it", so a house
+  with a hunt and a fray in it gets a hall to match. And the route labels copied from her screenshot ("one
+  island to another island") were labels on presents in her real house: "Without the presents ... it's just a
+  bit weird." A thing from a screenshot comes in with what gives it its point, or not at all.
 - **The housing district, and Gravee's house (11 Nov).** "you have like the areas of houses and
   you have the enter a house stuff and you can choose whose house to go into. And maybe she's just
   one of them ... she can show you ... around her house. And the vampires and do the portrait
