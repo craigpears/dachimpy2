@@ -19,6 +19,9 @@
   .top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 8px; }
   h1 { margin: 0; font: 700 26px/1.1 'Alegreya', serif; color: var(--title); }
   .modes { display: flex; gap: 6px; flex-wrap: wrap; }
+  .inspired { margin: 0 0 8px; color: var(--dim); font-size: 15px; }
+  .inspired q { color: var(--accent-text); font-style: italic; }
+  @media (max-width: 620px) { .inspired { font-size: 13px; margin-bottom: 4px; } }
   .modes a, .top button { font: 700 15px 'Alegreya Sans', sans-serif; color: var(--text); background: var(--tile); border: 1px solid var(--edge);
     border-radius: 8px; padding: 6px 12px; text-decoration: none; cursor: pointer; min-height: 36px; display: inline-flex; align-items: center; }
   .modes a[aria-current] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
@@ -80,6 +83,7 @@
     <button id="again" type="button">New tuft</button>
     <button id="how" type="button" aria-expanded="false" aria-controls="help">How to felt</button>
   </div>
+  <p class="inspired">Inspired by Lintmint, who said <q>i like sheep wool stabbing and cheej :3</q>, so here it is: needle felting as a puzzle.</p>
   <div class="help" id="help" hidden>
     <p>A tuft of wool on a foam pad, the pattern's outline faint on it. <b>Tap or click to stab</b> the barbed needle in.</p>
     <p><b>1. Tuck in the strays.</b> Stab the stray wool outside the outline and it's pulled a cell in toward the shape.</p>
