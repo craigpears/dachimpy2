@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Felting test</title>
+<!-- A first concept of needle felting as a puzzle (21 Nov), for Lintmint's croft one day ("i like sheep wool
+     stabbing and cheej :3"), unlinked like den.html, for the user to judge whether it works. The rules are
+     src/felting.ts (compiled to js/felting.js), its greedy bot src/felting-bot.ts; this page is drawn by the
+     hand-written js/felting-view.js. The pattern and the seed are in the address: ?pattern=sheep&seed=3, or
+     ?pattern=cheese, ?pattern=frog; &watch to watch the bot felt it, at a person's pace. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/site.css">
+<style>
+  .croft { max-width: 900px; margin: 0 auto; padding: 10px 16px 14px; }
+  .top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 8px; }
+  h1 { margin: 0; font: 700 26px/1.1 'Alegreya', serif; color: var(--title); }
+  .modes { display: flex; gap: 6px; flex-wrap: wrap; }
+  .modes a, .top button { font: 700 15px 'Alegreya Sans', sans-serif; color: var(--text); background: var(--tile); border: 1px solid var(--edge);
+    border-radius: 8px; padding: 6px 12px; text-decoration: none; cursor: pointer; min-height: 36px; display: inline-flex; align-items: center; }
+  .modes a[aria-current] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .modes a:hover, .top button:hover { background: var(--tile-hi); }
+  .modes a[aria-current]:hover { background: var(--accent-hi); }
+  .help { background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink); border: 1px solid var(--paper-edge); border-radius: 10px;
+    padding: 8px 14px; margin: 0 0 10px; font-size: 15px; }
+  .help p { margin: 4px 0; max-width: 75ch; }
+  .help b { color: var(--ink-head); }
+  .board { display: flex; justify-content: center; }
+  canvas { display: block; border-radius: 14px; box-shadow: 0 6px 18px var(--shadow); touch-action: none; cursor: crosshair; }
+  .steps { display: flex; justify-content: center; gap: 6px 16px; flex-wrap: wrap; margin: 8px 0 0; padding: 0; list-style: none; font-size: 15px; color: var(--faint); }
+  .steps li.now { color: var(--text); font-weight: 700; }
+  .steps li.done { color: var(--dim); text-decoration: line-through; text-decoration-color: var(--accent); }
+  .tools { display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .tools button { font: 700 15px 'Alegreya Sans', sans-serif; color: var(--text); background: var(--tile); border: 1px solid var(--edge); border-radius: 10px;
+    min-height: 44px; min-width: 44px; justify-content: center; padding: 4px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; user-select: none; -webkit-user-select: none; }
+  .tools button:hover { background: var(--tile-hi); }
+  .tools button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+  .tools .swatch { width: 20px; height: 20px; border-radius: 50%; box-shadow: 0 0 0 1px var(--shadow); flex: none; }
+  .tools .finish { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .tools .finish:hover { background: var(--accent-hi); }
+  .needles { display: inline-flex; gap: 2px; align-items: center; margin-left: 4px; }
+  .needles svg { width: 16px; height: 40px; }
+  .tools .shaft { stroke: var(--dim); stroke-width: 2; stroke-linecap: round; fill: none; }
+  .tools .grip { fill: var(--accent2); }
+  .needles .gone { opacity: 0.25; }
+  .said { min-height: 2.8em; margin: 8px auto 0; max-width: 700px; text-align: center; color: var(--text); font-size: 15px; line-height: 1.4; }
+  .said span { display: block; color: var(--dim); font-size: 14px; }
+  .said span:first-child { color: var(--text); font-size: 15px; }
+  .result { margin: 10px auto 0; max-width: 520px; text-align: center; background: linear-gradient(170deg, var(--paper), var(--paper2)); color: var(--ink);
+    border: 1px solid var(--paper-edge); border-radius: 12px; padding: 10px 14px; }
+  .result h2 { margin: 0; font: 700 34px/1.1 'Alegreya', serif; color: var(--ink-head); }
+  .result p { margin: 4px 0; }
+  .result .parts { color: var(--ink2); font-size: 14px; }
+  .keys { color: var(--faint); font-size: 14px; text-align: center; margin-top: 6px; }
+  @media (pointer: coarse) {
+    .keys { display: none; }
+    .modes a, .top button { min-height: 44px; }
+  }
+  @media (max-width: 620px) {
+    .croft { padding: 6px 8px 10px; }
+    h1 { font-size: 21px; }
+    .top { gap: 6px; margin-bottom: 4px; }
+    .steps { font-size: 13px; gap: 2px 10px; margin-top: 4px; }
+    .tools { gap: 6px; margin-top: 6px; }
+    .tools button { padding: 4px 9px; font-size: 14px; }
+    .said { font-size: 14px; min-height: 2.6em; margin-top: 4px; }
+    .said span:not(:first-child) { display: none; }
+  }
+</style>
+</head>
+<body>
+<script src="js/site-bar.js" data-static></script>
+<main class="croft">
+  <div class="top">
+    <h1>Felting</h1>
+    <nav class="modes" aria-label="Pattern" id="patterns"></nav>
+    <button id="again" type="button">New tuft</button>
+    <button id="how" type="button" aria-expanded="false" aria-controls="help">How to felt</button>
+  </div>
+  <div class="help" id="help" hidden>
+    <p>A tuft of wool on a foam pad, the pattern's outline faint on it. <b>Tap or click to stab</b> the barbed needle in.</p>
+    <p><b>1. Tuck in the strays.</b> Stab the stray wool outside the outline and it's pulled a cell in toward the shape.</p>
+    <p><b>2. Firm it evenly.</b> A stab firms its cell, and the cells beside it a little. Firm is the goal; stab a spot
+      too often and it goes <b>hard</b>, a dimple. The middle firms from all sides, so the edges need more stabs of their
+      own. Tucking wool in softens where it lands, so tuck first.</p>
+    <p><b>3. The details.</b> Pick a colour, tap to lay a wisp of it, then tap again to stab it in (twice and it's in).
+      Those stabs are shallow but firm the wool under it a little, so leave those cells a touch soft. A cheese's
+      <b>holes</b> are dimples on purpose: stab them hard.</p>
+    <p><b>Three needles.</b> Stab too fast, or drag while you stab, and the needle bends; do it again while it's bent
+      and it snaps. Wait a moment and it straightens. <b>Finish</b> when you're happy: it's scored on the pattern, how
+      even the felt is, and needles left.</p>
+  </div>
+  <div class="board"><canvas id="felt" aria-label="The wool on its foam pad"></canvas></div>
+  <ol class="steps" id="steps"></ol>
+  <div class="tools" id="tools"></div>
+  <p class="said" id="said" aria-live="polite"></p>
+  <div class="result" id="result" hidden></div>
+  <p class="keys" id="keys">Click to stab · 1 the needle, 2 and on the colours · F feels the wool · Enter finishes</p>
+</main>
+<script type="module" src="js/felting-view.js"></script>
+</body>
+</html>

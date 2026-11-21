@@ -1,8 +1,11 @@
 ---
 title: Lintmint's felting croft: stabbing wool into sheep and cheese
-status: idea
+status: playtest
 asked: 21 Nov
 updated: 21 Nov
+session: local_c9425d4a-3e51-4bc7-b398-d648641e5a15
+link: felting-test.html?pattern=sheep
+shot: changelog/felting-concept.jpg
 ---
 
 **Asked:** 21 Nov: "that would be cool if we could figure out a felty ... you’re going to have to really expand on that, you know, how exactly you’re going to stab a wool into something ... Lintmint sounds like she would love that. Definitely need to flesh that out a bit."
@@ -20,3 +23,9 @@ updated: 21 Nov
 - 21 Nov: Her croft: a cosy cottage of felted sheep and cheese, a big cheese wheel, autumn leaves and orange everywhere, her familiars on a belt display like a trainer’s, a felted frog that says "pepopupu".
 - 21 Nov: With Jezerbell (her card: jezerbells-house-her-hidden-octopuses-and-the-we), a joint adventure, "wolf in sheep’s clothing": the wolves raid Lintmint’s flock (their taunts all lambs and Little Bo Peep, in our own words); she felts a flock of decoy sheep; some of the sheep in the field are wolves in disguise, and Jezerbell spots them and the fray starts. Or Lintmint, in her werewolf costume, slips into the pack and gets "eliminated!" by mistake.
 - 21 Nov: 21 Nov, the user: "it sounds like a plausible idea ... I definitely need to see some kind of concept. It’s very hard to judge from that description ... I’d have to see it." Next: a playable sketch of the felting board to judge, before anything else.
+- 21 Nov: being done
+- 21 Nov: The first concept, built as the draft said: src/felting.ts the rules (a stab firms its cell by 1 and the four beside it a quarter each; firm is 3 to 4, 4 or more a hard dimple), src/felting-bot.ts a greedy bot, tests/felting.test.ts, drawn on the unlinked felting-test.html by js/felting-view.js. Patterns in the address: ?pattern=sheep, cheese, frog (pepopupu); &seed=; &watch has the bot felt one at a person's pace.
+- 21 Nov: Changed from the draft, and why: the cells round a stab firm a quarter each, so a checkerboard of one and two stabs comes out dead even in the middle, and the edges, with fewer cells beside them, need more stabs of their own (real felting: the edges stay fluffy). That makes it a planning puzzle and not just tapping everywhere. Tucked-in wool softens the cell it lands on (fresh fibre), which is why tucking comes first, and it can fill a dimple back up. A stab through a wisp is shallow (half depth): two of them felt it in. So detail cells want leaving a little soft, or doing as you go. The cheese's holes are dimples on purpose: over-stabbing is the trick there. Wool can't be added mid-board yet, and there's no hold-to-stab.
+- 21 Nov: The needles: stabbing within 0.12 s of the last, or dragging over half a cell while the needle's in, bends it; doing it again while it's bent snaps it; half a second's calm straightens it. Two drags far apart never snap, so a slip on a phone isn't punished. Score: 60% the pattern, 25% evenness, 15% needles left, and a verdict in words. The greedy bot felts each pattern to about 90 (sheep 91, cheese 90, frog 87) in about 240 stabs.
+- 21 Nov: To judge: about 240 taps a piece (a 16 by 12 board, about 110 cells of wool) may be too many; a smaller board or a bigger needle (a multi-needle tool firming a cross at once) would shorten it. Is the firmness readable without Feel (F), the dials? Gentle pastime or rated puzzle: it scores now, but nothing's timed.
+- 21 Nov: for you to playtest: Checked in the browser (desktop, phone, watching the bot): reads as wool on a foam pad; the shading softened so it's not rows of beads, the Feel dials faint rings. Still to judge on a phone: the sheep's a wide pattern, so the board is the screen's width and only about a third of its height. Try it: felting-test.html?pattern=sheep, ?pattern=cheese, or &watch to watch the bot.
