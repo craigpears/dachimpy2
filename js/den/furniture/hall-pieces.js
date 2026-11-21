@@ -17,7 +17,7 @@ function wing(w, h) {
 export function batThrone({ col = '#e3b32a' } = {}) {
   const g = new THREE.Group(), up = cloth(col), seatRed = cloth('#b0202e');
   g.add(box(0.95, 0.12, 0.8, batFrame, 0, 0.06, 0), box(0.85, 0.32, 0.72, batFrame, 0, 0.28, 0), box(0.86, 0.12, 0.76, up, 0, 0.5, 0.02));
-  g.add(box(0.95, 0.08, 0.9, seatRed, 0, 0.03, 0.1));
+  g.add(box(1.0, 0.08, 0.9, seatRed, 0, 0.03, 0.1));   // (wider than the base: sides sharing a face flicker)
   // the back, tall and rounded at the top
   g.add(box(0.8, 1.2, 0.1, up, 0, 1.15, -0.33), box(0.92, 1.3, 0.06, batFrame, 0, 1.15, -0.4));
   const top = cyl(0.46, 0.46, 0.06, batFrame, 0, 1.8, -0.4, 16); top.rotation.x = Math.PI / 2; top.scale.y = 1; g.add(top);
@@ -36,9 +36,11 @@ const gargM = mat('#5a5862', { roughness: 0.85 }), gargDark = mat('#38363f', { r
     spread, horns and purple eyes. */
 export function gargoyleChest({ col = '#6a3a9a' } = {}) {
   const g = new THREE.Group(), band = mat(col, { metalness: 0.3, roughness: 0.5 });
-  g.add(box(0.95, 0.5, 0.55, dark, 0, 0.25, 0), box(0.97, 0.06, 0.57, band, 0, 0.47, 0), box(0.97, 0.06, 0.57, band, 0, 0.1, 0));
-  for (const sx of [-1, 1]) g.add(box(0.06, 0.52, 0.57, band, 0.34 * sx, 0.26, 0));
-  g.add(box(0.12, 0.12, 0.04, brass, 0, 0.36, 0.29));
+  // (its bands proud of every face, never level with its top or with each other's fronts: the user, 21 Nov, saw
+  // the chests flicker)
+  g.add(box(0.95, 0.5, 0.55, dark, 0, 0.25, 0), box(0.97, 0.06, 0.57, band, 0, 0.44, 0), box(0.97, 0.06, 0.57, band, 0, 0.1, 0));
+  for (const sx of [-1, 1]) g.add(box(0.06, 0.53, 0.6, band, 0.34 * sx, 0.265, 0));
+  g.add(box(0.12, 0.12, 0.04, brass, 0, 0.3, 0.3));
   const G = new THREE.Group(); G.position.y = 0.5;
   G.add(ball(0.2, gargM, 0, 0.2, 0, 10), ball(0.13, gargM, 0, 0.42, 0.1, 10), box(0.1, 0.06, 0.12, gargM, 0, 0.38, 0.22));
   for (const sx of [-1, 1]) {
@@ -64,7 +66,7 @@ export function doubloonExchange() {
   for (const sx of [-1, 1]) g.add(box(0.06, 0.55, 0.06, gilt, 0.4 * sx, 1.2, -0.18));
   g.add(box(0.9, 0.12, 0.08, ebony, 0, 1.48, -0.18));
   const coin = cyl(0.26, 0.26, 0.05, gilt, 0, 1.78, -0.18, 24); coin.rotation.x = Math.PI / 2; g.add(coin);
-  const face = mesh(new THREE.CircleGeometry(0.24, 24), coinFace); face.position.set(0, 1.78, -0.15); g.add(face);
+  const face = mesh(new THREE.CircleGeometry(0.24, 24), coinFace); face.position.set(0, 1.78, -0.14); g.add(face);   // (clear of the coin's own face)
   for (const [x, n] of [[-0.25, 5], [-0.1, 3], [0.2, 4]]) for (let i = 0; i < n; i++) g.add(cyl(0.06, 0.06, 0.018, gilt, x, 0.955 + i * 0.019, 0.08, 12));
   return { g };
 }

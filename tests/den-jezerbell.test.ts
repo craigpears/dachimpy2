@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PLAN, FURNISH, OCTOPUSES, ALL, octopusAt, TOUR, stopAt, STUMP, atStump, atAltar, PACK, Fray, FRAY, PORTRAITS, type Hide } from '../src/den-jezerbell.js';
+import { PLAN, FURNISH, OCTOPUSES, ALL, octopusAt, TOUR, stopAt, STUMP, atStump, PACK, Fray, FRAY, PORTRAITS, type Hide } from '../src/den-jezerbell.js';
 import { walkable, houseById, BACKDROPS } from '../src/den-houses.js';
 import { FOUND, PACK_TAUNTS, ON_A_PICTURE } from '../src/lines/jezerbell.js';
 
@@ -8,7 +8,7 @@ describe("Jezerbell's house", () => {
     expect(houseById('jezerbell')?.owner).toBe('Jezerbell');
   });
 
-  it('has everything in her room inside it, and you can get to the stump, the altar and every hiding place', () => {
+  it('has everything in her room inside it, and you can get to the stump and every hiding place', () => {
     for (const p of FURNISH) expect(walkable(PLAN, p.x, Math.min(p.z, 3.0)) || Math.abs(p.x) > 5, p.kind).toBe(true);
     expect(walkable(PLAN, STUMP.x - 0.5, STUMP.z + 1.2)).toBe(true);
     for (const o of OCTOPUSES) expect(walkable(PLAN, o.at.x, o.at.z), o.id).toBe(true);
@@ -42,10 +42,9 @@ describe("Jezerbell's house", () => {
     }
   });
 
-  it('offers the stump and the altar only close to them', () => {
+  it('offers the stump only close to it', () => {
     expect(atStump({ x: STUMP.x, z: STUMP.z + 1 })).toBe(true);
     expect(atStump({ x: 0, z: 2 })).toBe(false);
-    expect(atAltar({ x: 0, z: 2 })).toBe(false);
   });
 
   it('walks you round her tour in order, skipping on if you walk ahead', () => {
@@ -79,6 +78,7 @@ describe('the werewolf fray', () => {
   it('has her beat one of her own now and then, never the one you are dueling', () => {
     const f = new Fray();
     f.start();
+    expect(f.hers()).toBe(1);
     expect(f.tick(FRAY.HER_FIRST - 1)).toEqual([]);
     const ev = f.tick(1);
     expect(ev).toEqual([{ what: 'down', wolf: 1, by: 'her' }]);
