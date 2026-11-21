@@ -1,14 +1,14 @@
 /* Jezerbell's house, the Summoning Hall: her scene in the house shell (house.js). Its rules (the plan, her furniture,
-   portraits and charts, where her octopuses hide, the tour, the pack and the fray) are src/den-jezerbell.ts's; her
-   lines and the pack's src/lines/jezerbell.ts's. This places the shared furniture (furniture.js: her summoning stump
-, her throne with bat wings...), paints her portraits (portraits.js), hides her octopuses (creatures.js's
-   familiars), and plays her: she meets you at the door and shows you round; come close to where an octopus is hiding
-   and Space finds it, out it comes and sits up; once you've found them all, one's missing, the werewolves have her;
-   Space at the stump uses a charm, and in a little cutscene (cine.js) the pack bursts out of it, a werewolf at a time
-   (werewolf.js), each with its taunt; then the fray, as Puzzle Pirates': a real Swordfight duel against each wolf in
-   turn (src/swordfight.ts's Duel, the wolf a bot's Hand at its own pace, both boards drawn by js/sword-duel-board.js),
-   her beating some of her own beside you (src/den-jezerbell.ts's Fray); win, and the pack slinks off, the missing
-   octopus comes back, and you're shown a Wolf-skull Wayfinder. */
+   portraits, where her octopuses hide, the tour, the pack and the fray) are src/den-jezerbell.ts's; her lines and
+   the pack's src/lines/jezerbell.ts's. This places the shared furniture (furniture.js: her summoning stump, her
+   throne with bat wings...), paints her portraits (portraits.js), hides her octopuses (creatures.js's familiars), and
+   plays her: she meets you at the door and shows you round; come close to where an octopus is hiding and Space finds
+   it, out it comes and sits up; once you've found them all, one's missing, the werewolves have her; Space at the stump
+   uses a charm, and in a little cutscene (cine.js) the pack bursts out of it, a werewolf at a time (werewolf.js), each
+   with its taunt; then the fray, as Puzzle Pirates': a real Rumble against each wolf in turn (src/rumble.ts, the wolf
+   the greedy brawler's Hand at its own pace, both boards drawn by js/rumble-board.js), her fighting her own beside
+   you (src/den-jezerbell.ts's Fray); win, and the pack slinks off, the missing octopus comes back, and you're shown a
+   Wolf-skull Wayfinder. */
 import { PIRATES } from '../den-look.js';
 import {
   PLAN, ARRIVE, WALLS, BACK, FURNISH, PORTRAITS, SIGN, OCTOPUSES, MISSING, ALL, octopusAt, TOUR, stopAt,
@@ -20,9 +20,9 @@ import {
   PACK_TAUNTS, PACK_DOWN, PACK_WON,
 } from '../lines/jezerbell.js';
 import { PACE } from '../chatter.js';
-import { Duel, SWORDS, seeded, W as SW, H as SH } from '../swordfight.js';
-import { BOTS, Hand } from '../sword-bots.js';
-import { duelBoard, STRIP } from '../sword-duel-board.js';
+import { Rumble, seeded, WIDTH, LAUNCH_Y, MAX_AIM, CHARGE_TIME } from '../rumble.js';
+import { Hand, GREEDY } from '../rumble-bots.js';
+import { rumbleBoards, BOARD_H } from '../rumble-board.js';
 import { FURNITURE, place } from './furniture.js';
 import { creature } from './creatures.js';
 import { werewolf } from './werewolf.js';
@@ -31,7 +31,8 @@ import { person } from './props-people.js';
 import { cine, cinePlay, cineEnd } from './cine.js';
 import { V3 } from './world.js';
 
-const ARROWS = { arrowleft: 'left', a: 'left', arrowright: 'right', d: 'right', arrowup: 'ccw', w: 'ccw', arrowdown: 'cw', s: 'cw', ' ': 'drop', enter: 'drop' };
+/** Your fists on the keys (Z and X, as the Rumble test page; Space the left too), and aiming (the arrows, A and D). */
+const FISTS = { z: 0, ' ': 0, x: 1 }, AIMS = { arrowleft: -1, a: -1, arrowright: 1, d: 1 };
 
 // ---------- the fray's panel: both boards, the pack, and the buttons for a phone ----------
 const style = document.createElement('style');
@@ -51,7 +52,9 @@ style.textContent = [
   `.fray .fray-side b { font: 700 14px 'Alegreya Sans', system-ui, sans-serif; color: #f6ead2; }`,
   `.fray .fray-pad { display: flex; gap: 6px; pointer-events: auto; }`,
   `.fray .fray-pad button { min-width: 48px; min-height: 44px; font: 700 18px 'Alegreya Sans', system-ui, sans-serif; color: #f6ead2; background: rgba(36, 23, 34, 0.92); border: 1px solid #b07ac8; border-radius: 10px; cursor: pointer; }`,
-  `.fray .fray-pad button.drop { min-width: 84px; background: #5a2a6a; }`,
+  `.fray .fray-pad button.fist { min-width: 96px; background: #5a2a6a; touch-action: none; }`,
+  `.fray .fray-pad button.held { background: #8a4a9a; border-color: #ffd8ff; }`,
+  `.fray canvas { touch-action: none; }`,
   `.fray-card { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 31; display: none; text-align: center; font: 16px 'Alegreya Sans', system-ui, sans-serif; color: #f6ead2; background: rgba(28, 18, 30, 0.95); border: 2px solid #c8a050; border-radius: 14px; padding: 16px 22px; width: min(340px, calc(100vw - 32px)); }`,
   `.fray-card.on { display: block; }`,
   `.fray-card h3 { margin: 6px 0; font-size: 20px; color: #e0a92a; }`,
@@ -63,13 +66,13 @@ style.textContent = [
 document.head.append(style);
 const panel = document.createElement('div');
 panel.className = 'fray'; panel.id = 'fray';
-panel.innerHTML = `<div class="fray-pack"></div><div class="fray-boards"><div class="fray-side"><b>You</b><canvas></canvas></div><div class="fray-side"><b class="wolf-name"></b><canvas></canvas></div></div><div class="fray-pad"><button data-k="left" title="Left (Left arrow)">&#x2190;</button><button data-k="ccw" title="Turn (Up)">&#x27F2;</button><button data-k="drop" class="drop" title="Drop (Space)">Drop</button><button data-k="cw" title="Turn (Down)">&#x27F3;</button><button data-k="right" title="Right (Right arrow)">&#x2192;</button></div>`;
+panel.innerHTML = `<div class="fray-pack"></div><div class="fray-boards"><div class="fray-side"><b>You</b><canvas></canvas></div><div class="fray-side"><b class="wolf-name"></b><canvas></canvas></div></div><div class="fray-pad"><button data-aim="-1" title="Aim left (Left arrow)">&#x2190;</button><button data-fist="0" class="fist" title="Left fist (Z): hold to charge">Left fist</button><button data-fist="1" class="fist" title="Right fist (X): hold to charge">Right fist</button><button data-aim="1" title="Aim right (Right arrow)">&#x2192;</button></div>`;
 const card = document.createElement('div');
 card.className = 'fray-card'; card.id = 'fray-card';
 const counter = document.createElement('div');
 counter.className = 'octo-count'; counter.id = 'octo-count';
 document.body.append(panel, card, counter);
-const boards = [...panel.querySelectorAll('canvas')].map(duelBoard);
+const canvases = [...panel.querySelectorAll('canvas')], boards = rumbleBoards(canvases);
 const packEl = panel.querySelector('.fray-pack'), wolfName = panel.querySelector('.wolf-name');
 
 /** The Wolf-skull Wayfinder, drawn: a brass compass, a wolf's skull on its face. */
@@ -239,22 +242,26 @@ export const JEZERBELL_HOUSE = {
     }
     function sizeBoards() {
       const box = panel.querySelector('.fray-boards').getBoundingClientRect();
-      const cell = Math.max(10, Math.floor(Math.min((Math.min(innerWidth - 16, 760) - 40) / (2 * SW), (box.height - 30) / (SH + STRIP), 30)));
-      boards.forEach((b) => b.size(cell));
+      const scale = Math.max(12, Math.floor(Math.min((Math.min(innerWidth - 16, 760) - 40) / (2 * WIDTH), (box.height - 30) / BOARD_H, 30)));
+      boards.size(scale);
     }
+    /** The rumble's clock: seconds since the fray started (a Rumble keeps its own time from what it's handed). */
+    const now = () => performance.now() / 1000 - G.fray.t0;
     function startFray() {
-      G.fray = { rules: new Fray(), duel: null, hand: null, seed: Math.floor(Math.random() * 1e6) + 1, downs: 0, mine: 0, yours: 0, pause: 0, t: 0 };
+      G.fray = { rules: new Fray(), game: null, hand: null, seed: Math.floor(Math.random() * 1e6) + 1, downs: 0, mine: 0, yours: 0, pause: 0, t: 0, t0: performance.now() / 1000, aim: 0, aiming: 0, held: null, ending: 0 };
       panel.classList.add('on');
       counter.classList.remove('on');
       sizeBoards();
       for (const e of G.fray.rules.start()) frayEvent(e);
       drawPack();
     }
+    /** A wolf turns on you: a fresh rumble, the greedy brawler at its pace. */
     function newDuel(i) {
       const F = G.fray, wolf = PACK[i];
-      F.duel = new Duel({ random: seeded(F.seed + i * 101), swords: [SWORDS.cutlass, SWORDS.cutlass] });
-      F.hand = new Hand(BOTS.greedy, 1, wolf.pace);
-      boards.forEach((b) => b.clear());
+      F.game = new Rumble(seeded(F.seed + i * 101), now());
+      F.hand = new Hand({ ...GREEDY, think: wolf.think }, 1, seeded(F.seed * 7 + i));
+      F.held = null; F.ending = 0;
+      boards.clear();
       wolfName.textContent = wolf.name;
     }
     function frayEvent(e) {
@@ -268,17 +275,10 @@ export const JEZERBELL_HOUSE = {
         else H.say(G.her, IN_THE_FRAY.yours[F.yours++ % IN_THE_FRAY.yours.length], 2.2);
       } else if (e.what === 'out') H.say(G.her, IN_THE_FRAY.youOut, 2.6);
       else if (e.what === 'over') {
-        F.duel = null; F.hand = null;
+        F.game = null; F.hand = null;
         F.pause = 1.6;   // (a beat to see the last board, then the pack slinks off)
       }
       drawPack();
-    }
-    function duelTurn(t) {
-      if (!t) return;
-      for (const l of t.landed) {
-        for (const s of l.swords) boards[t.side].flash(s.cells);
-        if (l.sprinkles.length) boards[t.side].flash(l.sprinkles);
-      }
     }
     /* Who's fighting whom, in the hall (the user, 21 Nov: "you should kind of see Jezebel kind of interacting with the
        werewolves. But for some reason, they're all staring at you"): your wolf comes up to you, hers to her, each
@@ -301,30 +301,62 @@ export const JEZERBELL_HOUSE = {
         who.g.rotation.y = Math.atan2(w.x - who.x, w.z - who.z);
       }
     }
+    /* The rumble played on: your fists (a held one charging; let go while a ball's in the air, it fires as that lands,
+       as on the Rumble test page), the wolf's hand, the game's clock; a knockout a moment on the board before the
+       next wolf. */
     function frayTick(dt) {
       const F = G.fray;
       stage(dt);
-      if (F.duel) {
-        for (const t of F.duel.update(dt)) duelTurn(t);
-        if (!F.duel.over) duelTurn(F.hand.update(F.duel, dt));
-        if (F.duel.over) { const won = F.duel.winner === 0; boards[0].draw(F.duel.sides[0], dt); boards[1].draw(F.duel.sides[1], dt); for (const e of F.rules.duelOver(won)) frayEvent(e); }
-        else for (const e of F.rules.tick(dt)) frayEvent(e);
+      const g = F.game;
+      if (g) {
+        const t = now();
+        if (F.aiming) F.aim = Math.max(-MAX_AIM, Math.min(MAX_AIM, F.aim + F.aiming * dt * 1.4));
+        if (!g.over()) {
+          if (F.held?.later && g.canFire(0)) { g.fire(0, F.held.fist, F.aim, false, t); F.held = null; }
+          if (F.held && !F.held.later && !g.canFire(0)) F.held.from = t;
+          g.sides[0].aim = F.aim;
+          F.hand.play(g, t);
+          g.tick(t);
+          boards.take(g.drain());
+          for (const e of F.rules.tick(dt)) frayEvent(e);
+        } else if ((F.ending += dt) >= 1.2) {
+          const won = g.winner === 0;
+          for (const e of F.rules.duelOver(won)) frayEvent(e);
+        }
+        boards.prune(t);
+        const o = { game: g, hands: [null, F.hand], you: 0, aim: F.aim, held: F.held };
+        boards.draw(0, t, o); boards.draw(1, t, o);
       }
-      if (F.duel) { boards[0].draw(F.duel.sides[0], dt); boards[1].draw(F.duel.sides[1], dt); }
       if (F.rules.over && (F.pause -= dt) <= 0) endFray(F.rules.won);
     }
-    function key(k) {
+    /** Your fists: pressed (held, charging) and let go (fired; charged if held long enough). */
+    function press(fist) {
       const F = G.fray;
-      if (!F?.duel || F.duel.over) return;
-      const b = F.duel.sides[0].board;
-      if (!b.falling) return;
-      if (k === 'left') b.move(-1);
-      else if (k === 'right') b.move(1);
-      else if (k === 'ccw') b.rotate(-1);
-      else if (k === 'cw') b.rotate(1);
-      else if (k === 'drop') duelTurn(F.duel.drop(0));
+      if (!F?.game || F.game.over() || F.held) return;
+      F.held = { fist, from: now() };
+      padFist(fist, true);
     }
-    current = key;
+    function release(fist) {
+      const F = G.fray;
+      if (!F?.held || F.held.fist !== fist) return;
+      const t = now(), charged = t - F.held.from >= CHARGE_TIME;
+      if (F.game && !F.game.over() && F.game.canFire(0)) { F.game.fire(0, fist, F.aim, charged, t); F.held = null; }
+      else F.held.later = true;
+      padFist(fist, false);
+    }
+    /** Aiming at a point on your board (a pointer over it). */
+    function aimAt(ev) {
+      const F = G.fray;
+      if (!F) return;
+      const r = canvases[0].getBoundingClientRect();
+      const x = ((ev.clientX - r.left) / r.width) * WIDTH, y = ((ev.clientY - r.top) / r.height) * BOARD_H;
+      F.aim = Math.max(-MAX_AIM, Math.min(MAX_AIM, Math.atan2(x - WIDTH / 2, -Math.min(-0.2, y - LAUNCH_Y))));
+    }
+    current = {
+      press, release, aimAt,
+      aim(dir) { if (G.fray) G.fray.aiming = dir; },
+      on: () => !!G.fray?.game,
+    };
     addEventListener('resize', () => { if (G.fray) sizeBoards(); });
     /* For checking from the console (as door.js's doorTest): stand somewhere, find every octopus, summon the pack,
        end the duel on now as won or lost. */
@@ -333,7 +365,7 @@ export const JEZERBELL_HOUSE = {
       stand(x, z) { const y = H.you; Object.assign(y, { x, z }); y.g.position.set(x, 0, z); H.house.to = null; },
       findAll() { for (const o of OCTOPUSES) if (!G.found.has(o.id)) find(o); },
       summon,
-      duel(won = true) { if (G.fray?.duel) { G.fray.duel.winner = won ? 0 : 1; } },
+      duel(won = true) { if (G.fray?.game) G.fray.game.winner = won ? 0 : 1; },
     };
 
     /** It's over: the pack slinks off out of the front door; won, her octopus back and the Wayfinder shown. */
@@ -407,7 +439,6 @@ export const JEZERBELL_HOUSE = {
       enter() {
         const again = G.visited;
         G.visited = true;
-        current = key;
         Object.assign(G.her, { x: ARRIVE.her.x, z: ARRIVE.her.z }); G.her.g.position.set(G.her.x, 0, G.her.z);
         G.her.g.rotation.y = Math.PI * 0.85;
         if (G.tour < TOUR.length) G.tour = 0;
@@ -443,10 +474,12 @@ export const JEZERBELL_HOUSE = {
         if (!G.fray && !G.after) return null;
         return { look: V3(STUMP.x + 0.3, 0.9, STUMP.z + 2.9), dist: 7.6, tilt: 0.5, yaw: -0.22 };
       },
+      // (in the fray every key is the fray's: Z, X and Space your fists, held to charge; the arrows, A and D, your
+      // aim; their letting go is the window's keyup, below)
       key(k, e) {
         if (!G.fray) return false;
-        const a = ARROWS[k];
-        if (a && !(a === 'drop' && e.repeat)) key(a);
+        if (k in FISTS) { if (!e.repeat) press(FISTS[k]); }
+        else if (k in AIMS) current.aim(AIMS[k]);
         return true;
       },
       prompt() {
@@ -468,9 +501,30 @@ export const JEZERBELL_HOUSE = {
 };
 // (the pad's buttons, to the house built: there's only the one)
 let current = null;
-panel.querySelector('.fray-pad').addEventListener('pointerdown', (e) => {
-  const b = e.target.closest('button');
-  if (!b || !current) return;
-  e.preventDefault();
-  current(b.dataset.k);
+/** A fist's button lit while it's held. */
+function padFist(fist, on) { panel.querySelector(`[data-fist="${fist}"]`)?.classList.toggle('held', on); }
+// (letting go of a key: a fist fires, the aim stops turning)
+addEventListener('keyup', (e) => {
+  if (!current?.on()) return;
+  const k = e.key.toLowerCase();
+  if (k in FISTS) current.release(FISTS[k]);
+  else if (k in AIMS) current.aim(0);
 });
+// (the buttons: a fist held to charge and let go to fire; an arrow held to turn the aim)
+for (const b of panel.querySelectorAll('.fray-pad button')) {
+  const fist = b.dataset.fist === undefined ? null : Number(b.dataset.fist), dir = Number(b.dataset.aim || 0);
+  b.addEventListener('pointerdown', (e) => { e.preventDefault(); b.setPointerCapture(e.pointerId); if (!current) return; if (fist !== null) current.press(fist); else current.aim(dir); });
+  const up = () => { if (!current) return; if (fist !== null) current.release(fist); else current.aim(0); };
+  b.addEventListener('pointerup', up);
+  b.addEventListener('pointercancel', up);
+  b.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+// (your board: the pointer aims; a mouse's buttons are the fists, left and right)
+canvases[0].addEventListener('pointermove', (e) => current?.aimAt(e));
+canvases[0].addEventListener('pointerdown', (e) => {
+  if (!current) return;
+  current.aimAt(e);
+  if (e.pointerType === 'mouse') { canvases[0].setPointerCapture(e.pointerId); current.press(e.button === 2 ? 1 : 0); }
+});
+canvases[0].addEventListener('pointerup', (e) => { if (current && e.pointerType === 'mouse') current.release(e.button === 2 ? 1 : 0); });
+canvases[0].addEventListener('contextmenu', (e) => e.preventDefault());
