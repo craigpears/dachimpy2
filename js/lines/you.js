@@ -37,6 +37,10 @@ export const IN_DACHIMPYS_HOUSE = {
     another: 'Just one more.',
 };
 /** In Affame's house, sinking into her cushion corner among the teddies: the first time, and again. */
+/** Jezerbell's grand gallery: running the length of it (the house shell's skip), the first time. */
+export const IN_JEZERBELLS_HOUSE = {
+    howBig: 'How big IS this place?',
+};
 export const IN_AFFAMES_HOUSE = {
     sunk: 'Mmm. So soft.',
     again: '...Five more minutes.',
@@ -102,6 +106,7 @@ export const CHARACTER = {
         { when: 'Coming into the smugglers\' cove behind Port Decorum, by way of the whirlpools (once a voyage)', says: [AT_SMUGGLERS_BEACH] },
         { when: 'Robert the kangaroo bear roobing your ear, in Roobear\'s ROOm', says: IN_ROOBEARS_HOUSE, each: { rubbed: 'The first time, at her door', again: 'Asking him for another' } },
         { when: 'At Dachimpy\'s door, every visit: their hug, their cookie; and asking for another from the plate', says: IN_DACHIMPYS_HOUSE, each: { hugged: 'Their hug', cookie: 'Their cookie', another: 'Another from the plate on the hall\'s table' } },
+        { when: 'Running the length of Jezerbell\'s grand gallery, the first time', says: IN_JEZERBELLS_HOUSE },
         { when: 'Sinking into Affame\'s cushion corner, among her teddies', says: IN_AFFAMES_HOUSE, each: { sunk: 'The first time', again: 'Another time' } },
         { when: 'Helium\'s rum run: as they ask you along, before their "Delivering" (`smuggling`); turned away at Port Decorum\'s jetty (`home`)', says: ON_THE_RUM_RUN },
         { when: 'Jazzmy on her jetty, needing to get to Helium\'s quick: your idea, before you change into the part', says: [ON_THE_CARPET_RIDE] },

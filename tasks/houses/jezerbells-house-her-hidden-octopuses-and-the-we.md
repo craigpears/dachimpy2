@@ -1,10 +1,10 @@
 ---
 title: Jezerbell's house: her hidden octopuses and the werewolf fray
-status: doing
+status: playtest
 asked: 21 Nov
 updated: 21 Nov
 link: den.html?at=jezerbell&as=dachimpy
-shot: changelog/jezerbell.jpg
+shot: changelog/jezerbell-gallery.jpg
 ---
 
 **Asked:** 21 Nov, from a chat log and a screenshot of her house: "there’s definitely some good material there for Jezebel in her house, like the hidden octopus ... especially if you start going looking for her familiar octopus, the werewolf for it ... we’ve definitely got enough there to card up something for Jezebel"
@@ -25,3 +25,5 @@ shot: changelog/jezerbell.jpg
 - 21 Nov: being done: 21 Nov, the user, first look: "the house is a bit small for how big of a concept there is in it. Things are flickering a lot as well, like the chests on the right, the Jezebel plaque on the wall. Also, it seems to have a thing from like one island to another island ... on some presents ... in this it’s just a bunch of [labels] ... a bit weird." So: the hall bigger, the route labels gone, the flicker fixed.
 - 21 Nov: 21 Nov, the user, more: "you should kind of see Jezebel kind of interacting with the werewolves. But for some reason, they’re all staring at you"; the duel itself "very glitchy in early days", for the Swordfight duels work, not this card; "the octopus’s found should be a bit clearer in the top right. Like each time you find one, it should say found one of X"; "I don’t know that I like two things in the same house, like the werewolf and the vampire altar"; the octopuses: "making sure the tentacles actually appear up front. Like one sinking into the chair ... one’s kind of disappearing into the picture frame".
 - 21 Nov: 21 Nov: the fray is a Rumble now (the user: "ready enough that you can at least swap the [Swordfight] thing out for it"): each wolf the greedy brawler at a pace of its own; Z, X or Space your fists (held to charge), the arrows or the mouse to aim, buttons on a phone. Rumble's boards drawn by one shared module, js/rumble-board.js, the Rumble test page's too. Next, the user: "her gallery ... she's prideful of just how giant her gallery is ... you got to go find all her [octopuses] in it ... hide and seek ... real grand scale".
+- 21 Nov: being done: 21 Nov: Rumble fray pushed (34d1730). Now the grand gallery: a huge room off her hall, the octopus hunt mostly in it (hide and seek), her pride in its size.
+- 21 Nov: for you to playtest: 21 Nov: her grand gallery in: a 60 m room off her hall through a doorway on the right (the hall’s chests moved either side of it), eight bays of a pillar, a statue or gold armour, a vase, a palm, a folding screen, a gargoyle chest, an armchair, a rug and a candelabra, seven portraits of hers (titled by us, playfully, till she says) and her sign "The Grand Gallery". Ten octopuses hide in it, two in the hall: twelve, and the missing one. Her pride in it on the tour; Q runs its length ("How big IS this place?"). New pieces: pillar, folding screen. Her pieces now have footprints you walk round (blocksOf).

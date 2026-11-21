@@ -11,14 +11,15 @@
    Wolf-skull Wayfinder. */
 import { PIRATES } from '../den-look.js';
 import {
-  PLAN, ARRIVE, WALLS, BACK, FURNISH, PORTRAITS, SIGN, OCTOPUSES, MISSING, ALL, octopusAt, TOUR, stopAt,
+  PLAN, ARRIVE, WALLS, BACK, FURNISH, PORTRAITS, GALLERY, GALLERY_PORTRAITS, GALLERY_BACK, BAYS, GALLERY_RUN, SIGN, OCTOPUSES, MISSING, ALL, octopusAt, TOUR, stopAt,
   STUMP, atStump, PACK, Fray,
 } from '../den-jezerbell.js';
 import { blocksOf } from '../den-houses.js';
 import {
   AT_THE_DOOR, TOUR_LINES, ON_A_PICTURE, FOUND, HUNT, AT_THE_STUMP, IN_THE_FRAY, AFTER, CHATTER, GOODBYE,
-  PACK_TAUNTS, PACK_DOWN, PACK_WON,
+  PACK_TAUNTS, PACK_DOWN, PACK_WON, THE_GALLERY,
 } from '../lines/jezerbell.js';
+import { IN_JEZERBELLS_HOUSE } from '../lines/you.js';
 import { PACE } from '../chatter.js';
 import { Rumble, seeded, WIDTH, CHARGE_TIME } from '../rumble.js';
 import { Hand, GREEDY } from '../rumble-bots.js';
@@ -96,26 +97,30 @@ export const JEZERBELL_HOUSE = {
   id: 'jezerbell', plan: PLAN, arrive: ARRIVE, walls: WALLS,
   build(H) {
     const R = H.root, G = { tour: 0, ticks: [], visited: false, found: new Set(), octos: new Map(), hops: [], fray: null, frays: 0, won: 0, missingBack: false, pack: [], after: null };
-    // ---------- her furniture, and her sign ----------
-    for (const p of FURNISH) {
+    // ---------- her furniture (her hall's and her grand gallery's), and her sign ----------
+    const ALL_PIECES = [...FURNISH, ...GALLERY];
+    for (const p of ALL_PIECES) {
       const opts = { col: p.col, ...(p.extra || {}) };
-      if (p.kind === 'candelabra') opts.light = true;
+      if (p.kind === 'candelabra') opts.light = p.extra?.light ?? true;
       if (p.s) opts.s = p.s;
       const piece = place(R, FURNITURE[p.kind](opts), p.x, p.z, p.yaw || 0);
       if (piece.tick) G.ticks.push(piece);
       if (p.kind === 'summoningStump') G.stump = piece;
     }
-    G.blocks = blocksOf(FURNISH);
+    G.blocks = blocksOf(ALL_PIECES);
     place(R, FURNITURE.sign({ text: SIGN.text, w: SIGN.w, h: SIGN.h, y: SIGN.y, col: '#3a1f40', ink: '#f2d6ff' }), SIGN.x, BACK, 0);
-    // ---------- her portraits ----------
+    place(R, FURNITURE.sign({ text: 'The Grand Gallery', w: 3.2, h: 0.5, y: 3.25, col: '#3a1f40', ink: '#ffd98a' }), BAYS[0] - 3.75, GALLERY_BACK, 0);
+    // ---------- her portraits, in her hall and down her gallery ----------
     G.exhibits = [];
-    for (const q of PORTRAITS) {
-      const f = place(R, FURNITURE.frame({ plaque: q.title, w: q.w, h: q.h, y: q.y, ornate: true }), q.x, BACK, 0);
+    G.hung = [...PORTRAITS.map((q) => ({ ...q, z: BACK })), ...GALLERY_PORTRAITS.map((q) => ({ ...q, z: GALLERY_BACK }))];
+    for (const q of G.hung) {
+      const f = place(R, FURNITURE.frame({ plaque: q.title, w: q.w, h: q.h, y: q.y, ornate: true }), q.x, q.z, 0);
       const painted = paint(q);
       f.setPicture(painted.texture, painted.uv);
-      G.exhibits.push({ id: q.id, x: q.x, y: q.y, z: BACK });
+      G.exhibits.push({ id: q.id, x: q.x, y: q.y, z: q.z });
     }
     G.ticks.push(...[-7.2, -4.45, 1.6, 4.8].map((x) => place(R, FURNITURE.sconce({ y: 2.35 }), x, BACK, 0)));
+    G.ticks.push(...BAYS.map((x) => place(R, FURNITURE.sconce({ y: 2.6 }), x, GALLERY_BACK, 0)));
     // ---------- her octopuses, hiding ----------
     for (const o of OCTOPUSES) {
       const c = creature('octopus', { col: o.col, idle: 'perch' });
@@ -428,9 +433,11 @@ export const JEZERBELL_HOUSE = {
       host,
       exhibits: G.exhibits,
       remark: (id) => ON_A_PICTURE[id] ?? null,
+      // Her gallery, run the length of on Q (the shell's skip), its portraits' titles going by.
+      stretch: { ...GALLERY_RUN, titles: GALLERY_PORTRAITS.map((q) => ({ x: q.x, title: q.title })), lines: { ask: IN_JEZERBELLS_HOUSE.howBig, answer: THE_GALLERY.answer, back: THE_GALLERY.back } },
       pictures: {
         name: 'Portraits', who: 'Jezerbell',
-        list: () => PORTRAITS.map((q) => ({ id: q.id, title: q.title, x: q.x, z: BACK, portrait: q })),
+        list: () => G.hung.map((q) => ({ id: q.id, title: q.title, x: q.x, z: q.z, portrait: q })),
         art(p) {
           G.flat ||= new Map();
           if (!G.flat.has(p.id)) G.flat.set(p.id, paintFlat(p.portrait));

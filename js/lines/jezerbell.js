@@ -13,29 +13,53 @@ export const TOUR_LINES = {
         'This is the fun bit. A charm on the stump, and in come the werewolves.',
         'Wolves are my thing. Vampires I leave to Gravee.',
     ],
+    gallery: [
+        'And THIS is my gallery. My real house, honestly. The hall\'s just the porch.',
+        'Go on, have a wander. It goes on a bit. I keep adding to it.',
+        'The octopuses love it in here. So many places to hide. Find them all, if you can.',
+    ],
 };
-/** About a portrait you've stopped by or turned to look at (src/den-jezerbell.ts's PORTRAITS), once a visit each. */
+/** Running the length of her gallery (the shell's skip, Q): your question the first time, her answer, and hers as
+    you come back. */
+export const THE_GALLERY = {
+    answer: 'Keep going. I\'ll tell you when you\'re halfway.',
+    back: 'Told you it was big. And that\'s just the one wing.',
+};
+/** About a portrait you've stopped by or turned to look at (src/den-jezerbell.ts's PORTRAITS and
+    GALLERY_PORTRAITS), once a visit each. */
 export const ON_A_PICTURE = {
     twilight: 'A twilight stroll. Very peaceful. No werewolves in that one.',
     love: 'Eternal love! Me and my babies. Well, one of them. The others were hiding.',
     three: 'Just the three of us. I don\'t know who the third is. Probably an octopus.',
+    wolfnight: 'Wolf night. My favourite kind of night.',
+    eightarms: 'Eight arms, one heart. Well, three hearts. Octopuses have three. Look it up.',
+    beginners: 'My beginners\' den. Everybody gets a shot in mine.',
+    moonrise: 'Moonrise. Right before the wolves come out. Lovely and spooky.',
+    hideandseek: 'Hide and seek. Guess who\'s winning. Not me.',
+    allmine: 'All mine. The gallery, I mean. And everything in it.',
+    karaoke: 'Karaoke night. Helium was meant to be teaching me to distil.',
 };
-/** Finding her octopuses, hidden about the room (src/den-jezerbell.ts's OCTOPUSES): what she says as each comes out,
-    by where it hid. */
+/** Finding her octopuses, hidden about her hall and her gallery (src/den-jezerbell.ts's OCTOPUSES): what she says as
+    each comes out, by where it hid. */
 export const FOUND = {
     vase: 'Oh, you found the pink one! She loves that vase. Don\'t ask me for her.',
     throne: 'Under my throne again? Cheeky. That\'s the violet one.',
-    frame: 'Behind the picture! He thinks he\'s part of the art.',
-    armour: 'In the helmet. Of course he\'s in the helmet.',
-    palm: 'Up the palm! She thinks she\'s a coconut.',
-    chest: 'In with the doubloons. Very sensible, that one.',
-    exchange: 'He was keeping an eye on the exchange rate.',
+    'g-screen': 'Behind the screen. Classic. He does that every time.',
+    'g-vase': 'Another one in a vase! They do love a vase.',
+    'g-chair': 'Under my good chair! Out you come.',
+    'g-frame': 'Behind the picture! He thinks he\'s part of the art.',
+    'g-chest': 'In with the treasure. She knows what\'s valuable.',
+    'g-pillar': 'Right up the pillar! How did she even get up there?',
+    'g-statue': 'Behind the shark. Brave little thing.',
+    'g-palm': 'Up the palm! She thinks she\'s a coconut.',
+    'g-armour': 'Behind the armour. Of course he is.',
+    'g-screen2': 'All the way down the end, behind the last screen. You walked all this way!',
 };
 /** As you find them: the first (her worry, now you've seen one), and when she counts them all and one's missing. */
 export const HUNT = {
     first: 'Oh no, you\'ve seen one. Now you\'ll want one. Everyone wants one.',
     allButOne: [
-        'Five, six, seven... and... where\'s my little black one?',
+        'Ten, eleven, twelve... and... where\'s my little black one?',
         'The werewolves. They\'ve been sniffing round all week. They\'ve got her!',
         'Right. There\'s a charm on the stump. Shall we go and get her back?',
     ],
@@ -106,8 +130,9 @@ export const CHARACTER = {
     ],
     lines: [
         { when: 'Answering the door when you knock', says: AT_THE_DOOR, each: { first: 'Your first visit', again: 'Coming back' } },
-        { when: 'Showing you round, as you come to each stop', says: TOUR_LINES, each: { hall: 'In the middle of her hall', stump: 'By her summoning stump' } },
-        { when: 'About the portrait you\'ve stopped by or turned to look at (once a visit each)', says: ON_A_PICTURE, each: { twilight: 'Twilight Stroll', love: 'Eternal Love!', three: 'Just the three of us' } },
+        { when: 'Showing you round, as you come to each stop', says: TOUR_LINES, each: { hall: 'In the middle of her hall', stump: 'By her summoning stump', gallery: 'Just inside her grand gallery' } },
+        { when: 'Running the length of her gallery (Q): her answer to your question, and as you come back', says: THE_GALLERY, each: { answer: 'Her answer', back: 'Coming back' } },
+        { when: 'About the portrait you\'ve stopped by or turned to look at (once a visit each)', says: ON_A_PICTURE, each: { twilight: 'Twilight Stroll', love: 'Eternal Love!', three: 'Just the three of us', wolfnight: 'Wolf Night (the gallery)', eightarms: 'Eight Arms, One Heart', beginners: 'The Beginners\' Den', moonrise: 'Moonrise', hideandseek: 'Hide and Seek', allmine: 'All Mine', karaoke: 'Karaoke Night' } },
         { when: 'As you find each of her octopuses, by where it hid', says: FOUND },
         { when: 'Her octopus hunt: the first you find, and once you\'ve found all but the missing one', says: HUNT, each: { first: 'The first you find', allButOne: 'All found but the one the werewolves took' } },
         { when: 'At her summoning stump (a charm)', says: AT_THE_STUMP, each: { summon: 'The first charm', again: 'Another charm' } },

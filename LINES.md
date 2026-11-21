@@ -93,6 +93,10 @@ Your own pirate, dressed as you like from the wardrobe (or as any real pirate in
 - *Their cookie:* "Mm! Still warm."
 - *Another from the plate on the hall's table:* "Just one more."
 
+### Running the length of Jezerbell's grand gallery, the first time
+
+- *howBig:* "How big IS this place?"
+
 ### Sinking into Affame's cushion corner, among her teddies
 
 - *The first time:* "Mmm. So soft."
@@ -2047,28 +2051,49 @@ The werewolf pack her charm summons are their own characters, ours: Huffing Hect
 - *By her summoning stump:*
   - "This is the fun bit. A charm on the stump, and in come the werewolves."
   - "Wolves are my thing. Vampires I leave to Gravee."
+- *Just inside her grand gallery:*
+  - "And THIS is my gallery. My real house, honestly. The hall's just the porch."
+  - "Go on, have a wander. It goes on a bit. I keep adding to it."
+  - "The octopuses love it in here. So many places to hide. Find them all, if you can."
+
+### Running the length of her gallery (Q): her answer to your question, and as you come back
+
+- *Her answer:* "Keep going. I'll tell you when you're halfway."
+- *Coming back:* "Told you it was big. And that's just the one wing."
 
 ### About the portrait you've stopped by or turned to look at (once a visit each)
 
 - *Twilight Stroll:* "A twilight stroll. Very peaceful. No werewolves in that one."
 - *Eternal Love!:* "Eternal love! Me and my babies. Well, one of them. The others were hiding."
 - *Just the three of us:* "Just the three of us. I don't know who the third is. Probably an octopus."
+- *Wolf Night (the gallery):* "Wolf night. My favourite kind of night."
+- *Eight Arms, One Heart:* "Eight arms, one heart. Well, three hearts. Octopuses have three. Look it up."
+- *The Beginners' Den:* "My beginners' den. Everybody gets a shot in mine."
+- *Moonrise:* "Moonrise. Right before the wolves come out. Lovely and spooky."
+- *Hide and Seek:* "Hide and seek. Guess who's winning. Not me."
+- *All Mine:* "All mine. The gallery, I mean. And everything in it."
+- *Karaoke Night:* "Karaoke night. Helium was meant to be teaching me to distil."
 
 ### As you find each of her octopuses, by where it hid
 
 - *vase:* "Oh, you found the pink one! She loves that vase. Don't ask me for her."
 - *throne:* "Under my throne again? Cheeky. That's the violet one."
-- *frame:* "Behind the picture! He thinks he's part of the art."
-- *armour:* "In the helmet. Of course he's in the helmet."
-- *palm:* "Up the palm! She thinks she's a coconut."
-- *chest:* "In with the doubloons. Very sensible, that one."
-- *exchange:* "He was keeping an eye on the exchange rate."
+- *g-screen:* "Behind the screen. Classic. He does that every time."
+- *g-vase:* "Another one in a vase! They do love a vase."
+- *g-chair:* "Under my good chair! Out you come."
+- *g-frame:* "Behind the picture! He thinks he's part of the art."
+- *g-chest:* "In with the treasure. She knows what's valuable."
+- *g-pillar:* "Right up the pillar! How did she even get up there?"
+- *g-statue:* "Behind the shark. Brave little thing."
+- *g-palm:* "Up the palm! She thinks she's a coconut."
+- *g-armour:* "Behind the armour. Of course he is."
+- *g-screen2:* "All the way down the end, behind the last screen. You walked all this way!"
 
 ### Her octopus hunt: the first you find, and once you've found all but the missing one
 
 - *The first you find:* "Oh no, you've seen one. Now you'll want one. Everyone wants one."
 - *All found but the one the werewolves took:*
-  - "Five, six, seven... and... where's my little black one?"
+  - "Ten, eleven, twelve... and... where's my little black one?"
   - "The werewolves. They've been sniffing round all week. They've got her!"
   - "Right. There's a charm on the stump. Shall we go and get her back?"
 

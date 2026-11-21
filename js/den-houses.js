@@ -103,6 +103,19 @@ export function blocksOf(pieces) {
             out.push({ x: p.x, z: p.z, r: 0.75 }); // (a heap of them: js/den/cuddly.js)
         else if (p.kind === 'teddy')
             out.push({ x: p.x, z: p.z, r: 0.3 });
+        // (Jezerbell's, 21 Nov: her hall's and her grand gallery's pieces)
+        else if (p.kind === 'summoningStump')
+            out.push({ x: p.x, z: p.z, r: 0.75 });
+        else if (p.kind === 'batThrone' || p.kind === 'doubloonExchange')
+            out.push({ x: p.x, z: p.z, r: 0.55 });
+        else if (p.kind === 'statue' || p.kind === 'pillar' || p.kind === 'armour')
+            out.push({ x: p.x, z: p.z, r: 0.4 });
+        else if (p.kind === 'vase' || p.kind === 'pottedPalm')
+            out.push({ x: p.x, z: p.z, r: 0.32 });
+        else if (p.kind === 'gargoyleChest' || p.kind === 'screen' || p.kind === 'vampireAltar') { // (long across its front)
+            const y = (p.yaw ?? 0) + Math.PI / 2, h = p.kind === 'screen' ? 0.45 : 0.3, dx = Math.sin(y) * h, dz = Math.cos(y) * h;
+            out.push({ x: p.x + dx, z: p.z + dz, r: 0.32 }, { x: p.x - dx, z: p.z - dz, r: 0.32 });
+        }
         else if (p.kind === 'shelf') { // (long across its front: two circles side by side)
             const y = (p.yaw ?? 0) + Math.PI / 2, dx = Math.sin(y) * 0.38, dz = Math.cos(y) * 0.38;
             out.push({ x: p.x + dx, z: p.z + dz, r: 0.32 }, { x: p.x - dx, z: p.z - dz, r: 0.32 });

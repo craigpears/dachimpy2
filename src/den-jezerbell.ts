@@ -26,8 +26,11 @@ import type { Plan, Piece, Portrait } from './den-houses.js';
     plum, as gothic as her stump. As big as what happens in it (the user, 21 Nov: "the house is a bit
     small for how big of a concept there is in it"): a hunt round it, and a fray in it. */
 export const PLAN: Plan = {
-  rooms: [{ id: 'hall', name: 'Jezerbell\'s hall', x0: -8.4, x1: 8.4, z0: -4.9, z1: 4.6, paper: '#3b2740' }],
-  doors: [],
+  rooms: [
+    { id: 'hall', name: 'Jezerbell\'s hall', x0: -8.4, x1: 8.4, z0: -4.9, z1: 4.6, paper: '#3b2740' },
+    { id: 'gallery', name: 'The Grand Gallery', x0: 8.4, x1: 68.4, z0: -9.0, z1: 8.0, paper: '#2c2340' },
+  ],
+  doors: [{ x0: 7.9, x1: 8.9, z0: -1.0, z1: 1.0 }],
   out: { x: 0, z: 4.0, r: 0.9 },
 };
 /** Where you come in (just inside the front door), and where she meets you. */
@@ -52,7 +55,7 @@ export const VASE = { x: -7.4, z: 2.7 } as const;
 export const PALM = { x: 2.6, z: 3.5 } as const;
 export const ARMOUR = { x: -7.4, z: -3.9 } as const;
 /** The gargoyles' chests, down the right wall, facing in. */
-export const CHESTS = [{ x: 7.6, z: -2.0 }, { x: 7.6, z: 0.4 }] as const;
+export const CHESTS = [{ x: 7.6, z: -2.6 }, { x: 7.6, z: 2.4 }] as const;   // (either side of the gallery's doorway)
 /** The doubloon exchanges, at the front on the right. */
 export const EXCHANGES = [{ x: 6.4, z: 3.4 }, { x: 4.7, z: 3.7 }] as const;
 export type Placed = Piece & { s?: number; extra?: Record<string, string | number | boolean> };
@@ -92,11 +95,59 @@ export const PORTRAITS: readonly Hung[] = [
 /** Her sign, over the stump: whose house it is. */
 export const SIGN = { text: 'Jezerbell', x: STUMP.x, w: 1.7, h: 0.4, y: 3.25 } as const;
 
+// ---------- her grand gallery ----------
+/* Her real main house is her gallery ("this is not my main house ... u should see my gallery", 21 Nov), and the
+   user: "she's prideful of just how giant her gallery is, that you have to go around it, and ... go find all her
+   [octopuses] in it ... hide and seek ... real grand scale". So: one enormous room off her hall, sixty metres of it, in
+   bays: pillars along the back of the aisle, a statue or a suit of armour before the back wall between her
+   portraits, vases, palms, folding screens, gargoyle chests along the front, her good armchairs. Run along it on Q
+   (the shell's `stretch`). Most of her octopuses hide in here. */
+const GAL = PLAN.rooms[1];
+/** The gallery's back wall's face (z). */
+export const GALLERY_BACK = GAL.z0 + WALL_T;
+/** Each bay's middle along the gallery (x). */
+export const BAYS: readonly number[] = Array.from({ length: 8 }, (_, i) => 13 + i * 7.5);
+/** The gallery's pieces, bay by bay (src/den-houses.ts's Piece), each bay a little different. */
+export const GALLERY: readonly Placed[] = BAYS.flatMap((bx, i): Placed[] => {
+  const odd = i % 2 === 1;
+  return [
+    { kind: 'pillar', x: bx - 3.4, z: -2.8 },   // (one row, behind the aisle: a front row stood between the camera and you)
+    odd ? { kind: 'armour', x: bx, z: -7.6, extra: { gold: true, plume: i % 4 === 1 ? '#c0262e' : '#6a3a9a' } }
+      : { kind: 'statue', x: bx, z: -7.6, extra: { animal: i % 4 === 0 ? 'shark' : 'turtle' } },
+    { kind: 'vase', x: bx - 1.7, z: -6.4 },
+    { kind: 'pottedPalm', x: bx + 2.0, z: -6.6, extra: { pot: odd ? '#7a2a3a' : '#5a2a7a' } },
+    { kind: 'screen', x: bx + 1.4, z: 4.6, yaw: odd ? -0.35 : 0.35, col: odd ? '#6a1e34' : '#4a2a5a' },
+    { kind: 'gargoyleChest', x: bx - 1.4, z: 6.7, yaw: Math.PI, col: odd ? '#d8b64a' : '#6a3a9a' },
+    { kind: 'armchair', x: bx - 1.5, z: 1.6, yaw: 0.5, col: odd ? '#7a2a3a' : '#4a2a5a' },
+    { kind: 'rug', x: bx, z: 0, col: odd ? '#5a1f4e' : '#7a1f2e', extra: { w: 6.6, d: 2.6 } },
+    { kind: 'candelabra', x: bx + 3.2, z: -2.2, extra: { light: i % 3 === 0 } },   // (a few lit, not all: they're lights)
+  ];
+});
+/** Her gallery's portraits, between the bays on its back wall: hers, painted by the den's pirate maker, and titled
+    by us, playfully, till she says what's really in her gallery. */
+const GALLERY_HUNG: readonly { id: string; title: string; backdrop: Portrait['backdrop']; dress?: Record<string, string> }[] = [
+  { id: 'wolfnight', title: 'Wolf Night', backdrop: 'bloodmoon' },
+  { id: 'eightarms', title: 'Eight Arms, One Heart', backdrop: 'pinksea', dress: { fam: 'octopus', famCol: 'violet' } },
+  { id: 'beginners', title: 'The Beginners\' Den', backdrop: 'night' },
+  { id: 'moonrise', title: 'Moonrise', backdrop: 'night', dress: { fam: 'octopus', famCol: 'aqua' } },
+  { id: 'hideandseek', title: 'Hide and Seek', backdrop: 'den', dress: { fam: 'octopus', famCol: 'orange' } },
+  { id: 'allmine', title: 'All Mine', backdrop: 'sea' },
+  { id: 'karaoke', title: 'Karaoke Night', backdrop: 'cafe' },
+];
+export const GALLERY_PORTRAITS: readonly (Portrait & { x: number; y: number; w: number; h: number })[] = GALLERY_HUNG.map((p, i) => ({
+  id: p.id, title: p.title, backdrop: p.backdrop, x: BAYS[i] + 3.75, y: 2.15, w: 1.05, h: 1.3, close: true,
+  sitter: { who: 'pirate' as const, name: 'Jezerbell', ...(p.dress ? { dress: p.dress } : {}) },
+}));
+/** Running along it (the shell's skip): from just inside its door to its far end. */
+export const GALLERY_RUN = { room: 'gallery', a: 9.6, b: 67.2 } as const;
+
 // ---------- her octopuses ----------
-/* Hidden about her room, so nobody asks her for one: each peeking out of somewhere, a tentacle showing if you look.
-   Come up close (within `near`) and Space, and it's found: out it comes, and sits up where everyone can see it. Found
-   in any order. One more is missing altogether: the werewolves have her (MISSING), back only once the pack's beaten. */
-export type Hide = 'vase' | 'throne' | 'frame' | 'armour' | 'palm' | 'chest' | 'exchange';
+/* Hidden about her hall and her gallery, so nobody asks her for one: each peeking out from somewhere, tentacles toward
+   you, never sunk into it (the user, 21 Nov, "making sure the tentacles actually appear up front. Like one sinking
+   into the chair"). Come up close (within `near`) and Space, and it's found: out it comes, and sits up where everyone
+   can see it. Found in any order. One more is missing altogether: the werewolves have her (MISSING), back only once
+   the pack's beaten. Two in the hall to begin with; the rest in the gallery, hide and seek. */
+export type Hide = string;
 export interface Octopus {
   id: Hide;
   /** Her colour (a familiar's, src/palette.ts's names). */
@@ -110,16 +161,49 @@ export interface Octopus {
 }
 const oct = (id: Hide, col: string, at: { x: number; z: number }, peek: [number, number, number, number], sit: [number, number, number, number], near = 1.25): Octopus =>
   ({ id, col, at, near, peek: { x: peek[0], y: peek[1], z: peek[2], yaw: peek[3] }, sit: { x: sit[0], y: sit[1], z: sit[2], yaw: sit[3] } });
-// (each peeking out in front of where it hides, tentacles toward you, never sunk into it: the user, 21 Nov, "making
-// sure the tentacles actually appear up front. Like one sinking into the chair")
+/* Where an octopus hides in each kind of piece, in the piece's own terms (facing +z, toward you): `at` where you
+   stand to find it, `peek` and `sit` (x, y, z, and her turn on the piece's). */
+type Local = { at: [number, number]; peek: [number, number, number, number]; sit: [number, number, number, number] };
+const IN: Record<string, Local> = {
+  vase: { at: [0, 0.9], peek: [0, 0.62, 0, 0.6], sit: [0, 0.92, 0, 0.6] },
+  screen: { at: [0.95, 0.8], peek: [0.84, 0.85, -0.18, 0.9], sit: [0, 1.78, 0, 0] },
+  pillar: { at: [0, 0.95], peek: [0.12, 3.42, 0.2, 0.3], sit: [0, 3.5, 0, 0] },
+  gargoyleChest: { at: [0, 0.95], peek: [0.6, 0.04, 0.12, 0.8], sit: [0.3, 0.52, 0.16, 0] },
+  pottedPalm: { at: [0, 0.95], peek: [0.11, 0.95, -0.02, 0.4], sit: [0, 1.75, 0, 0.3] },
+  statue: { at: [0, 1.0], peek: [0.36, 0.3, -0.22, 0.6], sit: [0.18, 0.32, 0.22, 0] },
+  armour: { at: [0.5, 0.9], peek: [0.3, 1.05, -0.05, 0.9], sit: [0, 2.12, 0, 0] },
+  armchair: { at: [0, 1.0], peek: [0, 0.04, 0.48, 0], sit: [0, 0.6, 0.05, 0] },
+};
+/** An octopus hidden in `p` (one of FURNISH or GALLERY), by IN's place for its kind, turned with it. */
+function hiddenIn(id: Hide, col: string, p: Placed): Octopus {
+  const L = IN[p.kind], yaw = p.yaw ?? 0, c = Math.cos(yaw), sn = Math.sin(yaw);
+  const w = (lx: number, lz: number) => ({ x: p.x + lx * c + lz * sn, z: p.z - lx * sn + lz * c });
+  const pt = (q: [number, number, number, number]): [number, number, number, number] => { const v = w(q[0], q[2]); return [v.x, q[1], v.z, yaw + q[3]]; };
+  const at = w(L.at[0], L.at[1]);
+  return oct(id, col, at, pt(L.peek), pt(L.sit));
+}
+/** The gallery's piece of `kind` in bay `i` (the first of that kind there). */
+function inBay(i: number, kind: string): Placed {
+  const p = GALLERY.find((q) => q.kind === kind && Math.abs(q.x - BAYS[i]) < 3.8);
+  if (!p) throw new Error(`no ${kind} in bay ${i}`);
+  return p;
+}
+const LOVE = GALLERY_PORTRAITS[2];
 export const OCTOPUSES: readonly Octopus[] = [
+  // (the hall's two, to begin with)
   oct('vase', 'pink', { x: VASE.x + 0.6, z: VASE.z }, [VASE.x, 0.62, VASE.z, 0.6], [VASE.x, 0.92, VASE.z, 0.6]),
   oct('throne', 'violet', { x: THRONE.x + 0.9, z: THRONE.z + 0.7 }, [THRONE.x + Math.sin(THRONE.yaw) * 0.62, 0.04, THRONE.z + Math.cos(THRONE.yaw) * 0.62, THRONE.yaw], [THRONE.x + 0.05, 0.52, THRONE.z + 0.05, THRONE.yaw]),
-  oct('frame', 'red', { x: -3.3, z: BACK + 1.1 }, [-2.68, 2.62, BACK + 0.16, -0.3], [-3.3, 2.86, BACK + 0.16, 0]),
-  oct('armour', 'lemon', { x: ARMOUR.x + 0.8, z: ARMOUR.z + 0.7 }, [ARMOUR.x + 0.3, 1.05, ARMOUR.z - 0.05, 0.9], [ARMOUR.x, 2.12, ARMOUR.z, 0.6]),
-  oct('palm', 'lime', { x: PALM.x - 0.7, z: PALM.z - 0.5 }, [PALM.x + 0.11, 0.95, PALM.z - 0.02, 0.4], [PALM.x, 1.75, PALM.z, 0.3]),
-  oct('chest', 'aqua', { x: CHESTS[1].x - 0.95, z: CHESTS[1].z }, [CHESTS[1].x + 0.3, 0.45, CHESTS[1].z + 0.2, -Math.PI / 2], [CHESTS[1].x - 0.25, 0.6, CHESTS[1].z + 0.5, -Math.PI / 2]),
-  oct('exchange', 'orange', { x: EXCHANGES[0].x - 0.3, z: EXCHANGES[0].z - 0.85 }, [EXCHANGES[0].x + 0.38, 0.1, EXCHANGES[0].z - 0.2, -0.4], [EXCHANGES[0].x, 1.42, EXCHANGES[0].z, -0.4]),
+  // (and the gallery's, from one end to the other)
+  hiddenIn('g-screen', 'red', inBay(0, 'screen')),
+  hiddenIn('g-vase', 'lemon', inBay(1, 'vase')),
+  hiddenIn('g-chair', 'lime', inBay(2, 'armchair')),
+  oct('g-frame', 'aqua', { x: LOVE.x, z: GALLERY_BACK + 1.1 }, [LOVE.x + 0.62, LOVE.y + 0.57, GALLERY_BACK + 0.16, -0.3], [LOVE.x, LOVE.y + 0.81, GALLERY_BACK + 0.16, 0]),
+  hiddenIn('g-chest', 'orange', inBay(3, 'gargoyleChest')),
+  hiddenIn('g-pillar', 'periwinkle', inBay(4, 'pillar')),
+  hiddenIn('g-statue', 'mint', inBay(4, 'statue')),
+  hiddenIn('g-palm', 'magenta', inBay(5, 'pottedPalm')),
+  hiddenIn('g-armour', 'gold', inBay(5, 'armour')),
+  hiddenIn('g-screen2', 'cranberry', inBay(7, 'screen')),
 ];
 /** The one the werewolves took. Back at her side once the pack's beaten. */
 export const MISSING = { col: 'black' } as const;
@@ -140,11 +224,12 @@ export const ALL = OCTOPUSES.length + 1;
 // ---------- the tour ----------
 /** Her tour, stop by stop: where you come to (`at`, within `near`) for her to say a stop's lines, and where she
     waits for you there (`her`). */
-export type TourStop = 'hall' | 'stump';
+export type TourStop = 'hall' | 'stump' | 'gallery';
 export interface Stop { id: TourStop; at: { x: number; z: number }; near: number; her: { x: number; z: number } }
 export const TOUR: readonly Stop[] = [
   { id: 'hall', at: { x: 0.4, z: 1.2 }, near: 2.0, her: { x: 1.6, z: 0.2 } },
   { id: 'stump', at: { x: STUMP.x - 0.4, z: STUMP.z + 1.3 }, near: 1.2, her: { x: STUMP.x + 1.2, z: STUMP.z + 0.9 } },
+  { id: 'gallery', at: { x: 11.0, z: 0 }, near: 1.8, her: { x: 12.2, z: -1.2 } },
 ];
 /** The stop to say next: the furthest from `from` on that you're at, or -1. */
 export function stopAt(from: number, x: number, z: number): number {

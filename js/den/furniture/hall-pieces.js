@@ -140,7 +140,45 @@ export function statue({ animal = 'shark' } = {}) {
   return { g };
 }
 
+// ---------- a pillar ----------
+const marble = mat('#d9d2c8', { roughness: 0.45 }), marbleDark = mat('#b8ada0', { roughness: 0.5 });
+/** A marble pillar, a gallery's: a square base, a fluted-looking round shaft, a broad capital on top (an octopus can
+    sit up there). `h`: its height. */
+export function pillar({ h = 3.4 } = {}) {
+  const g = new THREE.Group(), shaft = h - 0.55;
+  g.add(box(0.7, 0.18, 0.7, marbleDark, 0, 0.09, 0), cyl(0.33, 0.36, 0.12, marble, 0, 0.24, 0, 16));
+  g.add(cyl(0.26, 0.29, shaft, marble, 0, 0.3 + shaft / 2, 0, 16));
+  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; g.add(box(0.03, shaft * 0.96, 0.03, marbleDark, Math.cos(a) * 0.265, 0.3 + shaft / 2, Math.sin(a) * 0.265)); }
+  g.add(cyl(0.36, 0.28, 0.12, marble, 0, h - 0.19, 0, 16), box(0.74, 0.13, 0.74, marbleDark, 0, h - 0.065, 0));
+  return { g };
+}
+
+// ---------- a folding screen ----------
+/** A folding screen of three panels, zigzagged to stand: dark wood frames, cloth panels in `col` with a gilt trim
+    (as the wine furniture's French screen). About 1.5 wide and 1.7 high. */
+export function screen({ col = '#6a1e34' } = {}) {
+  const g = new THREE.Group(), panel = cloth(col), frame = mat('#2a1a12', { roughness: 0.6 });
+  const W = 0.5, Hh = 1.7;
+  [-1, 0, 1].forEach((k) => {
+    const p = new THREE.Group();
+    p.position.set(k * W * 0.94, 0, k === 0 ? 0 : -0.12);
+    p.rotation.y = k * 0.45;
+    p.add(box(W, Hh - 0.2, 0.03, panel, 0, Hh / 2 + 0.05, 0));
+    for (const sx of [-1, 1]) p.add(box(0.04, Hh, 0.05, frame, sx * W / 2, Hh / 2, 0));
+    p.add(box(W + 0.04, 0.05, 0.05, frame, 0, Hh, 0), box(W + 0.04, 0.05, 0.05, frame, 0, 0.12, 0));
+    p.add(box(W - 0.1, 0.02, 0.045, gilt, 0, Hh - 0.12, 0), box(W - 0.1, 0.02, 0.045, gilt, 0, 0.22, 0));
+    g.add(p);
+  });
+  return { g };
+}
+
 export const PIECES = [
+  { id: 'pillar', name: 'Marble pillar', group: 'hall', make: pillar,
+    about: 'A marble pillar: a square base, a round shaft with its flutes, a broad capital. Options: h (its height).',
+    where: 'Jezerbell\'s grand gallery.' },
+  { id: 'screen', name: 'Folding screen', group: 'hall', make: screen,
+    about: 'A folding screen of three panels, cloth in a dark wood frame with a gilt trim. Options: col (the cloth).',
+    where: 'Jezerbell\'s grand gallery.' },
   { id: 'batThrone', name: 'Throne with bat wings', group: 'hall', make: batThrone,
     about: 'A tall golden throne in a dark frame, bat wings spread from its back, gold finials. Options: col (its upholstery).',
     where: 'Jezerbell\'s house.' },
