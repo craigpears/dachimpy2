@@ -1,7 +1,7 @@
 /* Jezerbell's house, the Summoning Hall: her scene in the house shell (house.js). Its rules (the plan, her furniture,
    portraits and charts, where her octopuses hide, the tour, the pack and the fray) are src/den-jezerbell.ts's; her
    lines and the pack's src/lines/jezerbell.ts's. This places the shared furniture (furniture.js: her summoning stump
-   and altar, her throne with bat wings...), paints her portraits (portraits.js), hides her octopuses (creatures.js's
+, her throne with bat wings...), paints her portraits (portraits.js), hides her octopuses (creatures.js's
    familiars), and plays her: she meets you at the door and shows you round; come close to where an octopus is hiding
    and Space finds it, out it comes and sits up; once you've found them all, one's missing, the werewolves have her;
    Space at the stump uses a charm, and in a little cutscene (cine.js) the pack bursts out of it, a werewolf at a time
@@ -11,8 +11,8 @@
    octopus comes back, and you're shown a Wolf-skull Wayfinder. */
 import { PIRATES } from '../den-look.js';
 import {
-  PLAN, ARRIVE, WALLS, BACK, FURNISH, PORTRAITS, CHARTS, SIGN, OCTOPUSES, MISSING, ALL, octopusAt, TOUR, stopAt,
-  STUMP, atStump, atAltar, PACK, Fray,
+  PLAN, ARRIVE, WALLS, BACK, FURNISH, PORTRAITS, SIGN, OCTOPUSES, MISSING, ALL, octopusAt, TOUR, stopAt,
+  STUMP, atStump, PACK, Fray,
 } from '../den-jezerbell.js';
 import { blocksOf } from '../den-houses.js';
 import {
@@ -56,8 +56,9 @@ style.textContent = [
   `.fray-card.on { display: block; }`,
   `.fray-card h3 { margin: 6px 0; font-size: 20px; color: #e0a92a; }`,
   `.fray-card button { margin-top: 10px; min-height: 44px; min-width: 120px; font: 700 16px 'Alegreya Sans', system-ui, sans-serif; color: #2a1d13; background: #e0a92a; border: 0; border-radius: 10px; cursor: pointer; }`,
-  `.octo-count { position: fixed; top: 64px; right: 16px; z-index: 29; display: none; font: 700 15px 'Alegreya Sans', system-ui, sans-serif; color: #f6ead2; background: rgba(30, 18, 30, 0.85); border: 1px solid #b07ac8; border-radius: 10px; padding: 6px 12px; }`,
+  `.octo-count { position: fixed; top: 64px; right: 16px; z-index: 29; display: none; font: 700 18px 'Alegreya Sans', system-ui, sans-serif; color: #f6ead2; background: rgba(30, 18, 30, 0.9); border: 2px solid #b07ac8; border-radius: 12px; padding: 8px 14px; transition: transform 0.2s, border-color 0.2s; transform-origin: top right; }`,
   `.octo-count.on { display: block; }`,
+  `.octo-count.pop { transform: scale(1.25); border-color: #f0bd44; color: #ffe08a; }`,
 ].join('\n');
 document.head.append(style);
 const panel = document.createElement('div');
@@ -89,7 +90,7 @@ export const JEZERBELL_HOUSE = {
   id: 'jezerbell', plan: PLAN, arrive: ARRIVE, walls: WALLS,
   build(H) {
     const R = H.root, G = { tour: 0, ticks: [], visited: false, found: new Set(), octos: new Map(), hops: [], fray: null, frays: 0, won: 0, missingBack: false, pack: [], after: null };
-    // ---------- her furniture, her sign and her charts ----------
+    // ---------- her furniture, and her sign ----------
     for (const p of FURNISH) {
       const opts = { col: p.col, ...(p.extra || {}) };
       if (p.kind === 'candelabra') opts.light = true;
@@ -100,7 +101,6 @@ export const JEZERBELL_HOUSE = {
     }
     G.blocks = blocksOf(FURNISH);
     place(R, FURNITURE.sign({ text: SIGN.text, w: SIGN.w, h: SIGN.h, y: SIGN.y, col: '#3a1f40', ink: '#f2d6ff' }), SIGN.x, BACK, 0);
-    for (const c of CHARTS) place(R, FURNITURE.sign({ text: c.text, w: 1.75, h: 0.3, y: c.y, col: '#e8dcc0', ink: '#3a2a18' }), c.x, BACK, 0);
     // ---------- her portraits ----------
     G.exhibits = [];
     for (const q of PORTRAITS) {
@@ -109,7 +109,7 @@ export const JEZERBELL_HOUSE = {
       f.setPicture(painted.texture, painted.uv);
       G.exhibits.push({ id: q.id, x: q.x, y: q.y, z: BACK });
     }
-    G.ticks.push(...[-3.0, 3.8].map((x) => place(R, FURNITURE.sconce({ y: 2.35 }), x, BACK, 0)));
+    G.ticks.push(...[-7.2, -4.45, 1.6, 4.8].map((x) => place(R, FURNITURE.sconce({ y: 2.35 }), x, BACK, 0)));
     // ---------- her octopuses, hiding ----------
     for (const o of OCTOPUSES) {
       const c = creature('octopus', { col: o.col, idle: 'perch' });
@@ -122,7 +122,17 @@ export const JEZERBELL_HOUSE = {
     G.missing = creature('octopus', { col: MISSING.col, idle: 'perch' });
     G.missing.g.visible = false;
     R.add(G.missing.g); G.ticks.push(G.missing);
-    const showCount = () => { counter.textContent = `Octopuses found: ${G.found.size + (G.missingBack ? 1 : 0)} of ${ALL}`; counter.classList.toggle('on', G.found.size > 0 && !G.fray); };
+    const count = () => G.found.size + (G.missingBack ? 1 : 0);
+    const showCount = () => { counter.textContent = `Octopuses found: ${count()} of ${ALL}`; counter.classList.toggle('on', G.found.size > 0 && !G.fray && !cine); };
+    /** Each one found, said plainly in the corner a moment (the user, 21 Nov: "each time you find one, it should say
+        found one of X"), then the count again. */
+    const popCount = () => {
+      showCount();
+      counter.textContent = count() === ALL - 1 && !G.missingBack ? `Found one! ${count()} of ${ALL}. One's missing...` : `Found one! ${count()} of ${ALL} octopuses`;
+      counter.classList.add('pop');
+      clearTimeout(G.popT);
+      G.popT = setTimeout(() => { counter.classList.remove('pop'); showCount(); }, 2600);
+    };
 
     // ---------- her ----------
     G.herP = person({
@@ -151,7 +161,7 @@ export const JEZERBELL_HOUSE = {
       if (G.found.size === 1) lines.push(HUNT.first);
       if (G.found.size === OCTOPUSES.length && !G.missingBack) lines.push(...HUNT.allButOne);
       H.talk(G.her, lines);
-      showCount();
+      popCount();
     }
     const HOP = 0.7;
     function hopTick(dt) {
@@ -167,8 +177,9 @@ export const JEZERBELL_HOUSE = {
 
     // ---------- the pack: summoned out of the stump ----------
     /** Where each wolf stands in the fray: a crescent in front of the stump, facing the room. */
-    const spot = (i) => ({ x: STUMP.x - 2.6 + i * 1.25, z: STUMP.z + 2.1 + (i % 2) * 0.35 });
-    const YOU_AT = { x: STUMP.x - 1.6, z: STUMP.z + 3.6 }, HER_AT = { x: STUMP.x + 1.3, z: STUMP.z + 3.4 };
+    const spot = (i) => ({ x: STUMP.x - 2.6 + i * 1.6, z: STUMP.z + 1.5 + (i % 2) * 0.3 });
+    const YOU_AT = { x: STUMP.x - 1.8, z: STUMP.z + 4.0 }, HER_AT = { x: STUMP.x + 1.8, z: STUMP.z + 3.9 };
+    const MID = { x: (YOU_AT.x + HER_AT.x) / 2, z: (YOU_AT.z + HER_AT.z) / 2 };
     function packUp() {
       for (const w of G.pack) R.remove(w.g);
       G.pack = PACK.map((wolf, i) => {
@@ -191,7 +202,7 @@ export const JEZERBELL_HOUSE = {
       Object.assign(you, YOU_AT); you.g.position.set(you.x, 0, you.z); you.g.rotation.y = Math.atan2(STUMP.x - you.x, STUMP.z - you.z);
       Object.assign(G.her, HER_AT); G.her.g.position.set(G.her.x, 0, G.her.z); G.her.g.rotation.y = Math.atan2(STUMP.x - G.her.x, STUMP.z - G.her.z);
       H.say(G.her, G.frays > 1 ? AT_THE_STUMP.again : AT_THE_STUMP.summon, 2.6);
-      const at = H.at, cam = { look: V3(), dist: 6.4, tilt: 0.5, yaw: -0.45 };
+      const at = H.at, cam = { look: V3(), dist: 7.0, tilt: 0.5, yaw: -0.3 };
       const LEAP = 2.4, EVERY = 1.0, SECS = LEAP + EVERY * PACK.length + 1.6;
       let t = 0;
       const c = {
@@ -199,7 +210,7 @@ export const JEZERBELL_HOUSE = {
         tick(dt) {
           t += dt;
           G.stump.glow(Math.min(1, t / 1.2));
-          cam.look.set(STUMP.x - 0.9, 0.9, STUMP.z + 1.7).add(at);
+          cam.look.set(STUMP.x + 0.2, 0.9, STUMP.z + 2.2).add(at);
           G.pack.forEach((w, i) => {
             const t0 = LEAP + i * EVERY, u = (t - t0) / 0.7;
             if (u < 0) return;
@@ -207,7 +218,7 @@ export const JEZERBELL_HOUSE = {
             const e = Math.min(1, u);
             w.g.position.set(STUMP.x + (w.at.x - STUMP.x) * e, 0.6 * (1 - e) + Math.sin(e * Math.PI) * 1.2, STUMP.z + (w.at.z - STUMP.z) * e);
             w.pose = e < 1 ? 'leap' : t > SECS - 1.4 ? 'howl' : 'prowl';
-            face(w, YOU_AT.x, YOU_AT.z);
+            face(w, MID.x, MID.z);
           });
           if (t >= SECS) cineEnd(false);
         },
@@ -217,7 +228,7 @@ export const JEZERBELL_HOUSE = {
     }
     function landed() {
       G.stump.glow(0.25);
-      for (const w of G.pack) { w.out = true; w.g.visible = true; w.g.position.set(w.at.x, 0, w.at.z); w.pose = 'prowl'; face(w, YOU_AT.x, YOU_AT.z); H.say(w, null); }
+      for (const w of G.pack) { w.out = true; w.g.visible = true; w.g.position.set(w.at.x, 0, w.at.z); w.pose = 'prowl'; face(w, MID.x, MID.z); H.say(w, null); }
       startFray();
     }
 
@@ -232,8 +243,9 @@ export const JEZERBELL_HOUSE = {
       boards.forEach((b) => b.size(cell));
     }
     function startFray() {
-      G.fray = { rules: new Fray(), duel: null, hand: null, seed: Math.floor(Math.random() * 1e6) + 1, downs: 0, mine: 0, yours: 0, pause: 0 };
+      G.fray = { rules: new Fray(), duel: null, hand: null, seed: Math.floor(Math.random() * 1e6) + 1, downs: 0, mine: 0, yours: 0, pause: 0, t: 0 };
       panel.classList.add('on');
+      counter.classList.remove('on');
       sizeBoards();
       for (const e of G.fray.rules.start()) frayEvent(e);
       drawPack();
@@ -244,9 +256,6 @@ export const JEZERBELL_HOUSE = {
       F.hand = new Hand(BOTS.greedy, 1, wolf.pace);
       boards.forEach((b) => b.clear());
       wolfName.textContent = wolf.name;
-      const w = G.pack[i];
-      face(w, H.you.x, H.you.z);
-      H.you.g.rotation.y = Math.atan2(w.g.position.x - H.you.x, w.g.position.z - H.you.z);
     }
     function frayEvent(e) {
       const F = G.fray;
@@ -271,8 +280,30 @@ export const JEZERBELL_HOUSE = {
         if (l.sprinkles.length) boards[t.side].flash(l.sprinkles);
       }
     }
+    /* Who's fighting whom, in the hall (the user, 21 Nov: "you should kind of see Jezebel kind of interacting with the
+       werewolves. But for some reason, they're all staring at you"): your wolf comes up to you, hers to her, each
+       lunging now and then; the rest prowl at their spots, eyeing one of you or the other; she and you face your own. */
+    function stage(dt) {
+      const F = G.fray.rules, mine = F.yours, hers = F.hers(), t = (G.fray.t += dt);
+      G.pack.forEach((w, i) => {
+        if (!F.standing[i]) return;
+        const foe = i === mine ? H.you : i === hers ? G.her : null;
+        const to = foe ? { x: foe.x + 0.12, z: foe.z - 1.15 } : w.at;
+        const p = w.g.position, dx = to.x - p.x, dz = to.z - p.z, d = Math.hypot(dx, dz);
+        if (d > 0.05) { const k = Math.min(d, 2.6 * dt) / d; p.x += dx * k; p.z += dz * k; }
+        const look = foe || (i % 2 ? G.her : H.you);
+        face(w, look.x, look.z);
+        w.pose = d > 0.3 ? 'prowl' : foe && Math.sin(t * 2.3 + i * 1.7) > 0.75 ? 'leap' : 'prowl';
+      });
+      for (const [who, i] of [[H.you, mine], [G.her, hers]]) {
+        if (i < 0 || !F.standing[i]) continue;
+        const w = G.pack[i].g.position;
+        who.g.rotation.y = Math.atan2(w.x - who.x, w.z - who.z);
+      }
+    }
     function frayTick(dt) {
       const F = G.fray;
+      stage(dt);
       if (F.duel) {
         for (const t of F.duel.update(dt)) duelTurn(t);
         if (!F.duel.over) duelTurn(F.hand.update(F.duel, dt));
@@ -410,7 +441,7 @@ export const JEZERBELL_HOUSE = {
       /** The camera: during the fray, back and high enough to see you, her and the pack above the boards. */
       cam() {
         if (!G.fray && !G.after) return null;
-        return { look: V3(STUMP.x - 0.9, 0.9, STUMP.z + 2.3), dist: 7.2, tilt: 0.5, yaw: -0.3 };
+        return { look: V3(STUMP.x + 0.3, 0.9, STUMP.z + 2.9), dist: 7.6, tilt: 0.5, yaw: -0.22 };
       },
       key(k, e) {
         if (!G.fray) return false;
@@ -422,7 +453,6 @@ export const JEZERBELL_HOUSE = {
         if (G.fray || G.after || H.talking()) return null;
         if (octopusAt(H.you, G.found)) return { text: 'Something wriggled', btn: 'Look' };
         if (atStump(H.you)) return { text: 'The summoning stump', btn: 'Use a werewolf charm' };
-        if (atAltar(H.you)) return { text: 'The vampire altar', btn: 'Summon vampires' };
         return null;
       },
       act() {
@@ -431,7 +461,6 @@ export const JEZERBELL_HOUSE = {
         const o = octopusAt(H.you, G.found);
         if (o) { find(o); return true; }
         if (atStump(H.you)) { summon(); return true; }
-        if (atAltar(H.you)) { H.talk(G.her, [AT_THE_STUMP.altar]); return true; }
         return false;
       },
     };

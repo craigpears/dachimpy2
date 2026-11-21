@@ -2024,7 +2024,7 @@ Kind, sweet and playful, a gentle, peaceful part: she shows you her pictures, an
 
 ## Jezerbell
 
-A real pirate (by her pirate name only), from the user's chat log and a screenshot of her house, 21 Nov. She runs werewolf dens and vampire lairs, beginner ones so new crew get a shot; a friend says "she eats WW for breakfast". Her house has a summoning stump for werewolves and an altar for vampires; she hides her octopus familiars so nobody asks her for one. Her gallery is her main house, her shack her bank. Helium once tried to teach her distilling ("no your other left jez"), and they did karaoke instead.
+A real pirate (by her pirate name only), from the user's chat log and a screenshot of her house, 21 Nov. She runs werewolf dens and vampire lairs, beginner ones so new crew get a shot; a friend says "she eats WW for breakfast". Her house has a summoning stump for werewolves; she hides her octopus familiars so nobody asks her for one. Her gallery is her main house, her shack her bank. Helium once tried to teach her distilling ("no your other left jez"), and they did karaoke instead.
 
 Warm, bubbly and brave, a wolf hunter who laughs a lot: she shows you her house, worries you'll want one of her octopuses, and fights the werewolves beside you. Kept gentle: no other pirates' names, and nothing she wouldn't say herself.
 
@@ -2044,9 +2044,9 @@ The werewolf pack her charm summons are their own characters, ours: Huffing Hect
 - *In the middle of her hall:*
   - "This isn't even my main house, you know. You should see my gallery."
   - "And my shack's just my bank. Don't tell anyone."
-- *By her summoning stump and altar:*
+- *By her summoning stump:*
   - "This is the fun bit. A charm on the stump, and in come the werewolves."
-  - "The altar's for vampires. Tonight's a wolf night."
+  - "Wolves are my thing. Vampires I leave to Gravee."
 
 ### About the portrait you've stopped by or turned to look at (once a visit each)
 
@@ -2072,11 +2072,10 @@ The werewolf pack her charm summons are their own characters, ours: Huffing Hect
   - "The werewolves. They've been sniffing round all week. They've got her!"
   - "Right. There's a charm on the stump. Shall we go and get her back?"
 
-### At her summoning stump (a charm) and her vampire altar
+### At her summoning stump (a charm)
 
 - *The first charm:* "Charm's on. Here they come! Stand behind me. Actually, stand next to me, I need you."
 - *Another charm:* "Another charm? You're a natural. Here they come!"
-- *Space at the altar:* "Not tonight. Tonight's a wolf night."
 
 ### In the fray, beside you
 

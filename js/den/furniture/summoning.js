@@ -1,6 +1,6 @@
 /* Summoning furniture, as in Puzzle Pirates' houses: a werewolf summoning stump (a gnarled stump, pink-eyed skulls
    in its roots, where a charm brings a werewolf pack), and a vampire summoning altar (a gothic altar, its arch glazed
-   green and purple). Jezerbell's house has both, the stump on the altar's right. The stump's `glow(k)` lights its
+   green and purple). Jezerbell's house has the stump. The stump's `glow(k)` lights its
    skulls' eyes and a ring round it (0 to 1): its summoning. */
 import { THREE, mat, mesh, box, cyl, rod, ball, bone, socket, gilt, wax, flameM } from './parts.js';
 
@@ -74,5 +74,5 @@ export const PIECES = [
     where: 'Jezerbell\'s house.' },
   { id: 'vampireAltar', name: 'Vampire summoning altar', group: 'hall', make: vampireAltar,
     about: 'A dark stone altar under a gothic arch glazed green and purple, a scroll and candles on it.',
-    where: 'Jezerbell\'s house.' },
+    where: 'Nowhere yet (made for Jezerbell\'s house, left out: one summoning a house).' },
 ];

@@ -18,7 +18,7 @@ export const TOUR_LINES = {
   ],
   stump: [
     'This is the fun bit. A charm on the stump, and in come the werewolves.',
-    'The altar\'s for vampires. Tonight\'s a wolf night.',
+    'Wolves are my thing. Vampires I leave to Gravee.',
   ],
 } as const;
 
@@ -50,11 +50,10 @@ export const HUNT = {
   ],
 } as const;
 
-/** At her stump (Space uses a charm) and her altar (for show). */
+/** At her stump (Space uses a charm). */
 export const AT_THE_STUMP = {
   summon: 'Charm\'s on. Here they come! Stand behind me. Actually, stand next to me, I need you.',
   again: 'Another charm? You\'re a natural. Here they come!',
-  altar: 'Not tonight. Tonight\'s a wolf night.',
 } as const;
 
 /** In the fray, beside you: when she beats one of her own, when you beat yours, when you're knocked out. */
@@ -108,7 +107,7 @@ export const CHARACTER: Character = {
   name: 'Jezerbell',
   who: 'A real pirate (by her pirate name only), from the user\'s chat log and a screenshot of her house, 21 Nov. She '
     + 'runs werewolf dens and vampire lairs, beginner ones so new crew get a shot; a friend says "she eats WW for '
-    + 'breakfast". Her house has a summoning stump for werewolves and an altar for vampires; she hides her octopus '
+    + 'breakfast". Her house has a summoning stump for werewolves; she hides her octopus '
     + 'familiars so nobody asks her for one. Her gallery is her main house, her shack her bank. Helium once tried to teach '
     + 'her distilling ("no your other left jez"), and they did karaoke instead.\n\n'
     + 'Warm, bubbly and brave, a wolf hunter who laughs a lot: she shows you her house, worries you\'ll want one of her '
@@ -123,11 +122,11 @@ export const CHARACTER: Character = {
   ],
   lines: [
     { when: 'Answering the door when you knock', says: AT_THE_DOOR, each: { first: 'Your first visit', again: 'Coming back' } },
-    { when: 'Showing you round, as you come to each stop', says: TOUR_LINES, each: { hall: 'In the middle of her hall', stump: 'By her summoning stump and altar' } },
+    { when: 'Showing you round, as you come to each stop', says: TOUR_LINES, each: { hall: 'In the middle of her hall', stump: 'By her summoning stump' } },
     { when: 'About the portrait you\'ve stopped by or turned to look at (once a visit each)', says: ON_A_PICTURE, each: { twilight: 'Twilight Stroll', love: 'Eternal Love!', three: 'Just the three of us' } },
     { when: 'As you find each of her octopuses, by where it hid', says: FOUND },
     { when: 'Her octopus hunt: the first you find, and once you\'ve found all but the missing one', says: HUNT, each: { first: 'The first you find', allButOne: 'All found but the one the werewolves took' } },
-    { when: 'At her summoning stump (a charm) and her vampire altar', says: AT_THE_STUMP, each: { summon: 'The first charm', again: 'Another charm', altar: 'Space at the altar' } },
+    { when: 'At her summoning stump (a charm)', says: AT_THE_STUMP, each: { summon: 'The first charm', again: 'Another charm' } },
     { when: 'In the fray, beside you', says: IN_THE_FRAY, each: { mine: 'She beats one of her own, one in turn', yours: 'You beat yours, one in turn', youOut: 'You\'re knocked out' } },
     { when: 'After the fray', says: AFTER, each: { won: 'Won, her octopus back', again: 'Won again', lost: 'Lost' } },
     { when: 'Now and then, as you wander her hall once her octopuses are all back', says: CHATTER },
