@@ -49,7 +49,7 @@ function say(line) {
 // ---- The page round the board ----------------------------------------------------------------------------------
 
 function nav() {
-  const links = Object.values(PATTERNS).map((p) => `<a href="?pattern=${p.id}"${p === PATTERN && !WATCH ? ' aria-current="page"' : ''}>${p.name.replace(/^An? /, '').replace(/ \(.*/, '').replace(/^wedge of /, '')}</a>`);
+  const links = Object.values(PATTERNS).map((p) => `<a href="?pattern=${p.id}"${p === PATTERN && !WATCH ? ' aria-current="page"' : ''}>${p.name.replace(/^An? /, '').replace(/ \(.*/, '').replace(/^wedge of /, '').toLowerCase()}</a>`);
   links.push(`<a href="?pattern=${PATTERN.id}&watch"${WATCH ? ' aria-current="page"' : ''}>Watch the bot</a>`);
   $('patterns').innerHTML = links.join('');
 }
