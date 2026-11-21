@@ -39,6 +39,13 @@
      and one column put between two can't differ from both, but two can; and columns coming in on the far side
      instead would leave from that side on its next turn, every column gone 15 s after it came, the middle never
      reaching a furnace. From the middle, a column lives as long as with one furnace, drifting outward to one side.
+   - Four furnaces (`furnaces: 4`; the user, 21 Nov: "every single side being a furnace ... four sides is what makes it
+     obviously impossible to the point where you then have to start making more tactical choices"): the sides as with
+     two, and a furnace along the top and the bottom too. The pairs take turns, a burn every 50 ticks (15.3 s) as in
+     the real game, the sides first: each pair's columns or rows every 30.6 s. The top row (every column's top piece)
+     and the bottom row leave together, each judged by the same rule (the top first), and every column keeps its height:
+     its upper part moves up a piece, its lower part down, and two new pieces come in in its middle (`rowSplit`), the
+     same trick as the sides', so the honeycomb holds. A row's ten pieces, more leave a minute than with one furnace.
    - Dark rum (`darkRum`): a column of only browns (spice too) sent up while a chain is going holds the chain rather
      than breaking it, once between two Crystal Clears; it pays DARK_RUM_BONUS only when the next Crystal Clear keeps
      the chain going, never on its own, so browns can't pad a chain.
@@ -194,12 +201,17 @@ export const parseBoard = (cols) => cols.map((s) => [...s].map((ch) => {
 /** Write a board out, as parseBoard reads it. */
 export const writeBoard = (cols) => cols.map((c) => c.map((p) => LETTERS[p]).join(''));
 /** Whether a column is all browns (spice too, which never moves): a dark rum. */
+/** With four furnaces, where a column of n pieces, its top and bottom gone, takes its two new pieces: the pieces above
+    this many stay above them. */
+export const rowSplit = (n) => Math.floor((n - 2) / 2);
 export const pureBrown = (pieces) => pieces.some((p) => p === BROWN) && pieces.every((p) => p === BROWN || p === SPICE);
 /** A session at the still. */
 export class Distilling {
     random;
     timer;
     furnaces;
+    /** With four furnaces, the pair to go next: the sides, or the rows. */
+    next = 'sides';
     darkRum;
     richSpice;
     moveHeat;
@@ -245,17 +257,17 @@ export class Distilling {
     constructor(random, options = {}) {
         this.random = random;
         this.timer = options.timer !== false;
-        this.furnaces = options.furnaces === 2 ? 2 : 1;
+        this.furnaces = options.furnaces === 2 || options.furnaces === 4 ? options.furnaces : 1;
         this.darkRum = !!options.darkRum;
         this.richSpice = !!options.richSpice;
         this.moveHeat = Math.max(0, options.moveHeat ?? 0);
-        this.burnTicks = this.furnaces * (BURN_TICKS + 1) - 1;
+        this.burnTicks = this.furnaces === 2 ? 2 * (BURN_TICKS + 1) - 1 : BURN_TICKS;
         this.warnTick = this.burnTicks - (BURN_TICKS - WARN_TICK);
         // The furnace's column all black (no pieces made), then the rest from the right; with two, both furnaces'
         // columns all black, the rest from the edges in (the two beside them first, 17 pieces with no spice).
         this.cols = new Array(COLS);
-        const order = this.furnaces === 2 ? [8, 1, 7, 2, 6, 3, 5, 4] : [8, 7, 6, 5, 4, 3, 2, 1, 0];
-        const black = this.furnaces === 2 ? [0, COLS - 1] : [COLS - 1];
+        const order = this.furnaces > 1 ? [8, 1, 7, 2, 6, 3, 5, 4] : [8, 7, 6, 5, 4, 3, 2, 1, 0];
+        const black = this.furnaces > 1 ? [0, COLS - 1] : [COLS - 1];
         for (const x of black)
             this.cols[x] = new Array(x % 2 === 0 ? TALL : SHORT).fill(BLACK);
         for (const x of order)
@@ -477,7 +489,26 @@ export class Distilling {
             ev.push({ kind: 'column', column: col, finished });
             return;
         }
-        // Two furnaces: the right's column, then the left's; each half out a column, two new ones in the middle, tall
+        // Four furnaces, the rows' turn: the top row, then the bottom; each column's upper part up a piece, its lower part
+        // down, two new pieces in its middle.
+        const rows = this.furnaces === 4 && this.next === 'rows';
+        if (this.furnaces === 4)
+            this.next = rows ? 'sides' : 'rows';
+        if (rows) {
+            const top = this.leave(this.cols.map((c) => c[0]), 'top'), bottom = this.leave(this.cols.map((c) => c[c.length - 1]), 'bottom');
+            const richA = this.takeRich(), richB = this.takeRich();
+            this.cols = this.cols.map((c) => {
+                const keep = c.slice(1, c.length - 1), k = rowSplit(c.length);
+                return [...keep.slice(0, k), this.nextPiece(richA), this.nextPiece(richB), ...keep.slice(k)];
+            });
+            this.sliding = SLIDE_MS;
+            const finished = this.flask >= FLASK && this.chain < CARRY_ON;
+            if (finished)
+                this.finished = true;
+            ev.push({ kind: 'column', column: top, finished: false }, { kind: 'column', column: bottom, finished });
+            return;
+        }
+        // Two furnaces (or four, the sides' turn): the right's column, then the left's; each half out a column, two new ones in the middle, tall
         // and short in turn between their neighbours (the first the opposite of the one left of it, the second its
         // opposite, which the one right of them already is).
         const right = this.leave(this.cols[COLS - 1], 'right'), left = this.leave(this.cols[0], 'left');
@@ -492,10 +523,15 @@ export class Distilling {
     }
     /** A new column of n pieces, rich if a spice sent up in a Crystal Clear left it owed. */
     newColumn(n) {
-        const rich = this.rich > 0;
-        if (rich)
-            this.rich--;
+        const rich = this.takeRich();
         return Array.from({ length: n }, () => this.nextPiece(rich));
+    }
+    /** Whether the next column (or row) made is a rich one, counting it off. */
+    takeRich() {
+        if (this.rich <= 0)
+            return false;
+        this.rich--;
+        return true;
     }
     /** A column leaving (by the one furnace, or the side named): judged, the chain, the flask, the points, and the
         variations' rules. */
