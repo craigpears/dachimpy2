@@ -119,6 +119,10 @@ and `tests/cade-boards.test.ts`; the table `src/cade-play.ts` (a round set out, 
 stand-ins sailing the other ships until the teaching bots come, `Table`), drawn on the unlinked `cade-test.html` by
 `js/den/cade.js` in the den's and the 3D blockade's look (the den's ships, `ship-damage.js`'s holes and crew, the
 den's wind lanes and whirlpools from `js/den/sea-marks.js`, their one look, shared with sea.js and whirlpools.js).
+Rumble (21 Nov), the brawling puzzle, as a duel: [RUMBLE.md](RUMBLE.md) its real rules (YPPedia's tables, where they
+disagree, the strategies by name); `src/rumble.ts` the rules on two boards (what a clear sends, how it lands),
+`src/rumble-bots.ts` its bots (a `Style` each, only the greedy one built; the strategy bots an idea card), played on
+the unlinked `rumble-test.html` (`?watch` two bots) drawn by the hand-written `js/rumble-view.js`. No den 3D yet.
 The sloop race has a design document of its own, [RACE.md](RACE.md) (the user, 11 Nov: "all these kind of
 thoughts, design and balance decisions should all be in some kind of game design document specific to these
 races"): read it before working on the race, and keep it up to date with every design or balance decision and

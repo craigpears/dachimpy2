@@ -68,7 +68,7 @@ describe('the front page\'s colours: usable first (the user, 14 Nov: "not at the
    on through the site. It's just on the homepage right now"). */
 describe('every page: the front page\'s colours, and a way home at the top (14 Nov)', () => {
   const PAGES = ['changelog.html', 'design.html', 'distilling-guide.html', 'distilling-positions.html', 'carpentry.html',
-    'catalogue-colours.html', 'catalogue-furniture.html', 'race-editor.html'];
+    'catalogue-colours.html', 'catalogue-furniture.html', 'race-editor.html', 'rumble-test.html'];
   for (const f of PAGES) {
     const html = read(f);
     it(`${f}: the theme you picked, the shared colours, the bar home first thing`, () => {
