@@ -5,7 +5,7 @@
 // is what the board does. The pieces are the board's own (js/den/distill-board.js's pieceCanvas). Shown over the
 // unlinked distilling-test.html, `harderGuide()` an overlay to open and close.
 import {
-  Distilling, COLS, TALL, WHITE, BROWN, SPICE, SLIDE_MS, CHAIN_BONUS, DOUBLE_BONUS, DARK_RUM_BONUS, TICK_MS,
+  Distilling, COLS, TALL, WHITE, BROWN, SPICE, SLIDE_MS, CHAIN_BONUS, DOUBLE_BONUS, DARK_RUM_BONUS, TICK_MS, MOVE_HEAT_MS,
   BURN_TICKS, rowSplit, parseBoard,
 } from '../distilling.js';
 import { seeded } from '../mirror-row.js';
@@ -149,9 +149,9 @@ const SECTIONS = (pic) => {
     },
     {
       title: 'Every move heats the fire',
-      text: [`Each move you make (a drag, however many swaps, or a click's swap) brings the next burn ${(TICK_MS / 1000).toFixed(1)} s nearer.`,
+      text: [`Each move you make (a drag, however many swaps, or a click's swap) brings the next burn ${MOVE_HEAT_MS / 1000} s nearer to start with; the page's "moves heat the furnace" setting changes it.`,
         'It isn\'t scored. Fewer, better moves just leave you more time.'],
-      pics: [el('div', { class: 'turns' }, el('span', { class: 'sides' }, el('b', {}, '1 drag'), `−${(TICK_MS / 1000).toFixed(1)} s`), el('span', { class: 'sides' }, el('b', {}, '10 drags'), `−${(10 * TICK_MS / 1000).toFixed(1)} s`))],
+      pics: [el('div', { class: 'turns' }, el('span', { class: 'sides' }, el('b', {}, '1 drag'), `−${MOVE_HEAT_MS / 1000} s`), el('span', { class: 'sides' }, el('b', {}, '10 drags'), `−${(10 * MOVE_HEAT_MS / 1000).toFixed(1)} s`))],
     },
     {
       title: 'What it changes',

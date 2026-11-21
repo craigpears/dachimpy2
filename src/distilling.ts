@@ -58,9 +58,11 @@
      the chain going, never on its own, so browns can't pad a chain.
    - Rich spice (`richSpice`): each spice sent up in a Crystal Clear makes the next RICH_COLUMNS columns made richer,
      whites one in two and spice one in RICH_SPICE_ONE_IN.
-   - Moves heat the furnace (`moveHeat: n`, the user, 21 Nov: "the burn is sped up by how many drags you do ... I
+   - Moves heat the furnace (`moveHeat: ms`, the user, 21 Nov: "the burn is sped up by how many drags you do ... I
      don't want to score based on efficiency"): every move a hand makes (a drag, or a click's swap; `moved()`, called
-     once a move by whoever plays it) brings the burn n ticks nearer, so fewer moves leave more time. */
+     once a move by whoever plays it) brings the burn that many ms nearer, so fewer moves leave more time. MOVE_HEAT_MS
+     to start with, a third of a furnace tick (the user, 21 Nov, of a tick a move: "definitely a bit harsh right now.
+     Maybe it needs to be like a third of what it is at least"). */
 
 /** Pieces, as the game numbers them. */
 export const WHITE = 0, BROWN = 1, BLACK = 2, SPICE = 3, BURNT = 4;
@@ -82,6 +84,8 @@ export const POINTS: readonly number[] = [1, 0, -1, 3, -3];
 export const CHAIN_BONUS = 4;
 /** What the board says as a column goes. */
 export const MESSAGES = { clear: 'Crystal clear!', smooth: 'Smooooooth', blecch: 'Blecch!', burnt: 'Burnt!', spicy: 'Spicy!', wasted: 'Wasted Spice', finished: 'Finished!', darkRum: 'Dark rum', rich: 'Richer to come!', double: 'Double Crystal Clear!' } as const;
+/** Moves heating the furnace: ms a move brings the burn nearer, to start with. */
+export const MOVE_HEAT_MS = 100;
 /** A double Crystal Clear's bonus, and the spice it brings in. */
 export const DOUBLE_BONUS = 4, DOUBLE_SPICE = 2;
 /** Dark rum's bonus, paid on the Crystal Clear after it; rich spice: columns made richer a spice, and their spice. */
@@ -235,7 +239,7 @@ export interface DistillOptions {
   richSpice?: boolean;
   /** Both of a pair Crystal Clears at once: a bonus, and spice coming in (off by default). */
   doubles?: boolean;
-  /** Ticks a move brings the burn nearer (0, the default: none). */
+  /** ms a move brings the burn nearer (0, the default: none; MOVE_HEAT_MS to start with). */
   moveHeat?: number;
 }
 
@@ -256,7 +260,7 @@ export class Distilling {
   readonly richSpice: boolean;
   readonly doubles: boolean;
   readonly moveHeat: number;
-  /** Moves made (moved()), and the ticks they took off the furnace. */
+  /** Moves made (moved()), and the ms they took off the furnace. */
   moves = 0;
   heatedBy = 0;
   /** The furnace's ticks to a burn and its warning: BURN_TICKS and WARN_TICK with one; twice as long with two. */
@@ -470,17 +474,22 @@ export class Distilling {
     this.furnace = Number.MAX_SAFE_INTEGER;
     return this.furnaceTick(ev);
   }
-  /** A hand's move made (a drag, however many swaps, or a click's swap): with moveHeat, the furnace that many ticks
-      nearer its burn, its warning given if passed, the burn itself still on a tick of its own. */
+  /** A hand's move made (a drag, however many swaps, or a click's swap): with moveHeat, the furnace that many ms
+      nearer its burn (its clock run on, ticking over as time would, its warning given if passed), the burn itself
+      still on a tick of its own. */
   moved(): DistillEvent[] {
     const ev: DistillEvent[] = [];
     this.moves++;
     if (!this.moveHeat || !this.timer || this.finished) return ev;
-    for (let i = 0; i < this.moveHeat && this.furnace < this.burnTicks; i++) {
+    const before = this.timeLeft();
+    this.clock += this.moveHeat;
+    while (this.clock >= TICK_MS && this.furnace < this.burnTicks) {
+      this.clock -= TICK_MS;
       if (this.furnace === this.warnTick) ev.push({ kind: 'warning' });
       this.furnace++;
-      this.heatedBy++;
     }
+    if (this.furnace >= this.burnTicks) this.clock = Math.min(this.clock, TICK_MS - 1);
+    this.heatedBy += before - this.timeLeft();
     return ev;
   }
   /** Quit now, keeping what's been sent up. */

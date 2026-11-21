@@ -17,8 +17,8 @@
      Variations to feel (21 Nov, a harder Distilling that changes the thinking; DISTILLING.md §8), each off unless in
      the address: ?furnaces=2 a furnace each side, ?furnaces=4 every edge, the sides' and the rows' in turn (no bots
      for either yet), &darkrum a pure-brown column holding a chain,
-     &richspice a spice in a Crystal Clear making the next columns richer, &moveheat (or &moveheat=2) every drag
-     bringing the burn a tick (0.3 s) nearer, &doubles both of a pair Crystal Clears at once paying more and bringing
+     &richspice a spice in a Crystal Clear making the next columns richer, &moveheat every move bringing the burn 0.1 s
+     nearer (&moveheat=200, ms, any other; the page's setting), &doubles both of a pair Crystal Clears at once paying more and bringing
      spice in. ?hard all of it at once, four furnaces (the user, 21 Nov: "I kind of wanted them all in
      one because they kind of work with each other"), and the Harder button. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -83,7 +83,8 @@
     <label title="A pure-brown column sent up between two Crystal Clears holds the chain, and pays 2 on the next"><input type="checkbox" id="darkrum"> dark rum</label>
     <label title="A spice sent up in a Crystal Clear makes the next two columns richer in whites and spice"><input type="checkbox" id="richspice"> rich spice</label>
     <label title="Both of a pair Crystal Clears at once: 4 more points, and a spice comes in with each new column or row"><input type="checkbox" id="doubles"> doubles</label>
-    <label title="Every drag brings the burn a tick (0.3 s) nearer: fewer moves, more time"><input type="checkbox" id="moveheat"> moves heat the furnace</label>
+    <label title="Every move (a drag, or a click's swap) brings the burn this much nearer: fewer moves, more time">moves heat the furnace:
+      <select id="moveheat"><option value="0">no</option><option value="50">0.05 s a move</option><option value="100">0.1 s a move</option><option value="150">0.15 s a move</option><option value="200">0.2 s a move</option><option value="300">0.3 s a move</option></select></label>
     <button id="hard" title="All of them at once: a furnace on every edge, dark rum, rich spice, moves heating the furnace">Harder: all of it</button>
     <button id="how" title="What this harder Distilling is, with pictures">How it plays</button>
   </div>
@@ -113,7 +114,7 @@
 <script type="module">
 import * as THREE from 'three';
 import { seeded } from './js/mirror-row.js';
-import { Distilling, MESSAGES } from './js/distilling.js';
+import { Distilling, MESSAGES, MOVE_HEAT_MS, TICK_MS } from './js/distilling.js';
 import { LEVELS, levelNamed, bankFor, PER_COLUMN, BotPlayer } from './js/distill-bots.js';
 import { ROUTINES } from './js/distill-routines.js';
 import { STATES, TACTICS } from './js/distill-read.js';
@@ -144,10 +145,14 @@ let seed = Number(params.get('seed')) || 1, board = null, botName = params.get('
 // (?hard: all four at once)
 const hard = params.has('hard');
 let furnaces = hard ? 4 : [2, 4].includes(Number(params.get('furnaces'))) ? Number(params.get('furnaces')) : 1, darkRum = hard || params.has('darkrum'), richSpice = hard || params.has('richspice');
-// (moves heating the furnace: ?moveheat a tick a drag, ?moveheat=2 two)
 let doubles = hard || params.has('doubles');
-let moveHeat = params.has('moveheat') ? Math.max(1, Math.round(Number(params.get('moveheat')) || 1)) : hard ? 1 : 0;
-$('furnaces').value = String(furnaces); $('darkrum').checked = darkRum; $('richspice').checked = richSpice; $('moveheat').checked = moveHeat > 0; $('doubles').checked = doubles;
+// (moves heating the furnace, ms a move: ?moveheat MOVE_HEAT_MS, ?moveheat=200; an old link's ?moveheat=2, in ticks)
+const heatOf = (v) => { const n = Number(v); return !n ? MOVE_HEAT_MS : n <= 5 ? n * TICK_MS : Math.round(n); };
+let moveHeat = params.has('moveheat') ? heatOf(params.get('moveheat')) : hard ? MOVE_HEAT_MS : 0;
+// (the setting's nearest, so the select shows it)
+const HEATS = [...$('moveheat').options].map((o) => Number(o.value));
+if (moveHeat) moveHeat = HEATS.reduce((a, b) => (Math.abs(b - moveHeat) < Math.abs(a - moveHeat) ? b : a));
+$('furnaces').value = String(furnaces); $('darkrum').checked = darkRum; $('richspice').checked = richSpice; $('moveheat').value = String(moveHeat); $('doubles').checked = doubles;
 const showBotRow = () => { $('botrow').style.display = furnaces > 1 ? 'none' : ''; };
 showBotRow();
 // What the harder version is, with pictures (js/den/distill-harder-guide.js; the user, 21 Nov: "not in a text dump,
@@ -241,8 +246,8 @@ function deal() {
   address();
 }
 function address() {
-  const all = furnaces === 4 && darkRum && richSpice && doubles && moveHeat === 1;
-  const v = all ? '&hard' : `${furnaces > 1 ? `&furnaces=${furnaces}` : ''}${darkRum ? '&darkrum' : ''}${richSpice ? '&richspice' : ''}${doubles ? '&doubles' : ''}${moveHeat ? `&moveheat${moveHeat > 1 ? `=${moveHeat}` : ''}` : ''}`;
+  const all = furnaces === 4 && darkRum && richSpice && doubles && moveHeat === MOVE_HEAT_MS;
+  const v = all ? '&hard' : `${furnaces > 1 ? `&furnaces=${furnaces}` : ''}${darkRum ? '&darkrum' : ''}${richSpice ? '&richspice' : ''}${doubles ? '&doubles' : ''}${moveHeat ? `&moveheat${moveHeat !== MOVE_HEAT_MS ? `=${moveHeat}` : ''}` : ''}`;
   history.replaceState(null, '', `?seed=${seed}${v}${botName && furnaces === 1 ? `&bot=${botName}` : ''}${speed !== 1 ? `&speed=${speed}` : ''}${shot ? '&shot' : ''}`);
 }
 $('restart').onclick = () => deal();
@@ -257,10 +262,10 @@ $('furnaces').onchange = () => { furnaces = Number($('furnaces').value); showBot
 $('darkrum').onchange = () => { darkRum = $('darkrum').checked; deal(); $('darkrum').blur(); };
 $('richspice').onchange = () => { richSpice = $('richspice').checked; deal(); $('richspice').blur(); };
 $('doubles').onchange = () => { doubles = $('doubles').checked; deal(); $('doubles').blur(); };
-$('moveheat').onchange = () => { moveHeat = $('moveheat').checked ? 1 : 0; deal(); $('moveheat').blur(); };
+$('moveheat').onchange = () => { moveHeat = Number($('moveheat').value); deal(); $('moveheat').blur(); };
 $('hard').onclick = () => {
-  furnaces = 4; darkRum = richSpice = doubles = true; moveHeat = 1; $('doubles').checked = true;
-  $('furnaces').value = '4'; $('darkrum').checked = $('richspice').checked = $('moveheat').checked = true;
+  furnaces = 4; darkRum = richSpice = doubles = true; moveHeat = MOVE_HEAT_MS; $('doubles').checked = true;
+  $('furnaces').value = '4'; $('darkrum').checked = $('richspice').checked = true; $('moveheat').value = String(MOVE_HEAT_MS);
   showBotRow(); deal();
 };
 deal();
@@ -351,7 +356,7 @@ function frame() {
   $('stats').innerHTML = `Seed <b>${seed}</b>${speed !== 1 ? ` · speed <b>${speed}x</b>` : ''} · <b>${(gm.time / 1000).toFixed(0)}</b> s · burn in <b>${Number.isFinite(left) ? (left / 1000).toFixed(1) : '-'}</b> s<br>`
     + (gm.furnaces === 2 ? 'Two furnaces: both edge columns go together<br>' : '')
     + (gm.furnaces === 4 ? `Four furnaces: next to go, <b>${gm.next === 'sides' ? 'the sides' : 'the top and bottom rows'}</b><br>` : '')
-    + (gm.moveHeat ? `Moves <b>${gm.moves}</b>, the burn <b>${(gm.heatedBy * 0.306).toFixed(1)}</b> s sooner in all<br>` : '')
+    + (gm.moveHeat ? `Moves <b>${gm.moves}</b>, the burn <b>${(gm.heatedBy / 1000).toFixed(1)}</b> s sooner in all (${(gm.moveHeat / 1000).toFixed(2)} s a move)<br>` : '')
     + `Flask <b>${gm.flask}</b> / 100 · up <b>${gm.columnsUp}</b>, burned <b>${gm.columns.length - gm.columnsUp}</b><br>`
     + `Points <b>${gm.points}</b> · score <b>${gm.score().toFixed(2)}</b> · chain <b>${gm.chain}</b> (best ${gm.longest})`
     + (gm.rumHeld ? ' · <b>dark rum</b> holding it' : '') + (gm.rich ? ` · <b>${gm.rich}</b> rich column${gm.rich > 1 ? 's' : ''} to come` : '')

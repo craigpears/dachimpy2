@@ -2688,9 +2688,11 @@ itself the first time a harder board's loaded (the user, 21 Nov: "not in a text 
   whites, a quarter each brown and black, spice one in 12.
 - **All of it at once** (`?hard`, or the page's Harder button: four furnaces, doubles, dark rum, rich spice and moves heating the furnace; the user, 21 Nov: "I kind of wanted them all in one
   because they kind of work with each other"): the version to feel; the flags one at a time are for telling them apart.
-- **Moves heat the furnace** (`&moveheat`, or `&moveheat=2`; the user, 21 Nov: "the burn is sped up by how many drags
-  you do ... I don't want to score based on efficiency"): every move, a drag however many swaps it makes or a click's
-  swap, brings the burn a tick (0.3 s) nearer. Fewer, better moves leave more time; nothing is scored for it.
+- **Moves heat the furnace** (`&moveheat`, or `&moveheat=200` in ms; the user, 21 Nov: "the burn is sped up by how
+  many drags you do ... I don't want to score based on efficiency"): every move, a drag however many swaps it makes or
+  a click's swap, brings the burn nearer, 0.1 s to start with, set on the page from 0.05 s to 0.3 s. A tick a move
+  (0.3 s), the first try, was "definitely a bit harsh ... Maybe it needs to be like a third of what it is at least"
+  (the user, 21 Nov). Fewer, better moves leave more time; nothing is scored for it.
 
 ## 6. Sources
 - YPPedia, Distilling: https://yppedia.puzzlepirates.com/Distilling (rules, scoring, CC^12, history, tips)
