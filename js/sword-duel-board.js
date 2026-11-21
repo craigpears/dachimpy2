@@ -1,5 +1,5 @@
 // A Swordfight duel's board drawn on a canvas, hand-written: one side of a Duel (src/swordfight.ts), its well, its
-// pieces in the den's sword crates (js/den-sword-draw.js), the falling pair and its ghost, what just came in lit up,
+// pieces in the den's sword crates (js/den-sword-draw.js), the falling pair, what just came in lit up,
 // and the strip over it where attacks waiting to come in flash. The one drawing of a duel's board: the Swordfight duel
 // test page (js/sword-duel-view.js) and Jezerbell's werewolf fray (js/den/jezerbell-house.js) both draw with it.
 // It knows nothing of where it's shown: the page sizes it (`size(cell)`) and draws it each frame (`draw(side, dt)`).
@@ -91,20 +91,10 @@ export function duelBoard(canvas) {
         drawSword(x, 1, X + w / 2 - sw * 0.35, YY + h / 2 - sh * 0.46, sw * 0.7, sh * 0.92, '#ffffff', GREY.dark);
         x.restore();
       }
-      // the falling pair, and a ghost where it'll land
+      // the falling pair, drawn once: no ghost where it'll land, which read as a second copy of it, "really just
+      // confusing" (the user, 21 Nov; RULES.md)
       const f = b.falling;
-      if (f) {
-        const cells = b.fallingCells();
-        x.globalAlpha = 0.28;
-        const flat = f.rot % 2 === 1;
-        cells.forEach(([, c], k) => {
-          let gr = b.height(c);
-          if (!flat) gr += cells[k][0] > cells[1 - k][0] ? 1 : 0;
-          if (gr < H) block(f.pair[k], c * cell, Y(gr));
-        });
-        x.globalAlpha = 1;
-        cells.forEach(([r, c], k) => { if (r < H) block(f.pair[k], c * cell, Y(r)); });
-      }
+      if (f) b.fallingCells().forEach(([r, c], k) => { if (r < H) block(f.pair[k], c * cell, Y(r)); });
       // what just came in, lit up
       for (const fl of flashes) {
         fl.t -= dt;
