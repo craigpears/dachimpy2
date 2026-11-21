@@ -46,6 +46,13 @@
      and the bottom row leave together, each judged by the same rule (the top first), and every column keeps its height:
      its upper part moves up a piece, its lower part down, and two new pieces come in in its middle (`rowSplit`), the
      same trick as the sides', so the honeycomb holds. A row's ten pieces, more leave a minute than with one furnace.
+   - Double Crystal Clears (`doubles`; the user, 21 Nov: "an extra score for doing a double crystal clear ... one on
+     each side or top and bottom together ... You get extra spice pieces. That's actually a double hit because like
+     it's extra bonus, but it also makes things harder to move"): with two or four furnaces, both of a pair going up
+     as Crystal Clears at once (the left and right columns, or the top and bottom rows) score DOUBLE_BONUS more, and
+     the new pieces coming in bring DOUBLE_SPICE spice, one in each new column or row, wherever it falls: points if
+     sent up, but spice never moves. Each column or row is still a Crystal Clear on its own, chaining as ever; a
+     double is the pair both clear together.
    - Dark rum (`darkRum`): a column of only browns (spice too) sent up while a chain is going holds the chain rather
      than breaking it, once between two Crystal Clears; it pays DARK_RUM_BONUS only when the next Crystal Clear keeps
      the chain going, never on its own, so browns can't pad a chain.
@@ -74,7 +81,9 @@ export const POINTS: readonly number[] = [1, 0, -1, 3, -3];
 /** The chain bonus: this much for every Crystal Clear straight before. */
 export const CHAIN_BONUS = 4;
 /** What the board says as a column goes. */
-export const MESSAGES = { clear: 'Crystal clear!', smooth: 'Smooooooth', blecch: 'Blecch!', burnt: 'Burnt!', spicy: 'Spicy!', wasted: 'Wasted Spice', finished: 'Finished!', darkRum: 'Dark rum', rich: 'Richer to come!' } as const;
+export const MESSAGES = { clear: 'Crystal clear!', smooth: 'Smooooooth', blecch: 'Blecch!', burnt: 'Burnt!', spicy: 'Spicy!', wasted: 'Wasted Spice', finished: 'Finished!', darkRum: 'Dark rum', rich: 'Richer to come!', double: 'Double Crystal Clear!' } as const;
+/** A double Crystal Clear's bonus, and the spice it brings in. */
+export const DOUBLE_BONUS = 4, DOUBLE_SPICE = 2;
 /** Dark rum's bonus, paid on the Crystal Clear after it; rich spice: columns made richer a spice, and their spice. */
 export const DARK_RUM_BONUS = 2, RICH_COLUMNS = 2, RICH_SPICE_ONE_IN = 12;
 
@@ -165,6 +174,8 @@ export interface Column {
   rumBonus?: number;
   /** Rich spice (richSpice): its spice made the next columns richer. */
   rich?: boolean;
+  /** Doubles (doubles): the second of a pair both Crystal Clears at once, carrying the double's bonus in `bonus`. */
+  double?: boolean;
 }
 
 /** Whether a column goes up: its weights add to 0 or less. */
@@ -222,6 +233,8 @@ export interface DistillOptions {
   darkRum?: boolean;
   /** A spice sent up in a Crystal Clear makes the next columns richer (off by default). */
   richSpice?: boolean;
+  /** Both of a pair Crystal Clears at once: a bonus, and spice coming in (off by default). */
+  doubles?: boolean;
   /** Ticks a move brings the burn nearer (0, the default: none). */
   moveHeat?: number;
 }
@@ -241,6 +254,7 @@ export class Distilling {
   next: 'sides' | 'rows' = 'sides';
   readonly darkRum: boolean;
   readonly richSpice: boolean;
+  readonly doubles: boolean;
   readonly moveHeat: number;
   /** Moves made (moved()), and the ticks they took off the furnace. */
   moves = 0;
@@ -288,6 +302,7 @@ export class Distilling {
     this.furnaces = options.furnaces === 2 || options.furnaces === 4 ? options.furnaces : 1;
     this.darkRum = !!options.darkRum;
     this.richSpice = !!options.richSpice;
+    this.doubles = !!options.doubles;
     this.moveHeat = Math.max(0, options.moveHeat ?? 0);
     this.burnTicks = this.furnaces === 2 ? 2 * (BURN_TICKS + 1) - 1 : BURN_TICKS;
     this.warnTick = this.burnTicks - (BURN_TICKS - WARN_TICK);
@@ -492,11 +507,14 @@ export class Distilling {
     if (this.furnaces === 4) this.next = rows ? 'sides' : 'rows';
     if (rows) {
       const top = this.leave(this.cols.map((c) => c[0]), 'top'), bottom = this.leave(this.cols.map((c) => c[c.length - 1]), 'bottom');
+      const spice = this.double(top, bottom);
       const richA = this.takeRich(), richB = this.takeRich();
       this.cols = this.cols.map((c) => {
         const keep = c.slice(1, c.length - 1), k = rowSplit(c.length);
         return [...keep.slice(0, k), this.nextPiece(richA), this.nextPiece(richB), ...keep.slice(k)];
       });
+      // (a double's spice: one somewhere in each new row)
+      if (spice) for (const at of [0, 1]) { const x = Math.floor(this.random() * COLS); this.cols[x][rowSplit(this.cols[x].length) + at] = SPICE; }
       this.sliding = SLIDE_MS;
       const finished = this.flask >= FLASK && this.chain < CARRY_ON;
       if (finished) this.finished = true;
@@ -507,13 +525,24 @@ export class Distilling {
     // and short in turn between their neighbours (the first the opposite of the one left of it, the second its
     // opposite, which the one right of them already is).
     const right = this.leave(this.cols[COLS - 1], 'right'), left = this.leave(this.cols[0], 'left');
+    const spice = this.double(right, left);
     const mid = COLS / 2, keep = this.cols.slice(1, COLS - 1), lh = keep[mid - 2].length;
     const a = this.newColumn(lh === TALL ? SHORT : TALL), b = this.newColumn(lh);
+    // (a double's spice: one somewhere in each new column)
+    if (spice) for (const c of [a, b]) c[Math.floor(this.random() * c.length)] = SPICE;
     this.cols = [...keep.slice(0, mid - 1), a, b, ...keep.slice(mid - 1)];
     this.sliding = SLIDE_MS;
     const finished = this.flask >= FLASK && this.chain < CARRY_ON;
     if (finished) this.finished = true;
     ev.push({ kind: 'column', column: right, finished: false }, { kind: 'column', column: left, finished });
+  }
+  /** A pair gone (doubles): both Crystal Clears, the second marked a double and paid its bonus; whether spice is due. */
+  private double(first: Column, second: Column): boolean {
+    if (!this.doubles || !first.chain || !second.chain) return false;
+    second.double = true;
+    second.bonus += DOUBLE_BONUS;
+    this.points += DOUBLE_BONUS;
+    return true;
   }
   /** A new column of n pieces, rich if a spice sent up in a Crystal Clear left it owed. */
   private newColumn(n: number): number[] {

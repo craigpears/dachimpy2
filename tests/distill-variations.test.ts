@@ -3,7 +3,7 @@
    a-distilling-test-board-with-furnaces-on-both-si; DISTILLING.md §8). */
 import { describe, expect, it } from 'vitest';
 import {
-  BLACK, BROWN, BURNT, BURN_TICKS, CHAIN_BONUS, COLS, DARK_RUM_BONUS, Distilling, NO_SPICE_FIRST, RICH_COLUMNS, SHORT, SLIDE_MS,
+  BLACK, BROWN, BURNT, BURN_TICKS, CHAIN_BONUS, COLS, DARK_RUM_BONUS, DOUBLE_BONUS, Distilling, NO_SPICE_FIRST, RICH_COLUMNS, SHORT, SLIDE_MS,
   SPICE, TALL, TICK_MS, WARN_TICK, WHITE, parseBoard, writeBoard,
 } from '../src/distilling';
 import type { DistillEvent, DistillOptions } from '../src/distilling';
@@ -160,6 +160,38 @@ describe('four furnaces (21 Nov, the user: "every single side being a furnace")'
     expect(top.column.chain).toBe(3);
     expect(bottom.column.up).toBe(false);
     expect(g.chain).toBe(0);
+  });
+});
+
+describe('double Crystal Clears (21 Nov, the user: "extra spice pieces ... a double hit")', () => {
+  it('pay a bonus when both side columns clear at once, and bring a spice into each new column', () => {
+    const g = new Distilling(seeded(4), { furnaces: 2, doubles: true }).lay(parseBoard(sea('b')));
+    fill(g, 0, 'w'); fill(g, COLS - 1, 'w');
+    const [right, left] = burn(g);
+    expect(right.column.double).toBeUndefined();
+    expect(left.column.double).toBe(true);
+    expect(left.column.bonus).toBe(CHAIN_BONUS + DOUBLE_BONUS);
+    expect(g.points).toBe(right.column.points + left.column.points + CHAIN_BONUS + DOUBLE_BONUS);
+    expect(g.cols[4]).toContain(SPICE);
+    expect(g.cols[5]).toContain(SPICE);
+  });
+  it('pay for the top and bottom rows together too, a spice into each new row', () => {
+    const g = new Distilling(seeded(4), { furnaces: 4, doubles: true }).lay(parseBoard(sea('b')));
+    burn(g);   // (the sides)
+    for (const c of g.cols) { c[0] = WHITE; c[c.length - 1] = WHITE; }
+    const [, bottom] = burn(g);
+    expect(bottom.column.double).toBe(true);
+    const newRow = (at: number) => g.cols.map((c) => c[3 + at]);
+    expect(newRow(0)).toContain(SPICE);
+    expect(newRow(1)).toContain(SPICE);
+  });
+  it('need both: one Crystal Clear of a pair is no double, and it\'s off by default', () => {
+    const g = new Distilling(seeded(4), { furnaces: 2, doubles: true }).lay(parseBoard(sea('b')));
+    fill(g, COLS - 1, 'w');
+    expect(burn(g).some((e) => e.column.double)).toBe(false);
+    const off = new Distilling(seeded(4), { furnaces: 2 }).lay(parseBoard(sea('b')));
+    fill(off, 0, 'w'); fill(off, COLS - 1, 'w');
+    expect(burn(off).some((e) => e.column.double)).toBe(false);
   });
 });
 

@@ -65,7 +65,7 @@ const ease = (u) => u * u * (3 - 2 * u);
 
 /** A piece, a glossy sphere 40 px (drawn at K times), cached by kind. */
 const PIECES = new Map();
-function pieceCanvas(p) {
+export function pieceCanvas(p) {
   if (PIECES.has(p)) return PIECES.get(p);
   const c = COL[p], S = CELL * K, R = S / 2 - 2 * K;
   const cv = canvas(S, S, (g) => {
@@ -440,6 +440,7 @@ export function distillBoard(o = {}) {
     if (c.darkRum) say(MESSAGES.darkRum, { sup: 'held' });
     if (c.rumBonus) say(`${MESSAGES.darkRum} +${c.rumBonus}`, { orange: true });
     if (c.rich) say(MESSAGES.rich, { orange: true });
+    if (c.double) say(MESSAGES.double, { sup: 'spice in' });
     b.onColumn?.(c, finished);
     if (finished) finish();
   }

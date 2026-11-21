@@ -2653,7 +2653,9 @@ luck. They want a variation that changes the thinking, not the pace (no faster f
 The ideas are on the card `idea-distilling-with-a-higher-skill-cap-fun-variation`; a first feel-test is on
 `distilling-test.html` behind flags, each off by default, so the real puzzle, Helium's lesson and the bots are
 unchanged (`src/distilling.ts`'s options, tested in `tests/distill-variations.test.ts`). The bots know only one
-furnace, so none plays the two-furnace board yet.
+furnace, so none plays the two- or four-furnace board yet. The page explains it with pictures, "Distilling on four
+sides" (`js/den/distill-harder-guide.js`, its pictures drawn from the rules on seeded boards): How it plays, and open by
+itself the first time a harder board's loaded (the user, 21 Nov: "not in a text dump, but in an actual decent thing").
 
 - **Two furnaces** (`?furnaces=2`): a furnace each side, both edge columns starting all black. Both columns leave
   together every 100 ticks (30.6 s), the right judged first for the chain, by the same up-or-burn rule; as many columns
@@ -2673,12 +2675,18 @@ furnace, so none plays the two-furnace board yet.
   for the chain. Every column keeps its height: its upper part moves up a piece, its lower part down, and two new
   pieces come in in its middle, the same trick as the sides', so the honeycomb holds. More pieces leave a minute than
   with one furnace (two rows of ten every 30.6 s on top of the columns), so a flask fills sooner.
+- **Double Crystal Clears** (`&doubles`; the user, 21 Nov: "an extra score for doing a double crystal clear ... You get
+  extra spice pieces. That's actually a double hit because like it's extra bonus, but it also makes things harder to
+  move"): with two or four furnaces, both of a pair going up as Crystal Clears at the same burn (left and right, or top
+  and bottom) score 4 more, and a spice comes in with each new column or row, wherever it falls: 3 points sent up, -3
+  burned, and it never moves. A Crystal Clear still needs only its own column or row; a double is the pair together,
+  and the chain (CC^n) counts each clear in order, right, left, top, bottom.
 - **Dark rum** (`&darkrum`): a column of only browns (spice allowed, since it never moves) sent up while a chain is
   going holds the chain instead of breaking it, once between two Crystal Clears (a second in a row breaks it). It pays
   2 only on the Crystal Clear after it, never on its own, so browns can't pad a chain.
 - **Rich spice** (`&richspice`): each spice sent up in a Crystal Clear makes the next two columns made richer: half
   whites, a quarter each brown and black, spice one in 12.
-- **All of it at once** (`?hard`, or the page's Harder button, four furnaces with the other three; the user, 21 Nov: "I kind of wanted them all in one
+- **All of it at once** (`?hard`, or the page's Harder button: four furnaces, doubles, dark rum, rich spice and moves heating the furnace; the user, 21 Nov: "I kind of wanted them all in one
   because they kind of work with each other"): the version to feel; the flags one at a time are for telling them apart.
 - **Moves heat the furnace** (`&moveheat`, or `&moveheat=2`; the user, 21 Nov: "the burn is sped up by how many drags
   you do ... I don't want to score based on efficiency"): every move, a drag however many swaps it makes or a click's
