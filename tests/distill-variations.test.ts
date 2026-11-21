@@ -116,6 +116,53 @@ describe('two furnaces (21 Nov)', () => {
   });
 });
 
+describe('four furnaces (21 Nov, the user: "every single side being a furnace")', () => {
+  const four = (seed = 1) => new Distilling(seeded(seed), { furnaces: 4 });
+  it('burn the sides and then the rows in turn, one pair every 50 ticks (15.3 s), the sides first', () => {
+    const g = four();
+    expect(g.burnTicks).toBe(BURN_TICKS);
+    const sides: string[][] = [];
+    for (let i = 0; i < 4; i++) {
+      let ev: DistillEvent[] = [];
+      while (!columns(ev).length) ev = g.tick(TICK_MS);
+      sides.push(columns(ev).map((e) => e.column.side!));
+      g.tick(SLIDE_MS);
+    }
+    expect(sides).toEqual([['right', 'left'], ['top', 'bottom'], ['right', 'left'], ['top', 'bottom']]);
+  });
+  it('send the top and bottom rows off, every column keeping its height, two new pieces in its middle', () => {
+    for (let s = 1; s <= 30; s++) {
+      const g = four(s);
+      burn(g);   // (the sides)
+      const before = g.cols.map((c) => [...c]);
+      const [top, bottom] = burn(g);
+      expect(top.column.side).toBe('top');
+      expect(top.column.pieces).toEqual(before.map((c) => c[0]));
+      expect(bottom.column.side).toBe('bottom');
+      expect(bottom.column.pieces).toEqual(before.map((c) => c[c.length - 1]));
+      for (let x = 0; x < COLS; x++) {
+        const c = g.cols[x], b = before[x], k = b.length === TALL ? 3 : 3;
+        expect(c.length).toBe(b.length);
+        expect(c.slice(0, k)).toEqual(b.slice(1, k + 1));
+        expect(c.slice(k + 2)).toEqual(b.slice(k + 1, b.length - 1));
+      }
+      for (let x = 1; x < COLS; x++) expect(g.cols[x].length).not.toBe(g.cols[x - 1].length);
+    }
+  });
+  it('judge a row by the same up-or-burn rule, and chain it like a column', () => {
+    const g = four();
+    g.lay(parseBoard(sea('w')));
+    burn(g);   // (the sides: two Crystal Clears)
+    for (const c of g.cols) { c[0] = WHITE; c[c.length - 1] = BLACK; }
+    const [top, bottom] = burn(g);
+    expect(top.column.up).toBe(true);
+    expect(top.column.pieces.length).toBe(COLS);
+    expect(top.column.chain).toBe(3);
+    expect(bottom.column.up).toBe(false);
+    expect(g.chain).toBe(0);
+  });
+});
+
 describe('dark rum (21 Nov)', () => {
   /** A game laid all white, the next columns to go set by hand, for chains. */
   const rum = (on = true) => new Distilling(seeded(3), { darkRum: on }).lay(parseBoard(sea('w')));

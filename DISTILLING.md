@@ -2665,12 +2665,20 @@ furnace, so none plays the two-furnace board yet.
   change: there's no safe corner far from the fire, so storing blacks top-left and browns bottom-left stops working,
   whites in the middle are the only safe ones, a Crystal Clear on one side has to be built while the other side's junk
   burns, and burnt whites matter again.
+- **Four furnaces** (`?furnaces=4`; the user, 21 Nov: "every single side being a furnace ... two sides, you still kind
+  of manage that ... but four sides is what makes it obviously impossible to the point where you then have to start
+  making more tactical choices"): the sides as with two, and a furnace along the top and the bottom. The pairs take
+  turns, a burn every 15.3 s as in the real game, the sides first, so each pair goes every 30.6 s. The top row (every
+  column's top piece, a zigzag of ten) and the bottom row leave together, each judged by the same rule, the top first
+  for the chain. Every column keeps its height: its upper part moves up a piece, its lower part down, and two new
+  pieces come in in its middle, the same trick as the sides', so the honeycomb holds. More pieces leave a minute than
+  with one furnace (two rows of ten every 30.6 s on top of the columns), so a flask fills sooner.
 - **Dark rum** (`&darkrum`): a column of only browns (spice allowed, since it never moves) sent up while a chain is
   going holds the chain instead of breaking it, once between two Crystal Clears (a second in a row breaks it). It pays
   2 only on the Crystal Clear after it, never on its own, so browns can't pad a chain.
 - **Rich spice** (`&richspice`): each spice sent up in a Crystal Clear makes the next two columns made richer: half
   whites, a quarter each brown and black, spice one in 12.
-- **All four at once** (`?hard`, or the page's Harder button; the user, 21 Nov: "I kind of wanted them all in one
+- **All of it at once** (`?hard`, or the page's Harder button, four furnaces with the other three; the user, 21 Nov: "I kind of wanted them all in one
   because they kind of work with each other"): the version to feel; the flags one at a time are for telling them apart.
 - **Moves heat the furnace** (`&moveheat`, or `&moveheat=2`; the user, 21 Nov: "the burn is sped up by how many drags
   you do ... I don't want to score based on efficiency"): every move, a drag however many swaps it makes or a click's

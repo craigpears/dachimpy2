@@ -15,9 +15,10 @@
      playing it live, so you can compare"): Save my moves downloads them, for tools/distill-compare.mjs (the real
      puzzle only, not its variations).
      Variations to feel (21 Nov, a harder Distilling that changes the thinking; DISTILLING.md §8), each off unless in
-     the address: ?furnaces=2 a furnace each side (no bots for it yet), &darkrum a pure-brown column holding a chain,
+     the address: ?furnaces=2 a furnace each side, ?furnaces=4 every edge, the sides' and the rows' in turn (no bots
+     for either yet), &darkrum a pure-brown column holding a chain,
      &richspice a spice in a Crystal Clear making the next columns richer, &moveheat (or &moveheat=2) every drag
-     bringing the burn a tick (0.3 s) nearer. ?hard all four at once (the user, 21 Nov: "I kind of wanted them all in
+     bringing the burn a tick (0.3 s) nearer. ?hard all of it at once, four furnaces (the user, 21 Nov: "I kind of wanted them all in
      one because they kind of work with each other"), and the Harder button. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -77,11 +78,11 @@
   </div>
   <div class="row" title="Variations to try (21 Nov): kept in the address">
     <label for="furnaces">Furnaces:</label>
-    <select id="furnaces"><option value="1">one, the real puzzle</option><option value="2">two, one each side</option></select>
+    <select id="furnaces"><option value="1">one, the real puzzle</option><option value="2">two, one each side</option><option value="4">four, every edge</option></select>
     <label title="A pure-brown column sent up between two Crystal Clears holds the chain, and pays 2 on the next"><input type="checkbox" id="darkrum"> dark rum</label>
     <label title="A spice sent up in a Crystal Clear makes the next two columns richer in whites and spice"><input type="checkbox" id="richspice"> rich spice</label>
     <label title="Every drag brings the burn a tick (0.3 s) nearer: fewer moves, more time"><input type="checkbox" id="moveheat"> moves heat the furnace</label>
-    <button id="hard" title="All four at once: two furnaces, dark rum, rich spice, moves heating the furnace">Harder: all four</button>
+    <button id="hard" title="All of them at once: a furnace on every edge, dark rum, rich spice, moves heating the furnace">Harder: all of it</button>
   </div>
   <div class="row" id="botrow">
     <label for="bot">Watch a practice player:</label>
@@ -138,11 +139,11 @@ let seed = Number(params.get('seed')) || 1, board = null, botName = params.get('
 // know only the one furnace, so none plays two.
 // (?hard: all four at once)
 const hard = params.has('hard');
-let furnaces = hard || params.get('furnaces') === '2' ? 2 : 1, darkRum = hard || params.has('darkrum'), richSpice = hard || params.has('richspice');
+let furnaces = hard ? 4 : [2, 4].includes(Number(params.get('furnaces'))) ? Number(params.get('furnaces')) : 1, darkRum = hard || params.has('darkrum'), richSpice = hard || params.has('richspice');
 // (moves heating the furnace: ?moveheat a tick a drag, ?moveheat=2 two)
 let moveHeat = params.has('moveheat') ? Math.max(1, Math.round(Number(params.get('moveheat')) || 1)) : hard ? 1 : 0;
 $('furnaces').value = String(furnaces); $('darkrum').checked = darkRum; $('richspice').checked = richSpice; $('moveheat').checked = moveHeat > 0;
-const showBotRow = () => { $('botrow').style.display = furnaces === 2 ? 'none' : ''; };
+const showBotRow = () => { $('botrow').style.display = furnaces > 1 ? 'none' : ''; };
 showBotRow();
 // ?shot: the board alone in the middle, no panel (for a picture of it).
 const shot = params.has('shot');
@@ -218,7 +219,7 @@ function deal() {
   }) : null;
   board.external = !!player;
   // (the real puzzle only: a variation's game can't be replayed by the compare tool)
-  recorder = player || furnaces === 2 || darkRum || richSpice || moveHeat ? null : new Recorder(board.game, seed, { speed });
+  recorder = player || furnaces > 1 || darkRum || richSpice || moveHeat ? null : new Recorder(board.game, seed, { speed });
   window.recording = () => recorder?.rec;   // (for the console)
   $('save').style.display = recorder ? '' : 'none';
   // (a burn by hand while a bot plays: the bot told of the column)
@@ -228,8 +229,8 @@ function deal() {
   address();
 }
 function address() {
-  const all = furnaces === 2 && darkRum && richSpice && moveHeat === 1;
-  const v = all ? '&hard' : `${furnaces === 2 ? '&furnaces=2' : ''}${darkRum ? '&darkrum' : ''}${richSpice ? '&richspice' : ''}${moveHeat ? `&moveheat${moveHeat > 1 ? `=${moveHeat}` : ''}` : ''}`;
+  const all = furnaces === 4 && darkRum && richSpice && moveHeat === 1;
+  const v = all ? '&hard' : `${furnaces > 1 ? `&furnaces=${furnaces}` : ''}${darkRum ? '&darkrum' : ''}${richSpice ? '&richspice' : ''}${moveHeat ? `&moveheat${moveHeat > 1 ? `=${moveHeat}` : ''}` : ''}`;
   history.replaceState(null, '', `?seed=${seed}${v}${botName && furnaces === 1 ? `&bot=${botName}` : ''}${speed !== 1 ? `&speed=${speed}` : ''}${shot ? '&shot' : ''}`);
 }
 $('restart').onclick = () => deal();
@@ -245,8 +246,8 @@ $('darkrum').onchange = () => { darkRum = $('darkrum').checked; deal(); $('darkr
 $('richspice').onchange = () => { richSpice = $('richspice').checked; deal(); $('richspice').blur(); };
 $('moveheat').onchange = () => { moveHeat = $('moveheat').checked ? 1 : 0; deal(); $('moveheat').blur(); };
 $('hard').onclick = () => {
-  furnaces = 2; darkRum = richSpice = true; moveHeat = 1;
-  $('furnaces').value = '2'; $('darkrum').checked = $('richspice').checked = $('moveheat').checked = true;
+  furnaces = 4; darkRum = richSpice = true; moveHeat = 1;
+  $('furnaces').value = '4'; $('darkrum').checked = $('richspice').checked = $('moveheat').checked = true;
   showBotRow(); deal();
 };
 deal();
@@ -334,6 +335,7 @@ function frame() {
   const gm = board.game, left = gm.timeLeft();
   $('stats').innerHTML = `Seed <b>${seed}</b>${speed !== 1 ? ` · speed <b>${speed}x</b>` : ''} · <b>${(gm.time / 1000).toFixed(0)}</b> s · burn in <b>${Number.isFinite(left) ? (left / 1000).toFixed(1) : '-'}</b> s<br>`
     + (gm.furnaces === 2 ? 'Two furnaces: both edge columns go together<br>' : '')
+    + (gm.furnaces === 4 ? `Four furnaces: next to go, <b>${gm.next === 'sides' ? 'the sides' : 'the top and bottom rows'}</b><br>` : '')
     + (gm.moveHeat ? `Moves <b>${gm.moves}</b>, the burn <b>${(gm.heatedBy * 0.306).toFixed(1)}</b> s sooner in all<br>` : '')
     + `Flask <b>${gm.flask}</b> / 100 · up <b>${gm.columnsUp}</b>, burned <b>${gm.columns.length - gm.columnsUp}</b><br>`
     + `Points <b>${gm.points}</b> · score <b>${gm.score().toFixed(2)}</b> · chain <b>${gm.chain}</b> (best ${gm.longest})`
