@@ -107,6 +107,11 @@ choice by `js/tutorial-choice.js`; both on their own in the unlinked `tutorial-t
 
 Read [STORY.md](STORY.md) for the den's story, its progression and the principles behind them, and keep it
 up to date as the story grows. Read [RULES.md](RULES.md) before changing gameplay or wording, and add to it whenever the user corrects a rule or gives design feedback.
+Swordfight duels (21 Nov) have [SWORDFIGHT.md](SWORDFIGHT.md): Puzzle Pirates' real duel rules (where a
+sword or sprinkle lands, its colours by the attacker's drop pattern, the insta); built in `src/swordfight.ts`
+(`Duel`, `Board.take`, `SWORDS`), its bots `src/sword-bots.ts` (a `SwordBot` a strategy, `BOTS`, played at a
+person's pace by `Hand`), on the unlinked `swordfight-duel-test.html` (`js/sword-duel-view.js`; `?watch`, `?seed=`,
+`?bot=`, `?swords=`). Read it before working on Swordfight.
 Distilling, the puzzle Helium teaches, has one too, [DISTILLING.md](DISTILLING.md) (its real rules, look, techniques
 and targets, researched 12 Nov): read it before working on Distilling, and keep it current.
 The tabletop blockade (16 Nov), a faithful Puzzle Pirates blockade kept wholly apart from the den's 3D one, has

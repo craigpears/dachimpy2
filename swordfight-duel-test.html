@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swordfight duel test</title>
+<!-- Swordfight duels (SWORDFIGHT.md), unlinked like distilling-test.html: both boards side by side, so what your breaks
+     do to the other board is there to see. Duel the bot, or ?watch two bots. The rules src/swordfight.ts (the one
+     Swordfight, the den's armoury plays it too), the bots src/sword-bots.ts, the page js/sword-duel-view.js, the
+     pieces' look src/den-sword-draw.ts. ?seed= the pairs, ?bot= the bot you duel (greedy), ?watch with ?bots=
+     greedy,greedy, ?swords=cutlass,rapier each side's sword (its drop pattern). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/site.css">
+<style>
+  body { overflow: hidden; }
+  .duel { display: flex; flex-direction: column; max-width: 980px; margin: 0 auto; padding: 8px 16px 10px; box-sizing: border-box; }
+  .top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+  h1 { margin: 0; font: 700 26px/1.1 'Alegreya', serif; color: var(--title); }
+  .modes { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+  .modes a, .modes button, .pad button, .over button { font: 700 15px 'Alegreya Sans', sans-serif; border-radius: 8px; min-height: 36px; padding: 4px 12px;
+    color: var(--accent-text); background: transparent; border: 2px solid var(--accent); text-decoration: none; display: inline-flex; align-items: center; cursor: pointer; }
+  .modes a[aria-current], .over button { color: var(--on-accent); background: var(--accent); }
+  .modes a:hover, .modes button:hover, .pad button:hover { background: var(--tile-hi); }
+  .modes a[aria-current]:hover, .over button:hover { background: var(--accent-hi); }
+  #help { margin: 4px 0 0; color: var(--dim); font-size: 15px; max-width: 75ch; }
+  #help[hidden] { display: none; }
+  .boards { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: flex-start; gap: 14px; margin-top: 8px; }
+  .side { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+  .who { display: flex; gap: 8px; align-items: baseline; font-size: 15px; color: var(--dim); white-space: nowrap; }
+  .who b { font: 700 18px 'Alegreya', serif; color: var(--text); }
+  .who .sent { color: var(--faint); font-size: 14px; }
+  canvas { display: block; touch-action: none; }
+  #say { min-height: 1.4em; margin: 6px 0 0; text-align: center; color: var(--text); font-size: 15px; }
+  .pad { display: flex; justify-content: center; gap: 8px; margin-top: 6px; }
+  .pad button { min-width: 56px; min-height: 48px; justify-content: center; font-size: 22px; }
+  .pad button.drop { min-width: 72px; color: var(--on-accent); background: var(--accent); }
+  .pad[hidden] { display: none; }
+  .over { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%); text-align: center; background: var(--bar); border: 1px solid var(--edge);
+    border-radius: 12px; padding: 14px 22px; box-shadow: 0 8px 24px var(--shadow); }
+  .over[hidden] { display: none; }
+  .over p { margin: 0 0 10px; font: 700 24px 'Alegreya', serif; color: var(--title); }
+  .over small { display: block; margin: -6px 0 10px; color: var(--dim); font: 500 14px 'Alegreya Sans'; }
+  /* On a phone (RULES.md, "On a phone"): the boards the screen, the keys a row of thumb-sized buttons along the foot. */
+  @media (max-width: 620px) {
+    .duel { padding: 4px 8px 8px; }
+    h1 { font-size: 19px; }
+    .modes a, .modes button { min-height: 44px; font-size: 14px; padding: 4px 9px; }
+    .boards { gap: 8px; }
+    .who { font-size: 13px; gap: 5px; }
+    .who b { font-size: 15px; }
+    .who .sent { display: none; }
+    #say { font-size: 13px; }
+  }
+  @media (pointer: coarse) { .pad button { min-height: 52px; } .keys { display: none; } }
+  @media (pointer: fine) { .pad { display: none; } }
+</style>
+</head>
+<body>
+<script src="js/site-bar.js" data-static></script>
+<main class="duel">
+  <div class="top">
+    <h1>Swordfight duel</h1>
+    <nav class="modes" aria-label="Mode">
+      <a id="play" href="?">Duel the bot</a>
+      <a id="watch" href="?watch">Watch two bots</a>
+      <button id="again" type="button">Deal again</button>
+      <button id="helpBtn" type="button" aria-expanded="false" aria-controls="help">How it works</button>
+    </nav>
+  </div>
+  <p id="help" hidden>Puzzle Pirates' Swordfight, two boards, both dealt the same pairs. Break a breaker on its colour and what
+    breaks goes at the other side: loose pieces as sprinkles, a block fused 2x2 or bigger as a sword, a chain multiplying it.
+    It waits over their board and comes in when their pair lands, coloured by your sword's drop pattern: a sword picture for
+    a turn, then grey, then see-through, then ordinary. Fill their fourth column and they lose; a sword landing there is an
+    insta. <span class="keys">Left and right arrows move, up and down turn, Space drops.</span></p>
+  <div class="boards">
+    <section class="side"><div class="who"><b id="name0">You</b><span id="sword0"></span><span class="sent" id="sent0"></span></div><canvas id="c0"></canvas></section>
+    <section class="side"><div class="who"><b id="name1">Bot</b><span id="sword1"></span><span class="sent" id="sent1"></span></div><canvas id="c1"></canvas></section>
+  </div>
+  <p id="say" aria-live="polite"></p>
+  <div class="pad" id="pad">
+    <button type="button" data-k="left" aria-label="Move left">◀</button>
+    <button type="button" data-k="ccw" aria-label="Turn anticlockwise">⟲</button>
+    <button type="button" class="drop" data-k="drop" aria-label="Drop">⤓</button>
+    <button type="button" data-k="cw" aria-label="Turn clockwise">⟳</button>
+    <button type="button" data-k="right" aria-label="Move right">▶</button>
+  </div>
+</main>
+<div class="over" id="over" hidden><p id="overText"></p><small id="overSub"></small><button id="overAgain" type="button">Again</button></div>
+<script type="module" src="js/sword-duel-view.js"></script>
+</body>
+</html>
