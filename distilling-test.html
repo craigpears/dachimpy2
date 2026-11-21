@@ -17,7 +17,8 @@
      Variations to feel (21 Nov, a harder Distilling that changes the thinking; DISTILLING.md §8), each off unless in
      the address: ?furnaces=2 a furnace each side (no bots for it yet), &darkrum a pure-brown column holding a chain,
      &richspice a spice in a Crystal Clear making the next columns richer, &moveheat (or &moveheat=2) every drag
-     bringing the burn a tick (0.3 s) nearer. -->
+     bringing the burn a tick (0.3 s) nearer. ?hard all four at once (the user, 21 Nov: "I kind of wanted them all in
+     one because they kind of work with each other"), and the Harder button. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -80,6 +81,7 @@
     <label title="A pure-brown column sent up between two Crystal Clears holds the chain, and pays 2 on the next"><input type="checkbox" id="darkrum"> dark rum</label>
     <label title="A spice sent up in a Crystal Clear makes the next two columns richer in whites and spice"><input type="checkbox" id="richspice"> rich spice</label>
     <label title="Every drag brings the burn a tick (0.3 s) nearer: fewer moves, more time"><input type="checkbox" id="moveheat"> moves heat the furnace</label>
+    <button id="hard" title="All four at once: two furnaces, dark rum, rich spice, moves heating the furnace">Harder: all four</button>
   </div>
   <div class="row" id="botrow">
     <label for="bot">Watch a practice player:</label>
@@ -134,9 +136,11 @@ window.screenAt = (col, row) => {
 let seed = Number(params.get('seed')) || 1, board = null, botName = params.get('bot') || '';
 // The variations (src/distilling.ts's options, each off by default): two furnaces, dark rum, rich spice. The bots
 // know only the one furnace, so none plays two.
-let furnaces = params.get('furnaces') === '2' ? 2 : 1, darkRum = params.has('darkrum'), richSpice = params.has('richspice');
+// (?hard: all four at once)
+const hard = params.has('hard');
+let furnaces = hard || params.get('furnaces') === '2' ? 2 : 1, darkRum = hard || params.has('darkrum'), richSpice = hard || params.has('richspice');
 // (moves heating the furnace: ?moveheat a tick a drag, ?moveheat=2 two)
-let moveHeat = params.has('moveheat') ? Math.max(1, Math.round(Number(params.get('moveheat')) || 1)) : 0;
+let moveHeat = params.has('moveheat') ? Math.max(1, Math.round(Number(params.get('moveheat')) || 1)) : hard ? 1 : 0;
 $('furnaces').value = String(furnaces); $('darkrum').checked = darkRum; $('richspice').checked = richSpice; $('moveheat').checked = moveHeat > 0;
 const showBotRow = () => { $('botrow').style.display = furnaces === 2 ? 'none' : ''; };
 showBotRow();
@@ -224,7 +228,8 @@ function deal() {
   address();
 }
 function address() {
-  const v = `${furnaces === 2 ? '&furnaces=2' : ''}${darkRum ? '&darkrum' : ''}${richSpice ? '&richspice' : ''}${moveHeat ? `&moveheat${moveHeat > 1 ? `=${moveHeat}` : ''}` : ''}`;
+  const all = furnaces === 2 && darkRum && richSpice && moveHeat === 1;
+  const v = all ? '&hard' : `${furnaces === 2 ? '&furnaces=2' : ''}${darkRum ? '&darkrum' : ''}${richSpice ? '&richspice' : ''}${moveHeat ? `&moveheat${moveHeat > 1 ? `=${moveHeat}` : ''}` : ''}`;
   history.replaceState(null, '', `?seed=${seed}${v}${botName && furnaces === 1 ? `&bot=${botName}` : ''}${speed !== 1 ? `&speed=${speed}` : ''}${shot ? '&shot' : ''}`);
 }
 $('restart').onclick = () => deal();
@@ -239,6 +244,11 @@ $('furnaces').onchange = () => { furnaces = Number($('furnaces').value); showBot
 $('darkrum').onchange = () => { darkRum = $('darkrum').checked; deal(); $('darkrum').blur(); };
 $('richspice').onchange = () => { richSpice = $('richspice').checked; deal(); $('richspice').blur(); };
 $('moveheat').onchange = () => { moveHeat = $('moveheat').checked ? 1 : 0; deal(); $('moveheat').blur(); };
+$('hard').onclick = () => {
+  furnaces = 2; darkRum = richSpice = true; moveHeat = 1;
+  $('furnaces').value = '2'; $('darkrum').checked = $('richspice').checked = $('moveheat').checked = true;
+  showBotRow(); deal();
+};
 deal();
 
 /** The bot's mode, in the bar along the bottom, always in view (the user, 17 Nov: "more debugging on like what its

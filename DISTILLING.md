@@ -2670,6 +2670,8 @@ furnace, so none plays the two-furnace board yet.
   2 only on the Crystal Clear after it, never on its own, so browns can't pad a chain.
 - **Rich spice** (`&richspice`): each spice sent up in a Crystal Clear makes the next two columns made richer: half
   whites, a quarter each brown and black, spice one in 12.
+- **All four at once** (`?hard`, or the page's Harder button; the user, 21 Nov: "I kind of wanted them all in one
+  because they kind of work with each other"): the version to feel; the flags one at a time are for telling them apart.
 - **Moves heat the furnace** (`&moveheat`, or `&moveheat=2`; the user, 21 Nov: "the burn is sped up by how many drags
   you do ... I don't want to score based on efficiency"): every move, a drag however many swaps it makes or a click's
   swap, brings the burn a tick (0.3 s) nearer. Fewer, better moves leave more time; nothing is scored for it.
