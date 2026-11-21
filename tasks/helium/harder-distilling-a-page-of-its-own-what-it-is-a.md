@@ -1,6 +1,6 @@
 ---
 title: Harder Distilling, a page of its own: what it is, and the thinking behind it
-status: asked
+status: playtest
 asked: 21 Nov
 updated: 21 Nov
 ---
@@ -10,3 +10,6 @@ updated: 21 Nov
 ## Log
 
 - 21 Nov: added.
+- 21 Nov: being done
+- 21 Nov: Built: distilling-harder.html, three tabs: Play (the board in a frame, held still on another tab), What it is (the four-sides guide, the same module, in the site's look), The thinking behind it (the user's reasons in plain words, two pictures). The design intent in DISTILLING.md §8; the front page's card and the 21 Nov changelog entry link to it.
+- 21 Nov: for you to playtest

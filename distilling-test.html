@@ -45,6 +45,7 @@
   #log li:first-child { color: var(--ink); font-weight: 700; }
   #prompt { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; padding: 4px 12px; font-size: 15px; color: var(--dim); white-space: nowrap; max-width: calc(100vw - 24px); overflow: hidden; text-overflow: ellipsis; }
   @media (max-width: 900px) { .ui { top: auto; bottom: 48px; } .ui p { display: none; } }
+  .embed .ui > p { display: none; }   /* (in distilling-harder.html's frame: its What it is says it) */
   /* On a phone (RULES.md, "On a phone", 16 Nov): everything to tap a thumb's size. */
   @media (pointer: coarse) {
     button, select { min-height: 44px; }
@@ -246,6 +247,7 @@ function deal() {
   address();
 }
 function address() {
+  if (params.has('embed')) return;   // (in a frame: its own page's address is the one that matters)
   const all = furnaces === 4 && darkRum && richSpice && doubles && moveHeat === MOVE_HEAT_MS;
   const v = all ? '&hard' : `${furnaces > 1 ? `&furnaces=${furnaces}` : ''}${darkRum ? '&darkrum' : ''}${richSpice ? '&richspice' : ''}${doubles ? '&doubles' : ''}${moveHeat ? `&moveheat${moveHeat !== MOVE_HEAT_MS ? `=${moveHeat}` : ''}` : ''}`;
   history.replaceState(null, '', `?seed=${seed}${v}${botName && furnaces === 1 ? `&bot=${botName}` : ''}${speed !== 1 ? `&speed=${speed}` : ''}${shot ? '&shot' : ''}`);
@@ -269,7 +271,13 @@ $('hard').onclick = () => {
   showBotRow(); deal();
 };
 deal();
-if (harder() && !shot && !seenGuide()) { guide.open(); sawGuide(); }
+// (in distilling-harder.html's frame, &embed: the guide's its own tab there, so it never opens by itself, and the
+// page holds the board still while another tab's open, `hold`)
+const embed = params.has('embed');
+if (embed) document.body.classList.add('embed');
+let held = false;
+window.hold = (on) => { held = !!on; };
+if (harder() && !shot && !embed && !seenGuide()) { guide.open(); sawGuide(); }
 
 /** The bot's mode, in the bar along the bottom, always in view (the user, 17 Nov: "more debugging on like what its
     evaluation is, like what mood it's in, what it's trying to do ... oh look, it thinks it's in quick move terms"): its
@@ -345,7 +353,7 @@ const clock = new THREE.Clock();
 function frame() {
   // (a second at most caught up a frame: a tab back from the background carries on, not races)
   // (nothing moves while the guide's open: the user, 21 Nov, "the puzzle should not be playing while you're reading it")
-  const dt = Math.min(1, clock.getDelta()) * speed * (guide.shown ? 0 : 1);
+  const dt = Math.min(1, clock.getDelta()) * speed * (guide.shown || held ? 0 : 1);
   if (player && !board.paused) player.advance(dt * 1000);
   board.tick(dt);
   // Straight on to the board, a little left of the middle so the panel doesn't cover it.
