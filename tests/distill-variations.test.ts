@@ -3,7 +3,7 @@
    a-distilling-test-board-with-furnaces-on-both-si; DISTILLING.md §8). */
 import { describe, expect, it } from 'vitest';
 import {
-  BLACK, BROWN, BURNT, BURN_TICKS, CHAIN_BONUS, COLS, DARK_RUM_BONUS, Distilling, NO_SPICE_FIRST, RICH_COLUMNS, SHORT, SLIDE_MS,
+  BLACK, BROWN, BURNT, BURN_TICKS, CHAIN_BONUS, COLS, DARK_RUM_BONUS, DOUBLE_BONUS, MOVE_HEAT_MS, Distilling, NO_SPICE_FIRST, RICH_COLUMNS, SHORT, SLIDE_MS,
   SPICE, TALL, TICK_MS, WARN_TICK, WHITE, parseBoard, writeBoard,
 } from '../src/distilling';
 import type { DistillEvent, DistillOptions } from '../src/distilling';
@@ -163,6 +163,38 @@ describe('four furnaces (21 Nov, the user: "every single side being a furnace")'
   });
 });
 
+describe('double Crystal Clears (21 Nov, the user: "extra spice pieces ... a double hit")', () => {
+  it('pay a bonus when both side columns clear at once, and bring a spice into each new column', () => {
+    const g = new Distilling(seeded(4), { furnaces: 2, doubles: true }).lay(parseBoard(sea('b')));
+    fill(g, 0, 'w'); fill(g, COLS - 1, 'w');
+    const [right, left] = burn(g);
+    expect(right.column.double).toBeUndefined();
+    expect(left.column.double).toBe(true);
+    expect(left.column.bonus).toBe(CHAIN_BONUS + DOUBLE_BONUS);
+    expect(g.points).toBe(right.column.points + left.column.points + CHAIN_BONUS + DOUBLE_BONUS);
+    expect(g.cols[4]).toContain(SPICE);
+    expect(g.cols[5]).toContain(SPICE);
+  });
+  it('pay for the top and bottom rows together too, a spice into each new row', () => {
+    const g = new Distilling(seeded(4), { furnaces: 4, doubles: true }).lay(parseBoard(sea('b')));
+    burn(g);   // (the sides)
+    for (const c of g.cols) { c[0] = WHITE; c[c.length - 1] = WHITE; }
+    const [, bottom] = burn(g);
+    expect(bottom.column.double).toBe(true);
+    const newRow = (at: number) => g.cols.map((c) => c[3 + at]);
+    expect(newRow(0)).toContain(SPICE);
+    expect(newRow(1)).toContain(SPICE);
+  });
+  it('need both: one Crystal Clear of a pair is no double, and it\'s off by default', () => {
+    const g = new Distilling(seeded(4), { furnaces: 2, doubles: true }).lay(parseBoard(sea('b')));
+    fill(g, COLS - 1, 'w');
+    expect(burn(g).some((e) => e.column.double)).toBe(false);
+    const off = new Distilling(seeded(4), { furnaces: 2 }).lay(parseBoard(sea('b')));
+    fill(off, 0, 'w'); fill(off, COLS - 1, 'w');
+    expect(burn(off).some((e) => e.column.double)).toBe(false);
+  });
+});
+
 describe('dark rum (21 Nov)', () => {
   /** A game laid all white, the next columns to go set by hand, for chains. */
   const rum = (on = true) => new Distilling(seeded(3), { darkRum: on }).lay(parseBoard(sea('w')));
@@ -207,7 +239,7 @@ describe('dark rum (21 Nov)', () => {
 
 describe('moves heat the furnace (21 Nov, the user: "the burn is sped up by how many drags you do")', () => {
   it('brings the burn nearer a move at a time, warning on the way, burning on a tick of its own', () => {
-    const g = new Distilling(seeded(2), { moveHeat: 2 });
+    const g = new Distilling(seeded(2), { moveHeat: 2 * TICK_MS });
     const left = g.timeLeft();
     g.moved();
     expect(g.timeLeft()).toBe(left - 2 * TICK_MS);
@@ -215,9 +247,17 @@ describe('moves heat the furnace (21 Nov, the user: "the burn is sped up by how 
     for (let i = 0; i < 30; i++) if (g.moved().some((e) => e.kind === 'warning')) warned = true;
     expect(warned).toBe(true);
     expect(g.furnace).toBe(g.burnTicks);
+    expect(g.timeLeft()).toBeGreaterThan(0);
     expect(g.columns.length).toBe(0);
     expect(columns(g.tick(TICK_MS)).length).toBe(1);
     expect(g.moves).toBe(31);
+  });
+  it('takes a third of a tick a move to start with (the user, 21 Nov: "definitely a bit harsh right now"), in ms', () => {
+    const g = new Distilling(seeded(2), { moveHeat: MOVE_HEAT_MS }), left = g.timeLeft();
+    for (let i = 0; i < 3; i++) g.moved();
+    expect(MOVE_HEAT_MS).toBeLessThanOrEqual(TICK_MS / 3);
+    expect(g.timeLeft()).toBe(left - 3 * MOVE_HEAT_MS);
+    expect(g.heatedBy).toBe(3 * MOVE_HEAT_MS);
   });
   it('is off by default: moves counted, the furnace untouched', () => {
     const g = new Distilling(seeded(2)), left = g.timeLeft();

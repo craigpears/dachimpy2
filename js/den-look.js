@@ -333,6 +333,13 @@ export const PIRATES = Object.fromEntries(Object.entries({
     hat: 'bandana', hatCol: 'pink', hatCol2: 'navy', top: 'buccaneer', topCol: 'navy', topCol2: 'magenta', waist: 'none',
     legs: 'long', legsCol: 'magenta', legsCol2: 'navy', feet: 'shoes', feetCol: 'navy', hand: 'none', fam: 'none',
   },
+  // Jezerbell, the werewolf hunter, from a screenshot of her in her house (21 Nov; her pirate page's portrait still to
+  // check): red curls, a green coat, a lime sash. Her octopuses are about her house, hidden (js/den/jezerbell-house.js).
+  Jezerbell: {
+    body: 'f', skin: 1, hair: 'curly', hairCol: 'red', patch: false, earring: 'both', smile: true,
+    hat: 'none', top: 'buccaneer', topCol: 'green', topCol2: 'lime', waist: 'sash', waistCol: 'lime',
+    legs: 'pants', legsCol: 'green', feet: 'boots', feetCol: 'black', hand: 'none', fam: 'none',
+  },
 }).map(([name, look]) => [name, cleanLook(look)]));
 
 /* Mischievious through her gallery (Emerald, 399 portraits, checked 11 Nov), to choose which of her
