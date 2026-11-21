@@ -20,9 +20,9 @@ import {
   PACK_TAUNTS, PACK_DOWN, PACK_WON,
 } from '../lines/jezerbell.js';
 import { PACE } from '../chatter.js';
-import { Rumble, seeded, WIDTH, LAUNCH_Y, MAX_AIM, CHARGE_TIME } from '../rumble.js';
+import { Rumble, seeded, WIDTH, CHARGE_TIME } from '../rumble.js';
 import { Hand, GREEDY } from '../rumble-bots.js';
-import { rumbleBoards, BOARD_H } from '../rumble-board.js';
+import { rumbleBoards, BOARD_H, TARGET, targetAt, angleFor } from '../rumble-board.js';
 import { FURNITURE, place } from './furniture.js';
 import { creature } from './creatures.js';
 import { werewolf } from './werewolf.js';
@@ -251,7 +251,7 @@ export const JEZERBELL_HOUSE = {
     /** The rumble's clock: seconds since the fray started (a Rumble keeps its own time from what it's handed). */
     const now = () => performance.now() / 1000 - G.fray.t0;
     function startFray() {
-      G.fray = { rules: new Fray(), game: null, hand: null, seed: Math.floor(Math.random() * 1e6) + 1, downs: 0, mine: 0, yours: 0, pause: 0, t: 0, t0: performance.now() / 1000, aim: 0, aiming: 0, held: null, ending: 0 };
+      G.fray = { rules: new Fray(), game: null, hand: null, seed: Math.floor(Math.random() * 1e6) + 1, downs: 0, mine: 0, yours: 0, pause: 0, t: 0, t0: performance.now() / 1000, target: TARGET(), aiming: 0, held: null, ending: 0 };
       panel.classList.add('on');
       counter.classList.remove('on');
       sizeBoards();
@@ -313,21 +313,21 @@ export const JEZERBELL_HOUSE = {
       const g = F.game;
       if (g) {
         const t = now();
-        if (F.aiming) F.aim = Math.max(-MAX_AIM, Math.min(MAX_AIM, F.aim + F.aiming * dt * 1.4));
+        if (F.aiming) F.target = { ...F.target, x: Math.max(0.2, Math.min(WIDTH - 0.2, F.target.x + F.aiming * dt * 6)) };
         if (!g.over()) {
-          if (F.held?.later && g.canFire(0)) { g.fire(0, F.held.fist, F.aim, false, t); F.held = null; }
+          if (F.held?.later && g.canFire(0)) { g.fire(0, F.held.fist, angleFor(F.target, F.held.fist), false, t); F.held = null; }
           if (F.held && !F.held.later && !g.canFire(0)) F.held.from = t;
-          g.sides[0].aim = F.aim;
+          g.sides[0].aim = angleFor(F.target, 0);   // (the shot clock fires the left fist where you're aiming)
           F.hand.play(g, t);
           g.tick(t);
-          boards.take(g.drain());
+          boards.take(g.drain(), g);
           for (const e of F.rules.tick(dt)) frayEvent(e);
         } else if ((F.ending += dt) >= NEXT_WOLF) {
           const won = g.winner === 0;
           for (const e of F.rules.duelOver(won)) frayEvent(e);
         }
         boards.prune(t);
-        const o = { game: g, hands: [null, F.hand], you: 0, aim: F.aim, held: F.held };
+        const o = { game: g, hands: [null, F.hand], you: 0, target: F.target, held: F.held };
         boards.draw(0, t, o); boards.draw(1, t, o);
       }
       if (F.rules.over && (F.pause -= dt) <= 0) endFray(F.rules.won);
@@ -343,17 +343,15 @@ export const JEZERBELL_HOUSE = {
       const F = G.fray;
       if (!F?.held || F.held.fist !== fist) return;
       const t = now(), charged = t - F.held.from >= CHARGE_TIME;
-      if (F.game && !F.game.over() && F.game.canFire(0)) { F.game.fire(0, fist, F.aim, charged, t); F.held = null; }
+      if (F.game && !F.game.over() && F.game.canFire(0)) { F.game.fire(0, fist, angleFor(F.target, fist), charged, t); F.held = null; }
       else F.held.later = true;
       padFist(fist, false);
     }
-    /** Aiming at a point on your board (a pointer over it). */
+    /** Aiming at a point on your board (a pointer over it): both fists aim there. */
     function aimAt(ev) {
       const F = G.fray;
       if (!F) return;
-      const r = canvases[0].getBoundingClientRect();
-      const x = ((ev.clientX - r.left) / r.width) * WIDTH, y = ((ev.clientY - r.top) / r.height) * BOARD_H;
-      F.aim = Math.max(-MAX_AIM, Math.min(MAX_AIM, Math.atan2(x - WIDTH / 2, -Math.min(-0.2, y - LAUNCH_Y))));
+      F.target = targetAt(canvases[0], ev);
     }
     current = {
       press, release, aimAt,

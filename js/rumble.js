@@ -27,8 +27,9 @@ export const LAUNCH_Y = LINE_Y + 1.6;
 export const LAUNCH_X = [WIDTH * 0.3, WIDTH * 0.7];
 /** How far round from straight up a fist aims, either way (radians). */
 export const MAX_AIM = (78 * Math.PI) / 180;
-/** How fast a fired ball flies, in ball widths a second. */
-export const SPEED = 24;
+/** How fast a fired ball flies, in ball widths a second (24 at first; slowed, 21 Nov, the user: "Definitely seems to
+    just move very quickly"). */
+export const SPEED = 15;
 /** The shortest a sprinkle row is, and the most a queue sends (more than two rows is squished to one). */
 export const SPRINKLE_ROW = 9, SQUISH = 18;
 /** A seeded random number source (mulberry32), for a seed in a page's address. */

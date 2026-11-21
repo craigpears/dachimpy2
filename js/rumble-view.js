@@ -3,8 +3,8 @@
 // js/rumble-board.js (the one drawing of them, Jezerbell's werewolf fray's too). It owns only the input, the clock
 // and the words; every rule is the module's. The address keeps the seed, the
 // bots and the mode: ?seed=7&bot=greedy, or ?watch&seed=7&left=greedy&right=greedy. Normal speed only.
-import { CHARGE_TIME, LAUNCH_Y, MAX_AIM, Rumble, SPRINKLE_ROW, WIDTH, seeded } from './rumble.js';
-import { rumbleBoards, BOARD_H } from './rumble-board.js';
+import { CHARGE_TIME, LINE_Y, Rumble, SPRINKLE_ROW, WIDTH, seeded } from './rumble.js';
+import { rumbleBoards, BOARD_H, TARGET, targetAt, angleFor as aimFor } from './rumble-board.js';
 import { Hand, STYLES } from './rumble-bots.js';
 
 const q = new URLSearchParams(location.search);
@@ -24,7 +24,7 @@ function address() {
 const $ = (id) => document.getElementById(id);
 const canvases = [$('board0'), $('board1')];
 const boards = rumbleBoards(canvases);
-let game, hands, t0, said, held, aim, aimFromKeys, scale = 30;
+let game, hands, t0, said, held, target, aimFromKeys, scale = 30;
 
 function start() {
   game = new Rumble(seeded(seed), 0);
@@ -33,7 +33,7 @@ function start() {
   boards.clear();
   said = [];
   held = null;       // the human's held fist: { fist, from }
-  aim = 0;
+  target = TARGET();  // where you're aiming: both fists point at it
   history.replaceState(null, '', address());
   $('seed').textContent = `seed ${seed}`;
   $('who0').textContent = WATCH ? `${STYLE[0].name}` : 'You';
@@ -44,7 +44,7 @@ function start() {
 
 const now = () => performance.now() / 1000 - t0;
 const name = (p) => (WATCH ? (p === 0 ? 'Left' : 'Right') : p === 0 ? 'You' : 'The bot');
-const whose = (p) => (WATCH ? (p === 0 ? "the left board's" : "the right board's") : p === 0 ? 'your' : "the bot's");
+const whose = (p) => (WATCH ? (p === 0 ? 'the left' : 'the right') : p === 0 ? 'your' : "the bot's");
 
 function say(line) {
   said.unshift(line);
@@ -55,7 +55,7 @@ function say(line) {
 // ---- What happened, as flashes and words --------------------------------------------------------------------
 
 function take(happenings) {
-  boards.take(happenings);
+  boards.take(happenings, game);
   for (const h of happenings) {
     if (h.what === 'sent') {
       const a = h.attack;
@@ -67,6 +67,9 @@ function take(happenings) {
     if (h.what === 'lost') say(WATCH ? `${name(h.p)} is knocked out. ${name(1 - h.p)} wins.` : h.p === 0 ? 'Knocked out! The bot wins. New rumble?' : 'The bot\'s knocked out. You win!');
   }
 }
+
+/** The angle a fist fires at to hit where you're aiming. */
+const angleFor = (fist) => aimFor(target, fist);
 
 // ---- Drawing ------------------------------------------------------------------------------------------------
 
@@ -83,7 +86,7 @@ function size() {
 }
 
 function draw(p, t) {
-  boards.draw(p, t, { game, hands, you: WATCH ? -1 : 0, aim, held });
+  boards.draw(p, t, { game, hands, you: WATCH ? -1 : 0, target, held });
   const s = game.sides[p], n = s.board.charges.length;
   $(`stat${p}`).innerHTML = `<b>${n}</b> charged · sprinkles <b>${s.queue}</b>/${SPRINKLE_ROW} · row in <b>${s.toRow()}</b>`;
 }
@@ -99,16 +102,13 @@ function release(fist) {
   if (!held || held.fist !== fist) return;
   const t = now();
   const charged = t - held.from >= CHARGE_TIME;
-  if (game.canFire(0)) game.fire(0, fist, aim, charged, t);
+  if (game.canFire(0)) game.fire(0, fist, angleFor(fist), charged, t);
   else held.later = true;            // let go while a ball's in the air: it fires, uncharged, when it lands
   if (!held.later) held = null;
   $(`fist${fist}`).classList.remove('held');
 }
 function aimAt(ev) {
-  const r = canvases[0].getBoundingClientRect();
-  const x = ((ev.clientX - r.left) / r.width) * WIDTH, y = ((ev.clientY - r.top) / r.height) * BOARD_H;
-  const dy = Math.min(-0.2, y - LAUNCH_Y);
-  aim = Math.max(-MAX_AIM, Math.min(MAX_AIM, Math.atan2(x - WIDTH / 2, -dy)));
+  target = targetAt(canvases[0], ev);
   aimFromKeys = false;
 }
 
@@ -157,13 +157,13 @@ function frame() {
   const t = now();
   const dt = Math.min(0.1, t - last);
   last = t;
-  if (aimFromKeys) aim = Math.max(-MAX_AIM, Math.min(MAX_AIM, aim + aimFromKeys * dt * 1.4));
+  if (aimFromKeys) target = { ...target, x: Math.max(0.2, Math.min(WIDTH - 0.2, target.x + aimFromKeys * dt * 6)) };
   if (!game.over()) {
     // A fist let go while its ball was in the air fires once it's landed.
-    if (held?.later && game.canFire(0)) { game.fire(0, held.fist, aim, false, t); held = null; }
+    if (held?.later && game.canFire(0)) { game.fire(0, held.fist, angleFor(held.fist), false, t); held = null; }
     // A button held while the last ball's in the air starts charging the moment it lands (Boothook's guide).
     if (held && !held.later && !game.canFire(0)) held.from = t;
-    if (!WATCH && !held) game.sides[0].aim = aim;
+    if (!WATCH) game.sides[0].aim = angleFor(0);   // the shot clock fires the left fist where you're aiming
     for (const h of hands) h?.play(game, t);
     game.tick(t);
     take(game.drain());

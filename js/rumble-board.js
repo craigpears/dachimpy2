@@ -3,7 +3,7 @@
 // The one drawing of a Rumble's boards: the Rumble test page (js/rumble-view.js) and Jezerbell's werewolf fray
 // (js/den/jezerbell-house.js) both draw with it. It knows nothing of the page: the page sizes it (`size(scale)`, pixels
 // a ball width), hands it what happened (`take`), and draws each side every frame (`draw(p, t, ...)`).
-import { CHARGE_TIME, COLOURS, LAUNCH_X, LAUNCH_Y, LINE_Y, R, SHOT_CLOCK, WIDTH } from './rumble.js';
+import { CHARGE_TIME, COLOURS, LAUNCH_X, LAUNCH_Y, LINE_Y, MAX_AIM, R, ROW_H, SHOT_CLOCK, W, WIDTH } from './rumble.js';
 
 // The ball colours: the puzzle's own five, as the real game draws them (not the site's theme).
 const BALL = { red: '#d8402f', orange: '#ee8a24', yellow: '#f2d23c', aqua: '#3fc9c4', blue: '#3366d6' };
@@ -54,10 +54,64 @@ function pathPoint(path, f) {
   return path[path.length - 1];
 }
 
+/** Where you aim at first: the middle of the board, a little under halfway down. */
+export const TARGET = () => ({ x: WIDTH / 2, y: LINE_Y * 0.45 });
+/** A point on the board aimed at, from a pointer over the canvas (kept on the board, above the line). */
+export function targetAt(canvas, ev) {
+  const r = canvas.getBoundingClientRect();
+  const x = ((ev.clientX - r.left) / r.width) * WIDTH, y = ((ev.clientY - r.top) / r.height) * BOARD_H;
+  return { x: Math.max(0.2, Math.min(WIDTH - 0.2, x)), y: Math.max(0.3, Math.min(LINE_Y, y)) };
+}
+/** The angle a fist fires at to hit `target` (both fists aim where you point; only the one fired goes). */
+export function angleFor(target, fist) {
+  const dy = Math.max(0.2, LAUNCH_Y - target.y);
+  return Math.max(-MAX_AIM, Math.min(MAX_AIM, Math.atan2(target.x - LAUNCH_X[fist], dy)));
+}
+const easeOut = (f) => 1 - (1 - f) ** 3;
+const punch = (f) => { const k = 1.9; return 1 + (k + 1) * (f - 1) ** 3 + k * (f - 1) ** 2; };   // in fast, a little past, back
+
 /** Both boards of a Rumble, on `canvases` (left, right). */
 export function rumbleBoards(canvases) {
   const ctxs = canvases.map((c) => c.getContext('2d'));
-  let scale = 30, effects = [];
+  // (moving: balls of an attack still on their way in, by id: { from, t, dur, ease })
+  let scale = 30, effects = [], moving = [new Map(), new Map()];
+
+  /** An attack coming in, animated: sprinkles rising from the foot of the board up their columns one after another;
+      a strike punched in from the top, the balls under it shoved down its height, the board shaking. Only the
+      drawing: the rules have already put every ball where it ends up. */
+  function arrive(h, rowAfter, game) {
+    const b = game.sides[h.p].board, m = moving[h.p];
+    const at = (id) => { const c = b.find(id); return c && { ...c, end: b.centre(c.r, c.c) }; };
+    if (h.attack.kind === 'sprinkle') {
+      h.attack.balls.forEach(({ ball }, i) => {
+        const c = at(ball.id);
+        if (!c) return;
+        const from = { x: c.end.x, y: LAUNCH_Y + 1.4 }, dist = from.y - c.end.y;
+        m.set(ball.id, { from, t: h.t + i * 0.07, dur: 0.25 + dist / 18, ease: easeOut });
+      });
+      effects.push({ p: h.p, kind: 'shake', t: h.t, until: h.t + 0.3, dx: 0, dy: 0.06 });
+      return;
+    }
+    const rows = h.attack.rows, hgt = rows.length, w = rows[0].length;
+    const c0 = h.attack.from === 'left' ? 0 : W - w, mine = new Set(rows.flat().map((x) => x.id));
+    const dur = 0.42;
+    for (const { r, c, ball } of b.balls()) {
+      if (c < c0 || c >= c0 + w || (rowAfter && r === 0 && !mine.has(ball.id))) continue;
+      // Where it was before the strike: its height higher up the same column (a ball of the strike, above the top).
+      m.set(ball.id, { from: b.centre(r - hgt, c), t: h.t, dur, ease: punch });
+    }
+    effects.push({ p: h.p, kind: 'shake', t: h.t + dur * 0.7, until: h.t + dur * 0.7 + 0.35, dx: 0.12, dy: 0.05 });
+  }
+  /** Where a ball is drawn: its cell, or on its way there. */
+  function placed(p, ball, end, t) {
+    const mv = moving[p].get(ball.id);
+    if (!mv) return end;
+    const f = (t - mv.t) / mv.dur;
+    if (f >= 1) { moving[p].delete(ball.id); return end; }
+    if (f <= 0) return mv.from;
+    const k = mv.ease(f);
+    return { x: mv.from.x + (end.x - mv.from.x) * k, y: mv.from.y + (end.y - mv.from.y) * k };
+  }
 
   /** How far a fist's ball is through charging, 0 to 1: a bot's from its hand, a person's from the fist `held`. */
   function chargeOf(p, fist, t, { game, hands = [], you = -1, held = null }) {
@@ -79,9 +133,9 @@ export function rumbleBoards(canvases) {
         c.height = Math.round(BOARD_H * scale * dpr);
       }
     },
-    clear() { effects = []; },
-    /** What happened (the game's drain()), as flashes on the boards. */
-    take(happenings) {
+    clear() { effects = []; moving = [new Map(), new Map()]; },
+    /** What happened (the game's drain()), as flashes on the boards and attacks animated in. */
+    take(happenings, game) {
       for (const h of happenings) {
         if (h.what === 'fired') effects.push({ p: h.p, kind: 'flight', t: h.t, until: h.lands, path: h.path, c: null, fist: h.fist, charged: h.charged });
         if (h.what === 'landed') {
@@ -90,16 +144,20 @@ export function rumbleBoards(canvases) {
           for (const g of h.outcome.gone) effects.push({ p: h.p, kind: g.fell ? 'fall' : 'pop', t: h.t, until: h.t + 0.6, r: g.r, c: g.c, ball: g.ball });
           if (h.outcome.kind === 'charge') effects.push({ p: h.p, kind: 'ring', t: h.t, until: h.t + 0.7, cell: h.outcome.cell });
         }
-        if (h.what === 'hit') effects.push({ p: h.p, kind: 'hit', t: h.t, until: h.t + 1.8, cells: h.cells, attack: h.attack.kind });
+        if (h.what === 'hit') {
+          effects.push({ p: h.p, kind: 'hit', t: h.t + 0.5, until: h.t + 2.2, cells: h.cells, attack: h.attack.kind });
+          arrive(h, happenings.some((x) => x.what === 'row' && x.p === h.p), game);
+        }
         if (h.what === 'row') effects.push({ p: h.p, kind: 'row', t: h.t, until: h.t + 0.5 });
       }
     },
     /** Forgets what's had its moment. */
     prune(t) { effects = effects.filter((e) => e.until > t); },
-    /** Draws side `p` at time `t`: `you`, the side a person plays (-1, none: watching), their `aim` and the fist
-        `held` ({ fist, from }); `hands`, the bots' (their plans shown as their aim). */
+    /** Draws side `p` at time `t`: `you`, the side a person plays (-1, none: watching), where they're aiming
+        (`target`, a point on the board) and the fist `held` ({ fist, from }); `hands`, the bots' (their plans shown as
+        their aim). */
     draw(p, t, o) {
-      const { game, hands = [], you = -1, aim = 0, held = null } = o;
+      const { game, hands = [], you = -1, target = TARGET(), held = null } = o;
       const ctx = ctxs[p], s = game.sides[p], b = s.board, dpr = devicePixelRatio || 1;
       ctx.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
       ctx.clearRect(0, 0, WIDTH, BOARD_H);
@@ -111,20 +169,22 @@ export function rumbleBoards(canvases) {
       ctx.strokeStyle = css('--accent') || '#e48fae'; ctx.lineWidth = 0.06; ctx.setLineDash([0.25, 0.18]);
       ctx.beginPath(); ctx.moveTo(0, LINE_Y); ctx.lineTo(WIDTH, LINE_Y); ctx.stroke(); ctx.setLineDash([]);
 
-      // A row coming in shakes the board down a little.
+      // A row coming in slides the board down a row; an attack landing shakes it.
       const row = effects.find((e) => e.p === p && e.kind === 'row' && e.until > t);
+      const shake = effects.find((e) => e.p === p && e.kind === 'shake' && e.until > t && e.t <= t);
       ctx.save();
-      if (row) ctx.translate(0, -0.3 * (1 - (t - row.t) / 0.5));
+      if (row) ctx.translate(0, -ROW_H * (1 - easeOut((t - row.t) / (row.until - row.t))));
+      if (shake) { const k = 1 - (t - shake.t) / (shake.until - shake.t), w = Math.sin((t - shake.t) * 70) * k; ctx.translate(shake.dx * w, shake.dy * w); }
       for (const { r, c, ball } of b.balls()) {
         if (r > 40) continue;
-        const { x, y } = b.centre(r, c), order = b.charges.indexOf(ball.id) + 1;
+        const { x, y } = placed(p, ball, b.centre(r, c), t), order = b.charges.indexOf(ball.id) + 1;
         ballAt(ctx, x, y, ball.c, { bruise: ball.bruise, charged: order > 0, order });
       }
       // What just landed from the other side: ringed, fading.
       for (const e of effects) {
         if (e.p !== p || e.until < t) continue;
-        const f = (t - e.t) / (e.until - e.t);
-        if (e.kind === 'hit') {
+        const f = Math.max(0, (t - e.t) / (e.until - e.t));
+        if (e.kind === 'hit' && e.t <= t) {
           ctx.strokeStyle = e.attack === 'strike' ? `rgba(255,90,60,${1 - f})` : `rgba(255,255,255,${1 - f})`; ctx.lineWidth = 0.1;
           for (const { r, c } of e.cells) { const { x, y } = b.centre(r, c); ctx.beginPath(); ctx.arc(x, y, R * 1.02, 0, Math.PI * 2); ctx.stroke(); }
         }
@@ -139,17 +199,26 @@ export function rumbleBoards(canvases) {
         else ballAt(ctx, at.x, at.y + f * f * 8, e.ball.c, { bruise: e.ball.bruise, alpha: 1 - f * 0.6 });
       }
 
-      // The aim: where each fist's ball would go, faint, for you (or a bot's plan when watching).
+      // The aim: where you're pointing, a cross, and where each fist's ball would go from there, in that ball's colour;
+      // once a fist's held, only its line (one ball fires, never both). For a bot, its plan.
       const lines = [];
-      if (p === you && game.canFire(p)) for (const fist of [0, 1]) lines.push({ fist, angle: aim, strong: held?.fist === fist });
+      if (p === you && !game.over()) {
+        for (const fist of [0, 1]) if (!held || held.fist === fist) lines.push({ fist, angle: angleFor(target, fist), strong: !!held });
+        ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 0.06;
+        const { x, y } = target;
+        ctx.beginPath(); ctx.arc(x, y, 0.3, 0, Math.PI * 2); ctx.moveTo(x - 0.5, y); ctx.lineTo(x - 0.15, y); ctx.moveTo(x + 0.15, y); ctx.lineTo(x + 0.5, y);
+        ctx.moveTo(x, y - 0.5); ctx.lineTo(x, y - 0.15); ctx.moveTo(x, y + 0.15); ctx.lineTo(x, y + 0.5); ctx.stroke();
+      }
       const hand = hands[p];
       if (hand?.plan && game.canFire(p)) lines.push({ fist: hand.plan.option.fist, angle: hand.plan.option.angle, strong: true });
       for (const l of lines) {
-        const { path, cell } = b.shot(l.fist, l.angle);
-        ctx.strokeStyle = l.strong ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.28)'; ctx.lineWidth = 0.05; ctx.setLineDash([0.18, 0.16]);
-        ctx.beginPath(); ctx.moveTo(path[0].x, path[0].y); for (const pt of path.slice(1)) ctx.lineTo(pt.x, pt.y); ctx.stroke(); ctx.setLineDash([]);
+        const { path, cell } = b.shot(l.fist, l.angle), colour = shade(HEX[s.fists[l.fist][0]], 1.3);
+        ctx.save();
+        ctx.globalAlpha = l.strong ? 0.9 : 0.5; ctx.strokeStyle = colour; ctx.lineWidth = l.strong ? 0.07 : 0.05; ctx.setLineDash([0.18, 0.16]);
+        ctx.beginPath(); ctx.moveTo(path[0].x, path[0].y); for (const pt of path.slice(1)) ctx.lineTo(pt.x, pt.y); ctx.stroke();
+        ctx.restore();
         const at = b.centre(cell.r, cell.c);
-        ballAt(ctx, at.x, at.y, s.fists[l.fist][0], { alpha: l.strong ? 0.45 : 0.22 });
+        ballAt(ctx, at.x, at.y, s.fists[l.fist][0], { alpha: l.strong ? 0.5 : 0.3 });
       }
 
       // The ball in the air.

@@ -188,6 +188,13 @@ Next, on the idea card `rumble-bots-with-different-strategies-to-demo-th`: bots 
 `src/rumble-bots.ts` as a `Style`. Rumble in the den as boxers: the idea card
 `rumble-as-boxers-big-brawlers-in-boxing-mode`.
 
+The first playtest (21 Nov): both fists aim at the mouse, each line in its ball's colour, the other line gone once one
+is held ("it should go where the mouse is aiming at"); slower, the ball flying 15 ball widths a second and the bot
+taking about two seconds a shot ("seems to just move very quickly"); attacks animated in, sprinkles rising up from
+the foot one after another and a strike punched in at the top, shoving the balls under it down. An idea to think
+through later: firing both fists at once, both balls in the air together ("I don't know if that's an interesting
+idea that adds any tactical depth"); the real game allows one ball at a time.
+
 ## Questions to settle
 
 - The board's height in rows, and how full it starts.
