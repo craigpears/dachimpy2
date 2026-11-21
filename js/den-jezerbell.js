@@ -106,10 +106,10 @@ export function stopAt(from, x, z) {
 /** Close enough to her stump for Space? */
 export const atStump = (you) => Math.hypot(you.x - STUMP.x, you.z - STUMP.z) < STUMP.near;
 export const PACK = [
-    { id: 'huff', name: 'Huffing Hector', fur: '#7a6a5a', pace: { THINK: 1.6, KEY: 0.34, DROP: 0.6 } },
-    { id: 'puff', name: 'Puffing Prudence', fur: '#9a9086', pace: { THINK: 1.5, KEY: 0.32, DROP: 0.55 } },
-    { id: 'teeth', name: 'Big-Teeth Bartholomew', fur: '#4a3a30', pace: { THINK: 1.35, KEY: 0.3, DROP: 0.5 } },
-    { id: 'cried', name: 'Cried-Wolf Clementine', fur: '#2e2a2c', pace: { THINK: 1.2, KEY: 0.28, DROP: 0.45 } },
+    { id: 'huff', name: 'Huffing Hector', fur: '#7a6a5a', think: 2.6 },
+    { id: 'puff', name: 'Puffing Prudence', fur: '#9a9086', think: 2.3 },
+    { id: 'teeth', name: 'Big-Teeth Bartholomew', fur: '#4a3a30', think: 2.0 },
+    { id: 'cried', name: 'Cried-Wolf Clementine', fur: '#2e2a2c', think: 1.7 },
 ];
 /** How the fray goes, in seconds: Jezerbell beats a wolf of her own first `HER_FIRST` in, then one every
     `HER_EVERY` (never yours); once you're knocked out she fights on alone and wins if no more than `HER_ALONE` are

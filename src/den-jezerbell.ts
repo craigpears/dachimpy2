@@ -159,14 +159,15 @@ export const atStump = (you: { x: number; z: number }): boolean => Math.hypot(yo
 
 // ---------- the pack ----------
 /* Our own pack, in the fairy-tale spirit of Puzzle Pirates' wolves (their names and taunts are ours, never the
-   game's). Each duels at a pace of its own (sword-bots.ts's Hand at `pace`: seconds to think when a pair comes in,
-   a key a beat, the drop), slower than a person's to begin with, the pack's leader quickest. `fur`: its coat. */
-export interface Wolf { id: string; name: string; fur: string; pace: { THINK: number; KEY: number; DROP: number } }
+   game's). Each brawls with you in a Rumble (as Puzzle Pirates' wolves do: the user, 21 Nov, "swap the [Swordfight]
+   thing out for it"), the greedy brawler (src/rumble-bots.ts) at a pace of its own: `think`, its seconds over each
+   shot (the greedy bot's own is 1.1), slower than that to begin with, the pack's leader quickest. `fur`: its coat. */
+export interface Wolf { id: string; name: string; fur: string; think: number }
 export const PACK: readonly Wolf[] = [
-  { id: 'huff', name: 'Huffing Hector', fur: '#7a6a5a', pace: { THINK: 1.6, KEY: 0.34, DROP: 0.6 } },
-  { id: 'puff', name: 'Puffing Prudence', fur: '#9a9086', pace: { THINK: 1.5, KEY: 0.32, DROP: 0.55 } },
-  { id: 'teeth', name: 'Big-Teeth Bartholomew', fur: '#4a3a30', pace: { THINK: 1.35, KEY: 0.3, DROP: 0.5 } },
-  { id: 'cried', name: 'Cried-Wolf Clementine', fur: '#2e2a2c', pace: { THINK: 1.2, KEY: 0.28, DROP: 0.45 } },
+  { id: 'huff', name: 'Huffing Hector', fur: '#7a6a5a', think: 2.6 },
+  { id: 'puff', name: 'Puffing Prudence', fur: '#9a9086', think: 2.3 },
+  { id: 'teeth', name: 'Big-Teeth Bartholomew', fur: '#4a3a30', think: 2.0 },
+  { id: 'cried', name: 'Cried-Wolf Clementine', fur: '#2e2a2c', think: 1.7 },
 ];
 
 /** How the fray goes, in seconds: Jezerbell beats a wolf of her own first `HER_FIRST` in, then one every
