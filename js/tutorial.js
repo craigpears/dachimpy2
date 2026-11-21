@@ -244,6 +244,11 @@ export class TutorialMenu {
         this.focus = i;
         if (this.level === 'choose') {
             this.open(items[i].id);
+            // (a choice of one part is that lesson: it plays, no list of one to pick from; the user, 20 Nov, of the wolf
+            // den's quick double: "Surely when I pick the quick double, that should be it")
+            const only = this.lists().flatMap((l) => l.parts);
+            if (only.length === 1)
+                return { kind: 'play', part: only[0], section: findPart(this.t, only[0].id)?.section ?? this.lists()[0].section, choice: items[i].id };
             return null;
         }
         const l = this.lists()[this.tab], part = l.parts[i];

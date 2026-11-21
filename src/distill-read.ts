@@ -55,7 +55,7 @@ import type { Drag } from './distill-routines.js';
 import { RISK, burnsIn, flagged, freeCost, whiteRisk, whiteRisks } from './distill-risk.js';
 import type { WhiteRisk } from './distill-risk.js';
 import { PATTERN, bankEnd, bankJunk, bankOf, bankSettled, bankStrays, junkDisorder, ladderBad, patternsOf, solidColumns, stranded, tailOrder } from './distill-patterns.js';
-import { blockPhase } from './distill-score.js';
+import { S, blockPhase, trapped } from './distill-score.js';
 import type { At, Patterns } from './distill-patterns.js';
 
 export type BoardState = 'healthy' | 'atRisk' | 'cracked' | 'damageControl';
@@ -115,6 +115,18 @@ export const READ = {
       (down through the whites and up through the browns in one sweep). */
   STRAIGHTEN_SOLID: 3,
   STRAY_SWAPS: 12,
+  /** The ferry (`ferryDrags`, 18 Nov): on (1) or off (0); a black let down this many swaps at most into the bank's top;
+      this many ferries at most a board. */
+  FERRY: 1,
+  FERRY_SWAPS: 3,
+  FERRY_MOST: 24,
+  /** Straightening up's credit for sorting the junk columns, blacks over browns in each (`junkDisorder`), a swap of
+      sorting worth this much, only on a move that gets junk out or freed: till 17 Nov, a move of its own too (seed 5008:
+      "a whole column of black, whole column of brown"; "it's just trying to sort blacks and browns ... those blacks up
+      at the top were fine. Why did it have to drag them into a column? That's just wasting moves"). */
+  SORT_CREDIT: 0.5,
+  /** ... and its share under the half kept by junk got over (18 Nov). */
+  SORT_FLOOR: 0.05,
   /** A trapped white's surroundings, for how freely they move (low): this many columns either side. */
   FLOW_NEAR: 2,
 };
@@ -135,6 +147,10 @@ export interface Reading {
   /** The column being built (Stage I's junk target). */
   building: number;
   timeLeft: number;
+  /** The fire held (no clock: Helium's lessons), `timeLeft` then the furnace's usual. */
+  held?: boolean;
+  /** Nothing to get over (the bot's own fallback, 18 Nov): the junk columns' sorting a goal of its own. */
+  sortOnly?: boolean;
   /** Whites in the furnace's column past saving, given up as junk (`doomed`). */
   given?: WhiteRisk[];
   /** Straightening up: the bank's columns (`bankOf`), the junk to get out of them. */
@@ -171,7 +187,7 @@ const list = (ps: readonly At[], most = 3) => ps.slice(0, most).map(place).join(
 export function readBoard(cols: Board, o: { stage: 'junk' | 'chain'; timeLeft: number; straighten?: boolean }): Reading {
   const { stage } = o, timeLeft = Number.isFinite(o.timeLeft) ? o.timeLeft : RISK.BURN_MS;
   const patterns = patternsOf(cols, timeLeft), building = junkTarget(cols);
-  const base = { stage, patterns, building, timeLeft };
+  const base = { stage, patterns, building, timeLeft, held: !Number.isFinite(o.timeLeft) };
   if (stage === 'chain') return { ...base, state: 'healthy', tactic: 'chain', why: 'the chain: whites right', whites: [], flagged: [], targets: [] };
   // A white in the furnace's column that nothing can free before it goes is given up as junk (the user, 13 Nov, P26:
   // "it's just completely doomed ... You should at least just say, well, you're doomed on that white, that's going to be
@@ -317,11 +333,38 @@ export function progress(r: Reading, cols: Board, after: Board, drags: readonly 
     fewer) worth twice the junk columns' swaps of sorting it gains (`junkDisorder`); 0 if it puts junk into the bank or
     takes a white out of it. */
 export function straightened(r: Reading, cols: Board, after: Board): number {
-  const xs = r.bank ?? bankOf(cols), whites = (b: Board) => xs.reduce((n, x) => n + b[x].filter((p) => p === WHITE).length, 0);
-  if (whites(after) < whites(cols)) return 0;
-  const out = bankJunk(cols, xs) - bankJunk(after, xs);
+  const xs = r.bank ?? bankOf(cols), out = junkOver(xs, cols, after);
   if (out < 0) return 0;
-  return out + (junkDisorder(cols, bankEnd(xs)) - junkDisorder(after, bankEnd(xs))) / 2;
+  // (Trapped junk freed, in the bank's columns and left of them, each worth as much as a brown out of the bank's bottom
+  // half; trapped, as much against: picture 55's two blacks, "they move as one continuous unit", S.TRAP_GROUP.)
+  const freed = S.TRAP_GROUP ? trappedJunk(cols, bankEnd(xs)) - trappedJunk(after, bankEnd(xs)) : 0;
+  // (The junk columns' sorting only between moves that get something done, the sweep's edge over a fiddly move, with the
+  // furnace's clock running: never a move of its own then, READ.SORT_CREDIT. With the fire held, as in Helium's lessons,
+  // a move of its own still: the plain move they show.)
+  const got = out + freed, sorting = READ.SORT_CREDIT * (junkDisorder(cols, bankEnd(xs)) - junkDisorder(after, bankEnd(xs)));
+  // (Junk got over, with the clock running, keeps half its worth whatever the sorting it costs: the junk columns by height, 18 Nov, count a black
+  // taken off a column's top heavily, and that's the ferry's way over.)
+  // (Below that floor the sorting still tells two such moves apart, a little: READ.SORT_FLOOR.)
+  if (got > 0 && !r.held) return Math.max(got / 2 + READ.SORT_FLOOR * Math.tanh(sorting), got + sorting);
+  return r.held || r.sortOnly ? Math.max(0, got + sorting) : 0;
+}
+/** What a move gets over, straightening up ("step one, get it over"): the bank's junk out (`bankJunk`), and the junk
+    from the bank or left of it carried past it, PATTERN.OVER a piece (17 Nov, seed 5008, the bank done and junk still in the columns
+    left of it: "there's all this stuff on the left-hand side. Get it over. It's not moving anything"); -1 if it takes a
+    white out of the bank and the columns left of it, as one. */
+export function junkOver(xs: readonly number[], cols: Board, after: Board): number {
+  const end = bankEnd(xs);
+  const whites = (b: Board) => { let n = 0; for (let x = 0; x < end; x++) n += b[x].filter((p) => p === WHITE).length; return n; };
+  if (whites(after) < whites(cols)) return -1;
+  // (Carried past the bank, not dropped into it: "never more put in", 16 Nov.)
+  const left = (b: Board) => { let n = 0; for (let x = 0; x < end; x++) n += b[x].filter((p) => p === BROWN || p === BLACK).length; return n; };
+  return bankJunk(cols, xs) - bankJunk(after, xs) + PATTERN.OVER * (left(cols) - left(after));
+}
+/** Trapped junk (src/distill-score.ts, `trapped`) in columns 0 to `to`. */
+export function trappedJunk(cols: Board, to: number): number {
+  let n = 0;
+  for (let x = 0; x <= Math.min(to, COLS - 1); x++) for (let y = 0; y < cols[x].length; y++) if (trapped(cols, x, y)) n++;
+  return n;
 }
 
 // ---------------------------------------------------------------- moves the tactics look for themselves
@@ -354,15 +397,51 @@ function trace(cols: Board, x: number, y: number, most: number, ok: (to: [number
     black lifted through browns, READ.SORT_SWAPS at most, never into the bank. */
 export function straightenDrags(cols: Board, r: Reading): Drag[][] {
   const xs = r.bank ?? [], edge = bankEnd(xs), inBank = (x: number) => xs.includes(x), out = strayDrags(cols, r.targets, edge);
+  // Nothing gets over in one drag: a ferry, two (`ferryDrags`).
+  if (READ.FERRY && !out.some((ds) => { const a = playDrags(cols, ds); return !!a && junkOver(xs, cols, a) > 0; })) out.push(...ferryDrags(cols, xs));
   // A brown from the junk beside the bank brought in under its stranded blacks, lifting each out as it passes (the
   // user's arrow along the bottom, 16 Nov: "pull those browns down, push the blacks up").
   if (r.targets.some((t) => cols[t.x][t.y] === BLACK)) for (let x = edge; x < Math.min(COLS - 1, edge + READ.FLOW_NEAR + 1); x++) cols[x].forEach((p, y) => {
     if (p === BROWN) for (const d of trace(cols, x, y, READ.STRAY_SWAPS, () => true, (_b, at) => inBank(at[0]), 800)) out.push([d]);
   });
+  // A black from the junk lifted up through the browns into the place of a brown stuck at the top of the bank (17 Nov,
+  // seed 5008, notes/distilling/56-... and 57-...: "just drag those blacks up ... within a few moves ... I get to this
+  // quite quickly, and it's markedly better"): the brown let down out of the whites, the black free to sink after.
+  const high = (x: number, y: number) => inBank(x) && cols[x][y] === BROWN && y * 2 < cols[x].length;
+  if (xs.some((x) => cols[x].some((p, y) => high(x, y)))) for (let x = edge; x < COLS - 1; x++) cols[x].forEach((p, y) => {
+    if (p !== BLACK) return;
+    const ds = trace(cols, x, y, READ.STRAY_SWAPS, () => true, (_b, at) => high(at[0], at[1]), 400);
+    ds.sort((a, b) => a.ways.length - b.ways.length);
+    if (ds.length) out.push([ds[0]]);
+  });
   for (let x = edge; x < COLS; x++) cols[x].forEach((p, y) => {
     if (p !== BROWN && p !== BLACK) return;
     const ok = (to: [number, number]) => !inBank(to[0]) && isJunk(cols[to[0]][to[1]]);
     for (const d of trace(cols, x, y, READ.SORT_SWAPS, ok, () => true, 200)) out.push([d]);
+  });
+  return out;
+}
+
+/** The ferry (the user, 18 Nov, seed 5008, browns stuck at the top of the bank behind a junk column of browns, one black
+    on its top, the bot waiting: "you've got these browns that can be taken over and then straightened up"): a brown
+    climbs the whites but crosses into the junk only down through a black, so with no black where it tops out, a black
+    from the top of the junk beside the bank is first let down a swap or two into the bank's top, then a brown taken up
+    through the whites, down through it and over; the two drags as one move, kept when together they get junk over. */
+export function ferryDrags(cols: Board, xs: readonly number[]): Drag[][] {
+  const edge = bankEnd(xs), inBank = (x: number) => xs.includes(x), out: Drag[][] = [];
+  for (let x = edge; x < Math.min(COLS - 1, edge + 2); x++) cols[x].forEach((p, y) => {
+    if (p !== BLACK || y * 2 >= cols[x].length) return;
+    for (const d of trace(cols, x, y, READ.FERRY_SWAPS, () => true, (_b, at) => inBank(at[0]), 100)) {
+      const b = playDrags(cols, [d]);
+      if (!b) continue;
+      for (const bx of xs) b[bx].forEach((q, by) => {
+        if (q !== BROWN || out.length >= READ.FERRY_MOST) return;
+        for (const f of trace(b, bx, by, READ.STRAY_SWAPS, () => true, (_c, at) => at[0] >= edge, 300)) {
+          const a = playDrags(b, [f]);
+          if (a && junkOver(xs, cols, a) > 0) { out.push([d, f]); break; }
+        }
+      });
+    }
   });
   return out;
 }
@@ -442,16 +521,16 @@ export function hoistOrder(cols: Board, to: number): number {
 /** Hoisting's drags: a brown sunk down through blacks, lifting them, or a black lifted up through browns, left of column
     `to` (the colour, or the gaps being filled), READ.HOIST_SWAPS swaps at most, bringing blacks and browns together
     rather than splitting them further: each piece's drag that betters `hoistOrder` the most a swap, nothing stranded. */
-export function hoistDrags(cols: Board, to: number): Drag[][] {
-  const out: Drag[][] = [], base = hoistOrder(cols, to), s0 = stranded(cols).length;
-  for (let x = 0; x < Math.min(to, COLS); x++) cols[x].forEach((p, y) => {
+export function hoistDrags(cols: Board, to: number, from = 0, strandCheck = true): Drag[][] {
+  const out: Drag[][] = [], base = hoistOrder(cols, to), s0 = strandCheck ? stranded(cols).length : 0;
+  for (let x = Math.max(0, from); x < Math.min(to, COLS); x++) cols[x].forEach((p, y) => {
     if (p !== BROWN && p !== BLACK) return;
     let best: { d: Drag; v: number } | null = null;
     for (const d of trace(cols, x, y, READ.HOIST_SWAPS, (n) => n[0] < to, (b) => hoistOrder(b, to) > base, 120)) {
       const v = (hoistOrder(playDrags(cols, [d])!, to) - base) / (d.ways.length + 2);
       if (!best || v > best.v) best = { d, v };
     }
-    if (best && stranded(playDrags(cols, [best.d])!).length <= s0) out.push([best.d]);
+    if (best && (!strandCheck || stranded(playDrags(cols, [best.d])!).length <= s0)) out.push([best.d]);
   });
   return out;
 }

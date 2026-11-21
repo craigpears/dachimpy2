@@ -9,7 +9,10 @@
      (up, down, left, right and the diagonals), on the wheel's eight spokes. Ring 0 is the innermost.
    - Stars of five colours (the pictures: yellow, red, orange, white and blue, each its own shape).
      The next star waits outside the wheel on one of its spokes; Space drops it in, and it falls
-     toward the middle down that spoke.
+     toward the middle down that spoke. It doesn't wait forever: it creeps in on its own, really slowly,
+     and when it touches the wheel it drops where it is: the timer, so you can't sit there forever (the
+     user, 20 Nov: "It's supposed to slowly move down ... before you've done anything ... that's the timer
+     ... eventually it will touch the bottom and then you're stuck with that move"; CREEP, `creep`).
    - Up moves to the higher ring (outward, here), Down to the lower; Left turns the ring selected
      anticlockwise, Right clockwise, its stars with it. A star with nothing under it (inward) falls.
    - Three or more stars of a colour in a line vanish: straight out from the centre (a spoke, all
@@ -27,7 +30,8 @@
    Not on YPPedia, so made up here (say so if it matters): the exact points, the par of moves, the
    ratings' thresholds, how fast constellations grow (SIZES), that Up is outward, that a booch blows
    the board clear of stars (the constellation stays, rated Booched), that the next star's spoke and
-   colour are plain random, that turning and dropping are the moves counted (choosing a ring isn't),
+   colour are plain random, how long the next star takes to creep in (CREEP.SECS), that turning and
+   dropping are the moves counted (choosing a ring isn't),
    and that a constellation's own places never make a line of three of a colour.
 
    A wolf den's Navigation (`den: true`, 14 Nov; IDEAS.md, "Dignity's tutorial: four-tier Duty Navigation in the
@@ -48,6 +52,9 @@ export const RINGS = 3, SPOKES = 8, COLOURS = 5, LINE = 3;
 /** A wolf den's board (the header): its rings, its constellations' places a ring (a fresh board's first, then the
     rest), each ring's weight in its points, and the centre ring's places when two or more clears charted the last. */
 export const DEN = { RINGS: 4, FIRST: [3, 1, 0], PLACES: [3, 2, 1], WEIGHT: [3, 5, 9], WILD_MORE: 4 } as const;
+/** The next star creeping in on its own (the header): seconds from its being dealt to its touching the wheel, when
+    it drops where it is. Made up (YPPedia doesn't say how long): really slowly, the user's word. */
+export const CREEP = { SECS: 20 } as const;
 /** The colours, as the pictures have them. */
 export const COLOUR_NAMES = ['yellow', 'red', 'orange', 'white', 'blue'] as const;
 /** Points off for a booch. */
@@ -131,6 +138,8 @@ export interface NavOptions {
   given?: readonly (readonly Mark[] | null)[];
   /** A wolf den's board (the header): four rings, the den's constellations, wild targets, the den's points. */
   den?: boolean;
+  /** Seconds the next star takes to creep in and drop on its own (CREEP.SECS); 0 never. */
+  creep?: number;
 }
 
 /* A combo constellation: one that can't be made a star at a time. Most can: whatever order its
@@ -247,6 +256,9 @@ export class Navigation {
   /** A den's next constellation's centre: 0 plain, 1 wild, 2 wild with a fourth place (the last charted in a chain
       of one clear, or of two or more). */
   wildNext = 0;
+  /** Seconds the next star's been waiting, creeping in (`creep`), and how long it takes to touch (0: never). */
+  waited = 0;
+  readonly creepSecs: number;
   private nextId = 1;
 
   constructor(private readonly random: () => number = Math.random, opts: NavOptions = {}) {
@@ -257,6 +269,7 @@ export class Navigation {
     this.sizes = opts.sizes?.length ? opts.sizes : SIZES;
     this.colours = Math.max(2, Math.min(COLOURS, opts.colours ?? COLOURS));
     this.given = opts.given ?? [];
+    this.creepSecs = Math.max(0, opts.creep ?? CREEP.SECS);
     this.next = this.newStar();
     this.deal();
   }
@@ -357,12 +370,30 @@ export class Navigation {
     return res;
   }
 
+  /** A host's own next star (a teacher's, dealt where her lesson needs it): its colour and spoke, the creep from the
+      top. */
+  place(next: { c: number; spoke: number }): void {
+    this.next = { id: this.nextId++, c: next.c, spoke: next.spoke };
+    this.waited = 0;
+  }
+
+  /** How far the next star's crept in: 0 just dealt, 1 touching the wheel. */
+  creepShare(): number { return this.creepSecs > 0 ? Math.min(1, this.waited / this.creepSecs) : 0; }
+  /** Time passing for the next star (the clock handed in: `dt` seconds): it creeps in, and true once it's touched
+      the wheel, when its host drops it (`drop`), wherever it is. Never, with `creep` 0. */
+  creep(dt: number): boolean {
+    if (!(this.creepSecs > 0)) return false;
+    this.waited += Math.max(0, dt);
+    return this.waited >= this.creepSecs;
+  }
+
   /** Drop the next star in down its spoke. Onto a star in the outer ring, it's a booch. A move. */
   drop(): Move {
     const res = this.blank('drop'), n = this.next, outer = this.rings - 1;
     res.moved = true;
     this.counted();
     this.next = this.newStar();
+    this.waited = 0;
     if (this.grid[outer][n.spoke]) {
       res.booched = true;
       res.points -= BOOCH_PENALTY;

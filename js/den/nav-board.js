@@ -30,6 +30,10 @@ import { Navigation, RINGS, SPOKES, parFor } from '../navigation.js';
     board's radii on it, centred: the three rings, the handles' little rings (where the next star
     sits), and a star's size. (Measured off the real board, scaled from 450 wide to 1024.) */
 const S = 1024, C = S / 2, PANEL_H = 1366, RING_R = [118, 248, 369], OUT = 457, STAR_R = 46;
+/** A wolf den's wheel: its fourth rim as far out from the third as the others are from each other (the user, 20 Nov:
+    "surely the gap between each ring should be consistent"), and the whole wheel drawn this much smaller to fit it,
+    the next star waiting out past it. */
+const RING_4 = RING_R[2] + Math.round((RING_R[2] - RING_R[0]) / 2), DEN_K = 0.78, DEN_NEXT = 470;
 /** A spoke's angle on the canvas (y down): 0 straight up, then clockwise. */
 const ang = (spoke) => -Math.PI / 2 + spoke * (2 * Math.PI / SPOKES);
 const radius = (ring) => (ring < RINGS ? RING_R[ring] : OUT);
@@ -148,19 +152,26 @@ function panelCanvas() {
 /** Olive-gold, the wheel's: dark edge, body, shade and shine. */
 const GOLD = { edge: '#2e2808', body: '#857526', shade: '#62561a', shine: '#ddd290', tick: '#f0ecd0' };
 /** The wheel: spokes out to their handles, the hub's filigree, the thin inner ring and the two broad
-    rims the other places sit on (one lit over it each frame). */
-let WHEEL_CV = null;
-function wheelCanvas() {
-  if (WHEEL_CV) return WHEEL_CV;
-  WHEEL_CV = canvas(S, S, (g) => {
+    rims the other places sit on (one lit over it each frame). A wolf den's (`four`) has a third broad rim
+    out over the handles, its fourth ring's places: it was there, but only as stars sitting on the handles,
+    no ring to be seen (the user, 20 Nov: "I only see 3 ... rings. The whole point ... of Wolf Den Navving
+    is there are 4 of them"; "there is a fourth ring there, but I certainly can't see it"). */
+const WHEEL_CV = {};
+function wheelCanvas(four = false) {
+  if (WHEEL_CV[four]) return WHEEL_CV[four];
+  return (WHEEL_CV[four] = canvas(S, S, (g) => {
+    // (a wolf den's drawn smaller, to fit its fourth rim)
+    if (four) { g.translate(C, C); g.scale(DEN_K, DEN_K); g.translate(-C, -C); }
     g.lineCap = 'round'; g.lineJoin = 'round';
     // Gold work: a dark edge, then the gold, along the same path.
     const gold = (path, w) => { path(); g.lineWidth = w + 6; g.strokeStyle = GOLD.edge; g.stroke(); g.lineWidth = w; g.strokeStyle = GOLD.body; g.stroke(); };
     const at = (r, a) => [C + Math.cos(a) * r, C + Math.sin(a) * r];
     for (let s = 0; s < SPOKES; s++) {
       const a = ang(s), u = [Math.cos(a), Math.sin(a)], v = [-u[1], u[0]];
-      gold(() => { g.beginPath(); g.moveTo(C, C); g.lineTo(...at(OUT - 17, a)); }, 5);
-      // The handle: a little ring, and two leaves out from it.
+      gold(() => { g.beginPath(); g.moveTo(C, C); g.lineTo(...at(four ? RING_4 : OUT - 17, a)); }, 5);
+      // The handle: a little ring, and two leaves out from it (a wolf den's spokes end at its fourth rim, the next
+      // star waiting out past it).
+      if (four) continue;
       const [kx, ky] = at(OUT, a);
       gold(() => { g.beginPath(); g.arc(kx, ky, 15, 0, Math.PI * 2); }, 5);
       for (const sd of [-1, 1]) {
@@ -199,23 +210,22 @@ function wheelCanvas() {
     gold(() => { g.beginPath(); g.arc(C, C, RING_R[0], 0, Math.PI * 2); }, 9);
     g.lineWidth = 2; g.strokeStyle = GOLD.shine; g.beginPath(); g.arc(C, C, RING_R[0] - 2, 0, Math.PI * 2); g.stroke();
     // The two broad rims, the middle and the outer: shaded on the inside, a shine toward the outside,
-    // tick marks round the outer like a dial's.
-    for (const r of [RING_R[1], RING_R[2]]) {
+    // tick marks round the outer like a dial's (a wolf den's fourth, out over the handles, the same).
+    for (const r of four ? [RING_R[1], RING_R[2], RING_4] : [RING_R[1], RING_R[2]]) {
       const w = 46;
       g.lineWidth = w + 7; g.strokeStyle = GOLD.edge; g.beginPath(); g.arc(C, C, r, 0, Math.PI * 2); g.stroke();
       g.lineWidth = w; g.strokeStyle = GOLD.body; g.stroke();
       g.lineWidth = w * 0.34; g.strokeStyle = GOLD.shade; g.beginPath(); g.arc(C, C, r - w * 0.3, 0, Math.PI * 2); g.stroke();
       g.lineWidth = 4; g.strokeStyle = GOLD.shine; g.beginPath(); g.arc(C, C, r + w * 0.16, 0, Math.PI * 2); g.stroke();
       g.lineWidth = 2; g.strokeStyle = 'rgba(221,210,144,0.6)'; g.beginPath(); g.arc(C, C, r - w * 0.12, 0, Math.PI * 2); g.stroke();
-      const n = r === RING_R[2] ? 72 : 48;
+      const dial = r !== RING_R[1], n = dial ? 72 : 48;
       for (let i = 0; i < n; i++) {
         const a = i * 2 * Math.PI / n, long = i % 3 === 0;
-        g.lineWidth = 2.5; g.strokeStyle = r === RING_R[2] ? GOLD.tick : 'rgba(46,40,8,0.7)';
+        g.lineWidth = 2.5; g.strokeStyle = dial ? GOLD.tick : 'rgba(46,40,8,0.7)';
         g.beginPath(); g.moveTo(...at(r + w * 0.05, a)); g.lineTo(...at(r + w * (long ? 0.36 : 0.26), a)); g.stroke();
       }
     }
-  });
-  return WHEEL_CV;
+  }));
 }
 
 /** A constellation's place: holding its colour, a coin of it with its star on; else a thick ring of
@@ -250,23 +260,34 @@ function medallion(g, c, x, y, filled, glow, k = 1) {
   g.restore();
 }
 /* A wolf den's wild target (14 Nov; the screenshots the user shared, "it looked multicoloured"; the guide's "a paw
-   print ringed in every colour"): its ring in every colour, a pale paw print in its dark middle; a star sitting in it
-   is drawn on top by the caller, and holding one it glows. */
+   print ringed in every colour"): its ring in every colour, a pale paw print in its dark middle. Holding a star
+   (`held`, its colour), it's filled, lit and locked as a target holding its own colour is: a coin of the star's
+   colour with the star on it, inside the ring of every colour, glowing (the user, 20 Nov: "it should be showing ...
+   the same kind of visible indicator as if ... you've got a white in a white ring"); the caller leaves that star
+   undrawn. */
 function wildMedallion(g, x, y, held, glow, k = 1) {
-  const R = 56 * k;
+  const R = 56 * k, has = held !== undefined && held !== null;
   g.save();
-  if (glow > 0 || held) {
+  if (glow > 0 || has) {
     const gg = g.createRadialGradient(x, y, R * 0.6, x, y, R * 2);
-    gg.addColorStop(0, `rgba(255,255,255,${0.35 * Math.max(glow, held ? 0.6 : 0)})`); gg.addColorStop(1, 'rgba(255,255,255,0)');
+    gg.addColorStop(0, `rgba(255,255,255,${0.35 * Math.max(glow, has ? 0.8 : 0)})`); gg.addColorStop(1, 'rgba(255,255,255,0)');
     g.fillStyle = gg; g.beginPath(); g.arc(x, y, R * 2, 0, Math.PI * 2); g.fill();
   }
-  g.beginPath(); g.arc(x, y, R - 6, 0, Math.PI * 2); g.fillStyle = 'rgba(4,12,40,0.88)'; g.fill();
+  g.beginPath(); g.arc(x, y, R - 6, 0, Math.PI * 2);
+  if (has) {
+    const F = COL[held].face, gr = g.createRadialGradient(x - R * 0.3, y - R * 0.35, 4, x, y, R);
+    gr.addColorStop(0, mix(F, '#ffffff', 0.35)); gr.addColorStop(1, mix(F, '#000000', 0.12));
+    g.fillStyle = gr;
+  } else g.fillStyle = 'rgba(4,12,40,0.88)';
+  g.fill();
   g.lineWidth = 15; g.strokeStyle = 'rgba(10,10,30,0.7)'; g.stroke();
   for (let i = 0; i < COL.length; i++) {
     const a0 = -Math.PI / 2 + i * 2 * Math.PI / COL.length;
     g.lineWidth = 11; g.strokeStyle = COL[i].ring;
     g.beginPath(); g.arc(x, y, R - 6, a0, a0 + 2 * Math.PI / COL.length + 0.02); g.stroke();
   }
+  g.lineWidth = 3; g.strokeStyle = 'rgba(255,255,255,0.45)'; g.beginPath(); g.arc(x, y, R - 6, Math.PI * 1.1, Math.PI * 1.75); g.stroke();
+  if (has) { g.drawImage(starCanvas(held), x - R * 0.82, y - R * 0.82, R * 1.64, R * 1.64); g.restore(); return; }
   // (the paw: a pad and four toes)
   g.fillStyle = 'rgba(230,226,246,0.8)';
   g.beginPath(); g.ellipse(x, y + R * 0.14, R * 0.24, R * 0.2, 0, 0, Math.PI * 2); g.fill();
@@ -281,9 +302,11 @@ const xy = (r, a) => [C + Math.cos(a) * r, C + Math.sin(a) * r];
 
 /** How long each kind of stage plays, in seconds. */
 const TIME = { turn: 0.24, drop: 0.12, fall: 0.16, line: 0.42, constellation: 0.9, deal: 0.35, booch: 0.9 };
-/* A star dropping in, or falling, goes at a steady, slow pace: this many seconds a ring's width, so it's seen
-   sliding in rather than snapping (the user, 13 Nov: "the pieces are supposed to slowly drop"). */
-const DROP_PER_RING = 0.32, RING_W = RING_R[1] - RING_R[0];
+/* A star dropping in goes really quick once Space is pressed: the slow part is its creeping in before (the rules'
+   `creep`; the user, 20 Nov: "once you hit space, it should go really quick. The slow drop is ... for before you've hit
+   the space bar"; 13 Nov's "the pieces are supposed to slowly drop" was that, misread as a slow fall). Stars falling
+   after a clear go at a steady pace, quick but seen: these many seconds a ring's width. */
+const DROP_PER_RING = 0.06, FALL_PER_RING = 0.16, RING_W = RING_R[1] - RING_R[0];
 
 /* A Navigation board. `game` (a Navigation already made) or `random` and `options` (its NavOptions:
    sizes, colours) to make one. `at` (a Vector3, the board's middle), `yaw` (turned about the world's
@@ -299,16 +322,22 @@ const DROP_PER_RING = 0.32, RING_W = RING_R[1] - RING_R[0];
    Returns the board: add `board.group` to the scene, call `tick(dt)` every frame, feed it `key`,
    `pointer` and `click`, and `dispose()` it when you're done. `game` is the rules' Navigation (its
    score, completed, moves, constellation...), `busy()` whether it's still showing what happened,
-   `idle` (set it) hides the selected ring's light when nobody's at it, `plan` (set it: places, { ring, spoke })
+   `idle` (set it) hides the selected ring's light when nobody's at it (and stops the next star creeping in),
+   `timer` (true unless set false: a teacher's demonstration, a menu up over it) whether the next star creeps in on
+   its own and drops when it touches (the rules' `creep`), `plan` (set it: places, { ring, spoke })
    rings them, a teacher's plan shown before it's played, and `hold(dt)` keeps the board still where it is, drawn
    (while a teacher talks over it), in place of `tick`. */
 export function navBoard(o = {}) {
   const game = o.game ?? new Navigation(o.random ?? Math.random, o.options ?? {});
-  /* A wolf den's board, four rings ("four-tier", 14 Nov): the wheel drawn a little smaller, its handles' rings the
-     fourth ring's places, and the next star waiting further out. Its cascades named over the stars as they go. */
-  const K = game.rings > RINGS ? 0.84 : 1, RR = K < 1 ? [...RING_R.map((r) => r * K), OUT * K] : RING_R;
-  const OUT_B = K < 1 ? 468 : OUT, SR = STAR_R * K, named = o.named ?? game.rings > RINGS;
+  /* A wolf den's board, four rings ("four-tier", 14 Nov): the wheel drawn smaller, a fourth broad rim the fourth ring's
+     places, spaced as the others are (20 Nov: drawn, not only stars on the handles, and evenly), its spokes ending at it,
+     and the next star waiting out past it. Its cascades named over the stars as they go. */
+  const K = game.rings > RINGS ? DEN_K : 1, RR = K < 1 ? [...RING_R, RING_4].map((r) => r * K) : RING_R;
+  const OUT_B = K < 1 ? DEN_NEXT : OUT, SR = STAR_R * K, named = o.named ?? game.rings > RINGS;
   const radius = (ring) => (ring < game.rings ? RR[ring] : OUT_B);
+  // (the next star, crept in from its handle to touching the wheel's outer rim as its time runs out)
+  const TOUCH = RR[game.rings - 1] + 29 * K + SR * 0.8;
+  const nextR = () => OUT_B + (TOUCH - OUT_B) * game.creepShare();
   const ringAt = (r) => RR.findIndex((x) => Math.abs(x - r) < 0.6);
   const sky = o.sky !== false, CH = sky ? PANEL_H : S, OFF = (CH - S) / 2;
   const cv = document.createElement('canvas');
@@ -326,7 +355,7 @@ export function navBoard(o = {}) {
   group.scale.setScalar(size);
 
   const b = {
-    game, group, canvas: cv, size, sky, idle: false,
+    game, group, canvas: cv, size, sky, idle: false, timer: true,
     onMove: o.onMove ?? null, onConstellation: o.onConstellation ?? null, onBooch: o.onBooch ?? null, onDeal: o.onDeal ?? null, onStage: o.onStage ?? null, plan: null,
     /** Slots a move's clears turn wild, kept plain till that clear's shown ("ring,spoke"). */
     wildLater: new Set(),
@@ -353,7 +382,7 @@ export function navBoard(o = {}) {
       if (!x) return;
       seen.add(x.id);
       let st = b.stars.get(x.id);
-      if (!st) { st = { c: x.c, r: OUT_B, a: from ? ang(from.spoke) : ang(s) }; b.stars.set(x.id, st); }
+      if (!st) { st = { c: x.c, r: from?.r ?? OUT_B, a: from ? ang(from.spoke) : ang(s) }; b.stars.set(x.id, st); }
       st.fr = st.r; st.fa = st.a; st.tr = radius(r);
       let d = ang(s) - st.a;
       d = Math.atan2(Math.sin(d), Math.cos(d));
@@ -402,7 +431,9 @@ export function navBoard(o = {}) {
     if (st.kind === 'drop' || st.kind === 'fall') {
       let far = 0;
       for (const s of b.stars.values()) far = Math.max(far, Math.abs(s.tr - s.fr));
-      b.T = Math.max(TIME[st.kind], DROP_PER_RING * far / RING_W);
+      // (the star dropped, and its fall straight after into its place, quick; what falls after a clear, steady)
+      const quick = st.kind === 'drop' || b.lastKind === 'drop';
+      b.T = Math.max(TIME[st.kind], (quick ? DROP_PER_RING : FALL_PER_RING) * far / RING_W);
     }
   };
   // Finish a stage: everything where it ends up.
@@ -431,7 +462,7 @@ export function navBoard(o = {}) {
   };
   b.turn = (dir) => did(game.turn(dir));
   b.select = (d) => game.select(d);
-  b.drop = () => { b.dropFrom.push({ ...game.next }); return did(game.drop()); };
+  b.drop = () => { b.dropFrom.push({ ...game.next, r: nextR() }); return did(game.drop()); };
   b.key = (key, e) => {
     const k = key.length === 1 ? key.toLowerCase() : key;
     if (k === 'ArrowLeft' || k === 'a') { b.turn(-1); return true; }
@@ -463,6 +494,8 @@ export function navBoard(o = {}) {
 
   b.tick = (dt) => {
     b.time += dt;
+    // (the next star creeping in, while someone's at the board and nothing's moving: touching, it drops)
+    if (b.timer && !b.idle && !b.busy() && game.creep(dt)) b.drop();
     // Catch up when keys come faster than it's shown.
     const fast = 1 + Math.min(3, b.queue.length * 0.6);
     if (!b.stage && b.queue.length) begin(b.queue.shift());
@@ -502,8 +535,7 @@ export function navBoard(o = {}) {
     // The wheel and all on it, its middle the canvas's.
     g.save();
     g.translate(0, OFF);
-    if (K < 1) { g.save(); g.translate(C, C); g.scale(K, K); g.translate(-C, -C); g.drawImage(wheelCanvas(), 0, 0); g.restore(); }
-    else g.drawImage(wheelCanvas(), 0, 0);
+    g.drawImage(wheelCanvas(K < 1), 0, 0);
     // The ring selected, plainly: its band lit and a bright gold edge either side of it (one just turned,
     // brighter still for a moment). It was only a little brighter, hard to tell (the user, 13 Nov: "the
     // highlight between the selected ring and a non-selected ring is relatively minimal, so it's making it
@@ -532,18 +564,18 @@ export function navBoard(o = {}) {
       const grid = shownGrid();
       for (const m of con.marks) {
         const [x, y] = xy(radius(m.ring), ang(m.spoke)), here = grid.get(`${m.ring},${m.spoke}`);
-        if (m.wild && !b.wildLater.has(`${m.ring},${m.spoke}`)) wildMedallion(g, x, y, here !== undefined, flare > 0 ? 1 + flare : 0, K * (1 + 0.3 * flare));
+        if (m.wild && !b.wildLater.has(`${m.ring},${m.spoke}`)) wildMedallion(g, x, y, here, flare > 0 ? 1 + flare : 0, K * (1 + 0.3 * flare));
         else medallion(g, m.colour, x, y, here === m.colour || flare > 0, flare > 0 ? 1 + flare : 0, K * (1 + 0.3 * flare));
       }
       g.restore();
     }
     // The stars (on a place of the constellation's in its own colour, the coin shows it instead).
     const filled = new Set();
-    if (con) for (const m of con.marks) if (!m.wild || b.wildLater.has(`${m.ring},${m.spoke}`)) filled.add(`${m.ring},${m.spoke},${m.colour}`);
+    if (con) for (const m of con.marks) filled.add(`${m.ring},${m.spoke},${!m.wild || b.wildLater.has(`${m.ring},${m.spoke}`) ? m.colour : '*'}`);
     for (const [id, s] of b.stars) {
       const [x, y] = xy(s.r, s.a);
       const rr = ringAt(s.r), sp = Math.round(((s.a + Math.PI / 2) / (2 * Math.PI / SPOKES) % SPOKES + SPOKES) % SPOKES);
-      if (rr >= 0 && filled.has(`${rr},${sp},${s.c}`) && !b.lit?.has(id)) continue;
+      if (rr >= 0 && (filled.has(`${rr},${sp},${s.c}`) || filled.has(`${rr},${sp},*`)) && !b.lit?.has(id)) continue;
       let k = 1;
       if (b.lit?.has(id)) {   // (a line about to go: ringed and swelling)
         const u = Math.min(1, b.t / TIME.line);
@@ -562,12 +594,24 @@ export function navBoard(o = {}) {
       for (const p of b.plan) { const [x, y] = xy(radius(p.ring), ang(p.spoke)); g.beginPath(); g.arc(x, y, SR * 1.45, 0, Math.PI * 2); g.stroke(); }
       g.restore();
     }
-    // The next star, out on its spoke's handle, a pale halo round it (not while one's still dropping in).
+    drawMarks();
+    // The next star, out on its spoke's handle, a pale halo round it (not while one's still dropping in), creeping
+    // in toward the wheel as it waits, its time left an arc round it, draining, going red near the end, the halo
+    // pulsing faster: the timer (the rules' `creep`; the user, 20 Nov: "that's the timer to give you only a set amount
+    // of time to do something").
     if (!b.dropFrom.length && !(b.stage?.kind === 'booch')) {
-      const n = game.next, [x, y] = xy(OUT_B, ang(n.spoke)), p = 0.5 + 0.5 * Math.sin(b.time * 4);
+      const n = game.next, u = game.creepShare(), [x, y] = xy(nextR(), ang(n.spoke));
+      const p = 0.5 + 0.5 * Math.sin(b.time * (4 + 10 * u * u)), late = Math.max(0, (u - 0.7) / 0.3);
       const gg = g.createRadialGradient(x, y, SR * 0.6, x, y, SR * 1.5);
-      gg.addColorStop(0, `rgba(200,220,255,${0.45 + 0.15 * p})`); gg.addColorStop(1, 'rgba(160,190,255,0)');
+      gg.addColorStop(0, `rgba(${200 + 55 * late},${220 - 120 * late},${255 - 155 * late},${0.45 + 0.15 * p + 0.2 * late})`); gg.addColorStop(1, 'rgba(160,190,255,0)');
       g.fillStyle = gg; g.beginPath(); g.arc(x, y, SR * 1.5, 0, Math.PI * 2); g.fill();
+      if (game.creepSecs > 0 && b.timer && !b.idle) {
+        g.save(); g.lineCap = 'round'; g.lineWidth = 6 * K;
+        g.strokeStyle = 'rgba(10,20,50,0.55)'; g.beginPath(); g.arc(x, y, SR * 1.28, 0, Math.PI * 2); g.stroke();
+        g.strokeStyle = `rgb(${255},${214 - 150 * late},${106 - 60 * late})`;
+        g.beginPath(); g.arc(x, y, SR * 1.28, -Math.PI / 2, -Math.PI / 2 + (1 - u) * Math.PI * 2); g.stroke();
+        g.restore();
+      }
       g.drawImage(starCanvas(n.c), x - SR, y - SR, 2 * SR, 2 * SR);
     }
     // Sparks and ghosts.
@@ -644,6 +688,82 @@ export function navBoard(o = {}) {
   // the board's back).
   // Still where it is, drawn (only the time goes on, for what pulses): while a teacher talks over it.
   b.hold = (dt) => { b.time += dt; draw(); tex.needsUpdate = true; };
+
+  /* A teacher's plan marked on the board, Sailing's way (`b.marks`, set it: src/den-wolfden.ts's PlanMark, from
+     planMarks; js/den/sail-board.js's drawMarks the model; the user, 20 Nov: "it's not really showing the plan in the
+     way that sailing is"): a star still to put in place ringed in its colour, the gap glowing, each star parked
+     outside tagged ("1st", "2nd") with a dotted arrow round its ring and in to where it lands, and what happens in
+     order, gold badges (1 Single, 2 Double). Still to come, faint and dashed; built, solid, pulsing gently. */
+  b.marks = null;
+  function markTag(x, y, text, col, a) {
+    g.save();
+    g.globalAlpha = a;
+    g.font = `800 ${Math.round(38 * K)}px 'Alegreya Sans', sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    const w = g.measureText(text).width + 18 * K, h = 36 * K;
+    g.fillStyle = 'rgba(14,9,4,0.9)'; g.strokeStyle = col; g.lineWidth = 3;
+    g.beginPath(); g.roundRect(x - w / 2, y - h / 2, w, h, 10 * K); g.fill(); g.stroke();
+    g.fillStyle = col; g.fillText(text, x, y + 1);
+    g.restore();
+  }
+  // (a tag's place: out from the board's middle past the mark, or in toward it)
+  const beside = (p, out) => xy(radius(p.ring) + (out ? 1 : -1) * SR * 1.95, ang(p.spoke));
+  function drawMarks() {
+    const ms = b.marks;
+    if (!ms?.length) return;
+    const pulse = 0.75 + 0.25 * Math.sin(b.time * 4), order = { arrow: 0, star: 1, gap: 2, badge: 3 };
+    for (const m of [...ms].sort((p, q) => order[p.kind] - order[q.kind])) {
+      // (still to come, plainly there but dashed, never so faint you can't tell what it's about: the user, 20 Nov,
+      // "faintly ringed is an understatement. I can't tell ... what it's trying to refer to")
+      const a = m.faint ? 0.8 : pulse;
+      g.save();
+      g.setLineDash(m.faint ? [16 * K, 10 * K] : []);
+      if (m.kind === 'star' || m.kind === 'gap') {
+        const [x, y] = xy(radius(m.at.ring), ang(m.at.spoke)), col = m.kind === 'gap' ? '#ffffff' : COL[m.colour].ring;
+        if (m.kind === 'gap') {
+          const gg = g.createRadialGradient(x, y, SR * 0.2, x, y, SR * 1.5);
+          gg.addColorStop(0, `rgba(255,255,255,${0.3 * a})`); gg.addColorStop(1, 'rgba(255,255,255,0)');
+          g.fillStyle = gg; g.beginPath(); g.arc(x, y, SR * 1.5, 0, Math.PI * 2); g.fill();
+        }
+        g.globalAlpha = a; g.lineWidth = (m.faint ? 7 : 9) * K; g.strokeStyle = col; g.shadowColor = col; g.shadowBlur = m.faint ? 6 : 18;
+        g.beginPath(); g.arc(x, y, SR * 1.4, 0, Math.PI * 2); g.lineWidth += 6 * K; g.strokeStyle = 'rgba(8,10,30,0.55)'; g.shadowBlur = 0; g.stroke();
+        g.lineWidth -= 6 * K; g.strokeStyle = col; g.shadowBlur = m.faint ? 6 : 18;
+        g.beginPath(); g.arc(x, y, SR * 1.4, 0, Math.PI * 2); g.stroke();
+        g.restore();
+        if (m.label) { const [tx, ty] = beside(m.at, true); markTag(tx, ty, m.label, col, m.faint ? 0.85 : 1); }
+        continue;
+      }
+      if (m.kind === 'arrow') {
+        // (round its ring the way it's turned, then in to where it lands)
+        const col = COL[m.colour].ring, r0 = radius(m.from.ring), a0 = ang(m.from.spoke);
+        let a1 = ang(m.to.spoke), d = a1 - a0;
+        if (m.dir < 0) { while (d > 0) d -= Math.PI * 2; } else { while (d < 0) d += Math.PI * 2; }
+        a1 = a0 + d;
+        const [ex, ey] = xy(radius(m.to.ring) + SR * 0.9, a1);
+        g.globalAlpha = a; g.lineWidth = 9 * K; g.strokeStyle = col; g.setLineDash([1, 16 * K]); g.lineCap = 'round'; g.shadowColor = 'rgba(0,0,0,0.8)'; g.shadowBlur = 6;
+        g.beginPath();
+        if (Math.abs(d) > 0.01) g.arc(C, C, r0, a0, a1, m.dir < 0); else g.moveTo(...xy(r0, a0));
+        g.lineTo(ex, ey); g.stroke();
+        // (its head, pointing in)
+        g.setLineDash([]); g.fillStyle = col;
+        const ux = Math.cos(a1), uy = Math.sin(a1), vx = -uy, vy = ux, hl = 22 * K, hw = 13 * K;
+        g.beginPath(); g.moveTo(ex - ux * 2, ey - uy * 2);
+        g.lineTo(ex + ux * hl + vx * hw, ey + uy * hl + vy * hw); g.lineTo(ex + ux * hl - vx * hw, ey + uy * hl - vy * hw);
+        g.closePath(); g.fill();
+        g.restore();
+        continue;
+      }
+      if (m.kind === 'badge') {
+        const [x, y] = beside(m.at, false), R = 20 * K;
+        g.globalAlpha = m.faint ? 0.85 : 1;
+        g.fillStyle = '#f2c84a'; g.strokeStyle = '#3a2408'; g.lineWidth = 3;
+        g.beginPath(); g.arc(x, y, R, 0, Math.PI * 2); g.fill(); g.stroke();
+        g.fillStyle = '#2a1804'; g.font = `900 ${Math.round(26 * K)}px 'Alegreya Sans', sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(String(m.n), x, y + 1);
+        g.restore();
+        if (m.label) markTag(x, y + R + 20 * K, m.label, '#f2c84a', m.faint ? 0.85 : 1);
+      }
+    }
+  }
   b.refresh = () => { b.queue = []; b.stage = null; b.dropFrom = []; b.lit = null; b.wildLater.clear(); layNow(game.grid); b.shownCon = game.constellation; b.conFade = 1; };
   b.dispose = () => {
     group.removeFromParent();

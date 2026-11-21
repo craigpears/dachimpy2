@@ -52,6 +52,10 @@ export const S = {
     NEAR: 2,
     /** A brown or a black trapped among the whites (`trapped`): about the swaps it'll cost to free. */
     TRAPPED: 1,
+    /** Trapped junk as a group (the user, 17 Nov, notes/distilling/55-two-blacks-move-as-one.webp: "if I move number one
+        up without number two, that's going to leave number two stranded ... they move as one continuous unit"): a piece
+        of junk on a trapped one's right, the same colour and trapped itself, is no way out (`trapped`). 0 off. */
+    TRAP_GROUP: 1,
     /** A white in a pocket behind spice (`behindSpice`), one of the worst things to leave. */
     POCKET: 12,
     /** The block phase (`blockPhase`, the twenty-third to twenty-fifth notes), its terms only then: each brown on
@@ -83,7 +87,7 @@ export function doneFromRight(cols) {
 /** A brown or a black stuck among whites: whites beside it on its right, and no swap takes it right (a
     black on the bottom of the whites, a brown on the top; "blacks get stuck at the bottom, browns at the
     top"). It needs a technique to get out, and left there it's the white block's dirty edge later. */
-export function trapped(cols, x, y) {
+export function trapped(cols, x, y, seen) {
     const p = cols[x][y];
     if (p !== BROWN && p !== BLACK)
         return false;
@@ -93,8 +97,21 @@ export function trapped(cols, x, y) {
         if (!n)
             continue;
         const q = cols[n[0]][n[1]];
-        // Junk beside it on the right: it's part of the colour, not stuck in the whites.
-        if (junk(q) || canSwapOn(cols, x, y, n[0], n[1]))
+        if (canSwapOn(cols, x, y, n[0], n[1]))
+            return false;
+        // Junk beside it on the right: it's part of the colour, not stuck in the whites; unless it's the same colour and
+        // trapped itself, the two walled in together (S.TRAP_GROUP: picture 55's two blacks, "one continuous unit").
+        if (q === p && S.TRAP_GROUP) {
+            const s = seen ?? new Set([x * 16 + y]), k = n[0] * 16 + n[1];
+            if (s.has(k))
+                continue;
+            s.add(k);
+            if (!trapped(cols, n[0], n[1], s))
+                return false;
+            white = true;
+            continue;
+        }
+        if (junk(q))
             return false;
         if (q === WHITE)
             white = true;

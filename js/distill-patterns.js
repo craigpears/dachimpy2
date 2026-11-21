@@ -41,6 +41,15 @@ export const PATTERN = {
     /** The bank: a column this share white or more counts as almost white (`solidColumns`; "several columns of almost
         white pieces", six of eight or nine). */
     SOLID: 0.66,
+    /** A black in a bank column's top half (`bankJunk`): 2 till 17 Nov, as a black anywhere. */
+    BLACK_HIGH: 1,
+    /** Getting it over (`junkOver`, src/distill-read.ts's `straightened`): each piece of junk left of the bank carried past
+        it, worth a black out of the bank; 0 counts only the bank's own junk, as till 17 Nov. */
+    OVER: 2,
+    /** The junk columns' order by height over the board, not column by column (`junkDisorder`; 18 Nov; 0: as before). */
+    BY_HEIGHT: 1,
+    /** ... over this many columns either side (`junkDisorder`). */
+    ORDER_ACROSS: 9,
 };
 /** The colour's side starts at the straight wall's place (src/distill-score.ts, `wall`), or past the whites by the
     fire if that's further right. */
@@ -241,16 +250,18 @@ export const bankSettled = (cols, xs) => xs.length > 0 && cols.slice(0, xs[0]).e
 export const bankEnd = (xs) => (xs.length ? xs[xs.length - 1] + 1 : 0);
 /** The bank's columns that are solid white, PATTERN.SOLID white or more. */
 export const solidColumns = (cols, xs = bankOf(cols)) => xs.filter((x) => cols[x].filter((p) => p === WHITE).length >= PATTERN.SOLID * cols[x].length).length;
-/** The junk spoiling the bank's columns `xs`, each piece where it is: a black anywhere 2 (it sinks through the whites
-    and sticks at the bottom), a brown in the top half 2 (it rises and sticks at the top), a brown in the bottom half 1
-    (it can go on rising: the next to come out). Lower is cleaner; 0 is solid white columns. */
+/** The junk spoiling the bank's columns `xs`, each piece where it is: a black in the bottom half 2 (it's sunk through the
+    whites and sticks there), a brown in the top half 2 (it's risen and sticks there), a brown in the bottom half 1 (it
+    can go on rising: the next to come out), and a black in the top half PATTERN.BLACK_HIGH (it can go on sinking, and a
+    brown stuck at the top swapped for one is the user's own move, 17 Nov, seed 5008: "just drag those blacks up").
+    Lower is cleaner; 0 is solid white columns. */
 export function bankJunk(cols, xs) {
     let n = 0;
     for (const x of xs)
-        cols[x].forEach((p, y) => { if (p === BLACK)
-            n += 2;
+        cols[x].forEach((p, y) => { const high = y * 2 < cols[x].length; if (p === BLACK)
+            n += high ? PATTERN.BLACK_HIGH : 2;
         else if (p === BROWN)
-            n += y * 2 < cols[x].length ? 2 : 1; });
+            n += high ? 2 : 1; });
     return n;
 }
 /** The junk in the bank's columns `xs`, each piece's place. */
@@ -261,14 +272,36 @@ export function bankStrays(cols, xs) {
             out.push({ x, y }); });
     return out;
 }
-/** The junk columns right of the bank, from `from` (half junk or more), their browns above blacks, counted in pairs:
-    the swaps still to sort them blacks over browns (the user, 16 Nov: "straightening up the board, getting black to the
-    top, brown to the bottom on the junk columns"). Not the furnace's: it burns as it is. */
+/** The junk columns right of the bank, from `from` (half junk or more), out of order: blacks at the top and browns at
+    the bottom across them, by height over the board (each brown's height and each black's depth in half rows, halved:
+    a swap of a brown down past a black is one), not column by column (the user, 18 Nov, seed 5008, a column of browns
+    beside columns of blacks: "it feels like it's got the board rotated the wrong way around, and it's putting them at
+    the side rather than at the top"; 16 Nov: "getting black to the top, brown to the bottom on the junk columns"): each
+    brown higher than a black, by half rows, in any of the junk columns (PATTERN.ORDER_ACROSS either side), a pair. Lower is better. Not the
+    furnace's: it burns as it is. PATTERN.BY_HEIGHT 0: the old count, each column's browns above its blacks. */
 export function junkDisorder(cols, from) {
     let n = 0;
+    const xs = [];
     for (let x = Math.max(0, from); x < COLS - 1; x++)
         if (cols[x].filter(isJunk).length * 2 >= cols[x].length)
+            xs.push(x);
+    if (!PATTERN.BY_HEIGHT) {
+        for (const x of xs)
             n += inversions(cols[x]);
+        return n;
+    }
+    const pieces = (x, p) => cols[x].flatMap((q, y) => (q === p ? [halfOf(cols, x, y)] : []));
+    for (const x of xs) {
+        const browns = pieces(x, BROWN);
+        for (const bx of xs) {
+            if (Math.abs(bx - x) > PATTERN.ORDER_ACROSS)
+                continue;
+            for (const k of pieces(bx, BLACK))
+                for (const b of browns)
+                    if (b < k)
+                        n++;
+        }
+    }
     return n;
 }
 export function patternsOf(cols, timeLeft) {

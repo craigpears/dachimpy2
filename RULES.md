@@ -1212,6 +1212,17 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   to, like, even just say 1 or 2 junk columns, even if you're being incredibly anxious." Whites banked for the target,
   the chain starts only when the finished junk columns waiting for the furnace are down to two, or the junk can't
   finish the next one.
+- **Distilling: channels to the column going up (17 Nov, watching CC^8 in the chain).** "Creating a channel of browns
+  ... pulling the browns into the bottom right to create a nice channel to drag white pieces down through later, and
+  doing a similar kind of channel of getting blacks up to that top right"; "from a pathfinding perspective ... there's
+  far more paths from any point where the white can appear on the left to getting it into the right column." In the
+  three columns left of the column being filled, browns low and blacks high count in the chain's measure, over the
+  board, not column by column ("one column black, one column brown ... not column by column"); a brown sunk through
+  blacks or a black lifted through browns there is "build a channel".
+- **Distilling: a chain that can't go on is let go (17 Nov, a CC^8 about to be a CC^9).** "There's no way we're sending
+  the crystal clear past 9. Let's start moving the junk into that column"; "the bot keeps trying to send ... whites into
+  that column later. It's obviously futile." Its next column more junk than white, the chain's let go even with
+  nowhere fit to start the next one: that starts a few columns left (three for CC^8), from the whites to come.
 - **Distilling: going backwards to pull trapped browns down (16 Nov, notes/distilling/52-a-black-back-along-the-top.webp).**
   Browns stuck at the top of the white columns sink only through a black: a black taken back left along the top, up
   through each brown, pulls them down ("going backwards across the screen ... is good if it pulls down trapped pieces
@@ -1222,6 +1233,57 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   the block phase. Early on, browns at the top aren't trapped yet (17 Nov, seed 2 at 41 s, the bot waiting for the burn):
   "there's likely going to be more blacks to appear. So those browns at the top are not trapped, but in a later game
   that you would probably want to try and rescue them. But for now, it's fine." 
+- **Distilling: trapped pieces that touch are trapped together (17 Nov, notes/distilling/55-two-blacks-move-as-one.webp).**
+  "If I move number one up without number two, that's going to leave number two stranded ... they move as one continuous
+  unit." A black (or brown) with only another of its colour on its right, itself trapped, is trapped too, not joined to
+  the colour through it. Straightening up counts trapped junk freed as getting it done, and trapped as undoing it, so it
+  frees the pair together (a brown brought back beside them, their way out), never one by leaving the other.
+- **Distilling: there's no such thing as nothing worth moving (17 Nov, seed 5008, CC^8 waiting three junk columns deep
+  by the fire).** "What do you mean, nothing worth moving? There's no such thing as nothing worth moving. Like, browns can
+  go up, and then you can get the blacks ... you've got such a safe position here, you can just go for it." In Stage I
+  with the furnace's clock running and the column not ready, the bot always makes its best move with a goal, however
+  little it gets; with nothing to straighten up, it quick sorts. (With the fire held, as in Helium's lessons, a wait is
+  the burn that moves the lesson on.)
+- **Distilling: getting it over means the junk left of the white columns too (17 Nov, seed 5008).** "There's all this
+  stuff on the left-hand side. Get it over. It's not moving anything." Straightening up counts junk carried from the
+  white columns, or from left of them, past them; dropped into them it counts nothing ("never more put in").
+- **Distilling: sorting the junk columns is no goal of its own (17 Nov, seed 5008, notes/distilling/56-...).** "Why is
+  it doing things like these weird whole column of black, whole column of brown"; "it's just trying to sort blacks and
+  browns ... those blacks up at the top were fine. Why did it have to drag them into a column? That's just wasting
+  moves." Against the clock, a move that only sorts junk (blacks over browns in a column) gets nothing done; the sorting
+  only decides between moves that get junk out. Junk left at the top and bottom of the junk is fine while it isn't stuck
+  ("it's not stuck junk ... you've got plenty of pieces to do the straightening up").
+- **Distilling: a black at the top of the white columns is cleaner than a brown there (17 Nov, seed 5008,
+  notes/distilling/57-...).** "Just drag those blacks up ... within a few moves ... I get to this quite quickly, and it's
+  markedly better": a black lifted up through the browns into the place of a brown stuck at the top lets the brown down
+  and can sink out itself; a brown at the top can't. The bank's junk counts a black in its top half half a brown there.
+- **Distilling: no waiting for a ready column either (18 Nov, seed 5008).** "It's still saying waiting, the column is
+  ready. Again, I cannot fathom what that logic is." The furnace takes the column in its own time, so a ready column is
+  no reason to wait: the bot straightens up meanwhile, the same as when it isn't ready.
+- **Distilling: straightened up means blacks along the top, browns along the bottom, across the junk columns (18 Nov,
+  seed 5008).** "It feels like it's got the board rotated the wrong way around, and it's putting them at the side rather
+  than at the top." A column of browns beside a column of blacks is out of order. The junk's order counts each brown
+  higher than a black anywhere in the junk columns, not each column on its own. With nothing to get over, sorting it is
+  the move ("you've got these browns that can be taken over and then straightened up"); otherwise it only decides
+  between moves that get junk over.
+- **Distilling: the ferry, browns stuck at the top of the white columns taken over (18 Nov, seed 5008).** A brown
+  climbs the whites but crosses into the junk only down through a black. With no black where it tops out (a junk
+  column of browns beside the bank), a black from the top of the junk beside it is let down a swap or two into the
+  whites' top first, then the brown taken up, down through it and over: two drags, one move.
+- **Distilling: no sorting of the columns about to burn while whites are banked (18 Nov, seed 5008,
+  notes/distilling/58-seed-5008-a-brown-run-into-the-furnace-column.webp).** "We are expecting these columns to be
+  burned before we really do anything useful with them. So why try doing anything to improve the quality? ... The
+  reason for pulling rounds down doesn't exist yet." The tie-breaker that took a brown a flick lower (13 Nov) leaves
+  the columns to burn out of it, so it no longer stretches a drag down into the furnace's column.
+- **Distilling: pieces from the left first, the junk already over left alone (18 Nov).** "If it's got a gap, sometimes
+  it will drag things down that are already kind of far over past the whites, unless there's a clear need to straighten
+  it up because of a risk of whites being burned or losing the ability to zigzag ... The preference should always be
+  to take pieces from the left-hand side, i.e. the ones past the whites. You get far more from dragging them over to
+  fix problems than you do messing around with what's already over there." In Stage I, with whites banked (three
+  columns) and junk still in them or left of them: a gap among the junk, a white's place, is filled by junk brought
+  over from the left rather than junk already over, and a move only reworking the junk already over is the last
+  choice. Not when it's needed: a white at risk of burning (a danger zone, the columns about to burn, flagged), a
+  trapped white or trapped junk freed, the right-hand pair sorted before the zigzag's ladder is lost, damage control.
 
 - **Messages stay up long enough to read (10 Nov).** The checkpoint's message "vanished very
   quickly": a longer message stays up longer (about 70 ms a letter, 1.8 to 7 seconds), and one
@@ -2704,18 +2766,66 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     mechanics: the plan's places ringed in gold while she says it, before she plays (as every demonstration does);
     then, as each stage shows, her line for it (a cascade's step, slots going wild, a chart, the next constellation
     going up), the board waiting while she talks (Space moves her on). Her words are src/lines/multibella.ts's
-    `LESSON`, by board and cue; a slot turned wild by a clear is drawn wild only once that clear's shown. "How it
-    works" is four steps in order (`MECHANICS`), N or Next for the next one: a cascade, lines only, +3, +6, +9, its
-    combo clears leaving wild targets; the fourth ring, a star waiting up there, carried round, dropped in by a clear
-    under it (250), then the next constellation going up; the same cascade charting the last slot on its third clear
-    (375, a line's 3); and Umami's evil constellation (below), first a star at a time (the fifth red makes a line and
-    they go), then by her combo, both reds landing together (486).
+    `LESSON`, by board and cue; a slot turned wild by a clear is drawn wild only once that clear's shown. What's
+    different shows the same way: a cascade, lines only, +3, +6, +9, its combo clears leaving wild targets; the fourth
+    ring, a star waiting up there, carried round, dropped in by a clear under it (250); the same cascade charting the
+    last slot on its third clear (375, a line's 3).
+  - **How it works is Umami's run, from his replay (15 Nov).** The user, after playing the first version: "not what was
+    meant": the lesson was to walk through the replay they'd sent (notes/wolf-den/), not Umami's evil constellation.
+    One real board (`BOARDS.replay`), his constellation where his was (an orange target top middle in the centre ring,
+    a yellow over it and a red on the left in the middle ring, a yellow up-left in the third: 71), three filled, a blue
+    in the orange one; one white dropped: "Single! +3", the red above falling in beside two reds, "Double! +6", the
+    orange target beside it gone every colour, then "Triple! Constellation! +213" and the next up with four wild
+    targets. Three steps (`WALK`: Single, Double, Triple), walked a beat at a time: every beat she speaks holds the
+    board, her words up, till Space.
+  - **Next is Space (15 Nov):** "when it says next, like, surely that should be a space, or there's nothing really
+    inviting." While she waits, the Drop button's place is Next (saying the step it goes on to: "Next: Double! +6"),
+    pulsing; Space or a tap goes on. No N key.
+  - **Fewer controls, the menu the way in (15 Nov):** "Multibella should be less controls"; her lessons' menu along
+    the bottom, "that menu at the bottom that pops up quickly would be brilliant." It pops up as you sit at the table
+    the first time, on How it works (Space plays Single); T after. In a lesson the bar's only Next, Lessons and Stop.
+  - **Her opening (15 Nov; asked 14 Nov, the idea card's "Funny cutscenes"):** the first time you come in, a little
+    cutscene: her at the star table spinning the wheel frantically, rings flying round on a real board, to stop the
+    werewolves coming, the moon waning in the window and the werewolf there turning back; then "Phew. Oh! Hi!" and the
+    moon rising again for the next pack. About 13 seconds; Space or Esc skips it (`OPENING`).
+  - **Umami's evil constellation is a fun one (15 Nov):** "They did keep the umami thing just as like a fun one ... I'd
+    love for him to go after try and figure out how to solve that. But ... that's not the tutorial thing I was
+    intending." Out of How it works; her menu's last choice, "A fun one".
+  - **Speed nav: the quick double (the user, 15 Nov; built 20 Nov):** "it's speed nav and quick doubles is a good
+    strategy. So a layer of three so you can line up two pieces in the outer ring and it's nice and simple." Her
+    menu's second choice, walked a beat at a time like Umami's run, on the user's own board (notes/wolf-den/
+    quick-double.png, `BOARDS.quick`): two whites on the third ring with a gap beside them and the yellow target under
+    one; a white and a yellow behind it on the outer ring; the outer ring turned twice, the white drops into the gap
+    (Single), the yellow falls into the emptied target (Double! Constellation!, 71 times two). Fast, good doubles over
+    triples (Pandayay: "u dont need to do triples to get fren").
+    Reworked the same day after the user played it ("Surely when I pick the quick double, that should be it, and the
+    rest are just little steps within that selected lesson ... it's not really explaining the idea of why this is
+    easy ... not really showing the build-up ... there's a journey, there's a thinking process that's all quite
+    missing ... it's not really showing the plan in the way that sailing is"): one lesson, played as soon as it's
+    picked; the aim first and why it's easy (a shape you can build every time, no clever triples), then built up from
+    the start (a white onto the target, a white beside it: the pair and its gap; then wait, parking the two you need on
+    the outer ring in order, the rest put out of the way; then the spin), its plan marked on the board throughout,
+    Sailing's way (`planMarks`): faint till built, then solid, "gap", "1st" and "2nd" tagged, dotted arrows to where
+    each lands, "1 Single" and "2 Double".
+    Then, the same day, as you'd really play it: "the first step is ... building the bottom two rings basically like
+    normal ... by the time we get to the third ring ... we want to wait for an opportunity ... I've already got a red.
+    Why would I be building a white piece there? ... this is so methodical and easy to recreate. So now all I need is
+    to get a red and a yellow piece next to each other in the outer ring"; and "you can['t] magically predict that the
+    white is coming next". So: the bottom two rings filled in first; on the third ring, a red already beside the target
+    spotted (the plan marked from there, `markFrom`), what's no use put out of the way, a red onto the target; a red
+    parked outside, then a yellow that comes two spokes on, the outer ring turned to bring the red up beside where it
+    lands; spun round toward the gap. Each star shows before she says what she'll do with it (a step's `next`). The
+    plan's marks plain to see while still to come: dashed, never faint ("I can't tell ... what it's trying to refer to").
+  - **Her menu opens at the top, its choices, as you sit (20 Nov):** "I should be at that top menu first", and How it
+    works (Umami's run) one lesson, not three steps ("still broken down").
+  - **A choice of one part is that lesson (20 Nov):** in any tutorial's menu, picking a choice that covers a single
+    part plays it straight away, no list of one to pick from.
   - **"Wild target"** in her words, the guide's and the code's: YPPedia's word (the user, 15 Nov: "Go with yppedia and
     wild targets"), over "wild slot", the Wolf Dens Guide's and the players'.
   - **Umami's evil constellation at the wolf den (15 Nov):** the user's combo-only constellation (11 Nov, "The
     starlit door"; IDEAS.md), made with Umami in mind, at last somewhere in the world: shown in her lesson, credited
     to Umami in the changelog. Not yet dealt in play.
-  - Not yet: the rumbles, the den's Foraging, Multibella at the table, the cutscenes, a way to it on the sea.
+  - Not yet: the rumbles, the den's Foraging, a way to it on the sea.
 - **Duty Navigation (11 Nov), built by the real puzzle.** The night sky in front of a hidden cliff door,
   each constellation lighting its stars on the rock ("The starlit door", below). One module, `src/navigation.ts`,
   knowing nothing of the den; its look `js/den/nav-board.js` (`navBoard`); played on its own in the
@@ -2767,6 +2877,18 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
     "pieces come in, they say come in bags of 10 for this puzzle. So instead of it being random, it's like you get a
     bag mixed up with two of each colour ... you don't get a third of anything until you get two of each in that
     cycle." Shuffled within the bag, it seems. It makes combos needing three of a colour slower to set up.
+  - **The next star creeps in on its own: the timer (the user, 20 Nov).** "It's supposed to slowly move down, like,
+    before you've done anything ... that's the timer to give you only a set amount of time to do something, so you
+    can't just sit there forever. Like, really slowly. But eventually it will touch the bottom and then you're stuck
+    with that move." Waiting on its spoke's handle, it creeps in toward the wheel, an arc round it draining and going
+    red near the end, and touching (CREEP.SECS, 20 seconds, made up) it drops where it is, a booch if its spoke's full.
+    Turning doesn't stop the clock; dropping starts the next one's. Only while you're at the board: not in a teacher's
+    demonstration or under her menu. And once Space is pressed it goes in really quick ("once you hit space, it should
+    go really quick. The slow drop is ... for before you've hit the space bar"): 13 Nov's "the pieces are supposed to
+    slowly drop" meant this creep, and was misread then as a slow fall.
+  - **A wild target holding a star is filled, lit and locked (the user, 20 Nov):** "the same kind of visible indicator
+    as if ... you've got a white in a white ring": a coin of the star's colour with its star on it, inside the ring of
+    every colour, glowing.
   - A first go is the first three, one, two and three stars (FIRST_GO): the greedy bot takes about 66
     moves over them (15, 21 and 30), a minute or two at the keys, and booches about once in thirteen
     goes.

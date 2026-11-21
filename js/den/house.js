@@ -17,7 +17,8 @@
    portrait, or turn the camera onto one, and they tell you about it, once a visit each.
 
    A scene module: { plan, arrive, build(H) } where build returns { blocks, tick(dt), act(), prompt(),
-   enter(), leave(), cam(), frozen(), host, stretch, exhibits, remark(id) }: `exhibits` what's on its
+   enter(), leave(), cam(), frozen(), hidesYou(), host, stretch, exhibits, remark(id) }: `hidesYou()` true
+   while you're kept out of its camera's way (at a puzzle on a table, looked down on); `exhibits` what's on its
    walls ({ id, x, y, z }: src/den-houses.ts's Exhibit), `remark(id)` what the host says of one;
    `pictures` its pictures to look through close up, flat (picture-view.js: Tab, or the button), as
    { name, who (says what's said of them), list() ({ id, title, x, z }, in the order they hang), art(picture)
@@ -604,7 +605,7 @@ function lookTick(dt, moved) {
     house.look = lookEase(house.look, dt, moved);
   }
   const Y = house.you, w = Y.g.getWorldPosition(V3()), c = camera.position;
-  Y.g.visible = !!cine || Math.hypot(c.x - w.x, c.z - w.z) > 1.5 || c.y > w.y + 2.8;
+  Y.g.visible = !!cine || (!house.inst.hidesYou?.() && (Math.hypot(c.x - w.x, c.z - w.z) > 1.5 || c.y > w.y + 2.8));
 }
 /** The house's own view of you, house-local: looking in from the front and a little above (not so steeply
     you see only the tops of hats: the user, 11 Nov, of Gravee in her pelt, "you really can't see her"). */

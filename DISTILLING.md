@@ -545,6 +545,15 @@ levels. **(to confirm with the user:** which of these you used, and how.)
 
 ## 4. Ratings and target numbers
 
+### The benchmark: CC^8 on seeds 5000 to 5019 (18 Nov)
+The user, 18 Nov: "are we using a consistent 20 seeds so that I can do the recording on one or two, and ... the goal
+is over those 20 boards to gradually get towards CC8 consistently." The same 20 boards every run,
+`SEED=5000 tools/distill-bots.mjs 20 cc8`, and the goal is the CC^8 bot reaching CC^8 on them consistently. On the
+18 Nov version (c2d0672), 2 of 20 (seeds 5004, 5012), mean longest chain 5.0. A seed's incoming pieces are the same
+whoever plays it, so the user's recorded games on these seeds (src/distill-record.ts, tools/distill-compare.mjs) set
+their play beside the bot's on the same board; worth recording first, the bot's weakest: 5011 (longest 1), 5017 (3),
+5006, 5008, 5009, 5013 (4).
+
 ### Worked scores (session score = points per column sent up)
 | Session | Points | Per column |
 |---|---|---|
@@ -2406,6 +2415,126 @@ white columns now, so we're switching from quick dragging to ... straightening u
 - **The bot's mode in view** (17 Nov: "more debugging on like what its evaluation is, like what mood it's in, what it's
   trying to do"): distilling-test.html's bottom bar, while a bot plays, says its stage, how it reads the board and the
   tactic in play, and the move it's making ("Stage I: banking whites · Healthy: Straighten up · The sweep").
+- **Channels in the chain, built** (17 Nov): `M.CHANNEL` (2) in src/distill-routines.ts's `measure`, the junk in the
+  `M.CHANNEL_NEAR` (3) columns left of the column being filled, browns by depth and blacks by height; the hoist's drags
+  there offered in the chain (`P.CHANNEL_SORT`, `hoistDrags` from those columns, no stranding check, after the stuck
+  pieces' fallback: in it they cost four times the time), each drag's goal "build a channel" (`channelOrder`,
+  src/distill-goals.ts). On the user's board, where it waited, it now builds one.
+- **The chain let go with nowhere to start the next** (17 Nov, `P.FUTILE`, `nextChainAt`): the next chain starts
+  letGoFor(target) columns left all the same. A count of the whites left to bring in (only columns not yet clear) was
+  tried and dropped: a clear column's whites can be passed right a column at a time (the mirror), so it gave up
+  chains that could go on. On the user's CC^9 board it no longer brings a white round into column 9; it lets columns 7
+  to 9 go and starts the next in column 6.
+- **Run** (6 boards each, `PLAN='{"CHANNEL_SORT":0,"FUTILE":0}'` the old): CC^8 chain mean 4.0 to 4.2, best 6 to 7,
+  chains a session's mean 2.5 to 2.6, 12.6 to 13.6 points a minute, effort 17.4 to 17.5; CC^3 chain mean 3.8 to 3.5,
+  its chains' mean 2.1 to 2.7, at target 8 of 22 to 10 of 18, 11.9 to 14.0 points a minute. But whites burned 0.2 to
+  0.7 a session for CC^8 (no white burned 5 to 3 of 6), 0.3 to 0.5 for CC^3: the channels' (the same with the let go
+  off), not their weight's (M.CHANNEL 1: 0.7 too, and worse throughout). Six boards; a 20-board run each way is next.
+- **Run, 20 boards each** (CC^8, the same off and on): whites burned 0.4 a session both ways (no white burned 15 to 13
+  of 20), so six boards' rise was mostly noise. Chain mean 4.8 to 4.3, best 8 to 7, at target 2 of 20 to none; chains a
+  session 2.9 to 3.3, their mean 2.9 to 2.6; points a minute 14.9 to 15.4; a column gone, effort 17.6 to 16.6 (moves
+  9.8 to 9.3). More, shorter chains for less effort; the longest lost. Left on until the user has watched it (17 Nov: "I
+  might see something the metrics don't when I judge the moves").
+- **Trapped pieces as a group, built** (17 Nov, notes/distilling/55-two-blacks-move-as-one.webp): "it eventually rescues
+  black number one, but then leaves number two. Like I would just be moving the brown back and moving those trap blacks
+  as like one unit upwards ... It doesn't seem to have any method of predicting ... if I move number one up without
+  number two, that's going to leave number two stranded ... so I've got to go grab number two at the same time because
+  they move as one continuous unit." A move ahead for stranded junk that touches. src/distill-score.ts's `trapped`: junk
+  on a trapped piece's right, the same colour and trapped itself, is no way out (`S.TRAP_GROUP`; before, number two
+  counted as joined to the colour through number one, so the bot only saw it trapped once number one had gone).
+  src/distill-read.ts's `straightened` counts trapped junk freed (`trappedJunk`) as progress, and trapped as undoing it:
+  on the user's board the bot used to straighten up round them for eight moves and more, leaving them; now it frees
+  both first and doesn't take their way out away again. The path search already found the user's own move once number two counted as
+  trapped: a brown dragged back through both, lifting each a place.
+- **Run, 20 boards each** (CC^8, `SCORE='{"TRAP_GROUP":0}'` the old; the runner now prints each board's line, `SEED n`):
+  whites burned 0.4 to 0.2 a session (no white burned 13 to 17 of 20), chain mean 4.3 to 4.5, best 7 to 8 (seed 5012,
+  2 before), at target 0 to 1 of 20, points a minute 15.4 to 16.5. Seed 5009 the one worse (no white burned to 2).
+- **Seed 5008's Stage I, straightened out** (17 Nov, the user watching CC^8 on seed 5008, notes/distilling/56-... and
+  57-...; RULES.md's four notes of the day): getting it over counts the junk from left of the bank carried past it
+  (`junkOver`, PATTERN.OVER, src/distill-read.ts); a black in a bank column's top half counts half a brown there
+  (PATTERN.BLACK_HIGH), with a black lifted up through the browns into a stuck top brown's place among straightening up's
+  drags; sorting the junk columns only between moves that get junk out, with the clock running (READ.SORT_CREDIT; a move
+  of its own still with the fire held, Helium's lessons' plain move: tests/distill-teach.test.ts); and never a wait in
+  Stage I with the column not ready and the clock running (P.NEVER_IDLE), quick sorting when straightening up has
+  nothing. The chain's channel moves kept to targets of 3 and up (P.CHANNEL_FROM): Helium's CC^1 lesson back to 56 moves
+  on seed 269; over ten CC^1 boards with the buffer on, no white burned 4 to 7 of 10. The CC^1 opening test counts the
+  opening's whites, up to its first Crystal Clear (seed 1 burns two later, at 92 and 107 s).
+- **Run, 20 boards each** (CC^8, the live 8746181 against this): chain mean 4.5 to 4.4, best 8 to 9 (seed 5007, a CC^9),
+  at target 1 to 2 of 20; no white burned 17 of 20 both, whites burned 0.2 to 0.1; points a minute 16.5 to 16.9; a column
+  gone, moves 9.3 to 8.5 and effort down a tenth (Stage I's moves 3115 to 2496 in all). Seed 5008 itself worse: longest
+  7 to 3. Seeds 5000 (3 to 6), 5009 (4 to 6, no white burned now), 5013 (2 to 5) better; 5003 (7 to 3), 5017 (6 to 3)
+  worse.
+- **Seed 5008's straightening up, again** (18 Nov, the user watching seed 5008 live; RULES.md's four notes of the
+  day; notes/distilling/58-...): the tie-breaker (`tieBreak`, `rightOrder`) leaves the columns from `burnFrom` out
+  (P.TIE_SPARES_BURN): at 1.9 s it had stretched "finish the junk column" from two swaps to five, the brown into the
+  furnace's column. Never a wait for a ready column (P.NEVER_IDLE no longer stops at `ready`). The junk's order by
+  height across the junk columns (`junkDisorder`, PATTERN.BY_HEIGHT, ORDER_ACROSS): each brown higher than a black, in
+  half rows, a pair. A plain sum of heights was tried first and dropped: junk arriving anywhere raised it, so picture 3's
+  sweep counted as making things worse; neighbouring columns only (ORDER_ACROSS 1) left browns left and blacks right.
+  With nothing to get over, straightening up sorts (`Reading.sortOnly`, the bot's fallback before quick sorting); junk
+  got over keeps half its worth whatever sorting it costs, READ.SORT_FLOOR telling such moves apart below that. The
+  ferry (`ferryDrags`, READ.FERRY): on the board the bot waited on, no single drag got anything over (the browns top
+  out under whites, a junk column of browns beside them); a black let down from the top of the junk beside the bank,
+  then a brown up through the whites and down through it, two drags as one move: bank junk 10 to 5 in ten moves.
+- **Run, 20 boards each** (CC^8, the live 3d53f5f against this): chain mean 4.4 to 4.8, best 9 to 7, at target 2 to 0
+  of 20; no white burned 17 of 20 both, whites burned 0.1 to 0.3 a session (0.0 to 0.1 in the first 3 minutes); points a
+  minute 16.9 to 16.2; a column gone, moves 8.5 to 9.0. Seed 5008 better, longest 3 to 5 and no white burned (was 1);
+  5003 (3 to 6), 5004 (3 to 6), 5005 (2 to 5) better; 5007 (9 to 6), 5009 (6 to 4, two whites burned) worse. P31 and
+  P32 (tests/distill-positions.test.ts) no longer make their bad move.
+- **Pieces from the left first** (18 Nov, the user: "if it's got a gap, sometimes it will drag things down that are
+  already kind of far over past the whites ... The preference should always be to take pieces from the left-hand side";
+  RULES.md). `reworkOf` (src/distill-bots.ts, P.LEFT_FIRST, P.LEFT_BANK): in Stage I with three white columns banked or
+  more and junk in them or left of them, a move whose drags all start right of the bank is `rework` unless it moves a
+  white on the junk side left, frees a trapped white or trapped junk, or the reading's tactic is a need (fillGaps,
+  freeTrapped, sortLadder, fixCracks, damage control); and a gap filled (a white on the junk side moved left, `whiteX`)
+  is 'right' or 'left' by where its drags start, unless the white was at risk (a danger zone, the columns from
+  `burnFrom`, flagged). `choose` takes the best move from the left in place of rework, and a left gap fill in place of
+  a right one, so long as it's worth a move and puts no more junk into the bank (`keeps`); straightening up looks for
+  them under the plain reading (quick sorting) before sorting the junk columns, and the V's tail under straightening
+  up's own drags, then blocks, before sorting the tail. Found on the way: the tail's sort, a brown brought to the V's
+  tip, swapping the same pieces back and forth for 6 s on seed 5000 at 112 s with 15 junk left of the bank; and the
+  "nothing needed" test first counted only whites leaving the junk side, so a white nudged one column left was rework,
+  and the fallback then pushed a black from the left into the bank. Over seeds 5000 to 5004's first 150 s, the Stage I
+  moves starting right of the bank with junk left of it, not a white's rescue, about 40 to 15.
+- **Run, 20 boards each** (CC^8, the live ec9ab8e against this): chain mean 4.8 to 5.0, best 7 to 8, at target 0 to 2
+  of 20 (seeds 5004 and 5012, CC^8 each); no white burned 17 to 16 of 20, whites burned 0.3 to 0.4 a session (none in
+  the first 3 minutes); points a minute 16.2 to 17.2; a column gone, moves 9.0 to 8.9. Seed 5008 worse, longest 5 to 4
+  and three whites burned late (from 552 s); 5004 (6 to 8), 5012 (7 to 8), 5014 (2 to 4) better; 5011 (3 to 1) worse.
+  P37 (tests/distill-positions.test.ts) refreshed: the bot's move there is now a four-drag crawl filling the gap from
+  the left, and it still shuts the white in.
+- **Your own game recorded** (18 Nov, the user: "record and log my moves while I'm playing it live, so you can compare
+  ... you can get more of an insight into what I'm doing differently"): playing distilling-test.html yourself, every
+  move is written down (src/distill-record.ts, `Recorder`: a held piece's swaps one move, each with the board before
+  it, the game time, the furnace's time left and the chain; the columns gone, the burns by hand, how it ended). Save
+  my moves downloads it as `distilling-seed<n>-<when>.json`; a finished game of ten moves or more saves itself.
+  `tools/distill-compare.mjs [file] [target]` (the newest in Downloads by default) prints your game's figures beside
+  the bot's on the same seed, then each of your moves where the bot, on that same board (`compare`, the bots'
+  `advise`), would have moved another piece, with its reason (ALL=1 every move).
+- **The user's own game, seed 5011** (18 Nov, recorded: notes/distilling/recordings/seed5011-18nov.json; the bot's
+  weakest benchmark board, its longest chain 1). The user's CC^6 (unfinished, 3.5 minutes, 105 moves) beside the CC^8
+  bot's 1 on the same pieces (`tools/distill-compare.mjs`'s timeline). Their account as they played: "looking for the
+  longest moves ... I want to drag things as far as I can, as long as I've got my safe spot sorted"; "break up that
+  kind of block of browns in the middle, and then I'm just dragging stuff as far as I can"; "instead of trying to use
+  pieces on the right to fix it, I am just dragging new pieces in as much as I can"; then, near decision time, "I'm
+  not dragging any more blacks over because I don't know if I'm going to be able to. Maybe I'll try and get one more
+  column"; then straightening up, "these trapped browns along the top ... dragging browns down ... get those blacks up
+  and out ... dealing with this crap in the bottom left". What the record shows:
+  - Stage I, both burn 8 junk columns in 123 s. The user makes 8 to 9 moves a column, the bot 12 to 20 (in the first
+    column 12 against 20); the bot's extra moves are mostly junk moved on right of the white columns or sorted there
+    (about 4 a column), the user's about 1. The user's longest drags come last (92 to 108 s, 6.2 swaps a move), the
+    last junk carried over before the chain.
+  - Where the whites are when the chain starts, the big difference. At 121 s the user's whites are banked right
+    against the fire (columns 6 to 9 white, the furnace's column the last junk) with the fresh junk left of them
+    (columns 1 to 5): every column the fire takes next is white. The bot's, at 120 s, are in columns 1 to 7, three junk
+    columns between them and the fire, which it burns first (139 s, 154 s) while its chain waits.
+  - The chain: the user goes up six in a row (139 s to 211 s), 5 to 10 moves a column, junk taken left out of the
+    columns going up and whites moved right into their gaps. The bot makes 2 moves a column there and waits ("nothing
+    worth moving") with a brown at the top of the column going up, which goes up with it (169.8 s, `bwwwwwww`): the
+    chain broken before it starts (the bots' runner's "waits in the chain ... with junk in the column going up").
+- **Found on the way** (17 Nov): the chain's channel moves (`P.CHANNEL_SORT`) slow Helium's Crystal Clear 1, seed 269's
+  first chain 56 moves to 81, past tests/helium-goal.test.ts's 80 (failing on main since the channels went up); gating
+  them to targets of 3 or more fixes it but cost the CC^1 opening test (P.BUFFER on) two whites on seed 1. Settled the
+  same day: see seed 5008's Stage I, above.
 - **Next, the chain's end: when to give it up** (17 Nov, a CC^8 about to be a CC^9 with no room left): "this is when I
   would start ... going back to quick move strategy ... there's no way we're sending the crystal clear past 9. Let's
   start moving the junk into that column"; "the bot keeps trying to send ... whites into that column later. It's

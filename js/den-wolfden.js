@@ -17,7 +17,10 @@
    wolf-kin, the guide's), and the lesson's boards, each laid for a part of the tutorial and the moves Multibella plays on
    it, and when she says what as they play (her cues, `stageCues`; the words are src/lines/multibella.ts's LESSON).
    The deeper mechanics (15 Nov, after the user played the basics): a cascade making wild targets, the outer ring where
-   stars wait, a constellation charted by a cascade's last clear, and Umami's evil constellation. Not yet (to come, with the user): the rumbles, the den's Foraging, the funny cutscenes. */
+   stars wait, a constellation charted by a cascade's last clear, and Umami's evil constellation (a fun one, not the
+   lesson); and Umami's run from his replay, the lesson's "How it works" (`replay`); and the quick double, speed nav (`quick`). Her opening, the first time you
+   come in: spinning the wheel frantically as the werewolves come, the moon waning (`OPENING`). Not yet (to come,
+   with the user): the rumbles, the den's Foraging. */
 import { Navigation, bottomRow } from './navigation.js';
 // ---------------------------------------------------------------- the hut
 /** One room, a log hut, the camera looking in from the front (its front wall cut low, a doll's house). */
@@ -96,19 +99,58 @@ export const BOARDS = {
         next: { c: R, spoke: 3 },
         moves: [],
     },
-    /* The run in the screenshots ("Single! +3", "Double! +6", "Triple! Constellation!"): the red dropped makes a line
-       round the third ring; the orange above falls onto two below it, a line down its spoke, beside the constellation's
-       place holding a blue; that combo's clear turns it wild, the blue counts, and it's charted on the third step. */
-    run: {
+    /* Umami's run, from his replay (notes/wolf-den/, the user's screenshots of 14 Nov: "the tutorial thing I was
+       intending", 15 Nov), its constellation where his was: an orange target in the centre ring at the top, a yellow
+       over it and a red on the left in the middle ring, a yellow up-left in the third (71). Three are filled, but a blue
+       sits in the orange one. A white dropped down the lower left makes three round the centre: "Single! +3". The red
+       over the first white falls in beside the two reds: "Double! +6", a combo's clear, and the orange target beside it
+       goes every colour (wild), the blue in it counting. So the constellation's charted on the third step: "Triple!
+       Constellation! +213", and the next goes up with four wild targets in its centre (two clears before the chart).
+       Her lesson's "How it works" walks it a beat at a time (src/wolf-den-tutorial.ts's WALK). */
+    replay: {
         rings: [
-            [_, _, W, O, B],
-            [_, _, B, O, W],
-            [_, _, R, R],
-            [_, _, _, O],
+            [B, R, R, W, W, _, O, B],
+            [Y, O, B, R, B, _, R, W],
+            [_, Y, W, _, O, _, _, Y],
+            [_, B],
         ],
-        marks: [{ ring: 0, spoke: 4, colour: Y }],
-        next: { c: R, spoke: 4 },
+        marks: [{ ring: 0, spoke: 0, colour: O }, { ring: 1, spoke: 0, colour: Y }, { ring: 1, spoke: 6, colour: R }, { ring: 2, spoke: 7, colour: Y }],
+        next: { c: W, spoke: 5 },
         moves: [{ drop: true }],
+        plan: [{ ring: 0, spoke: 0 }, { ring: 0, spoke: 3 }, { ring: 0, spoke: 4 }, { ring: 0, spoke: 5 }, { ring: 1, spoke: 3 }, { ring: 0, spoke: 1 }, { ring: 0, spoke: 2 }],
+    },
+    /* The quick double, speed nav (the user, 15 Nov: "it's speed nav and quick doubles is a good strategy. So a layer of
+       three so you can line up two pieces in the outer ring and it's nice and simple"; their board, notes/wolf-den/
+       quick-double.png), as you'd really play it (20 Nov, after playing the first goes: "the first step is ... we're
+       building the bottom two rings basically like normal, we're just filling them in. And then by the time we get to the
+       third ring, we're saying, right, we want to wait for an opportunity ... I've already got a red ... That's the ...
+       basis for the first part of the double ... this is so methodical and easy to recreate. So now all I need is to get
+       a red and a yellow piece next to each other in the outer ring"; and "you can['t] magically predict that the white is
+       coming next"). The constellation's yellow target on the third ring at the top, a red already beside it, up-right.
+       Stars come as they come (each step's `next`, shown before she says what she'll do with it): a blue and an orange
+       fill the bottom two rings in, like normal; a blue that's no use goes on the third ring out of the way; a red, onto
+       the target beside the red: the pair, its gap up-left. A red: parked on the outer ring, right, over a full spoke. A
+       yellow, two spokes on: the outer ring turned on one to bring the red right up beside where it'll land, and the
+       yellow dropped in behind it. The outer ring turned back round toward the gap, four places: the red drops into the
+       gap, three reds, "Single! +3"; the yellow, right behind, falls into the emptied target: charted on the second step,
+       "Double! Constellation!", 71 times two. Her lesson's "Speed nav" walks it a beat at a time (src/wolf-den-
+       tutorial.ts's WALKS.quick), its plan marked on the board from when she spots the red (`planMarks`, `markFrom`). */
+    quick: {
+        rings: [
+            [O, Y, R, R, B, W, Y, B],
+            [_, O, Y, W, _, Y, B, W],
+            [_, R, O, W, _, B, Y, _],
+        ],
+        marks: [{ ring: 0, spoke: 3, colour: R }, { ring: 1, spoke: 4, colour: O }, { ring: 1, spoke: 6, colour: B }, { ring: 2, spoke: 0, colour: Y }],
+        next: { c: B, spoke: 0 },
+        moves: [
+            { drop: true, next: { c: B, spoke: 0 } }, { drop: true, next: { c: O, spoke: 4 } },
+            { drop: true, next: { c: B, spoke: 4 } }, { drop: true, next: { c: R, spoke: 0 } },
+            { drop: true, next: { c: R, spoke: 2 } }, { turn: 3, dir: 1, next: { c: Y, spoke: 4 } }, { drop: true },
+            { turn: 3, dir: -1 }, { turn: 3, dir: -1 }, { turn: 3, dir: -1 }, { turn: 3, dir: -1 },
+        ],
+        marked: true,
+        markFrom: 3,
     },
     /* A Trapdoor: the third ring turned a place puts a red over two reds down spoke 0; they go, and the yellow parked
        above them in the fourth ring falls into the place. */
@@ -266,9 +308,94 @@ export function layBoard(name, random = Math.random) {
         game.next = { id: 9000, ...L.next };
     return { game, moves: [...L.moves] };
 }
-/** Play one of a lesson's moves on its game. */
+/** Play one of a lesson's moves on its game (the star that comes before it first, if it says). */
 export function playStep(game, step) {
+    if (step.next && (game.next.c !== step.next.c || game.next.spoke !== step.next.spoke))
+        game.place(step.next);
     return 'drop' in step ? game.drop() : game.turn(step.dir, step.turn);
+}
+const placeOf = (grid, id) => {
+    for (let r = 0; r < grid.length; r++)
+        for (let s = 0; s < grid[r].length; s++)
+            if (grid[r][s]?.id === id)
+                return { ring: r, spoke: s };
+    return null;
+};
+/** What's marked on a lesson's board once `n` of its moves are played (see PlanMark); none for a board that isn't
+    `marked`, or once it's been set off. */
+export function planMarks(name, n) {
+    const L = BOARDS[name];
+    if (!L?.marked)
+        return [];
+    const steady = () => 0.5, lastDrop = L.moves.map((m) => 'drop' in m).lastIndexOf(true);
+    // (from where she spots it, `markFrom`, till it's set off)
+    if (n >= L.moves.length || n < (L.markFrom ?? 0))
+        return [];
+    // (the board built, then set off, every stage seen)
+    const g = layBoard(name, steady).game, outer = g.rings - 1;
+    L.moves.slice(0, lastDrop + 1).forEach((s) => playStep(g, s));
+    const built = g.grid.map((ring) => ring.slice());
+    const parked = built[outer].flatMap((x, spoke) => (x ? [{ id: x.id, c: x.c, at: { ring: outer, spoke } }] : []));
+    const spin = L.moves.slice(lastDrop + 1);
+    const dir = spin.find((m) => 'turn' in m)?.dir ?? -1;
+    const stages = spin.flatMap((s) => playStep(g, s).stages);
+    // (the line that goes first: where its stars were as it went, on the board the stage before it left)
+    const li = stages.findIndex((st) => st.kind === 'line');
+    if (li < 1)
+        return [];
+    const lineAt = stages[li].cleared.map((id) => placeOf(stages[li - 1].grid, id)).filter((p) => !!p);
+    const lands = parked.map((p) => {
+        const i = stages.findIndex((st) => { const at = placeOf(st.grid, p.id); return !!at && at.ring < outer; });
+        return i < 0 ? null : { ...p, to: placeOf(stages[i].grid, p.id), i };
+    }).filter((p) => !!p).sort((a, b) => a.i - b.i);
+    // (where things stand after n moves)
+    const now = layBoard(name, steady).game;
+    L.moves.slice(0, n).forEach((s) => playStep(now, s));
+    const has = (p, c) => now.grid[p.ring][p.spoke]?.c === c;
+    const out = [];
+    const mark = (m, there) => { out.push(there ? m : { ...m, faint: true }); };
+    // (the pair: a star already there first, the one she spots, tagged)
+    const laid = layBoard(name, steady).game.grid;
+    const pair = lineAt.filter((p) => built[p.ring][p.spoke]).sort((p, q) => Number(!!laid[q.ring][q.spoke]) - Number(!!laid[p.ring][p.spoke]));
+    const gap = lineAt.find((p) => !pair.includes(p));
+    pair.forEach((p, k) => mark({ kind: 'star', at: p, colour: built[p.ring][p.spoke].c, label: k === 0 ? 'pair' : '' }, has(p, built[p.ring][p.spoke].c)));
+    if (gap)
+        mark({ kind: 'gap', at: gap, label: 'gap' }, pair.every((p) => has(p, built[p.ring][p.spoke].c)));
+    const ready = n > lastDrop;
+    lands.forEach((l, k) => {
+        const at = placeOf(now.grid, l.id) ?? l.at;
+        mark({ kind: 'star', at, colour: l.c, label: k === 0 ? '1st' : k === 1 ? '2nd' : `${k + 1}th` }, !!placeOf(now.grid, l.id));
+        mark({ kind: 'arrow', from: at, to: l.to, colour: l.c, dir }, ready);
+    });
+    if (gap)
+        mark({ kind: 'badge', at: gap, n: 1, label: 'Single' }, ready);
+    if (lands[1])
+        mark({ kind: 'badge', at: lands[1].to, n: 2, label: 'Double' }, ready);
+    return out;
 }
 /** Seconds between Multibella's moves on a lesson's board, and how long she waits before the first. */
 export const PACE_LESSON = { MOVE: 1.1, FIRST: 1.6 };
+export const OPENING = {
+    /** Its length (s). */
+    SECS: 13.5,
+    /** Its beats: from when (s), the camera's shot, her line. */
+    BEATS: [
+        { at: 0, shot: 'hut', say: 'frantic' },
+        { at: 3.4, shot: 'wheel', say: 'spin' },
+        { at: 6.8, shot: 'window', say: 'waning' },
+        { at: 10.2, shot: 'her', say: 'phew' },
+    ],
+    /** Her hands on the wheel: a ring turned or a star dropped every EVERY seconds, till UNTIL. */
+    SPIN: { EVERY: 0.17, UNTIL: 10 },
+    /** The moon in the window: full till FROM, gone by TO, the werewolf turning back to a wolf-kin as it goes. */
+    WANE: { FROM: 2.2, TO: 9.6 },
+};
+/** Her opening at `t` seconds: its beat (the index in BEATS), how much moon's left, whether she's still spinning,
+    and whether it's over. */
+export function openingAt(t) {
+    let beat = 0;
+    OPENING.BEATS.forEach((b, i) => { if (t >= b.at)
+        beat = i; });
+    const { FROM, TO } = OPENING.WANE, moon = Math.max(0, Math.min(1, 1 - (t - FROM) / (TO - FROM)));
+    return { beat, moon, spinning: t < OPENING.SPIN.UNTIL, done: t >= OPENING.SECS };
+}
