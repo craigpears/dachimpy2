@@ -10,7 +10,11 @@
      and the bots of src/distill-bots.ts to watch at their own pace (?bot=cc3, each named by its target chain): each drag swept as a
      hand would, the piece held, and the routine it's playing (src/distill-routines.ts) in small text. A speed
      control (16 Nov: "can I at least have some sort of speed control?") runs the whole board slower or faster, the
-     hand, the furnace and the pieces alike, so the bot plays the same game: ?speed=0.5, [ and ] to step it. -->
+     hand, the furnace and the pieces alike, so the bot plays the same game: ?speed=0.5, [ and ] to step it.
+     Variations to feel (21 Nov, a harder Distilling that changes the thinking; DISTILLING.md §8), each off unless in
+     the address: ?furnaces=2 a furnace each side (no bots for it yet), &darkrum a pure-brown column holding a chain,
+     &richspice a spice in a Crystal Clear making the next columns richer, &moveheat (or &moveheat=2) every drag
+     bringing the burn a tick (0.3 s) nearer. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -66,7 +70,14 @@
     <button id="pause">Pause</button>
     <button id="burn" title="Burn the furnace's column now, paused or not (X, right-click)">Burn</button>
   </div>
-  <div class="row">
+  <div class="row" title="Variations to try (21 Nov): kept in the address">
+    <label for="furnaces">Furnaces:</label>
+    <select id="furnaces"><option value="1">one, the real puzzle</option><option value="2">two, one each side</option></select>
+    <label title="A pure-brown column sent up between two Crystal Clears holds the chain, and pays 2 on the next"><input type="checkbox" id="darkrum"> dark rum</label>
+    <label title="A spice sent up in a Crystal Clear makes the next two columns richer in whites and spice"><input type="checkbox" id="richspice"> rich spice</label>
+    <label title="Every drag brings the burn a tick (0.3 s) nearer: fewer moves, more time"><input type="checkbox" id="moveheat"> moves heat the furnace</label>
+  </div>
+  <div class="row" id="botrow">
     <label for="bot">Watch a practice player:</label>
     <select id="bot"><option value="">no, I'll play</option></select>
   </div>
@@ -116,6 +127,14 @@ window.screenAt = (col, row) => {
   return [(p.x + 1) / 2 * innerWidth, (1 - p.y) / 2 * innerHeight];
 };
 let seed = Number(params.get('seed')) || 1, board = null, botName = params.get('bot') || '';
+// The variations (src/distilling.ts's options, each off by default): two furnaces, dark rum, rich spice. The bots
+// know only the one furnace, so none plays two.
+let furnaces = params.get('furnaces') === '2' ? 2 : 1, darkRum = params.has('darkrum'), richSpice = params.has('richspice');
+// (moves heating the furnace: ?moveheat a tick a drag, ?moveheat=2 two)
+let moveHeat = params.has('moveheat') ? Math.max(1, Math.round(Number(params.get('moveheat')) || 1)) : 0;
+$('furnaces').value = String(furnaces); $('darkrum').checked = darkRum; $('richspice').checked = richSpice; $('moveheat').checked = moveHeat > 0;
+const showBotRow = () => { $('botrow').style.display = furnaces === 2 ? 'none' : ''; };
+showBotRow();
 // ?shot: the board alone in the middle, no panel (for a picture of it).
 const shot = params.has('shot');
 // The speed it's all run at (the user, 16 Nov: "I never remember asking for this to be a super speed thing, but can
@@ -149,18 +168,19 @@ function deal() {
   $('log').innerHTML = '';
   window.played = [];
   board = distillBoard({
-    game: new Distilling(seeded(seed)), at: new THREE.Vector3(0, 0, 0), size: 3,
+    game: new Distilling(seeded(seed), { furnaces, darkRum, richSpice, moveHeat }), at: new THREE.Vector3(0, 0, 0), size: 3,
     onColumn: (c, finished) => {
       window.played.push({ t: board.game.time, up: c.up, pieces: c.pieces.map((p) => L[p]).join('') });   // (every column gone, for checking a run)
-      const what = c.message ? (c.message === 'clear' && c.chain > 1 ? `${MESSAGES.clear} x${c.chain}` : MESSAGES[c.message]) : c.up ? 'up' : 'burned';
-      log(`${c.up ? 'up' : 'burned'}: ${c.pieces.map((p) => L[p]).join('')}, ${what}${c.spice ? `, ${MESSAGES[c.spice]}` : ''}, ${c.points + c.bonus} points`);
+      const what = c.message ? (c.message === 'clear' && c.chain > 1 ? `${MESSAGES.clear} x${c.chain}` : MESSAGES[c.message]) : c.darkRum ? `${MESSAGES.darkRum}, the chain held` : c.up ? 'up' : 'burned';
+      const extra = `${c.rumBonus ? `, dark rum +${c.rumBonus}` : ''}${c.rich ? `, ${MESSAGES.rich}` : ''}`;
+      log(`${c.side ? `${c.side}: ` : ''}${c.up ? 'up' : 'burned'}: ${c.pieces.map((p) => L[p]).join('')}, ${what}${c.spice ? `, ${MESSAGES[c.spice]}` : ''}${extra}, ${c.points + c.bonus} points`);
       if (finished) log(`finished: ${board.game.points} points in ${board.game.columnsUp} columns, ${board.game.score().toFixed(2)} a column`);
     },
     onFinish: (gm) => { if (gm.dismissed) log(`dismissed: ${gm.points} points in ${gm.columnsUp} columns, ${gm.score().toFixed(2)} a column`); },
   });
   scene.add(board.group);
   mode = '';
-  player = botName ? new BotPlayer(board.game, levelNamed(botName), {
+  player = botName && furnaces === 1 ? new BotPlayer(board.game, levelNamed(botName), {
     onEvents: (ev) => board.show(ev),
     onSwap: (x, y, to) => board.showSwap(x, y, to[0], to[1]),
     onHold: (x, y) => board.hold(x, y),
@@ -174,7 +194,10 @@ function deal() {
   $('routine').textContent = '';
   address();
 }
-function address() { history.replaceState(null, '', `?seed=${seed}${botName ? `&bot=${botName}` : ''}${speed !== 1 ? `&speed=${speed}` : ''}${shot ? '&shot' : ''}`); }
+function address() {
+  const v = `${furnaces === 2 ? '&furnaces=2' : ''}${darkRum ? '&darkrum' : ''}${richSpice ? '&richspice' : ''}${moveHeat ? `&moveheat${moveHeat > 1 ? `=${moveHeat}` : ''}` : ''}`;
+  history.replaceState(null, '', `?seed=${seed}${v}${botName && furnaces === 1 ? `&bot=${botName}` : ''}${speed !== 1 ? `&speed=${speed}` : ''}${shot ? '&shot' : ''}`);
+}
 $('restart').onclick = () => deal();
 $('next').onclick = () => { seed++; deal(); };
 $('dismiss').onclick = () => board.dismiss();
@@ -182,6 +205,10 @@ $('burn').onclick = () => board.burn();
 $('pause').onclick = () => { board.paused = !board.paused; $('pause').classList.toggle('on', board.paused); };
 $('bot').onchange = () => { botName = $('bot').value; deal(); $('bot').blur(); };
 $('speed').onchange = () => { setSpeed(Number($('speed').value)); $('speed').blur(); };
+$('furnaces').onchange = () => { furnaces = Number($('furnaces').value); showBotRow(); deal(); $('furnaces').blur(); };
+$('darkrum').onchange = () => { darkRum = $('darkrum').checked; deal(); $('darkrum').blur(); };
+$('richspice').onchange = () => { richSpice = $('richspice').checked; deal(); $('richspice').blur(); };
+$('moveheat').onchange = () => { moveHeat = $('moveheat').checked ? 1 : 0; deal(); $('moveheat').blur(); };
 deal();
 
 /** The bot's mode, in the bar along the bottom, always in view (the user, 17 Nov: "more debugging on like what its
@@ -266,8 +293,11 @@ function frame() {
   camera.lookAt(v.look.clone().add(new THREE.Vector3(side, low, 0)));
   const gm = board.game, left = gm.timeLeft();
   $('stats').innerHTML = `Seed <b>${seed}</b>${speed !== 1 ? ` · speed <b>${speed}x</b>` : ''} · <b>${(gm.time / 1000).toFixed(0)}</b> s · burn in <b>${Number.isFinite(left) ? (left / 1000).toFixed(1) : '-'}</b> s<br>`
+    + (gm.furnaces === 2 ? 'Two furnaces: both edge columns go together<br>' : '')
+    + (gm.moveHeat ? `Moves <b>${gm.moves}</b>, the burn <b>${(gm.heatedBy * 0.306).toFixed(1)}</b> s sooner in all<br>` : '')
     + `Flask <b>${gm.flask}</b> / 100 · up <b>${gm.columnsUp}</b>, burned <b>${gm.columns.length - gm.columnsUp}</b><br>`
     + `Points <b>${gm.points}</b> · score <b>${gm.score().toFixed(2)}</b> · chain <b>${gm.chain}</b> (best ${gm.longest})`
+    + (gm.rumHeld ? ' · <b>dark rum</b> holding it' : '') + (gm.rich ? ` · <b>${gm.rich}</b> rich column${gm.rich > 1 ? 's' : ''} to come` : '')
     // (a bot's moves and a person's effort for them: the user, 16 Nov, "how many moves a bot makes ... can be as important")
     + (player ? `<br>Moves <b>${player.bot.drags}</b> · swaps <b>${gm.swaps}</b> · effort <b>${player.effort.toFixed(0)}</b>` : '');
   $('prompt').textContent = player && mode ? mode : board.prompt();

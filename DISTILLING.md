@@ -2517,6 +2517,34 @@ nice and illustrative". In order:
    board), the bang whenever a white burns, and the panel's distiller drawn as them. Still to come: a
    demonstration per technique, the coached replay (IDEAS.md), the smuggling ring.
 
+## 8. Harder variations to feel (21 Nov)
+
+The user (21 Nov) finds the real puzzle near solved for a good player: CC^12 comes routinely and the rest is spawn
+luck. They want a variation that changes the thinking, not the pace (no faster fires, more rows or exploding pieces).
+The ideas are on the card `idea-distilling-with-a-higher-skill-cap-fun-variation`; a first feel-test is on
+`distilling-test.html` behind flags, each off by default, so the real puzzle, Helium's lesson and the bots are
+unchanged (`src/distilling.ts`'s options, tested in `tests/distill-variations.test.ts`). The bots know only one
+furnace, so none plays the two-furnace board yet.
+
+- **Two furnaces** (`?furnaces=2`): a furnace each side, both edge columns starting all black. Both columns leave
+  together every 100 ticks (30.6 s), the right judged first for the chain, by the same up-or-burn rule; as many columns
+  leave a minute as with one furnace. Each half slides outward a column and two new columns rise into the middle.
+  Why the middle, and two at once: the honeycomb needs neighbours tall and short in turn, and one column put between two
+  can't differ from both, but two can. New columns on the far side instead would leave by that side on its next turn,
+  every column gone 15 s after it came and the middle never reaching a furnace. From the middle, a column lives as long
+  as with one furnace (five burns to an edge, against ten), drifting out to one side or the other. What it should
+  change: there's no safe corner far from the fire, so storing blacks top-left and browns bottom-left stops working,
+  whites in the middle are the only safe ones, a Crystal Clear on one side has to be built while the other side's junk
+  burns, and burnt whites matter again.
+- **Dark rum** (`&darkrum`): a column of only browns (spice allowed, since it never moves) sent up while a chain is
+  going holds the chain instead of breaking it, once between two Crystal Clears (a second in a row breaks it). It pays
+  2 only on the Crystal Clear after it, never on its own, so browns can't pad a chain.
+- **Rich spice** (`&richspice`): each spice sent up in a Crystal Clear makes the next two columns made richer: half
+  whites, a quarter each brown and black, spice one in 12.
+- **Moves heat the furnace** (`&moveheat`, or `&moveheat=2`; the user, 21 Nov: "the burn is sped up by how many drags
+  you do ... I don't want to score based on efficiency"): every move, a drag however many swaps it makes or a click's
+  swap, brings the burn a tick (0.3 s) nearer. Fewer, better moves leave more time; nothing is scored for it.
+
 ## 6. Sources
 - YPPedia, Distilling: https://yppedia.puzzlepirates.com/Distilling (rules, scoring, CC^12, history, tips)
 - YPPedia, the official game document: https://yppedia.puzzlepirates.com/Official:Distilling (controls,

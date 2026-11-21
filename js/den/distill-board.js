@@ -27,12 +27,17 @@ import {
    copper trough along the bottom, where burned whites roll back left, scorched. Swaps slide 150 ms; a
    leaving column glides up into the pipe or down into the furnace (0.4 px a ms), then the board slides
    right over 900 ms. Messages float up 30 px over 1.5 s in the middle, fading in the second half
-   ("Burnt!" and "Wasted Spice" drift down). "Finished!" holds the board when the flask is full. */
+   ("Burnt!" and "Wasted Spice" drift down). "Finished!" holds the board when the flask is full.
+   Two furnaces (the rules' `furnaces: 2`, 21 Nov, a test of a harder Distilling): a second furnace at the bottom
+   left, the trough between the two, a chute's mouth over the top left; both columns go at once, each to its own
+   side, the halves slide outward and the two new columns rise up into the middle. */
 
 const PW = 450, PH = 600, K = 2;
 /** The board view in the panel, its cells, and the furnace, flask and trough. */
 const VX = 25, VY = 135, VW = 425, VH = 465, CELL = 40, TOP = 23;
 const FURN = { x: 316, y: 399, w: 109, h: 66 };
+/** The left furnace, with two: the right one's mirror. */
+const FURN_L = { ...FURN, x: 0 };
 const FLASK = { x: 235, y: 55, w: 42, h: 75 };
 const EXIT_UP = -CELL, EXIT_DOWN = 416, EXIT_X = 9 * CELL, SPEED = 0.4;
 const FLOAT_MS = 1500, FLOAT_PX = 30;
@@ -91,11 +96,12 @@ function pieceCanvas(p) {
 }
 
 /** The panel's still parts (everything but the pieces, the flask's liquid, the furnace's glow and the
-    messages), drawn once. */
-let PANEL = null;
-function panelCanvas() {
-  if (PANEL) return PANEL;
-  PANEL = canvas(PW * K, PH * K, (g) => {
+    messages), drawn once (a panel for one furnace, and one for two). */
+const PANELS = new Map();
+function panelCanvas(furnaces = 1) {
+  if (PANELS.has(furnaces)) return PANELS.get(furnaces);
+  const two = furnaces === 2;
+  const panel = canvas(PW * K, PH * K, (g) => {
     g.scale(K, K);
     // The shop: a dark plank wall, warm lamp light from the middle.
     const wall = g.createLinearGradient(0, 0, 0, VY);
@@ -128,20 +134,29 @@ function panelCanvas() {
     }
     for (const [o, col] of [[1.5, '#b89a48'], [5, '#7a6a30']]) { g.strokeStyle = col; g.lineWidth = 1.4; g.strokeRect(VX + o, VY + o, VW - 2 * o, VH - 2 * o); }
     g.strokeStyle = '#d8b858'; g.lineWidth = 2; g.strokeRect(1, 1, PW - 2, PH - 2);
-    // The copper trough along the bottom, left of the furnace.
-    const ty = VY + 412, tr = g.createLinearGradient(0, ty, 0, ty + 40);
+    // The copper trough along the bottom, left of the furnace (between the two, with two).
+    const ty = VY + 412, tr = g.createLinearGradient(0, ty, 0, ty + 40), t0 = two ? FURN_L.w + 2 : 6, t1 = FURN.x - 2;
     tr.addColorStop(0, '#d88a4a'); tr.addColorStop(0.3, '#a8582a'); tr.addColorStop(0.7, '#6a3014'); tr.addColorStop(1, '#3a1808');
-    g.fillStyle = tr; g.beginPath(); g.roundRect(VX + 6, ty, FURN.x - 8, 40, 10); g.fill();
-    g.fillStyle = '#2a1206'; g.beginPath(); g.roundRect(VX + 12, ty + 6, FURN.x - 20, 26, 8); g.fill();
-    g.strokeStyle = 'rgba(255,200,140,0.45)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(VX + 12, ty + 3); g.lineTo(VX + FURN.x - 6, ty + 3); g.stroke();
-    // The furnace: an iron box, rivets, its grille (lit by the glow, drawn each frame).
-    const fx = VX + FURN.x, fy = VY + FURN.y;
-    const iron = g.createLinearGradient(fx, fy, fx + FURN.w, fy + FURN.h);
-    iron.addColorStop(0, '#5a5a5e'); iron.addColorStop(1, '#202024');
-    g.fillStyle = iron; g.beginPath(); g.roundRect(fx, fy, FURN.w, FURN.h, 6); g.fill();
-    g.strokeStyle = '#0e0e10'; g.lineWidth = 1.5; g.stroke();
-    g.fillStyle = '#9a9aa0';
-    for (const [rx, ry] of [[6, 6], [FURN.w - 6, 6], [6, FURN.h - 6], [FURN.w - 6, FURN.h - 6]]) { g.beginPath(); g.arc(fx + rx, fy + ry, 2.2, 0, Math.PI * 2); g.fill(); }
+    g.fillStyle = tr; g.beginPath(); g.roundRect(VX + t0, ty, t1 - t0, 40, 10); g.fill();
+    g.fillStyle = '#2a1206'; g.beginPath(); g.roundRect(VX + t0 + 6, ty + 6, t1 - t0 - 12, 26, 8); g.fill();
+    g.strokeStyle = 'rgba(255,200,140,0.45)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(VX + t0 + 6, ty + 3); g.lineTo(VX + t1 - 4, ty + 3); g.stroke();
+    // The furnace (both): an iron box, rivets, its grille (lit by the glow, drawn each frame).
+    for (const F of two ? [FURN, FURN_L] : [FURN]) {
+      const fx = VX + F.x, fy = VY + F.y;
+      const iron = g.createLinearGradient(fx, fy, fx + F.w, fy + F.h);
+      iron.addColorStop(0, '#5a5a5e'); iron.addColorStop(1, '#202024');
+      g.fillStyle = iron; g.beginPath(); g.roundRect(fx, fy, F.w, F.h, 6); g.fill();
+      g.strokeStyle = '#0e0e10'; g.lineWidth = 1.5; g.stroke();
+      g.fillStyle = '#9a9aa0';
+      for (const [rx, ry] of [[6, 6], [F.w - 6, 6], [6, F.h - 6], [F.w - 6, F.h - 6]]) { g.beginPath(); g.arc(fx + rx, fy + ry, 2.2, 0, Math.PI * 2); g.fill(); }
+    }
+    // With two, a second chute's mouth over the top left, where the left's columns sent up rise.
+    if (two) {
+      const cx = VX + CELL / 2;
+      g.strokeStyle = '#8a6420'; g.lineWidth = 10; g.lineCap = 'butt';
+      g.beginPath(); g.moveTo(cx, VY + 4); g.lineTo(cx, VY - 22); g.stroke();
+      g.fillStyle = '#6a4a14'; g.beginPath(); g.roundRect(cx - 24, VY - 8, 48, 14, 3); g.fill();
+    }
     // The title, gold, outlined dark, top centre.
     g.font = '700 34px Alegreya, Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.lineWidth = 6; g.strokeStyle = '#2a1404'; g.lineJoin = 'round'; g.strokeText('Distilling', PW / 2 + 10, 24);
@@ -149,7 +164,8 @@ function panelCanvas() {
     gold.addColorStop(0, '#fff2a0'); gold.addColorStop(0.5, '#e8b62a'); gold.addColorStop(1, '#a86c10');
     g.fillStyle = gold; g.fillText('Distilling', PW / 2 + 10, 24);
   });
-  return PANEL;
+  PANELS.set(furnaces, panel);
+  return panel;
 }
 function barrel(g, x, y, w, h) {
   const gr = g.createLinearGradient(x, 0, x + w, 0);
@@ -343,25 +359,40 @@ export function distillBoard(o = {}) {
   }
 
   // A column goes: its pieces glide up into the pipe or down into the furnace (burned whites rolling
-  // back left along the trough, scorched), the board slides right, a new column comes in.
-  function columnGone(c, finished) {
+  // back along the trough, scorched), the board slides right, a new column comes in. With two furnaces,
+  // both columns go at once, the right's then the left's: each half slides outward and the two new columns
+  // rise up into the middle.
+  const two = game.furnaces === 2;
+  function leaveBy(sprites, c, left) {
     // (`onFurnace` once, as the first white or burnt white of a burned column reaches the furnace)
     let hit = c.up ? null : () => { hit = null; b.onFurnace?.(c); };
-    for (const s of grid[COLS - 1]) {
+    const ex = left ? 0 : EXIT_X, roll = left ? VW + CELL : -CELL;
+    for (const s of sprites) {
       if (s === selected) selected = null;
       const burning = !c.up && s.p === WHITE, scorched = !c.up && s.p === BURNT, ey = c.up ? EXIT_UP : EXIT_DOWN;
-      const d1 = Math.hypot(EXIT_X - s.x, ey - s.y) / SPEED;
-      const pts = [[EXIT_X, ey]], durs = [d1];
-      if (burning) { pts.push([-CELL, ey]); durs.push((EXIT_X + CELL) / SPEED * 1.6); }
+      const d1 = Math.hypot(ex - s.x, ey - s.y) / SPEED;
+      const pts = [[ex, ey]], durs = [d1];
+      if (burning) { pts.push([roll, ey]); durs.push((EXIT_X + CELL) / SPEED * 1.6); }
       s.gone = true;
       go(s, pts, durs, burning ? () => { s.p = BURNT; hit?.(); } : null, () => { if (scorched) hit?.(); leaving = leaving.filter((q) => q !== s); });
       leaving.push(s);
     }
-    grid.pop();
+  }
+  function columnGone(c, finished) {
+    const left = two && c.side === 'left';
+    leaveBy(left ? grid.shift() : grid.pop(), c, left);
     b.arrows = [];   // (the places they named have moved on)
-    grid.unshift(game.cols[0].map((_, row) => sprite(0, row, -CELL)));
-    grid.forEach((col, x) => col.forEach((s) => { s.col = x; const [tx, ty] = spot(x, s.row); line(s, [tx, ty], SLIDE_MS); }));
-    if (cursor.col < COLS - 1) cursor = { col: cursor.col + 1, row: Math.min(cursor.row, game.cols[cursor.col + 1].length - 1) };
+    if (!two) {
+      grid.unshift(game.cols[0].map((_, row) => sprite(0, row, -CELL)));
+      if (cursor.col < COLS - 1) cursor = { col: cursor.col + 1, row: Math.min(cursor.row, game.cols[cursor.col + 1].length - 1) };
+    } else if (left) {
+      // (the left's the second to go: the board's two new columns rising into the middle, from below it)
+      const mid = COLS / 2, rise = (x) => game.cols[x].map((_, row) => { const s = sprite(x, row); s.y += VH; return s; });
+      grid.splice(mid - 1, 0, rise(mid - 1), rise(mid));
+      const col = cursor.col < mid ? Math.max(0, cursor.col - 1) : Math.min(COLS - 1, cursor.col + 1);
+      cursor = { col, row: Math.min(cursor.row, game.cols[col].length - 1) };
+    }
+    if (grid.length === COLS) grid.forEach((col, x) => col.forEach((s) => { s.col = x; const [tx, ty] = spot(x, s.row); line(s, [tx, ty], SLIDE_MS); }));
     // Messages, as the game shows them.
     if (c.message === 'clear') say(MESSAGES.clear, { sup: c.chain > 1 ? String(c.chain) : '' });
     else if (c.message === 'smooth') say(MESSAGES.smooth);
@@ -369,6 +400,10 @@ export function distillBoard(o = {}) {
     else if (c.message === 'burnt') say(MESSAGES.burnt, { down: true });
     if (c.spice === 'spicy') say(MESSAGES.spicy, { orange: true });
     else if (c.spice === 'wasted') say(MESSAGES.wasted, { orange: true, down: true });
+    // The variations' own (dark rum holding a chain, and paying; a spice making the next columns rich).
+    if (c.darkRum) say(MESSAGES.darkRum, { sup: 'held' });
+    if (c.rumBonus) say(`${MESSAGES.darkRum} +${c.rumBonus}`, { orange: true });
+    if (c.rich) say(MESSAGES.rich, { orange: true });
     b.onColumn?.(c, finished);
     if (finished) finish();
   }
@@ -405,7 +440,7 @@ export function distillBoard(o = {}) {
     if (!s) return;
     if (!selected) { if (!dragging && game.mask(s.col, s.row)) selected = s; }
     else if (selected === s) { if (!dragging) selected = null; }
-    else if (trySwap(s.col, s.row, selected.col, selected.row)) { if (dragging) dragSwapped = true; else selected = null; }
+    else if (trySwap(s.col, s.row, selected.col, selected.row)) { if (dragging) dragSwapped = true; else { selected = null; handle(game.moved()); } }
     else if (!dragging && game.mask(s.col, s.row)) selected = s;
   }
   function moveCursor(dir) {
@@ -476,6 +511,7 @@ export function distillBoard(o = {}) {
   b.release = (button) => {
     if (button === 2) return;
     if (dragSwapped && selected) selected = null;
+    if (dragSwapped) handle(game.moved());   // (a drag, one move however many swaps: the rules' moveHeat)
     dragging = dragSwapped = held = false;
   };
   b.busy = () => clickBusy > 0 || game.sliding > 0 || grid.some((c) => c.some((s) => s.path));
@@ -514,7 +550,7 @@ export function distillBoard(o = {}) {
 
   function draw() {
     g.setTransform(1, 0, 0, 1, 0, 0);
-    g.drawImage(panelCanvas(), 0, 0);
+    g.drawImage(panelCanvas(game.furnaces), 0, 0);
     g.scale(K, K);
     drawFlask();
     drawFurnace();
@@ -636,9 +672,10 @@ export function distillBoard(o = {}) {
     g.beginPath(); g.roundRect(x - 4, y - 7, w + 8, 9, 3); g.fill();
     g.beginPath(); g.roundRect(x - 4, y + h - 2, w + 8, 9, 3); g.fill();
   }
-  function drawFurnace() {
+  function drawFurnace() { for (const F of two ? [FURN, FURN_L] : [FURN]) drawGrille(F); }
+  function drawGrille(F) {
     // The grille: eight slots, lit orange from the bottom as the burn nears, full just before.
-    const fx = VX + FURN.x + 12, fy = VY + FURN.y + 12, fw = FURN.w - 24, fh = FURN.h - 24, n = 5;
+    const fx = VX + F.x + 12, fy = VY + F.y + 12, fw = F.w - 24, fh = F.h - 24, n = 5;
     const lit = over ? 0 : heatShown;
     for (let i = 0; i < n; i++) {
       const sy = fy + fh - (i + 1) * (fh / n) + 2, on = Math.max(0, Math.min(1, lit * n - i));
@@ -656,7 +693,7 @@ export function distillBoard(o = {}) {
   }
 
   b.prompt = () => (over ? 'Finished: restart for another batch'
-    : 'Distilling · click a piece then a neighbour to swap (or drag through swaps) · arrows / number pad move · Space swaps · X or right-click burns the column now');
+    : `Distilling · click a piece then a neighbour to swap (or drag through swaps) · arrows / number pad move · Space swaps · X or right-click burns ${two ? 'both columns' : 'the column'} now`);
   // The camera to play it from: straight on to its face, far enough back to see it all.
   b.camView = (camera) => {
     const vh = camera.fov * Math.PI / 360, hh = Math.atan(Math.tan(vh) * camera.aspect);

@@ -28,7 +28,25 @@
      in the first 17), the rest white, brown or black evenly.
    - The session ends once 100 pieces are in the flask, unless the column that got there was the 12th
      Crystal Clear in a row or more: then it carries on until a column that isn't one leaves. Its score
-     is points / columns sent up. */
+     is points / columns sent up.
+
+   Variations, each off by default, so the real puzzle, Helium's lesson and the bots are unchanged (21 Nov, the user
+   on a harder Distilling that changes the thinking, not the pace; DISTILLING.md §8):
+   - Two furnaces (`furnaces: 2`): a furnace on the left too. Both edge columns start all black and leave together,
+     each judged by the same up-or-burn rule (the right first, for the chain), every 2 x 50 ticks (30.6 s), so as many
+     columns leave a minute as with one. The two halves slide outward and two new columns come in in the middle,
+     rising up into the gap. Why the middle, and two at a time: the honeycomb needs neighbours tall and short in turn,
+     and one column put between two can't differ from both, but two can; and columns coming in on the far side
+     instead would leave from that side on its next turn, every column gone 15 s after it came, the middle never
+     reaching a furnace. From the middle, a column lives as long as with one furnace, drifting outward to one side.
+   - Dark rum (`darkRum`): a column of only browns (spice too) sent up while a chain is going holds the chain rather
+     than breaking it, once between two Crystal Clears; it pays DARK_RUM_BONUS only when the next Crystal Clear keeps
+     the chain going, never on its own, so browns can't pad a chain.
+   - Rich spice (`richSpice`): each spice sent up in a Crystal Clear makes the next RICH_COLUMNS columns made richer,
+     whites one in two and spice one in RICH_SPICE_ONE_IN.
+   - Moves heat the furnace (`moveHeat: n`, the user, 21 Nov: "the burn is sped up by how many drags you do ... I
+     don't want to score based on efficiency"): every move a hand makes (a drag, or a click's swap; `moved()`, called
+     once a move by whoever plays it) brings the burn n ticks nearer, so fewer moves leave more time. */
 /** Pieces, as the game numbers them. */
 export const WHITE = 0, BROWN = 1, BLACK = 2, SPICE = 3, BURNT = 4;
 /** Their letters, for boards written out (DISTILLING.md's sketches): w b K * x. */
@@ -48,7 +66,9 @@ export const POINTS = [1, 0, -1, 3, -3];
 /** The chain bonus: this much for every Crystal Clear straight before. */
 export const CHAIN_BONUS = 4;
 /** What the board says as a column goes. */
-export const MESSAGES = { clear: 'Crystal clear!', smooth: 'Smooooooth', blecch: 'Blecch!', burnt: 'Burnt!', spicy: 'Spicy!', wasted: 'Wasted Spice', finished: 'Finished!' };
+export const MESSAGES = { clear: 'Crystal clear!', smooth: 'Smooooooth', blecch: 'Blecch!', burnt: 'Burnt!', spicy: 'Spicy!', wasted: 'Wasted Spice', finished: 'Finished!', darkRum: 'Dark rum', rich: 'Richer to come!' };
+/** Dark rum's bonus, paid on the Crystal Clear after it; rich spice: columns made richer a spice, and their spice. */
+export const DARK_RUM_BONUS = 2, RICH_COLUMNS = 2, RICH_SPICE_ONE_IN = 12;
 /** Directions to a neighbour: up-right, up-left, down-left, down-right. */
 export const UP_RIGHT = 0, UP_LEFT = 1, DOWN_LEFT = 2, DOWN_RIGHT = 3;
 /** Each way as it's drawn, in pieces: a column across and half a piece up or down (y down). */
@@ -173,10 +193,25 @@ export const parseBoard = (cols) => cols.map((s) => [...s].map((ch) => {
 }));
 /** Write a board out, as parseBoard reads it. */
 export const writeBoard = (cols) => cols.map((c) => c.map((p) => LETTERS[p]).join(''));
+/** Whether a column is all browns (spice too, which never moves): a dark rum. */
+export const pureBrown = (pieces) => pieces.some((p) => p === BROWN) && pieces.every((p) => p === BROWN || p === SPICE);
 /** A session at the still. */
 export class Distilling {
     random;
     timer;
+    furnaces;
+    darkRum;
+    richSpice;
+    moveHeat;
+    /** Moves made (moved()), and the ticks they took off the furnace. */
+    moves = 0;
+    heatedBy = 0;
+    /** The furnace's ticks to a burn and its warning: BURN_TICKS and WARN_TICK with one; twice as long with two. */
+    burnTicks;
+    warnTick;
+    /** Dark rum: a dark rum holding the chain now. Rich spice: new columns still to be made richer. */
+    rumHeld = false;
+    rich = 0;
     /** The board: columns left to right, each top to bottom. */
     cols = [];
     /** Pieces made (none of the first NO_SPICE_FIRST is spice), and whites burned not yet made into a
@@ -210,21 +245,41 @@ export class Distilling {
     constructor(random, options = {}) {
         this.random = random;
         this.timer = options.timer !== false;
-        // The furnace's column all black (no pieces made), then the rest from the right.
+        this.furnaces = options.furnaces === 2 ? 2 : 1;
+        this.darkRum = !!options.darkRum;
+        this.richSpice = !!options.richSpice;
+        this.moveHeat = Math.max(0, options.moveHeat ?? 0);
+        this.burnTicks = this.furnaces * (BURN_TICKS + 1) - 1;
+        this.warnTick = this.burnTicks - (BURN_TICKS - WARN_TICK);
+        // The furnace's column all black (no pieces made), then the rest from the right; with two, both furnaces'
+        // columns all black, the rest from the edges in (the two beside them first, 17 pieces with no spice).
         this.cols = new Array(COLS);
-        for (let x = COLS - 1; x >= 0; x--) {
-            const n = x % 2 === 0 ? TALL : SHORT;
-            this.cols[x] = Array.from({ length: n }, () => (x === COLS - 1 ? BLACK : this.nextPiece()));
-        }
+        const order = this.furnaces === 2 ? [8, 1, 7, 2, 6, 3, 5, 4] : [8, 7, 6, 5, 4, 3, 2, 1, 0];
+        const black = this.furnaces === 2 ? [0, COLS - 1] : [COLS - 1];
+        for (const x of black)
+            this.cols[x] = new Array(x % 2 === 0 ? TALL : SHORT).fill(BLACK);
+        for (const x of order)
+            this.cols[x] = Array.from({ length: x % 2 === 0 ? TALL : SHORT }, () => this.nextPiece());
     }
     /** A new piece: 1 in 31 spice (never the first 17), else white, brown or black evenly; a white made
         while two burned whites are owed is a burnt white. */
-    nextPiece() {
-        const n = this.made++ < NO_SPICE_FIRST ? SPICE_ONE_IN - 1 : SPICE_ONE_IN;
-        const r = Math.floor(this.random() * n);
-        if (r === SPICE_ONE_IN - 1)
-            return SPICE;
-        const p = r % 3;
+    nextPiece(rich = false) {
+        let p;
+        if (rich) {
+            this.made++;
+            const r = this.random();
+            if (r < 1 / RICH_SPICE_ONE_IN)
+                return SPICE;
+            const u = (r - 1 / RICH_SPICE_ONE_IN) / (1 - 1 / RICH_SPICE_ONE_IN);
+            p = u < 0.5 ? WHITE : u < 0.75 ? BROWN : BLACK;
+        }
+        else {
+            const n = this.made++ < NO_SPICE_FIRST ? SPICE_ONE_IN - 1 : SPICE_ONE_IN;
+            const r = Math.floor(this.random() * n);
+            if (r === SPICE_ONE_IN - 1)
+                return SPICE;
+            p = r % 3;
+        }
         if (p === WHITE && this.owed >= 2) {
             this.owed -= 2;
             return BURNT;
@@ -324,10 +379,10 @@ export class Distilling {
     timeLeft() {
         if (!this.timer || this.finished)
             return Infinity;
-        return (TICK_MS - this.clock) + Math.max(0, BURN_TICKS - this.furnace) * TICK_MS;
+        return (TICK_MS - this.clock) + Math.max(0, this.burnTicks - this.furnace) * TICK_MS;
     }
-    /** How hot the furnace is, 0 just after a burn to 1 at it. */
-    heat() { return Math.max(0, Math.min(1, this.furnace / BURN_TICKS)); }
+    /** How hot the furnace is (both, with two), 0 just after a burn to 1 at it. */
+    heat() { return Math.max(0, Math.min(1, this.furnace / this.burnTicks)); }
     /** Time passes: swaps land, the board slides, the furnace ticks. What happened. */
     tick(ms) {
         const ev = [];
@@ -369,9 +424,9 @@ export class Distilling {
     furnaceTick(ev = []) {
         if (this.finished)
             return ev;
-        if (this.furnace === WARN_TICK)
+        if (this.furnace === this.warnTick)
             ev.push({ kind: 'warning' });
-        if (this.furnace >= BURN_TICKS) {
+        if (this.furnace >= this.burnTicks) {
             this.due = true;
             this.tryBurn(ev);
         }
@@ -388,6 +443,21 @@ export class Distilling {
         this.furnace = Number.MAX_SAFE_INTEGER;
         return this.furnaceTick(ev);
     }
+    /** A hand's move made (a drag, however many swaps, or a click's swap): with moveHeat, the furnace that many ticks
+        nearer its burn, its warning given if passed, the burn itself still on a tick of its own. */
+    moved() {
+        const ev = [];
+        this.moves++;
+        if (!this.moveHeat || !this.timer || this.finished)
+            return ev;
+        for (let i = 0; i < this.moveHeat && this.furnace < this.burnTicks; i++) {
+            if (this.furnace === this.warnTick)
+                ev.push({ kind: 'warning' });
+            this.furnace++;
+            this.heatedBy++;
+        }
+        return ev;
+    }
     /** Quit now, keeping what's been sent up. */
     dismiss() { this.finished = true; this.dismissed = true; this.due = false; }
     tryBurn(ev) {
@@ -395,9 +465,66 @@ export class Distilling {
             return;
         this.due = false;
         this.furnace = -1;
-        const col = judge(this.cols[COLS - 1], this.chain);
-        this.chain = col.chain;
+        if (this.furnaces === 1) {
+            const col = this.leave(this.cols[COLS - 1]);
+            // Everything right a column, a new one in on the left, the opposite height of its neighbour.
+            this.cols.pop();
+            this.cols.unshift(this.newColumn(this.cols[0].length === TALL ? SHORT : TALL));
+            this.sliding = SLIDE_MS;
+            const finished = this.flask >= FLASK && this.chain < CARRY_ON;
+            if (finished)
+                this.finished = true;
+            ev.push({ kind: 'column', column: col, finished });
+            return;
+        }
+        // Two furnaces: the right's column, then the left's; each half out a column, two new ones in the middle, tall
+        // and short in turn between their neighbours (the first the opposite of the one left of it, the second its
+        // opposite, which the one right of them already is).
+        const right = this.leave(this.cols[COLS - 1], 'right'), left = this.leave(this.cols[0], 'left');
+        const mid = COLS / 2, keep = this.cols.slice(1, COLS - 1), lh = keep[mid - 2].length;
+        const a = this.newColumn(lh === TALL ? SHORT : TALL), b = this.newColumn(lh);
+        this.cols = [...keep.slice(0, mid - 1), a, b, ...keep.slice(mid - 1)];
+        this.sliding = SLIDE_MS;
+        const finished = this.flask >= FLASK && this.chain < CARRY_ON;
+        if (finished)
+            this.finished = true;
+        ev.push({ kind: 'column', column: right, finished: false }, { kind: 'column', column: left, finished });
+    }
+    /** A new column of n pieces, rich if a spice sent up in a Crystal Clear left it owed. */
+    newColumn(n) {
+        const rich = this.rich > 0;
+        if (rich)
+            this.rich--;
+        return Array.from({ length: n }, () => this.nextPiece(rich));
+    }
+    /** A column leaving (by the one furnace, or the side named): judged, the chain, the flask, the points, and the
+        variations' rules. */
+    leave(pieces, side) {
+        const col = judge(pieces, this.chain);
+        if (side)
+            col.side = side;
+        if (this.darkRum) {
+            if (col.up && !this.rumHeld && this.chain > 0 && pureBrown(pieces)) {
+                // A dark rum: the chain held, not added to, its bonus waiting on the next Crystal Clear.
+                col.darkRum = true;
+                this.rumHeld = true;
+            }
+            else {
+                if (this.rumHeld && col.chain > 0) {
+                    col.rumBonus = DARK_RUM_BONUS;
+                    col.bonus += DARK_RUM_BONUS;
+                }
+                this.rumHeld = false;
+                this.chain = col.chain;
+            }
+        }
+        else
+            this.chain = col.chain;
         this.longest = Math.max(this.longest, this.chain);
+        if (this.richSpice && col.chain > 0 && col.spices > 0) {
+            col.rich = true;
+            this.rich += RICH_COLUMNS * col.spices;
+        }
         if (!col.up) {
             this.owed += col.whites;
             this.whitesBurned += col.whites;
@@ -409,15 +536,7 @@ export class Distilling {
         }
         this.points += col.points + col.bonus;
         this.columns.push(col);
-        // Everything right a column, a new one in on the left, the opposite height of its neighbour.
-        this.cols.pop();
-        const n = this.cols[0].length === TALL ? SHORT : TALL;
-        this.cols.unshift(Array.from({ length: n }, () => this.nextPiece()));
-        this.sliding = SLIDE_MS;
-        const finished = this.flask >= FLASK && col.chain < CARRY_ON;
-        if (finished)
-            this.finished = true;
-        ev.push({ kind: 'column', column: col, finished });
+        return col;
     }
     /** Columns sent up so far. */
     get columnsUp() { return this.columns.filter((c) => c.up).length; }

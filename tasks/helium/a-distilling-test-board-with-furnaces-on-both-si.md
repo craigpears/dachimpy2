@@ -1,6 +1,6 @@
 ---
 title: A Distilling test board with furnaces on both sides
-status: asked
+status: doing
 asked: 21 Nov
 updated: 21 Nov
 ---
@@ -10,3 +10,5 @@ updated: 21 Nov
 ## Log
 
 - 21 Nov: added.
+- 21 Nov: being done
+- 21 Nov: 21 Nov, the user, mid-build: "a version about efficiency where the burn is sped up by how many drags you do ... I don't want to score based on efficiency, but the idea of burning faster because you're doing more moves or fewer moves". Added as a fourth flag, &moveheat (each drag heats the furnace a tick, 0.3 s).
