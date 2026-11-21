@@ -2,7 +2,7 @@
 title: Distilling with a higher skill cap: fun variations
 status: idea
 asked: 13 Nov
-updated: 15 Nov
+updated: 21 Nov
 ---
 
 *Distilling with a higher skill cap: fun variations (13 Nov)*
@@ -26,3 +26,4 @@ Each with a bot tier tuned to it (src/distill-bots.ts), and a read version, as e
 ## Log
 
 - 15 Nov: moved over from IDEAS.md.
+- 21 Nov: 21 Nov, the user: once you're good, CC^12 is easy and the rest is luck (how whites and spice spawn; experts abandon boards for spice). Wants a harder Distilling that changes the thinking, not the pace: not stale spice, not more rows, not pieces that blow up whites ('do the same thing you do now, but there's more frustration'). Ideas from this, to shape with the user: (1) Dark rum: a pure-brown column, today's accident, is a clear product of its own, chaining like a Crystal Clear, with a bonus for alternating blends; two blocks to build, and they get in each other's way, because browns rise through whites; only blacks are junk, and the luck of the spawn halves. (2) Spice earned and placed: a chain of so many earns a spice you drop where you choose; it is worth points but never moves, so it is a wall in your own channels. The luck the user named becomes a decision. (3) Pour by par: no furnace timer, a budget of swaps for the session; skill as finding the shortest way, not dragging fast. (4) Two furnaces (already listed): no safe side to keep junk.
