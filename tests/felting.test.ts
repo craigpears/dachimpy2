@@ -19,6 +19,9 @@ describe('the patterns', () => {
     expect(patternOf('sheep').core).toBe('w');
     expect(patternOf('cheese').rows.join('')).toContain('o');
     expect(patternOf('nonsense')).toBe(PATTERNS.sheep);
+    // (21 Nov, the user: "keep her personality ... don't call it frog": it's pepopupu, as Lintmint says)
+    expect(patternOf('pepopupu').name).toBe('Pepopupu');
+    expect(patternOf('frog')).toBe(PATTERNS.pepopupu);
     expect(detailColours(PATTERNS.sheep)).toEqual(['k']);
     expect(detailColours(PATTERNS.cheese)).toEqual(['r']);
   });

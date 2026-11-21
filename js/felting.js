@@ -58,8 +58,8 @@ export const PATTERNS = {
             '................',
         ],
     },
-    frog: {
-        id: 'frog', name: 'A frog (pepopupu)', core: 'g',
+    pepopupu: {
+        id: 'pepopupu', name: 'Pepopupu', core: 'g',
         wools: { g: 'green', w: 'white', k: 'black', p: 'pink' },
         rows: [
             '................',
@@ -334,6 +334,9 @@ export function verdict(total) {
 }
 /** Read a pattern's name from the address, falling back to the sheep. */
 export function patternOf(id) {
+    // (the frog was 'frog' at first; Lintmint calls hers pepopupu, so that's its name now, the old link still finding it)
+    if (id === 'frog')
+        return PATTERNS.pepopupu;
     return (id && PATTERNS[id]) || PATTERNS.sheep;
 }
 /** The detail colours a pattern needs laid (its letters other than the core and the holes). */

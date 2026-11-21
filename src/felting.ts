@@ -72,8 +72,8 @@ export const PATTERNS: Record<string, Pattern> = {
       '................',
     ],
   },
-  frog: {
-    id: 'frog', name: 'A frog (pepopupu)', core: 'g',
+  pepopupu: {
+    id: 'pepopupu', name: 'Pepopupu', core: 'g',
     wools: { g: 'green', w: 'white', k: 'black', p: 'pink' },
     rows: [
       '................',
@@ -355,6 +355,8 @@ export function verdict(total: number): string {
 
 /** Read a pattern's name from the address, falling back to the sheep. */
 export function patternOf(id: string | null | undefined): Pattern {
+  // (the frog was 'frog' at first; Lintmint calls hers pepopupu, so that's its name now, the old link still finding it)
+  if (id === 'frog') return PATTERNS.pepopupu;
   return (id && PATTERNS[id]) || PATTERNS.sheep;
 }
 
