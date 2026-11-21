@@ -35,6 +35,7 @@ import { GRAVEE_HOUSE } from './gravee-house.js';
 import { ROOBEAR_HOUSE } from './roobear-house.js';
 import { DACHIMPY_HOUSE } from './dachimpy-house.js';
 import { AFFAME_HOUSE } from './affame-house.js';
+import { JEZERBELL_HOUSE } from './jezerbell-house.js';
 import { WOLFDEN_HOUSE } from './wolfden-house.js';
 import { pictures, picturesOpen, picturesClose, picturesKey } from './picture-view.js';
 import { startAt } from '../picture-view.js';
@@ -42,7 +43,7 @@ import { startAt } from '../picture-view.js';
 /** Where the houses are: well out of sight of the den, the sea and the Wedding Isle (at +400). */
 export const HOUSE_AT = V3(-400, 0, 0);
 /** Each house's scene, by its id in HOUSES. */
-const SCENES = { gravee: GRAVEE_HOUSE, roobear: ROOBEAR_HOUSE, dachimpy: DACHIMPY_HOUSE, affame: AFFAME_HOUSE, wolfden: WOLFDEN_HOUSE };
+const SCENES = { gravee: GRAVEE_HOUSE, roobear: ROOBEAR_HOUSE, dachimpy: DACHIMPY_HOUSE, affame: AFFAME_HOUSE, jezerbell: JEZERBELL_HOUSE, wolfden: WOLFDEN_HOUSE };
 
 const toast = (text, bad = false) => denToast(text, bad, false, true);
 /** All there is of the house you're in. */

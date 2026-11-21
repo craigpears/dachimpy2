@@ -4,7 +4,7 @@ Every character's lines, and who they are, made from `src/lines/` by `npm run bu
 (`tools/lines-doc.mjs`): change a line there, not here, and the game changes with it.
 This file's history in git shows every line as it's changed.
 
-[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Multibella](#multibella) · [Jazzmy](#jazzmy) · [Gravee](#gravee) · [The Count](#the-count) · [Roobear](#roobear) · [Dachimpy](#dachimpy) · [Affame](#affame) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
+[Dalnoth](#dalnoth) · [You](#you) · [The den's pirate voice](#the-dens-pirate-voice) · [Dignity](#dignity) · [Bella](#bella) · [Umami](#umami) · [Mischievious](#mischievious) · [The suitors](#the-suitors) · [Your sweetheart](#your-sweetheart) · [The wedding's guests](#the-weddings-guests) · [The wedding keepsake](#the-wedding-keepsake) · [Kikkit](#kikkit) · [The penguin in the balaclava](#the-penguin-in-the-balaclava) · [Tzz](#tzz) · [Helium](#helium) · [Multibella](#multibella) · [Jazzmy](#jazzmy) · [Gravee](#gravee) · [The Count](#the-count) · [Roobear](#roobear) · [Dachimpy](#dachimpy) · [Affame](#affame) · [Jezerbell](#jezerbell) · [The imperial guards of Port Decorum](#the-imperial-guards-of-port-decorum) · [The race's starter](#the-races-starter) · [The guard at the race's gate](#the-guard-at-the-races-gate)
 
 ## Dalnoth
 
@@ -2021,6 +2021,112 @@ Kind, sweet and playful, a gentle, peaceful part: she shows you her pictures, an
 ### As you leave
 
 - "Bye, sweetness! Come back soon."
+
+## Jezerbell
+
+A real pirate (by her pirate name only), from the user's chat log and a screenshot of her house, 21 Nov. She runs werewolf dens and vampire lairs, beginner ones so new crew get a shot; a friend says "she eats WW for breakfast". Her house has a summoning stump for werewolves and an altar for vampires; she hides her octopus familiars so nobody asks her for one. Her gallery is her main house, her shack her bank. Helium once tried to teach her distilling ("no your other left jez"), and they did karaoke instead.
+
+Warm, bubbly and brave, a wolf hunter who laughs a lot: she shows you her house, worries you'll want one of her octopuses, and fights the werewolves beside you. Kept gentle: no other pirates' names, and nothing she wouldn't say herself.
+
+The werewolf pack her charm summons are their own characters, ours: Huffing Hector, Puffing Prudence, Big-Teeth Bartholomew and Cried-Wolf Clementine, fairy-tale wolves who taunt in nursery rhymes and whimper off when beaten.
+
+> "there's definitely some good material there for Jezebel in her house, like the hidden octopus ... especially if you start going looking for her familiar octopus, the werewolf for it" (the user, 21 Nov)
+>
+> "Oh, I absolutely love Jezebel's house idea ... Go find her octopuses. That's brilliant." (the user, 21 Nov)
+
+### Answering the door when you knock
+
+- *Your first visit:* "Ahoy! Come in, come in. Mind the stump, it bites. Well. What comes out of it does."
+- *Coming back:* "Back again! Got your sword arm warmed up?"
+
+### Showing you round, as you come to each stop
+
+- *In the middle of her hall:*
+  - "This isn't even my main house, you know. You should see my gallery."
+  - "And my shack's just my bank. Don't tell anyone."
+- *By her summoning stump and altar:*
+  - "This is the fun bit. A charm on the stump, and in come the werewolves."
+  - "The altar's for vampires. Tonight's a wolf night."
+
+### About the portrait you've stopped by or turned to look at (once a visit each)
+
+- *Twilight Stroll:* "A twilight stroll. Very peaceful. No werewolves in that one."
+- *Eternal Love!:* "Eternal love! Me and my babies. Well, one of them. The others were hiding."
+- *Just the three of us:* "Just the three of us. I don't know who the third is. Probably an octopus."
+
+### As you find each of her octopuses, by where it hid
+
+- *vase:* "Oh, you found the pink one! She loves that vase. Don't ask me for her."
+- *throne:* "Under my throne again? Cheeky. That's the violet one."
+- *frame:* "Behind the picture! He thinks he's part of the art."
+- *armour:* "In the helmet. Of course he's in the helmet."
+- *palm:* "Up the palm! She thinks she's a coconut."
+- *chest:* "In with the doubloons. Very sensible, that one."
+- *exchange:* "He was keeping an eye on the exchange rate."
+
+### Her octopus hunt: the first you find, and once you've found all but the missing one
+
+- *The first you find:* "Oh no, you've seen one. Now you'll want one. Everyone wants one."
+- *All found but the one the werewolves took:*
+  - "Five, six, seven... and... where's my little black one?"
+  - "The werewolves. They've been sniffing round all week. They've got her!"
+  - "Right. There's a charm on the stump. Shall we go and get her back?"
+
+### At her summoning stump (a charm) and her vampire altar
+
+- *The first charm:* "Charm's on. Here they come! Stand behind me. Actually, stand next to me, I need you."
+- *Another charm:* "Another charm? You're a natural. Here they come!"
+- *Space at the altar:* "Not tonight. Tonight's a wolf night."
+
+### In the fray, beside you
+
+- *She beats one of her own, one in turn:*
+  - "That's one for me!"
+  - "Down you go, puppy."
+  - "I eat werewolves for breakfast!"
+- *You beat yours, one in turn:*
+  - "Nice! Next one's yours too."
+  - "Ooh, good break!"
+  - "That's the way!"
+- *You're knocked out:* "You're out? Don't worry, I've got this."
+
+### After the fray
+
+- *Won, her octopus back:*
+  - "She's back! My little black one! Come here, you."
+  - "And look, a Wolf-skull Wayfinder. Put that on a little ship's chart table and it'll take you to their ship."
+- *Won again:* "Good fray! Same time tomorrow?"
+- *Lost:* "That was hard. Another charm, and we'll have them."
+
+### Now and then, as you wander her hall once her octopuses are all back
+
+- "I've been running beginner dens. Everyone does the elite ones, so the new ones never get a shot."
+- "Helium tried to teach me distilling. "No, your other left, Jez!" We did karaoke instead."
+- "Most of my octopuses are hidden. People get ideas."
+- "Wolf dens, vampire lairs, I'm a bit of an addict. In a good way."
+- "If a wine bat ever turns up, you tell me first."
+
+### As you leave
+
+- "Bye! Don't tell anyone where the octopuses are."
+
+### The pack: each werewolf's taunt as it bursts in from the stump
+
+- *Huffing Hector:* "Little pirate, little pirate, let us in! Oh. We're in."
+- *Puffing Prudence:* "Two little piggies and four big wolves. I like those odds."
+- *Big-Teeth Bartholomew:* "My, what a big board you have!"
+- *Cried-Wolf Clementine:* "Little Bo Peep's lost her sheep, and look who's found them!"
+
+### The pack: a werewolf knocked out, slinking off, one in turn
+
+- "Yipe! Me tail!"
+- "Not the fur! It won't grow back till the full moon!"
+- "We'll be back. With a bigger pack."
+- "Owooo... ow."
+
+### The pack, winning the fray
+
+- "Mutton for supper! Arooo!"
 
 ## The imperial guards of Port Decorum
 

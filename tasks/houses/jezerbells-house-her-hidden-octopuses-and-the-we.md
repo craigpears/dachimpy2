@@ -1,8 +1,10 @@
 ---
 title: Jezerbell's house: her hidden octopuses and the werewolf fray
-status: doing
+status: playtest
 asked: 21 Nov
 updated: 21 Nov
+link: den.html?at=jezerbell&as=dachimpy
+shot: changelog/jezerbell.jpg
 ---
 
 **Asked:** 21 Nov, from a chat log and a screenshot of her house: "there’s definitely some good material there for Jezebel in her house, like the hidden octopus ... especially if you start going looking for her familiar octopus, the werewolf for it ... we’ve definitely got enough there to card up something for Jezebel"
@@ -19,3 +21,4 @@ updated: 21 Nov
 - 21 Nov: In the den: her house the front door to Multibella’s wolf den, joined by one item, the Wayfinder (her house, then the expedition at sea, then the wolf den, each its own island). The fray first by Swordfight, which the den has; Rumble once its basics card is done. Lintmint turned up to the real one dressed as a werewolf, in orange: see Lintmint’s card for the joint adventure.
 - 21 Nov: Before drawing her: her looks and her octopuses’ colours from her pirate page and portrait.
 - 21 Nov: being done: 21 Nov: "can you start building out as much of that as you can? ... enough for a first version. Go find her octopuses."
+- 21 Nov: for you to playtest: 21 Nov: first version in. Her hall from the screenshot (summoning stump and vampire altar, bat-winged throne, gargoyle chests, doubloon exchanges, gold armour, vase, palm, shark, turtle and seal statues, her three portraits, the route charts). Seven octopuses peeking from hiding (Space to find; a counter); all found, her little black one is missing. A charm at the stump: the pack (four of our own fairy-tale wolves, taunting) leaps out in a cutscene; the fray is a real Swordfight duel against each wolf in turn, boards either side, buttons for a phone, her beating some of her own beside you (src/den-jezerbell.ts Fray). Win: the pack slinks off, her black octopus rides on her shoulder, a Wolf-skull Wayfinder card. Duel boards now one drawing shared with swordfight-duel-test.html (js/sword-duel-board.js). Not yet: the Wayfinder leading anywhere (the werewolf expedition, then Multibella’s wolf den), Rumble as the fight once its den side exists, her look checked against her pirate page, her gallery and shack.

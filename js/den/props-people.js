@@ -64,6 +64,15 @@ export const IDLES = {
     p.arms[1].rotation.set(-0.25 - Math.max(0, Math.sin(t * 2.1)) * 0.3, 0, -0.1);
     p.body.rotation.x = Math.sin(t * 4.2) * 0.03;
   },
+  /** Brawling: fists up, jabbing and swinging, bobbing on her feet (Jezerbell in her werewolf fray). */
+  fight: (p, t) => {
+    rest(p);
+    const j = Math.max(0, Math.sin(t * 6.5)) ** 3, k = Math.max(0, Math.sin(t * 6.5 + Math.PI)) ** 3;
+    p.arms[0].rotation.set(-1.3 - j * 0.5, 0, 0.35 - j * 0.3);
+    p.arms[1].rotation.set(-1.3 - k * 0.5, 0, -0.35 + k * 0.3);
+    p.body.rotation.x = 0.1 + 0.05 * Math.sin(t * 13);
+    p.body.rotation.z = Math.sin(t * 3.2) * 0.08;
+  },
   /** Waving hello. */
   wave: (p, t) => { rest(p); p.arms[0].rotation.set(-2.7, 0, 0.35 + Math.sin(t * 9) * 0.35); },
   /** Clapping, delighted. */
