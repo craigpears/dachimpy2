@@ -1,6 +1,6 @@
 ---
 title: Jezerbell's house: her hidden octopuses and the werewolf fray
-status: idea
+status: doing
 asked: 21 Nov
 updated: 21 Nov
 ---
@@ -18,3 +18,4 @@ updated: 21 Nov
 - 21 Nov: The fray, as Puzzle Pirates has it: a werewolf charm (used up) at the summoning stump starts a fray in the house, 5 pirates against the pack, each fighting by Swordfight or Rumble; win, and everyone gets some coins and one winner a Wolf-skull Wayfinder. The Wayfinder lasts 3 days; on the chart table of a cutter or smaller it starts a werewolf expedition, a battle with the werewolf ship at sea, then the den on Woodhallow. Sources: yppedia.puzzlepirates.com/Werewolf_expedition and /Wolf-skull_wayfinder; the summoning furniture seen in the screenshot (YPPedia only had the vampire one).
 - 21 Nov: In the den: her house the front door to Multibella’s wolf den, joined by one item, the Wayfinder (her house, then the expedition at sea, then the wolf den, each its own island). The fray first by Swordfight, which the den has; Rumble once its basics card is done. Lintmint turned up to the real one dressed as a werewolf, in orange: see Lintmint’s card for the joint adventure.
 - 21 Nov: Before drawing her: her looks and her octopuses’ colours from her pirate page and portrait.
+- 21 Nov: being done: 21 Nov: "can you start building out as much of that as you can? ... enough for a first version. Go find her octopuses."
