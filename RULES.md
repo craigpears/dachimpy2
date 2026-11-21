@@ -3431,7 +3431,9 @@ Unlisted for now: reachable only by its URL until the user says to put it in the
   same Swordfight module as the armoury hoist, with Puzzle Pirates' real duel rules (SWORDFIGHT.md): both sides
   dealt the same pairs, an attack waiting over your board till your pair lands, swords and sprinkles placed and
   coloured as the real ones are by the attacker's drop pattern, the insta. "Start out the basics for now": one
-  greedy bot; bots with strategies of their own (one building an insta) are an idea card.
+  greedy bot; bots with strategies of their own (one building an insta) are an idea card. No ghost of the falling
+  pair where it'll land (the user, 21 Nov, playtesting: "I thought it was glitchy at first, but it's really just
+  confusing"): the pair is drawn once, where it is.
 - **Crewmates help each other's puzzle, visibly.** Even when one pirate plays a puzzle (one
   swordfighter against the golem), the rest of the crew should be able to help from their own
   jobs: a cannon shot that hits the golem drops black blocks onto its board. The help has to be

@@ -31,6 +31,8 @@ import { person } from './props-people.js';
 import { cine, cinePlay, cineEnd } from './cine.js';
 import { V3 } from './world.js';
 
+/** Seconds a beaten wolf's duel stays up before the next wolf's deal. */
+const NEXT_WOLF = 2.2;
 const ARROWS = { arrowleft: 'left', a: 'left', arrowright: 'right', d: 'right', arrowup: 'ccw', w: 'ccw', arrowdown: 'cw', s: 'cw', ' ': 'drop', enter: 'drop' };
 
 // ---------- the fray's panel: both boards, the pack, and the buttons for a phone ----------
@@ -250,7 +252,9 @@ export const JEZERBELL_HOUSE = {
     }
     function frayEvent(e) {
       const F = G.fray;
-      if (e.what === 'duel') newDuel(e.wolf);
+      // (a wolf beaten, the next one waits a beat: its board stays up, the wolf going down, before the next deal;
+      // it went straight to the next wolf's fresh boards, "going away too quickly", the user, 21 Nov)
+      if (e.what === 'duel') { if (F.duel) F.next = { wolf: e.wolf, t: NEXT_WOLF }; else newDuel(e.wolf); }
       else if (e.what === 'down') {
         const w = G.pack[e.wolf];
         w.pose = 'down';
@@ -273,7 +277,8 @@ export const JEZERBELL_HOUSE = {
     }
     function frayTick(dt) {
       const F = G.fray;
-      if (F.duel) {
+      if (F.next) { if ((F.next.t -= dt) <= 0) { const i = F.next.wolf; F.next = null; newDuel(i); } }
+      else if (F.duel) {
         for (const t of F.duel.update(dt)) duelTurn(t);
         if (!F.duel.over) duelTurn(F.hand.update(F.duel, dt));
         if (F.duel.over) { const won = F.duel.winner === 0; boards[0].draw(F.duel.sides[0], dt); boards[1].draw(F.duel.sides[1], dt); for (const e of F.rules.duelOver(won)) frayEvent(e); }
